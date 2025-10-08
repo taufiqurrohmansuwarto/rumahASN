@@ -8,7 +8,7 @@ const PDF_POINTS_PER_PIXEL = 0.75; // Conversion ratio
 
 /**
  * Convert signatures array to sign_coordinate format
- * @param {Array} signatures - Array of {id, page, position: {x, y}, size: {width, height}, signerName, signerId}
+ * @param {Array} signatures - Array of {id, page, positionRatio/position, sizeRatio/size, signerName, signerId}
  * @param {Number} pdfPageWidth - PDF page width in pixels
  * @param {Number} pdfPageHeight - PDF page height in pixels
  * @returns {Array} sign_coordinate format
@@ -19,13 +19,26 @@ export function signaturesToCoordinates(
   pdfPageHeight = 792
 ) {
   return signatures.map((sig) => {
-    // Convert pixel position to PDF points
-    const originX = Math.round(sig.position.x * PDF_POINTS_PER_PIXEL);
-    const originY = Math.round(sig.position.y * PDF_POINTS_PER_PIXEL);
+    // Handle both ratio format (new) and pixel format (old)
+    let pixelX, pixelY, pixelWidth, pixelHeight;
 
-    // Get size from signature or use default
-    const width = sig.size?.width || DEFAULT_SIGNATURE_WIDTH;
-    const height = sig.size?.height || DEFAULT_SIGNATURE_HEIGHT;
+    if (sig.positionRatio && sig.sizeRatio) {
+      // New ratio format - convert to pixels
+      pixelX = sig.positionRatio.x * pdfPageWidth;
+      pixelY = sig.positionRatio.y * pdfPageHeight;
+      pixelWidth = sig.sizeRatio.width * pdfPageWidth;
+      pixelHeight = sig.sizeRatio.height * pdfPageHeight;
+    } else {
+      // Old pixel format - use directly
+      pixelX = sig.position?.x || 0;
+      pixelY = sig.position?.y || 0;
+      pixelWidth = sig.size?.width || DEFAULT_SIGNATURE_WIDTH;
+      pixelHeight = sig.size?.height || DEFAULT_SIGNATURE_HEIGHT;
+    }
+
+    // Convert pixel position to PDF points
+    const originX = Math.round(pixelX * PDF_POINTS_PER_PIXEL);
+    const originY = Math.round(pixelY * PDF_POINTS_PER_PIXEL);
 
     return {
       page: sig.page,
@@ -35,48 +48,59 @@ export function signaturesToCoordinates(
       found: true,
       pageWidth: pdfPageWidth,
       pageHeight: pdfPageHeight,
-      signatureWidth: Math.round(width * PDF_POINTS_PER_PIXEL),
-      signatureHeight: Math.round(height * PDF_POINTS_PER_PIXEL),
+      signatureWidth: Math.round(pixelWidth * PDF_POINTS_PER_PIXEL),
+      signatureHeight: Math.round(pixelHeight * PDF_POINTS_PER_PIXEL),
       signerName: sig.signerName,
-      signerId: sig.signerId || "self", // ADD THIS LINE
-      signerAvatar: sig.signerAvatar, // ADD THIS LINE
+      signerId: sig.signerId || "self",
+      signerAvatar: sig.signerAvatar,
     };
   });
 }
 
 /**
- * Convert sign_coordinate format back to signatures array
+ * Convert sign_coordinate format back to signatures array (with ratio format)
  * @param {Array} coordinates - sign_coordinate array
- * @returns {Array} signatures array
+ * @param {Number} pdfPageWidth - PDF page width for ratio calculation
+ * @param {Number} pdfPageHeight - PDF page height for ratio calculation
+ * @returns {Array} signatures array with ratio format
  */
-export function coordinatesToSignatures(coordinates) {
+export function coordinatesToSignatures(coordinates, pdfPageWidth = 612, pdfPageHeight = 792) {
   if (!coordinates || !Array.isArray(coordinates)) return [];
 
   return coordinates
     .filter((coord) => coord.found)
-    .map((coord, index) => ({
-      id: `sig_${coord.page}_${index}`,
-      page: coord.page,
-      position: {
-        x: Math.round((coord.originX || 0) / PDF_POINTS_PER_PIXEL),
-        y: Math.round((coord.originY || 0) / PDF_POINTS_PER_PIXEL),
-      },
-      size: {
-        width: Math.round(
-          (coord.signatureWidth ||
-            DEFAULT_SIGNATURE_WIDTH * PDF_POINTS_PER_PIXEL) /
-            PDF_POINTS_PER_PIXEL
-        ),
-        height: Math.round(
-          (coord.signatureHeight ||
-            DEFAULT_SIGNATURE_HEIGHT * PDF_POINTS_PER_PIXEL) /
-            PDF_POINTS_PER_PIXEL
-        ),
-      },
-      signerName: coord.signerName || "Unknown",
-      signerId: coord.signerId || "self", // ADD THIS LINE
-      signerAvatar: coord.signerAvatar, // ADD THIS LINE
-    }));
+    .map((coord, index) => {
+      // Convert PDF points to pixels
+      const pixelX = Math.round((coord.originX || 0) / PDF_POINTS_PER_PIXEL);
+      const pixelY = Math.round((coord.originY || 0) / PDF_POINTS_PER_PIXEL);
+      const pixelWidth = Math.round(
+        (coord.signatureWidth || DEFAULT_SIGNATURE_WIDTH * PDF_POINTS_PER_PIXEL) / PDF_POINTS_PER_PIXEL
+      );
+      const pixelHeight = Math.round(
+        (coord.signatureHeight || DEFAULT_SIGNATURE_HEIGHT * PDF_POINTS_PER_PIXEL) / PDF_POINTS_PER_PIXEL
+      );
+
+      // Convert pixels to ratio (0-1)
+      const positionRatio = {
+        x: pdfPageWidth > 0 ? pixelX / pdfPageWidth : 0,
+        y: pdfPageHeight > 0 ? pixelY / pdfPageHeight : 0,
+      };
+
+      const sizeRatio = {
+        width: pdfPageWidth > 0 ? pixelWidth / pdfPageWidth : 0,
+        height: pdfPageHeight > 0 ? pixelHeight / pdfPageHeight : 0,
+      };
+
+      return {
+        id: `sig_${coord.page}_${index}`,
+        page: coord.page,
+        positionRatio,
+        sizeRatio,
+        signerName: coord.signerName || "Unknown",
+        signerId: coord.signerId || "self",
+        signerAvatar: coord.signerAvatar,
+      };
+    });
 }
 
 /**
@@ -158,41 +182,49 @@ export function coordinatesToPixelFormat(coordinates) {
 /**
  * Convert signatures to sign_coordinate format in PIXELS (for form submission)
  * Format: [{page, originX, originY, width, height}]
- * @param {Array} signatures - Array of {id, page, position: {x, y}, size: {width, height}, signerName, signerId}
+ * @param {Array} signatures - Array of {id, page, positionRatio/position, sizeRatio/size, signerName, signerId}
+ * @param {Number} pdfPageWidth - PDF page width for ratio conversion
+ * @param {Number} pdfPageHeight - PDF page height for ratio conversion
  * @returns {Array} sign_coordinate in pixels
  */
-export function signaturesToPixelCoordinates(signatures) {
+export function signaturesToPixelCoordinates(signatures, pdfPageWidth = 612, pdfPageHeight = 792) {
   if (!signatures || !Array.isArray(signatures)) return [];
 
   return signatures.map((sig) => {
-    // Handle both formats: raw signatures or already-converted coordinates
-    if (sig.position && sig.size) {
-      // Raw signature format
-      // Logo BSrE harus SQUARE - gunakan height sebagai patokan
-      const squareSize = sig.size?.height || DEFAULT_SIGNATURE_HEIGHT;
+    let pixelX, pixelY, pixelWidth, pixelHeight;
 
-      return {
-        page: sig.page,
-        originX: Math.round(sig.position.x),
-        originY: Math.round(sig.position.y),
-        width: squareSize,
-        height: squareSize,
-        signerId: sig.signerId || "self",
-        signerName: sig.signerName,
-      };
+    // Handle ratio format (new), pixel format (old), or coordinate format
+    if (sig.positionRatio && sig.sizeRatio) {
+      // New ratio format - convert to pixels
+      pixelX = sig.positionRatio.x * pdfPageWidth;
+      pixelY = sig.positionRatio.y * pdfPageHeight;
+      pixelWidth = sig.sizeRatio.width * pdfPageWidth;
+      pixelHeight = sig.sizeRatio.height * pdfPageHeight;
+    } else if (sig.position && sig.size) {
+      // Old pixel format
+      pixelX = sig.position.x;
+      pixelY = sig.position.y;
+      pixelWidth = sig.size.width;
+      pixelHeight = sig.size.height;
     } else {
       // Already converted coordinate format
-      const pixelHeight = Math.round((sig.signatureHeight || DEFAULT_SIGNATURE_HEIGHT * PDF_POINTS_PER_PIXEL) / PDF_POINTS_PER_PIXEL);
-
-      return {
-        page: sig.page,
-        originX: Math.round(sig.originX / PDF_POINTS_PER_PIXEL),
-        originY: Math.round(sig.originY / PDF_POINTS_PER_PIXEL),
-        width: pixelHeight,
-        height: pixelHeight,
-        signerId: sig.signerId || "self",
-        signerName: sig.signerName,
-      };
+      pixelX = Math.round((sig.originX || 0) / PDF_POINTS_PER_PIXEL);
+      pixelY = Math.round((sig.originY || 0) / PDF_POINTS_PER_PIXEL);
+      pixelHeight = Math.round((sig.signatureHeight || DEFAULT_SIGNATURE_HEIGHT * PDF_POINTS_PER_PIXEL) / PDF_POINTS_PER_PIXEL);
+      pixelWidth = pixelHeight;
     }
+
+    // Logo BSrE harus SQUARE - gunakan height sebagai patokan
+    const squareSize = Math.round(pixelHeight || DEFAULT_SIGNATURE_HEIGHT);
+
+    return {
+      page: sig.page,
+      originX: Math.round(pixelX),
+      originY: Math.round(pixelY),
+      width: squareSize,
+      height: squareSize,
+      signerId: sig.signerId || "self",
+      signerName: sig.signerName,
+    };
   });
 }

@@ -40,7 +40,7 @@ import DraggableSignature, {
   SIGNATURE_WIDTH,
   SIGNATURE_HEIGHT,
 } from "./DraggableSignature";
-import useSignatureStore from "@/store/useSignatureStore";
+import useSignatureStore, { pixelToRatio, pixelSizeToRatio } from "@/store/useSignatureStore";
 import { signaturesToCoordinates } from "@/utils/signature-coordinate-helper";
 
 // Import react-pdf CSS (required)
@@ -92,16 +92,21 @@ const PdfViewer = forwardRef(function PdfViewer(
   const [pageLoading, setPageLoading] = useState(false);
   const [isMounted, setIsMounted] = useState(true);
 
-  // Signature placement state - INTERNAL/UNCONTROLLED
-  const [signatures, setSignatures] = useState(initialSignatures);
+  // Signature placement state - NOW USING ZUSTAND
+  const signatures = useSignatureStore((state) => state.signatures);
+  const addSignature = useSignatureStore((state) => state.addSignature);
+  const removeSignature = useSignatureStore((state) => state.removeSignature);
+  const removeSignaturesByPage = useSignatureStore((state) => state.removeSignaturesByPage);
+  const removeSignaturesBySignerId = useSignatureStore((state) => state.removeSignaturesBySignerId);
+  const updateSignaturePosition = useSignatureStore((state) => state.updateSignaturePosition);
+  const updateSignatureSize = useSignatureStore((state) => state.updateSignatureSize);
+  const clearSignatures = useSignatureStore((state) => state.clearSignatures);
+  const setSignatures = useSignatureStore((state) => state.setSignatures);
+  const setSignCoordinates = useSignatureStore((state) => state.setSignCoordinates);
+
   const pageContainerRef = useRef(null);
   const [pageSize, setPageSize] = useState({ width: 0, height: 0 });
   const [isPageReady, setIsPageReady] = useState(false);
-
-  // Get Zustand setter
-  const setSignCoordinates = useSignatureStore(
-    (state) => state.setSignCoordinates
-  );
 
   // Memoize PDF.js options to prevent unnecessary reloads
   const pdfOptions = useMemo(
@@ -113,15 +118,20 @@ const PdfViewer = forwardRef(function PdfViewer(
     [pdfjsVersion]
   );
 
-  // Initialize signatures from prop only once
+  // Initialize signatures from prop on mount, cleanup on unmount
   useEffect(() => {
     if (initialSignatures && initialSignatures.length > 0) {
       setSignatures(initialSignatures);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Empty deps - only on mount (intentional)
 
-  // Update Zustand whenever signatures change
+    // Cleanup: clear signatures when component unmounts
+    return () => {
+      clearSignatures();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Empty deps - only on mount/unmount (intentional)
+
+  // Update signCoordinates (for API) whenever signatures change
   useEffect(() => {
     const coordinates = signaturesToCoordinates(signatures);
     setSignCoordinates(coordinates);
@@ -148,8 +158,8 @@ const PdfViewer = forwardRef(function PdfViewer(
     return signatures.filter((sig) => sig.page === pageNumber);
   }, [signatures, pageNumber]);
 
-  // Signature placement functions
-  const addSignature = useCallback(() => {
+  // Signature placement functions - now using zustand actions
+  const handleAddSignature = useCallback(() => {
     if (!isPageReady || !pageSize.width || pageSize.width === 0) {
       return;
     }
@@ -157,65 +167,56 @@ const PdfViewer = forwardRef(function PdfViewer(
     const pdfWidth = pageSize.width;
     const pdfHeight = pageSize.height;
 
-    const initialX = Math.max(20, pdfWidth / 2 - SIGNATURE_WIDTH / 2);
+    // Account for signature controls overflow
+    const avatarSize = Math.max(16, Math.min(24, SIGNATURE_WIDTH * 0.18));
+    const buttonSize = Math.max(16, Math.min(20, SIGNATURE_WIDTH * 0.15));
+    const leftPadding = Math.max(8, avatarSize * 0.3);
+    const topPadding = Math.max(8, avatarSize * 0.3);
+    const rightPadding = buttonSize * 0.4;
+    const bottomPadding = Math.max(2, buttonSize * 0.5);
+
+    const initialX = Math.max(leftPadding, pdfWidth / 2 - SIGNATURE_WIDTH / 2);
     const initialY = 50;
 
     const boundedX = Math.max(
-      20,
-      Math.min(initialX, pdfWidth - SIGNATURE_WIDTH - 20)
+      leftPadding,
+      Math.min(initialX, pdfWidth - SIGNATURE_WIDTH - rightPadding)
     );
     const boundedY = Math.max(
-      20,
-      Math.min(initialY, pdfHeight - SIGNATURE_HEIGHT - 20)
+      topPadding,
+      Math.min(initialY, pdfHeight - SIGNATURE_HEIGHT - bottomPadding)
     );
+
+    // Convert pixel position and size to ratio for storage
+    const positionRatio = pixelToRatio({ x: boundedX, y: boundedY }, pageSize);
+    const sizeRatio = pixelSizeToRatio({ width: SIGNATURE_WIDTH, height: SIGNATURE_HEIGHT }, pageSize);
 
     const newSignature = {
       id: `sig_${Date.now()}`,
       page: pageNumber,
-      position: { x: boundedX, y: boundedY },
-      size: { width: SIGNATURE_WIDTH, height: SIGNATURE_HEIGHT },
+      positionRatio, // Store as ratio
+      sizeRatio, // Store as ratio
       signerName: signerName,
-      signerAvatar: signerAvatar, // Add this
-      signerId: signerId, // Add this
+      signerAvatar: signerAvatar,
+      signerId: signerId,
     };
 
-    setSignatures((prev) => [...prev, newSignature]);
-  }, [pageNumber, signerName, signerAvatar, signerId, pageSize, isPageReady]); // Add signerAvatar to deps
-
-  const removeSignature = useCallback((signatureId) => {
-    setSignatures((prev) => prev.filter((sig) => sig.id !== signatureId));
-  }, []);
-
-  // Add new methods for removing signatures by page and clearing all
-  const removeSignaturesByPage = useCallback((page) => {
-    setSignatures((prev) => prev.filter((sig) => sig.page !== page));
-  }, []);
-
-  const clearAllSignatures = useCallback(() => {
-    setSignatures([]);
-  }, []);
+    addSignature(newSignature);
+  }, [pageNumber, signerName, signerAvatar, signerId, pageSize, isPageReady, addSignature]);
 
   const handleSignaturePositionChange = useCallback(
-    (signatureId, page, position) => {
-      setSignatures((prev) =>
-        prev.map((sig) =>
-          sig.id === signatureId ? { ...sig, page, position } : sig
-        )
-      );
+    (signatureId, page, positionRatio) => {
+      updateSignaturePosition(signatureId, page, positionRatio);
     },
-    []
+    [updateSignaturePosition]
   );
 
-  const handleSignatureSizeChange = useCallback((signatureId, size) => {
-    setSignatures((prev) =>
-      prev.map((sig) => (sig.id === signatureId ? { ...sig, size } : sig))
-    );
-  }, []);
-
-  // Add method to remove signatures by signerId
-  const removeSignaturesBySignerId = useCallback((signerId) => {
-    setSignatures((prev) => prev.filter((sig) => sig.signerId !== signerId));
-  }, []);
+  const handleSignatureSizeChange = useCallback(
+    (signatureId, sizeRatio) => {
+      updateSignatureSize(signatureId, sizeRatio);
+    },
+    [updateSignatureSize]
+  );
 
   // Setup PDF.js worker sesuai dokumentasi react-pdf
   useEffect(() => {
@@ -281,7 +282,7 @@ const PdfViewer = forwardRef(function PdfViewer(
     [isMounted]
   );
 
-  const onDocumentLoadProgress = useCallback(({ loaded, total }) => {
+  const onDocumentLoadProgress = useCallback(() => {
     // Silent progress tracking
   }, []);
 
@@ -417,28 +418,22 @@ const PdfViewer = forwardRef(function PdfViewer(
   useImperativeHandle(
     ref,
     () => ({
-      changePage: (page) => {
-        changePage(page);
-      },
+      changePage,
       getCurrentPage: () => pageNumber,
       getTotalPages: () => numPages,
       getScale: () => scale,
-      clearAllSignatures: () => {
-        clearAllSignatures();
-      },
-      removeSignaturesByPage: (page) => {
-        removeSignaturesByPage(page);
-      },
-      removeSignaturesBySignerId: (signerId) => {
-        removeSignaturesBySignerId(signerId);
-      },
+      addSignature: handleAddSignature,
+      clearAllSignatures: clearSignatures,
+      removeSignaturesByPage,
+      removeSignaturesBySignerId,
     }),
     [
       changePage,
       pageNumber,
       numPages,
       scale,
-      clearAllSignatures,
+      handleAddSignature,
+      clearSignatures,
       removeSignaturesByPage,
       removeSignaturesBySignerId,
     ]
@@ -525,7 +520,7 @@ const PdfViewer = forwardRef(function PdfViewer(
                 <Button
                   type="primary"
                   icon={<PlusOutlined />}
-                  onClick={addSignature}
+                  onClick={handleAddSignature}
                   size="small"
                   disabled={!isPageReady}
                   style={!isPageReady ? { pointerEvents: "none" } : {}}
@@ -734,34 +729,24 @@ const PdfViewer = forwardRef(function PdfViewer(
                         width: `${pageSize.width}px`,
                         height: `${pageSize.height}px`,
                         pointerEvents: "none",
-                        transform: `scale(${scale})`,
-                        transformOrigin: "top left",
+                        overflow: "hidden",
                       }}
                     >
                       {currentPageSignatures.map((signature) => (
                         <div
                           key={signature.id}
                           style={{
-                            position: "absolute",
-                            left: 0,
-                            top: 0,
-                            width: `${pageSize.width}px`,
-                            height: `${pageSize.height}px`,
                             pointerEvents: "auto",
                           }}
                         >
                           <DraggableSignature
                             id={signature.id}
                             page={signature.page}
-                            initialPosition={signature.position}
-                            initialSize={
-                              signature.size || {
-                                width: SIGNATURE_WIDTH,
-                                height: SIGNATURE_HEIGHT,
-                              }
-                            }
+                            positionRatio={signature.positionRatio}
+                            sizeRatio={signature.sizeRatio}
                             signerName={signature.signerName}
-                            signerAvatar={signature.signerAvatar} // Add this prop
+                            signerAvatar={signature.signerAvatar}
+                            containerBounds={pageSize}
                             onPositionChange={handleSignaturePositionChange}
                             onSizeChange={handleSignatureSizeChange}
                             onRemove={canEdit ? removeSignature : null}
