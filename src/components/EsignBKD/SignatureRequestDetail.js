@@ -1,9 +1,10 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import { useRouter } from "next/router";
 import { Button, Space, Tabs, Card, Spin, Tag, Avatar } from "antd";
 import { UserOutlined } from "@ant-design/icons";
 import { Text, Badge, Flex, Alert, Group, Tooltip } from "@mantine/core";
 import { useSession } from "next-auth/react";
+import usePdfPageStore from "@/store/usePdfPageStore";
 import {
   IconCheck,
   IconX,
@@ -50,6 +51,9 @@ const SignatureRequestDetail = () => {
   const [pdfLoading, setPdfLoading] = useState(false);
   const [pdfError, setPdfError] = useState(null);
 
+  // Subscribe to page sizes from Zustand (MUST be before early returns!)
+  const allPageSizes = usePdfPageStore((state) => state.pageSizes);
+
   // API hooks
   const { data: response, isLoading, refetch } = useSignatureRequest(id);
   const { mutateAsync: reviewDocument, isLoading: reviewLoading } =
@@ -61,6 +65,11 @@ const SignatureRequestDetail = () => {
 
   // Extract signature request from response
   const signatureRequest = response?.data;
+  const documentId = signatureRequest?.document_id;
+
+  const pdfPageSizes = useMemo(() => {
+    return allPageSizes[documentId] || {};
+  }, [allPageSizes, documentId]);
 
   // Get current user ID from session
   const currentUserId = session?.user?.id;
@@ -114,30 +123,62 @@ const SignatureRequestDetail = () => {
     }
   };
 
-  // Extract all TTE coordinates from signature_details for view-only mode
-  const allTteCoordinates =
-    signatureRequest?.signature_details
-      ?.sort((a, b) => (a.sequence_order || 0) - (b.sequence_order || 0))
-      .flatMap((detail) => {
-        if (!detail.sign_coordinate || !Array.isArray(detail.sign_coordinate)) {
-          return [];
+  // Calculate TTE coordinates (reactive to pdfPageSizes changes)
+  const allTteCoordinates = useMemo(() => {
+    if (!signatureRequest?.signature_details) return [];
+
+    const signatureDetails = signatureRequest.signature_details.sort(
+      (a, b) => (a.sequence_order || 0) - (b.sequence_order || 0)
+    );
+
+    const coordinates = signatureDetails.flatMap((detail) => {
+      if (!detail.sign_coordinate || !Array.isArray(detail.sign_coordinate)) {
+        return [];
+      }
+      return detail.sign_coordinate.map((coord) => {
+        // Get actual page size for this specific page from Zustand
+        const pageSize = pdfPageSizes[coord.page];
+
+        if (!pageSize) {
+          console.warn(`[SignatureRequestDetail] Page size not loaded for page ${coord.page}`);
+          return null;
         }
-        return detail.sign_coordinate.map((coord) => ({
+
+        // Database stores coordinates in PIXELS with BROWSER coordinate system (top-left origin)
+        // No Y-flip needed - use as-is
+
+        console.log('[SignatureRequestDetail] Loading coordinate:', {
+          database: { originX: coord.originX, originY: coord.originY, width: coord.width, height: coord.height },
+          pageSize,
+          calculatedRatio: {
+            x: coord.originX / pageSize.width,
+            y: coord.originY / pageSize.height,
+          },
+          NOTE: 'NO Y-FLIP - database stores browser coordinates',
+        });
+
+        // Convert pixels to ratio
+        return {
           id: `${detail.id}_${coord.page}_${coord.originX}_${coord.originY}`,
           page: coord.page,
-          position: {
-            x: coord.originX,
-            y: coord.originY,
+          positionRatio: {
+            x: coord.originX / pageSize.width,
+            y: coord.originY / pageSize.height,
           },
-          size: {
-            width: coord.width,
-            height: coord.height,
+          sizeRatio: {
+            width: coord.width / pageSize.width,
+            height: coord.height / pageSize.height,
           },
           signerId: coord.signerId,
           signerName: coord.signerName,
           signerAvatar: detail.user?.image || null,
-        }));
-      }) || [];
+        };
+      });
+    }).filter(Boolean);
+
+    console.log('[SignatureRequestDetail] Calculated TTE coordinates:', coordinates);
+    return coordinates;
+  }, [signatureRequest, pdfPageSizes]);
 
   // Find user detail in signature_details
   const userDetail = signatureRequest?.signature_details?.find(

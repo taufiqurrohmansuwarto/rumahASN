@@ -29,6 +29,7 @@ import { getSignatureCountByPage } from "@/utils/signature-coordinate-helper";
 
 function SignaturePlacementForm({
   pdfBase64,
+  documentId, // ADD: documentId prop
   initialMode = "self",
   onModeChange,
   onSignersChange, // ADD THIS PROP
@@ -54,17 +55,26 @@ function SignaturePlacementForm({
   const pdfViewerRef = useRef(null);
 
   const currentSignerInfo = useMemo(() => {
+    let info = null;
     if (mode === "self") {
-      return {
+      info = {
         id: user?.id || "self",
         name: user?.name || "Saya",
         image: user?.image,
         type: "signer",
       };
     } else if (activeSigner) {
-      return activeSigner;
+      info = activeSigner;
     }
-    return null;
+
+    console.log('[SignaturePlacementForm] currentSignerInfo:', {
+      mode,
+      user,
+      activeSigner,
+      currentSignerInfo: info,
+    });
+
+    return info;
   }, [mode, user, activeSigner]);
 
   const signaturesBySigner = useMemo(() => {
@@ -296,6 +306,14 @@ function SignaturePlacementForm({
   };
 
   const showTTEPlacement = currentSignerInfo?.type === "signer";
+
+  console.log('[SignaturePlacementForm] TTE Placement Status:', {
+    canEdit,
+    currentSignerInfo,
+    showTTEPlacement,
+    enableSignaturePlacement: !!currentSignerInfo && showTTEPlacement,
+    pdfViewerCanEdit: canEdit && !!currentSignerInfo && showTTEPlacement,
+  });
 
   // Handler untuk update notes
   const handleGlobalNotesChange = (e) => {
@@ -738,6 +756,7 @@ function SignaturePlacementForm({
           <PdfViewer
             ref={pdfViewerRef}
             pdfBase64={pdfBase64}
+            documentId={documentId}
             title="Dokumen untuk Ditandatangani"
             enableSignaturePlacement={!!currentSignerInfo && showTTEPlacement}
             initialSignatures={initialSignatures}

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import {
   useDocument,
   useDownloadDocument,
@@ -7,6 +7,7 @@ import {
   useUpdateDocument,
 } from "@/hooks/esign-bkd";
 import { previewDocumentAsBase64 } from "@/services/esign-bkd.services";
+import usePdfPageStore from "@/store/usePdfPageStore";
 import dynamic from "next/dynamic";
 import { DocumentAuditLog } from "@/components/EsignBKD";
 import {
@@ -130,6 +131,8 @@ function DocumentDetail() {
   const [pdfLoading, setPdfLoading] = useState(false);
   const [pdfError, setPdfError] = useState(null);
 
+  // No longer needed - we'll use selector directly in component
+
   const { data: response, isLoading, refetch } = useDocument(id);
   const { mutateAsync: downloadDocument, isLoading: downloadLoading } =
     useDownloadDocument();
@@ -145,6 +148,70 @@ function DocumentDetail() {
 
   // Generate document ID
   const documentId = document?.id || router.query.id || id;
+
+  // Subscribe to page sizes from Zustand (MUST be before early returns!)
+  const allPageSizes = usePdfPageStore((state) => state.pageSizes);
+
+  const pdfPageSizes = useMemo(() => {
+    return allPageSizes[id] || {};
+  }, [allPageSizes, id]);
+
+  // Calculate TTE coordinates (before early returns, handle undefined gracefully)
+  const allTteCoordinates = useMemo(() => {
+    const signatureRequest = document?.signature_requests?.[0];
+    if (!signatureRequest) return [];
+
+    const signatureDetails = (signatureRequest?.signature_details || []).sort(
+      (a, b) => (a.sequence_order || 0) - (b.sequence_order || 0)
+    );
+
+    const coordinates = signatureDetails.flatMap((detail) => {
+      if (!detail.sign_coordinate || !Array.isArray(detail.sign_coordinate)) {
+        return [];
+      }
+      return detail.sign_coordinate.map((coord) => {
+        const pageSize = pdfPageSizes[coord.page];
+
+        if (!pageSize) {
+          console.warn(`[DocumentDetail] Page size not loaded for page ${coord.page}`);
+          return null;
+        }
+
+        // Database stores coordinates in PIXELS with BROWSER coordinate system (top-left origin)
+        // No Y-flip needed - use as-is
+
+        console.log('[DocumentDetail] Loading coordinate:', {
+          database: { originX: coord.originX, originY: coord.originY, width: coord.width, height: coord.height },
+          pageSize,
+          calculatedRatio: {
+            x: coord.originX / pageSize.width,
+            y: coord.originY / pageSize.height,
+          },
+          NOTE: 'NO Y-FLIP - database stores browser coordinates',
+        });
+
+        // Convert pixels to ratio
+        return {
+          id: `${detail.id}_${coord.page}_${coord.originX}_${coord.originY}`,
+          page: coord.page,
+          positionRatio: {
+            x: coord.originX / pageSize.width,
+            y: coord.originY / pageSize.height,
+          },
+          sizeRatio: {
+            width: coord.width / pageSize.width,
+            height: coord.height / pageSize.height,
+          },
+          signerId: coord.signerId,
+          signerName: coord.signerName,
+          signerAvatar: detail.user?.image || null,
+        };
+      });
+    }).filter(Boolean);
+
+    console.log('[DocumentDetail] Calculated TTE coordinates:', coordinates);
+    return coordinates;
+  }, [document, pdfPageSizes]);
 
   // Fetch PDF base64 data
   const fetchPdfBase64 = useCallback(async () => {
@@ -373,27 +440,7 @@ function DocumentDetail() {
     (a, b) => (a.sequence_order || 0) - (b.sequence_order || 0)
   );
 
-  // Extract all TTE coordinates from signature_details for view-only mode
-  const allTteCoordinates = signatureDetails.flatMap((detail) => {
-    if (!detail.sign_coordinate || !Array.isArray(detail.sign_coordinate)) {
-      return [];
-    }
-    return detail.sign_coordinate.map((coord) => ({
-      id: `${detail.id}_${coord.page}_${coord.originX}_${coord.originY}`,
-      page: coord.page,
-      position: {
-        x: coord.originX,
-        y: coord.originY,
-      },
-      size: {
-        width: coord.width,
-        height: coord.height,
-      },
-      signerId: coord.signerId,
-      signerName: coord.signerName,
-      signerAvatar: detail.user?.image || null,
-    }));
-  });
+  // allTteCoordinates already calculated above (before early returns)
 
   return (
     <div style={{ maxWidth: "100%", margin: "0 auto" }}>

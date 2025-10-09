@@ -9,6 +9,7 @@ const SignModal = ({ open, onCancel, onSign, loading = false }) => {
     try {
       const values = await form.validateFields();
       await onSign(values);
+      message.success("Dokumen berhasil ditandatangani");
       form.resetFields();
     } catch (error) {
       // Only show error if it's not form validation error

@@ -18,7 +18,13 @@ export function signaturesToCoordinates(
   pdfPageWidth = 612,
   pdfPageHeight = 792
 ) {
-  return signatures.map((sig) => {
+  console.log('[signaturesToCoordinates] Input:', {
+    signatures,
+    pdfPageWidth,
+    pdfPageHeight,
+  });
+
+  const result = signatures.map((sig) => {
     // Handle both ratio format (new) and pixel format (old)
     let pixelX, pixelY, pixelWidth, pixelHeight;
 
@@ -28,19 +34,44 @@ export function signaturesToCoordinates(
       pixelY = sig.positionRatio.y * pdfPageHeight;
       pixelWidth = sig.sizeRatio.width * pdfPageWidth;
       pixelHeight = sig.sizeRatio.height * pdfPageHeight;
+
+      console.log('[signaturesToCoordinates] Ratio format conversion:', {
+        signature: sig,
+        positionRatio: sig.positionRatio,
+        sizeRatio: sig.sizeRatio,
+        pdfPageWidth,
+        pdfPageHeight,
+        calculatedPixels: { pixelX, pixelY, pixelWidth, pixelHeight },
+      });
     } else {
       // Old pixel format - use directly
       pixelX = sig.position?.x || 0;
       pixelY = sig.position?.y || 0;
       pixelWidth = sig.size?.width || DEFAULT_SIGNATURE_WIDTH;
       pixelHeight = sig.size?.height || DEFAULT_SIGNATURE_HEIGHT;
+
+      console.log('[signaturesToCoordinates] Old pixel format:', {
+        signature: sig,
+        pixels: { pixelX, pixelY, pixelWidth, pixelHeight },
+      });
     }
+
+    // IMPORTANT: Save browser Y as-is (BSrE API handles Cartesian conversion internally)
+    // DO NOT flip Y here - API expects browser coordinates (top-left origin)
 
     // Convert pixel position to PDF points
     const originX = Math.round(pixelX * PDF_POINTS_PER_PIXEL);
     const originY = Math.round(pixelY * PDF_POINTS_PER_PIXEL);
 
-    return {
+    console.log('🔴 [signaturesToCoordinates] SAVE:', {
+      browserY: pixelY,
+      originY_PDF_POINTS: originY,
+      pageHeight: pdfPageHeight,
+      iconHeight: pixelHeight,
+      NOTE: 'NO Y-FLIP - BSrE API expects browser coordinates',
+    });
+
+    const converted = {
       page: sig.page,
       tag: "$", // Keep tag for BSrE compatibility
       originX: originX,
@@ -54,7 +85,13 @@ export function signaturesToCoordinates(
       signerId: sig.signerId || "self",
       signerAvatar: sig.signerAvatar,
     };
+
+    console.log('[signaturesToCoordinates] Final coordinate:', converted);
+    return converted;
   });
+
+  console.log('[signaturesToCoordinates] All coordinates:', result);
+  return result;
 }
 
 /**
@@ -159,7 +196,9 @@ export function validateSignatures(signatures) {
 export function coordinatesToPixelFormat(coordinates) {
   if (!coordinates || !Array.isArray(coordinates)) return [];
 
-  return coordinates.map((coord) => {
+  console.log('[coordinatesToPixelFormat] Input coordinates:', coordinates);
+
+  const result = coordinates.map((coord) => {
     // Convert size dari PDF points ke pixels
     const pixelHeight = Math.round(coord.signatureHeight / PDF_POINTS_PER_PIXEL);
 
@@ -167,7 +206,7 @@ export function coordinatesToPixelFormat(coordinates) {
     // Gunakan height sebagai patokan untuk ukuran square
     const squareSize = pixelHeight;
 
-    return {
+    const converted = {
       page: coord.page,
       originX: Math.round(coord.originX / PDF_POINTS_PER_PIXEL),
       originY: Math.round(coord.originY / PDF_POINTS_PER_PIXEL),
@@ -176,7 +215,13 @@ export function coordinatesToPixelFormat(coordinates) {
       signerId: coord.signerId || "self",
       signerName: coord.signerName,
     };
+
+    console.log('[coordinatesToPixelFormat] Converted:', { input: coord, output: converted });
+    return converted;
   });
+
+  console.log('[coordinatesToPixelFormat] Final result:', result);
+  return result;
 }
 
 /**
@@ -190,6 +235,8 @@ export function coordinatesToPixelFormat(coordinates) {
 export function signaturesToPixelCoordinates(signatures, pdfPageWidth = 612, pdfPageHeight = 792) {
   if (!signatures || !Array.isArray(signatures)) return [];
 
+  console.log('[signaturesToPixelCoordinates] Input:', { signatures, pdfPageWidth, pdfPageHeight });
+
   return signatures.map((sig) => {
     let pixelX, pixelY, pixelWidth, pixelHeight;
 
@@ -200,6 +247,12 @@ export function signaturesToPixelCoordinates(signatures, pdfPageWidth = 612, pdf
       pixelY = sig.positionRatio.y * pdfPageHeight;
       pixelWidth = sig.sizeRatio.width * pdfPageWidth;
       pixelHeight = sig.sizeRatio.height * pdfPageHeight;
+
+      console.log('[signaturesToPixelCoordinates] Ratio conversion:', {
+        positionRatio: sig.positionRatio,
+        sizeRatio: sig.sizeRatio,
+        calculatedPixels: { pixelX, pixelY, pixelWidth, pixelHeight }
+      });
     } else if (sig.position && sig.size) {
       // Old pixel format
       pixelX = sig.position.x;
@@ -207,24 +260,39 @@ export function signaturesToPixelCoordinates(signatures, pdfPageWidth = 612, pdf
       pixelWidth = sig.size.width;
       pixelHeight = sig.size.height;
     } else {
-      // Already converted coordinate format
+      // Already converted coordinate format (BSrE Y, from bottom)
+      // Need to convert back to browser Y for consistent handling
+      const bsreY = Math.round((sig.originY || 0) / PDF_POINTS_PER_PIXEL);
       pixelX = Math.round((sig.originX || 0) / PDF_POINTS_PER_PIXEL);
-      pixelY = Math.round((sig.originY || 0) / PDF_POINTS_PER_PIXEL);
       pixelHeight = Math.round((sig.signatureHeight || DEFAULT_SIGNATURE_HEIGHT * PDF_POINTS_PER_PIXEL) / PDF_POINTS_PER_PIXEL);
       pixelWidth = pixelHeight;
+      // Convert BSrE Y (from bottom) to browser Y (from top)
+      pixelY = pdfPageHeight - bsreY - pixelHeight;
     }
+
+    // IMPORTANT: Save browser Y as-is (BSrE API handles conversion)
+    console.log('🟢 [signaturesToPixelCoordinates] SAVE:', {
+      browserY: pixelY,
+      originY_PIXELS: Math.round(pixelY),
+      pageHeight: pdfPageHeight,
+      iconHeight: pixelHeight,
+      NOTE: 'NO Y-FLIP - BSrE API expects browser coordinates',
+    });
 
     // Logo BSrE harus SQUARE - gunakan height sebagai patokan
     const squareSize = Math.round(pixelHeight || DEFAULT_SIGNATURE_HEIGHT);
 
-    return {
+    const result = {
       page: sig.page,
       originX: Math.round(pixelX),
-      originY: Math.round(pixelY),
+      originY: Math.round(pixelY), // Use browser Y coordinate (no flip)
       width: squareSize,
       height: squareSize,
       signerId: sig.signerId || "self",
       signerName: sig.signerName,
     };
+
+    console.log('[signaturesToPixelCoordinates] Final result:', result);
+    return result;
   });
 }

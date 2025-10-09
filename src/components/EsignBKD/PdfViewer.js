@@ -41,6 +41,7 @@ import DraggableSignature, {
   SIGNATURE_HEIGHT,
 } from "./DraggableSignature";
 import useSignatureStore, { pixelToRatio, pixelSizeToRatio } from "@/store/useSignatureStore";
+import usePdfPageStore from "@/store/usePdfPageStore";
 import { signaturesToCoordinates } from "@/utils/signature-coordinate-helper";
 
 // Import react-pdf CSS (required)
@@ -72,6 +73,7 @@ const PdfViewer = forwardRef(function PdfViewer(
     signerAvatar = null, // Add this prop - URL foto user
     signerId = "self", // Add this
     canEdit = true,
+    onPageSizesLoad = null, // Callback when all page sizes are loaded
   },
   ref
 ) {
@@ -108,6 +110,20 @@ const PdfViewer = forwardRef(function PdfViewer(
   const [pageSize, setPageSize] = useState({ width: 0, height: 0 });
   const [isPageReady, setIsPageReady] = useState(false);
 
+  // Zustand store for page sizes (global state)
+  const setPageSizeToStore = usePdfPageStore((state) => state.setPageSize);
+  const getDocumentPageSizes = usePdfPageStore((state) => state.getDocumentPageSizes);
+
+  // Debug props
+  console.log('[PdfViewer] Props:', {
+    documentId,
+    enableSignaturePlacement,
+    canEdit,
+    initialSignaturesLength: initialSignatures?.length || 0,
+    signerName,
+    signerId,
+  });
+
   // Memoize PDF.js options to prevent unnecessary reloads
   const pdfOptions = useMemo(
     () => ({
@@ -118,10 +134,28 @@ const PdfViewer = forwardRef(function PdfViewer(
     [pdfjsVersion]
   );
 
-  // Initialize signatures from prop on mount, cleanup on unmount
+  // Initialize signatures from prop - only on mount or when count changes
+  const prevInitialSigsLength = useRef(0);
+
   useEffect(() => {
-    if (initialSignatures && initialSignatures.length > 0) {
-      setSignatures(initialSignatures);
+    const currentLength = initialSignatures?.length || 0;
+
+    console.log('[PdfViewer] Checking initialSignatures:', {
+      prevLength: prevInitialSigsLength.current,
+      currentLength,
+      currentSignaturesCount: signatures.length,
+      canEdit,
+    });
+
+    // Only update if:
+    // 1. Length changed (new signatures added/removed)
+    // 2. AND (in view mode OR in edit mode with empty signatures)
+    if (currentLength !== prevInitialSigsLength.current) {
+      if (currentLength > 0 && (!canEdit || signatures.length === 0)) {
+        console.log('[PdfViewer] Setting signatures from initialSignatures');
+        setSignatures(initialSignatures);
+      }
+      prevInitialSigsLength.current = currentLength;
     }
 
     // Cleanup: clear signatures when component unmounts
@@ -129,13 +163,78 @@ const PdfViewer = forwardRef(function PdfViewer(
       clearSignatures();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Empty deps - only on mount/unmount (intentional)
+  }, [initialSignatures?.length, canEdit]); // Only watch length, not array reference
+
+  // Track previous signatures to avoid unnecessary updates
+  const prevSignaturesRef = useRef([]);
 
   // Update signCoordinates (for API) whenever signatures change
   useEffect(() => {
-    const coordinates = signaturesToCoordinates(signatures);
+    if (!documentId) return;
+
+    // Check if signatures actually changed (deep comparison including position and size)
+    const signaturesChanged =
+      signatures.length !== prevSignaturesRef.current.length ||
+      signatures.some((sig, idx) => {
+        const prevSig = prevSignaturesRef.current[idx];
+        if (!prevSig || sig.id !== prevSig.id) return true;
+
+        // CRITICAL: Also check if position or size changed!
+        const positionChanged =
+          sig.positionRatio?.x !== prevSig.positionRatio?.x ||
+          sig.positionRatio?.y !== prevSig.positionRatio?.y;
+
+        const sizeChanged =
+          sig.sizeRatio?.width !== prevSig.sizeRatio?.width ||
+          sig.sizeRatio?.height !== prevSig.sizeRatio?.height;
+
+        return positionChanged || sizeChanged;
+      });
+
+    if (!signaturesChanged) {
+      console.log('[PdfViewer] Signatures unchanged, skipping coordinate conversion');
+      return;
+    }
+
+    console.log('✅ [PdfViewer] Signatures changed! Converting to coordinates...', {
+      signaturesCount: signatures.length,
+      prevCount: prevSignaturesRef.current.length,
+    });
+
+    // Get all page sizes from Zustand for this document
+    const allPageSizes = getDocumentPageSizes(documentId);
+
+    console.log('[PdfViewer] Converting signatures to coordinates:', {
+      documentId,
+      signaturesCount: signatures.length,
+      pageSizeWidth: pageSize.width,
+      allPageSizesKeys: Object.keys(allPageSizes),
+    });
+
+    // Convert each signature using its specific page's dimensions
+    const coordinates = signatures.map((sig) => {
+      // Get page size for this specific signature's page from Zustand
+      const sigPageSize = allPageSizes[sig.page] || pageSize;
+      const pdfPageWidth = sigPageSize.width || 612;
+      const pdfPageHeight = sigPageSize.height || 792;
+
+      console.log(`[PdfViewer] Converting signature on page ${sig.page}:`, {
+        signatureId: sig.id,
+        pageSize: sigPageSize,
+        pdfPageWidth,
+        pdfPageHeight,
+      });
+
+      // Convert this single signature with correct page dimensions
+      const [coord] = signaturesToCoordinates([sig], pdfPageWidth, pdfPageHeight);
+      return coord;
+    });
+
+    console.log('[PdfViewer] Final coordinates for API:', coordinates.length);
     setSignCoordinates(coordinates);
-  }, [signatures, setSignCoordinates]);
+    prevSignaturesRef.current = signatures;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [signatures, setSignCoordinates, documentId, pageSize.width, pageSize.height]);
 
   // Listen for jumpToPage event from parent components
   useEffect(() => {
@@ -294,21 +393,49 @@ const PdfViewer = forwardRef(function PdfViewer(
 
       // Capture page size for signature placement
       if (page) {
-        const newPageSize = {
-          width: page.width,
-          height: page.height,
+        // IMPORTANT: react-pdf returns page size AFTER scaling
+        // We need RAW PDF size (unscaled) for coordinate calculations
+        const rawPageSize = {
+          width: page.width / scale,
+          height: page.height / scale,
         };
-        setPageSize(newPageSize);
+
+        console.log('[PdfViewer] Page rendered successfully:', {
+          documentId,
+          pageNumber,
+          rawReactPdfSize: { width: page.width, height: page.height },
+          scale,
+          calculatedRawSize: rawPageSize,
+          hasDocumentId: !!documentId,
+        });
+
+        // Always set page size and ready state
+        setPageSize(rawPageSize);
         setIsPageReady(true);
+        console.log('[PdfViewer] Page is now ready!');
+
+        // Store to Zustand only if documentId exists
+        if (documentId) {
+          setPageSizeToStore(documentId, pageNumber, rawPageSize);
+          console.log(`[PdfViewer] Stored page ${pageNumber} size to Zustand for doc ${documentId}`);
+        } else {
+          console.warn('[PdfViewer] No documentId - page size not stored to Zustand');
+        }
       }
     },
-    [isMounted]
+    [isMounted, pageNumber, scale, documentId, setPageSizeToStore]
   );
 
   // Reset page ready state when page changes
   useEffect(() => {
+    console.log(`[PdfViewer] Page changed to ${pageNumber} - resetting isPageReady to false`);
     setIsPageReady(false);
   }, [pageNumber]);
+
+  // Debug: Log isPageReady changes
+  useEffect(() => {
+    console.log(`[PdfViewer] isPageReady changed to: ${isPageReady}`);
+  }, [isPageReady]);
 
   const onPageRenderError = useCallback(
     (pageError) => {
@@ -520,12 +647,20 @@ const PdfViewer = forwardRef(function PdfViewer(
                 <Button
                   type="primary"
                   icon={<PlusOutlined />}
-                  onClick={handleAddSignature}
+                  onClick={() => {
+                    console.log('[PdfViewer] Tambah TTE clicked:', {
+                      isPageReady,
+                      pageSize,
+                      signerName,
+                      signerId,
+                    });
+                    handleAddSignature();
+                  }}
                   size="small"
                   disabled={!isPageReady}
                   style={!isPageReady ? { pointerEvents: "none" } : {}}
                 >
-                  Tambah TTE
+                  Tambah TTE {!isPageReady && '(loading...)'}
                 </Button>
               </span>
             </Tooltip>
@@ -718,7 +853,7 @@ const PdfViewer = forwardRef(function PdfViewer(
                   />
                 </Document>
 
-                {/* Signature Overlay - SCALED WITH PDF */}
+                {/* Signature Overlay - Use SCALED page size (no transform) */}
                 {enableSignaturePlacement &&
                   currentPageSignatures.length > 0 && (
                     <div
@@ -726,8 +861,8 @@ const PdfViewer = forwardRef(function PdfViewer(
                         position: "absolute",
                         top: 0,
                         left: 0,
-                        width: `${pageSize.width}px`,
-                        height: `${pageSize.height}px`,
+                        width: `${pageSize.width * scale}px`,
+                        height: `${pageSize.height * scale}px`,
                         pointerEvents: "none",
                         overflow: "hidden",
                       }}
@@ -746,7 +881,11 @@ const PdfViewer = forwardRef(function PdfViewer(
                             sizeRatio={signature.sizeRatio}
                             signerName={signature.signerName}
                             signerAvatar={signature.signerAvatar}
-                            containerBounds={pageSize}
+                            containerBounds={{
+                              width: pageSize.width * scale,
+                              height: pageSize.height * scale,
+                            }}
+                            rawPageSize={pageSize}
                             onPositionChange={handleSignaturePositionChange}
                             onSizeChange={handleSignatureSizeChange}
                             onRemove={canEdit ? removeSignature : null}

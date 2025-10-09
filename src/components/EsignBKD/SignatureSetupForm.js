@@ -133,9 +133,13 @@ function SignatureSetupForm({ document }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [document?.id]);
 
-  // Clear signature coordinates on unmount
+  // Clear signature coordinates on mount AND unmount
   useEffect(() => {
+    // Clear saat mount untuk menghindari signatures dari document sebelumnya
+    clearSignCoordinates();
+
     return () => {
+      // Clear saat unmount
       clearSignCoordinates();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -398,6 +402,7 @@ function SignatureSetupForm({ document }) {
                   <>
                     <SignaturePlacementForm
                       pdfBase64={memoizedPdfBase64}
+                      documentId={document?.id}
                       initialMode={
                         signatureType === "self_sign" ? "self" : "request"
                       }

@@ -1,14 +1,23 @@
-import { CloseOutlined, ExpandOutlined, UserOutlined, DragOutlined } from "@ant-design/icons";
-import { ActionIcon, Paper, Avatar } from "@mantine/core";
-import { useState, useRef, useMemo, useEffect, memo } from "react";
+import {
+  pixelSizeToRatio,
+  pixelToRatio,
+  ratioSizeToPixel,
+  ratioToPixel,
+} from "@/store/useSignatureStore";
+import {
+  CloseOutlined,
+  DragOutlined,
+  ExpandOutlined,
+  UserOutlined,
+} from "@ant-design/icons";
+import { Avatar, Paper } from "@mantine/core";
+import { memo, useMemo, useRef, useState, useEffect } from "react";
 import Draggable from "react-draggable";
-import { pixelToRatio, ratioToPixel, pixelSizeToRatio, ratioSizeToPixel } from "@/store/useSignatureStore";
 
 const DEFAULT_WIDTH = 60; // pixels - square untuk logo BSrE
 const DEFAULT_HEIGHT = 60; // pixels - square untuk logo BSrE
 const MIN_WIDTH = 30; // Bisa diperkecil sampai 30px
 const MIN_HEIGHT = 30; // Bisa diperkecil sampai 30px (square)
-const SELECTION_PADDING = 8; // Extra padding untuk selection box
 const HANDLE_SIZE = 24; // Size untuk drag/resize handles
 
 // Helper function to get initials from name
@@ -52,74 +61,130 @@ function DraggableSignature({
   onPositionChange, // Callback with ratio
   onSizeChange, // Callback with ratio
   onRemove,
-  containerBounds,
+  containerBounds, // Actual rendered size (for visual positioning)
+  rawPageSize, // Raw page size (for ratio calculations)
   disabled = false,
 }) {
   const nodeRef = useRef(null);
 
-  // Convert ratio to pixels for internal state and rendering
-  const pixelPosition = useMemo(
+  // Convert ratio to pixels for rendering - NO local state needed!
+  const position = useMemo(
     () => ratioToPixel(positionRatio, containerBounds),
     [positionRatio, containerBounds]
   );
 
-  const pixelSize = useMemo(
+  const size = useMemo(
     () => ratioSizeToPixel(sizeRatio, containerBounds),
     [sizeRatio, containerBounds]
   );
 
-  const [position, setPosition] = useState(pixelPosition);
-  const [size, setSize] = useState(pixelSize);
+  // Only UI state - no position/size state to avoid infinite loop!
   const [isResizing, setIsResizing] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [imageError, setImageError] = useState(false);
 
-  // Sync pixel position/size when ratio or containerBounds change
+  // Local dragging position for smooth dragging (only used during drag)
+  const [dragPosition, setDragPosition] = useState(null);
+  const [resizeSize, setResizeSize] = useState(null);
+
+  // Use local state during drag/resize, props otherwise
+  const currentPosition = isDragging && dragPosition ? dragPosition : position;
+  const currentSize = isResizing && resizeSize ? resizeSize : size;
+
+  // DEBUG: Log position data only during interactions to avoid console spam
   useEffect(() => {
-    if (!isDragging && !isResizing) {
-      setPosition(pixelPosition);
-      setSize(pixelSize);
+    if (isDragging || isResizing || isHovered) {
+      console.log(`[DraggableSignature] ID: ${id}, Page: ${page}`, {
+        positionRatio,
+        sizeRatio,
+        containerBounds,
+        calculatedPixelPosition: position,
+        calculatedPixelSize: size,
+        currentPosition,
+        currentSize,
+        signerName,
+      });
     }
-  }, [pixelPosition, pixelSize, isDragging, isResizing]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isDragging, isResizing, isHovered]);
 
-  // Responsive sizing berdasarkan ukuran signature
-  const avatarSize = Math.max(16, Math.min(24, size.width * 0.18));
-  const buttonSize = Math.max(16, Math.min(20, size.width * 0.15));
-  const rightOverflow = buttonSize * 0.4; // Close button negative right offset
-  const bottomOverflow = Math.max(2, buttonSize * 0.5); // Resize handle
-  const avatarPadding = Math.max(8, avatarSize * 0.3); // Avatar left/top overflow
+  // Responsive sizing berdasarkan ukuran signature - use currentSize for dynamic sizing
+  const avatarSize = Math.max(16, Math.min(24, currentSize.width * 0.18));
+  const buttonSize = Math.max(16, Math.min(20, currentSize.width * 0.15));
 
-  // Calculate bounds dynamically - constrain position so signature + controls don't overflow
+  // SIMPLE bounds calculation - cukup page size dari Zustand!
+  // Biarkan controls (avatar, buttons) overflow sedikit - yang penting signature box tidak keluar
+  // IMPORTANT: Harus pakai SIZE dari props, bukan currentSize, karena currentSize berubah saat resize
   const bounds = useMemo(() => {
     if (!containerBounds || !containerBounds.width || !containerBounds.height) {
       return { left: 0, top: 0, right: 0, bottom: 0 };
     }
 
-    return {
-      left: avatarPadding, // Avatar overflows left
-      top: avatarPadding, // Avatar overflows top
-      right: Math.max(avatarPadding, containerBounds.width - size.width - rightOverflow),
-      bottom: Math.max(avatarPadding, containerBounds.height - size.height - bottomOverflow),
+    // Use SIZE from props (not currentSize) untuk bounds yang stabil
+    const iconWidth = size.width;
+    const iconHeight = size.height;
+
+    // Simple: signature box tidak boleh keluar dari page
+    const calculatedBounds = {
+      left: 0,
+      top: 0,
+      right: containerBounds.width - iconWidth,
+      bottom: containerBounds.height - iconHeight,
     };
-  }, [containerBounds, size.width, size.height, rightOverflow, bottomOverflow, avatarPadding]);
+
+    console.log('[DraggableSignature] Bounds calculation:', {
+      page,
+      containerWidth: containerBounds.width,
+      containerHeight: containerBounds.height,
+      iconWidth,
+      iconHeight,
+      maxRight: calculatedBounds.right,
+      maxBottom: calculatedBounds.bottom,
+    });
+
+    return calculatedBounds;
+  }, [containerBounds.width, containerBounds.height, size.width, size.height, page]);
 
   const handleDrag = (_e, data) => {
     setIsDragging(true);
     const newPixelPosition = { x: data.x, y: data.y };
-    setPosition(newPixelPosition);
+    setDragPosition(newPixelPosition); // Local state for smooth dragging
     // Don't update parent during drag - wait for drag stop for better performance
   };
 
   const handleDragStop = (_e, data) => {
-    setIsDragging(false);
+    const finalPosition = { x: data.x, y: data.y };
 
-    // Update parent only when drag is complete for smooth dragging
+    // IMPORTANT: Calculate ratio based on RAW page size, not actual rendered size
+    // This ensures ratios are consistent across different scales and mobile constraints
     if (onPositionChange) {
-      const finalPosition = { x: data.x, y: data.y };
-      const newRatio = pixelToRatio(finalPosition, containerBounds);
+      // Convert from rendered pixels to raw pixels first
+      const scaleX = rawPageSize.width / containerBounds.width;
+      const scaleY = rawPageSize.height / containerBounds.height;
+      const rawPixelPosition = {
+        x: finalPosition.x * scaleX,
+        y: finalPosition.y * scaleY,
+      };
+
+      // Then convert raw pixels to ratio
+      const newRatio = pixelToRatio(rawPixelPosition, rawPageSize);
+
+      console.log('🟣 [DraggableSignature] Drag stop - Position conversion:', {
+        renderedPosition: finalPosition,
+        containerBounds,
+        rawPageSize,
+        scaleFactors: { scaleX, scaleY },
+        rawPixelPosition,
+        finalRatio: newRatio,
+      });
+
       onPositionChange(id, page, newRatio);
     }
+
+    // Clear local drag state
+    setIsDragging(false);
+    setDragPosition(null);
   };
 
   // Resize handler with aspect ratio lock
@@ -131,7 +196,8 @@ function DraggableSignature({
     const startX = e.clientX;
     const startWidth = size.width;
     const startHeight = size.height;
-    const aspectRatio = startWidth / startHeight; // Lock aspect ratio
+    const aspectRatio = startWidth / startHeight; // Lock aspect ratio (square)
+    let finalSize = null;
 
     const handleMouseMove = (moveEvent) => {
       const deltaX = moveEvent.clientX - startX;
@@ -146,10 +212,21 @@ function DraggableSignature({
         newWidth = newHeight * aspectRatio;
       }
 
-      // Constrain size so signature doesn't overflow container
+      // SIMPLE: Constrain based on page size dari Zustand
       if (containerBounds) {
+        // Maksimal width = page width - position x (sisa ruang ke kanan)
         const maxWidth = containerBounds.width - position.x;
+        // Maksimal height = page height - position y (sisa ruang ke bawah)
         const maxHeight = containerBounds.height - position.y;
+
+        console.log('[DraggableSignature] Resize constraint:', {
+          containerBounds,
+          position,
+          maxWidth,
+          maxHeight,
+          requestedWidth: newWidth,
+          requestedHeight: newHeight,
+        });
 
         if (newWidth > maxWidth) {
           newWidth = maxWidth;
@@ -162,18 +239,38 @@ function DraggableSignature({
         }
       }
 
-      const newSize = { width: newWidth, height: newHeight };
-      setSize(newSize);
-
-      // Convert pixel size to ratio and update parent
-      if (onSizeChange) {
-        const newSizeRatio = pixelSizeToRatio(newSize, containerBounds);
-        onSizeChange(id, newSizeRatio);
-      }
+      finalSize = { width: newWidth, height: newHeight };
+      setResizeSize(finalSize); // Local state for smooth resizing
     };
 
     const handleMouseUp = () => {
+      // Update parent only once when resize is complete
+      if (finalSize && onSizeChange) {
+        // IMPORTANT: Calculate size ratio based on RAW page size, not rendered size
+        const scaleX = rawPageSize.width / containerBounds.width;
+        const scaleY = rawPageSize.height / containerBounds.height;
+        const rawPixelSize = {
+          width: finalSize.width * scaleX,
+          height: finalSize.height * scaleY,
+        };
+
+        const newSizeRatio = pixelSizeToRatio(rawPixelSize, rawPageSize);
+
+        console.log('🟣 [DraggableSignature] Resize stop - Size conversion:', {
+          renderedSize: finalSize,
+          containerBounds,
+          rawPageSize,
+          scaleFactors: { scaleX, scaleY },
+          rawPixelSize,
+          finalSizeRatio: newSizeRatio,
+        });
+
+        onSizeChange(id, newSizeRatio);
+      }
+
+      // Clear local resize state
       setIsResizing(false);
+      setResizeSize(null);
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseup", handleMouseUp);
     };
@@ -190,12 +287,11 @@ function DraggableSignature({
 
   // Additional sizing calculations
   const avatarFontSize = Math.max(7, avatarSize * 0.4);
-  const iconSize = Math.max(8, buttonSize * 0.5);
 
   return (
     <Draggable
       nodeRef={nodeRef}
-      position={position}
+      position={currentPosition}
       onDrag={handleDrag}
       onStop={handleDragStop}
       bounds={bounds}
@@ -209,8 +305,8 @@ function DraggableSignature({
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         style={{
-          width: size.width,
-          height: size.height,
+          width: currentSize.width,
+          height: currentSize.height,
           cursor: disabled
             ? "default"
             : isResizing
@@ -395,17 +491,32 @@ function DraggableSignature({
 // Memoize component to prevent unnecessary re-renders when other signatures change
 // Custom comparison: only re-render if props actually changed
 const arePropsEqual = (prevProps, nextProps) => {
+  // Safe comparison with null/undefined checks
+  const positionEqual =
+    prevProps.positionRatio?.x === nextProps.positionRatio?.x &&
+    prevProps.positionRatio?.y === nextProps.positionRatio?.y;
+
+  const sizeEqual =
+    prevProps.sizeRatio?.width === nextProps.sizeRatio?.width &&
+    prevProps.sizeRatio?.height === nextProps.sizeRatio?.height;
+
+  const boundsEqual =
+    prevProps.containerBounds?.width === nextProps.containerBounds?.width &&
+    prevProps.containerBounds?.height === nextProps.containerBounds?.height;
+
+  const rawPageSizeEqual =
+    prevProps.rawPageSize?.width === nextProps.rawPageSize?.width &&
+    prevProps.rawPageSize?.height === nextProps.rawPageSize?.height;
+
   return (
     prevProps.id === nextProps.id &&
     prevProps.page === nextProps.page &&
-    prevProps.positionRatio.x === nextProps.positionRatio.x &&
-    prevProps.positionRatio.y === nextProps.positionRatio.y &&
-    prevProps.sizeRatio.width === nextProps.sizeRatio.width &&
-    prevProps.sizeRatio.height === nextProps.sizeRatio.height &&
+    positionEqual &&
+    sizeEqual &&
     prevProps.signerName === nextProps.signerName &&
     prevProps.signerAvatar === nextProps.signerAvatar &&
-    prevProps.containerBounds.width === nextProps.containerBounds.width &&
-    prevProps.containerBounds.height === nextProps.containerBounds.height &&
+    boundsEqual &&
+    rawPageSizeEqual &&
     prevProps.disabled === nextProps.disabled &&
     prevProps.onPositionChange === nextProps.onPositionChange &&
     prevProps.onSizeChange === nextProps.onSizeChange &&
@@ -414,4 +525,4 @@ const arePropsEqual = (prevProps, nextProps) => {
 };
 
 export default memo(DraggableSignature, arePropsEqual);
-export { DEFAULT_WIDTH as SIGNATURE_WIDTH, DEFAULT_HEIGHT as SIGNATURE_HEIGHT };
+export { DEFAULT_HEIGHT as SIGNATURE_HEIGHT, DEFAULT_WIDTH as SIGNATURE_WIDTH };
