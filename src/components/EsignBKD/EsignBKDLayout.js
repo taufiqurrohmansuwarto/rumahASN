@@ -14,7 +14,7 @@ import {
   IconFileText,
   IconLayoutDashboard,
   IconSignature,
-  IconUserCheck,
+  IconUser,
 } from "@tabler/icons-react";
 import { Button, Dropdown, Flex, Input, Space } from "antd";
 import { trim } from "lodash";
@@ -53,6 +53,12 @@ const menuItems = [
     icon: <IconCloudComputing size={16} />,
     label: "Monitor BSrE",
     role: ["admin"],
+  },
+  {
+    key: "/esign-bkd/profile",
+    icon: <IconUser size={16} />,
+    label: "Profil",
+    role: ["admin", "user"],
   },
 ];
 

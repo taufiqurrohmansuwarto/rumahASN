@@ -419,3 +419,83 @@ export const checkTTEUser = async () => {
   const res = await esignBkdApi.get(`/check`);
   return res?.data;
 };
+
+// ==========================================
+// SPESIMEN SERVICES
+// ==========================================
+
+/**
+ * Generate spesimen tanda tangan PNG (text-only, no signature file)
+ * @param {Object} data - { name, nip, position, rank }
+ * @returns {Promise<Blob>} - PNG file blob
+ */
+export const generateSpesimen = async (data) => {
+  const res = await esignBkdApi.post(`/spesimen/generate`, data, {
+    headers: {
+      "Content-Type": "application/json",
+    },
+    responseType: "blob", // Important: get PNG as blob
+  });
+
+  return res?.data;
+};
+
+/**
+ * Generate spesimen as base64 (text-only, no signature file)
+ * @param {Object} data - { name, nip, position, rank }
+ * @returns {Promise<Object>} - { content, contentType, size, filename }
+ */
+export const generateSpesimenBase64 = async (data) => {
+  const res = await esignBkdApi.post(
+    `/spesimen/generate?format=base64`,
+    data,
+    {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
+
+  return res?.data;
+};
+
+/**
+ * Preview spesimen HTML (for debugging, text-only)
+ * @param {Object} data - { name, nip, position, rank }
+ * @returns {Promise<String>} - HTML string
+ */
+export const previewSpesimen = async (data) => {
+  const res = await esignBkdApi.post(`/spesimen/preview`, data, {
+    headers: {
+      "Content-Type": "application/json",
+    },
+    responseType: "text",
+  });
+
+  return res?.data;
+};
+
+/**
+ * Test Gotenberg connection
+ * @returns {Promise<Object>} - { success, message, gotenbergUrl }
+ */
+export const testGotenberg = async () => {
+  const res = await esignBkdApi.get(`/spesimen/test`);
+  return res?.data;
+};
+
+/**
+ * Download spesimen PNG
+ * @param {Blob} blob - PNG blob from generateSpesimen
+ * @param {String} filename - Filename (default: spesimen.png)
+ */
+export const downloadSpesimen = (blob, filename = "spesimen.png") => {
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  window.URL.revokeObjectURL(url);
+};

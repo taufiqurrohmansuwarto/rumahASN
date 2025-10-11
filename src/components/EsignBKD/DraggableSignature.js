@@ -133,7 +133,7 @@ function DraggableSignature({
       bottom: containerBounds.height - iconHeight,
     };
 
-    console.log('[DraggableSignature] Bounds calculation:', {
+    console.log("[DraggableSignature] Bounds calculation:", {
       page,
       containerWidth: containerBounds.width,
       containerHeight: containerBounds.height,
@@ -144,7 +144,13 @@ function DraggableSignature({
     });
 
     return calculatedBounds;
-  }, [containerBounds.width, containerBounds.height, size.width, size.height, page]);
+  }, [
+    containerBounds.width,
+    containerBounds.height,
+    size.width,
+    size.height,
+    page,
+  ]);
 
   const handleDrag = (_e, data) => {
     setIsDragging(true);
@@ -170,7 +176,7 @@ function DraggableSignature({
       // Then convert raw pixels to ratio
       const newRatio = pixelToRatio(rawPixelPosition, rawPageSize);
 
-      console.log('🟣 [DraggableSignature] Drag stop - Position conversion:', {
+      console.log("🟣 [DraggableSignature] Drag stop - Position conversion:", {
         renderedPosition: finalPosition,
         containerBounds,
         rawPageSize,
@@ -219,7 +225,7 @@ function DraggableSignature({
         // Maksimal height = page height - position y (sisa ruang ke bawah)
         const maxHeight = containerBounds.height - position.y;
 
-        console.log('[DraggableSignature] Resize constraint:', {
+        console.log("[DraggableSignature] Resize constraint:", {
           containerBounds,
           position,
           maxWidth,
@@ -256,7 +262,7 @@ function DraggableSignature({
 
         const newSizeRatio = pixelSizeToRatio(rawPixelSize, rawPageSize);
 
-        console.log('🟣 [DraggableSignature] Resize stop - Size conversion:', {
+        console.log("🟣 [DraggableSignature] Resize stop - Size conversion:", {
           renderedSize: finalSize,
           containerBounds,
           rawPageSize,
