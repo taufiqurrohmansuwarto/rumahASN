@@ -520,11 +520,11 @@ const proxyRekapPengadaan = async (req, res) => {
 const cekPertekByNomerPeserta = async (req, res) => {
   try {
     const knex = SiasnPengadaanProxy.knex();
-    const { no_peserta, nip, ket_kelakuanbaik_nomor, tahun } = req?.body;
+    const { no_peserta, ket_kelakuanbaik_nomor, tahun } = req?.body;
     const { siasnRequest } = req;
 
     // buat syarat untuk req?.body beserta format
-    if (!no_peserta || !nip || !ket_kelakuanbaik_nomor || !tahun) {
+    if (!no_peserta || !ket_kelakuanbaik_nomor || !tahun) {
       return res.status(400).json({
         message: "Data tidak boleh kosong",
       });
@@ -532,7 +532,6 @@ const cekPertekByNomerPeserta = async (req, res) => {
 
     if (
       typeof no_peserta !== "string" ||
-      typeof nip !== "string" ||
       typeof ket_kelakuanbaik_nomor !== "string" ||
       typeof tahun !== "string"
     ) {
@@ -580,7 +579,6 @@ const cekPertekByNomerPeserta = async (req, res) => {
         "rsu.nama as status_usulan_nama"
       )
       .whereRaw("sp.usulan_data->'data'->>'no_peserta' = ?", [trim(no_peserta)])
-      .andWhereRaw("sp.nip = ?", [nip])
       .andWhereRaw("sp.usulan_data->'data'->>'ket_kelakuanbaik_nomor' = ?", [
         trim(ket_kelakuanbaik_nomor),
       ])

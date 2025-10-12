@@ -1,14 +1,19 @@
 import axios from "axios";
 import { unstable_getServerSession } from "next-auth/next";
 import { authOptions } from "pages/api/auth/[...nextauth]";
+
+require("dotenv").config();
+
 const User = require("../models/users.model");
 const Minio = require("minio");
+
+const useSSL = process.env.NODE_ENV === "production";
 
 const bannedUserId = ["100549038920214179600"];
 
 const minioConfig = {
   port: parseInt(process.env.MINIO_PORT),
-  useSSL: true,
+  useSSL,
   accessKey: process.env.MINIO_ACCESS_KEY,
   secretKey: process.env.MINIO_SECRET_KEY,
   endPoint: process.env.MINIO_ENDPOINT,

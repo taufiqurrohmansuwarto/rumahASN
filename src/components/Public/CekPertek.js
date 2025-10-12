@@ -1,9 +1,10 @@
 import { cekPertekService } from "@/services/public.services";
-import { FilePdfOutlined, FileWordOutlined } from "@ant-design/icons";
+import { FileWordOutlined } from "@ant-design/icons";
 import { useMutation } from "@tanstack/react-query";
 import {
   Button,
   Col,
+  Radio,
   Form,
   Input,
   message,
@@ -112,12 +113,9 @@ const ModalCekPertek = ({ open, onCancel }) => {
     const values = await form.validateFields();
     const payload = {
       no_peserta: values?.no_peserta,
-      nip: values?.nip,
       ket_kelakuanbaik_nomor: values?.ket_kelakuanbaik_nomor,
-      tahun: "2024",
+      tahun: values?.tahun,
     };
-
-    console.log(payload);
 
     mutate(payload);
   };
@@ -134,7 +132,7 @@ const ModalCekPertek = ({ open, onCancel }) => {
     >
       <Form form={form} layout="vertical">
         <Row gutter={16}>
-          <Col span={12}>
+          <Col md={12} xs={24}>
             <Form.Item
               rules={[{ required: true, message: "No Peserta harus diisi" }]}
               normalize={(values) => values.replace(/\s/g, "")}
@@ -145,28 +143,31 @@ const ModalCekPertek = ({ open, onCancel }) => {
               <Input placeholder="Masukkan nomor peserta" />
             </Form.Item>
           </Col>
-
-          <Col span={12}>
-            <Form.Item
-              normalize={(values) => values.replace(/\s/g, "")}
-              rules={[{ required: true, message: "NIP harus diisi" }]}
-              name="nip"
-              label="NIP"
-              style={{ marginBottom: 16 }}
-            >
-              <Input placeholder="Masukkan NIP" />
-            </Form.Item>
-          </Col>
-          <Col span={24}>
+          <Col md={12} xs={24}>
             <Form.Item
               rules={[
                 { required: true, message: "Ket Kelakuan Baik harus diisi" },
               ]}
               name="ket_kelakuanbaik_nomor"
-              label="Ket Kelakuan Baik"
+              label="Ket Kelakuan Baik (Nomor SKCK)"
               style={{ marginBottom: 16 }}
             >
               <Input placeholder="Masukkan keterangan kelakuan baik" />
+            </Form.Item>
+          </Col>
+          <Col span={24}>
+            <Form.Item
+              rules={[{ required: true, message: "Tahun harus diisi" }]}
+              name="tahun"
+              label="Tahun"
+              style={{ marginBottom: 16 }}
+            >
+              <Radio.Group>
+                <Radio.Button value="2025">2025</Radio.Button>
+                <Radio.Button value="2024">2024</Radio.Button>
+                <Radio.Button value="2023">2023</Radio.Button>
+                <Radio.Button value="2022">2022</Radio.Button>
+              </Radio.Group>
             </Form.Item>
           </Col>
         </Row>

@@ -1,7 +1,7 @@
 import multer from "multer";
 import { createRouter } from "next-connect";
-import { uploadsMultipleFiles } from "../../controller/file.controller";
-import auth from "../../middleware/auth.middleware";
+import { uploadsMultipleFiles } from "@/controller/file.controller";
+import auth from "@/middleware/auth.middleware";
 
 // add setting to import images
 export const config = {
