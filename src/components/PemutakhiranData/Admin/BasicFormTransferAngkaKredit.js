@@ -1,30 +1,27 @@
-import React, { useEffect } from "react";
 import {
-  Button,
+  postRwAngkakreditByNip,
+  uploadDokRiwayat,
+} from "@/services/siasn-services";
+import { serializeAngkaKredit } from "@/utils/transfer-siasn.utils";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
   Col,
   DatePicker,
   Flex,
   Form,
   Input,
   InputNumber,
+  message,
   Modal,
   Radio,
   Row,
-  Upload,
-  message,
   Spin,
 } from "antd";
-import { FileAddOutlined } from "@ant-design/icons";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-  postRwAngkakreditByNip,
-  uploadDokRiwayat,
-} from "@/services/siasn-services";
-import { serializeAngkaKredit } from "@/utils/transfer-siasn.utils";
-import FormRiwayatJabatanByNip from "../FormRiwayatJabatanByNip";
-import FormAngkaKreditPredikat from "./FormAngkaKreditPredikat";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
+import React, { useEffect } from "react";
+import FormRiwayatJabatanByNip from "../FormRiwayatJabatanByNip";
+import FormAngkaKreditPredikat from "./FormAngkaKreditPredikat";
 
 dayjs.extend(customParseFormat);
 
@@ -332,7 +329,7 @@ const BasicFormTransferAngkaKredit = ({
                       >
                         <InputNumber
                           min={0}
-                          step={0.01}
+                          step={0.001}
                           precision={2}
                           style={{ width: "100%" }}
                         />
@@ -346,7 +343,7 @@ const BasicFormTransferAngkaKredit = ({
                       >
                         <InputNumber
                           min={0}
-                          step={0.01}
+                          step={0.001}
                           precision={2}
                           style={{ width: "100%" }}
                         />
@@ -380,7 +377,7 @@ const BasicFormTransferAngkaKredit = ({
                       >
                         <InputNumber
                           min={0}
-                          step={0.01}
+                          step={0.001}
                           precision={2}
                           style={{ width: "100%" }}
                         />
