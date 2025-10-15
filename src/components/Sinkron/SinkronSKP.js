@@ -1,24 +1,33 @@
-import { useMutation } from "@tanstack/react-query";
-import { Button, message } from "antd";
 import { syncSKPSIASN } from "@/services/rekon.services";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Button, message } from "antd";
 
 const SinkronSKP = () => {
-  const { mutate: syncSKP, isLoading: isSyncingSKP } = useMutation({
-    mutationFn: syncSKPSIASN,
+  const queryClient = useQueryClient();
+  const { mutate, isLoading } = useMutation(() => syncSKPSIASN(), {
     onSuccess: () => {
-      message.success("SKP berhasil disinkronisasi");
+      message.success("Berhasil sinkronisasi data SKP");
+      queryClient.invalidateQueries(["daftar-sinkron"]);
     },
     onError: () => {
-      message.error("SKP gagal disinkronisasi");
+      message.error("Gagal sinkronisasi data SKP");
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries(["daftar-sinkron"]);
     },
   });
 
   return (
-    <div>
-      <Button onClick={() => syncSKP()} loading={isSyncingSKP}>
-        Sinkron SKP Siasn
-      </Button>
-    </div>
+    <Button
+      type="primary"
+      block
+      size="small"
+      onClick={() => mutate()}
+      loading={isLoading}
+      disabled={isLoading}
+    >
+      SKP SIASN
+    </Button>
   );
 };
 

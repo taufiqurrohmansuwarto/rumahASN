@@ -1,20 +1,32 @@
 import { syncPendidikan } from "@/services/siasn-services";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button, message } from "antd";
 
 const SyncPendidikan = () => {
+  const queryClient = useQueryClient();
   const { mutate, isLoading } = useMutation(() => syncPendidikan(), {
     onSuccess: () => {
-      message.success("Pendidikan berhasil disinkronisasi");
+      message.success("Berhasil sinkronisasi data pendidikan");
+      queryClient.invalidateQueries(["daftar-sinkron"]);
     },
     onError: () => {
-      message.error("Pendidikan gagal disinkronisasi");
+      message.error("Gagal sinkronisasi data pendidikan");
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries(["daftar-sinkron"]);
     },
   });
 
   return (
-    <Button type="primary" onClick={() => mutate()} loading={isLoading}>
-      Sinkron Ref Pendidikan
+    <Button
+      type="primary"
+      block
+      size="small"
+      onClick={() => mutate()}
+      loading={isLoading}
+      disabled={isLoading}
+    >
+      Pendidikan
     </Button>
   );
 };

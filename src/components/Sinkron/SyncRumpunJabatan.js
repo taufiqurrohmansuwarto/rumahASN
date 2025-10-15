@@ -1,20 +1,32 @@
 import { syncRumpunJabatan } from "@/services/siasn-services";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button, message } from "antd";
 
 const SyncRumpunJabatan = () => {
+  const queryClient = useQueryClient();
   const { mutate, isLoading } = useMutation(() => syncRumpunJabatan(), {
     onSuccess: () => {
-      message.success("Rumpun jabatan berhasil disinkronisasi");
+      message.success("Berhasil sinkronisasi data rumpun jabatan");
+      queryClient.invalidateQueries(["daftar-sinkron"]);
     },
     onError: () => {
-      message.error("Rumpun jabatan gagal disinkronisasi");
+      message.error("Gagal sinkronisasi data rumpun jabatan");
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries(["daftar-sinkron"]);
     },
   });
 
   return (
-    <Button type="primary" onClick={() => mutate()} loading={isLoading}>
-      Sinkron Ref Rumpun Jabatan
+    <Button
+      type="primary"
+      block
+      size="small"
+      onClick={() => mutate()}
+      loading={isLoading}
+      disabled={isLoading}
+    >
+      Rumpun Jabatan
     </Button>
   );
 };

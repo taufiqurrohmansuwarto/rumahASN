@@ -1,36 +1,32 @@
 import { syncPegawaiMaster } from "@/services/sync.services";
-import { SyncOutlined } from "@ant-design/icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button, message } from "antd";
 
 const SinkronMaster = () => {
-  const queryCLient = useQueryClient();
+  const queryClient = useQueryClient();
   const { mutate, isLoading } = useMutation(() => syncPegawaiMaster(), {
     onSuccess: () => {
-      message.success("berhasil");
-      queryCLient.invalidateQueries(["daftar-sinkron"]);
+      message.success("Berhasil sinkronisasi data pegawai");
+      queryClient.invalidateQueries(["daftar-sinkron"]);
     },
     onError: () => {
-      message.error("gagal");
+      message.error("Gagal sinkronisasi data pegawai");
     },
     onSettled: () => {
-      queryCLient.invalidateQueries(["daftar-sinkron"]);
+      queryClient.invalidateQueries(["daftar-sinkron"]);
     },
   });
-
-  const handleClick = () => {
-    mutate();
-  };
 
   return (
     <Button
       type="primary"
-      onClick={handleClick}
+      block
+      size="small"
+      onClick={() => mutate()}
       loading={isLoading}
       disabled={isLoading}
-      icon={<SyncOutlined />}
     >
-      Sync Pegawai
+      Pegawai
     </Button>
   );
 };

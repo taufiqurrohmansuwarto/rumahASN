@@ -1,5 +1,4 @@
 import { syncSimasterJft } from "@/services/sync.services";
-import { SyncOutlined } from "@ant-design/icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button, message } from "antd";
 
@@ -7,30 +6,27 @@ const SinkronJft = () => {
   const queryClient = useQueryClient();
   const { mutate, isLoading } = useMutation(() => syncSimasterJft(), {
     onSuccess: () => {
-      message.success("Berhasil Sinkron JFT");
+      message.success("Berhasil sinkronisasi data JFT");
       queryClient.invalidateQueries(["daftar-sinkron"]);
     },
     onError: () => {
-      message.error("gagal");
+      message.error("Gagal sinkronisasi data JFT");
     },
     onSettled: () => {
       queryClient.invalidateQueries(["daftar-sinkron"]);
     },
   });
 
-  const handleClick = () => {
-    mutate();
-  };
-
   return (
     <Button
       type="primary"
-      onClick={handleClick}
+      block
+      size="small"
+      onClick={() => mutate()}
       loading={isLoading}
       disabled={isLoading}
-      icon={<SyncOutlined />}
     >
-      Sync JFT
+      JFT
     </Button>
   );
 };

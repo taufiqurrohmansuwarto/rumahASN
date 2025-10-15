@@ -1,20 +1,10 @@
+import SiasnToken from "@/components/Admin/SiasnToken";
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import DaftarSinkron from "@/components/Sinkron/DaftarSinkron";
-import SinkronJft from "@/components/Sinkron/SinkronJft";
-import SinkronJfu from "@/components/Sinkron/SinkronJfu";
 import SinkronLayout from "@/components/Sinkron/SinkronLayout";
-import SinkronMaster from "@/components/Sinkron/SinkronMaster";
-import SinkronSKP from "@/components/Sinkron/SinkronSKP";
-import SinkronUnorMaster from "@/components/Sinkron/SinkronUnorMaster";
-import SyncUnorSiasn from "@/components/Sinkron/SyncUnorSiasn";
-import SiasnToken from "@/components/Admin/SiasnToken";
-import SyncPendidikan from "@/components/Sinkron/SyncPendidikan";
-import SyncLembagaSertifikasi from "@/components/Sinkron/SyncLembagaSertifikasi";
-import SyncRumpunJF from "@/components/Sinkron/SyncRumpunJF";
-import SyncRumpunJabatan from "@/components/Sinkron/SyncRumpunJabatan";
+import DaftarTombolSinkron from "@/components/Sinkron/DaftarTombolSinkron";
 
-import { Space } from "antd";
 import Head from "next/head";
 
 const Sync = () => {
@@ -30,20 +20,7 @@ const Sync = () => {
         <SinkronLayout active="data">
           <SiasnToken />
           <DaftarSinkron />
-          <div style={{ marginTop: 10 }}>
-            <Space>
-              <SinkronMaster />
-              <SinkronUnorMaster />
-              <SyncPendidikan />
-              <SinkronJfu />
-              <SinkronJft />
-              <SinkronSKP />
-              <SyncUnorSiasn />
-              <SyncLembagaSertifikasi />
-              <SyncRumpunJF />
-              <SyncRumpunJabatan />
-            </Space>
-          </div>
+          <DaftarTombolSinkron />
         </SinkronLayout>
       </PageContainer>
     </>

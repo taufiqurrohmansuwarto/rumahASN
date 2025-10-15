@@ -1,20 +1,32 @@
 import { syncLembagaSertifikasi } from "@/services/siasn-services";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button, message } from "antd";
 
 const SyncLembagaSertifikasi = () => {
+  const queryClient = useQueryClient();
   const { mutate, isLoading } = useMutation(() => syncLembagaSertifikasi(), {
     onSuccess: () => {
-      message.success("Lembaga sertifikasi berhasil disinkronisasi");
+      message.success("Berhasil sinkronisasi data lembaga sertifikasi");
+      queryClient.invalidateQueries(["daftar-sinkron"]);
     },
     onError: () => {
-      message.error("Lembaga sertifikasi gagal disinkronisasi");
+      message.error("Gagal sinkronisasi data lembaga sertifikasi");
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries(["daftar-sinkron"]);
     },
   });
 
   return (
-    <Button type="primary" onClick={() => mutate()} loading={isLoading}>
-      Sinkron Ref Lembaga Sertifikasi
+    <Button
+      type="primary"
+      block
+      size="small"
+      onClick={() => mutate()}
+      loading={isLoading}
+      disabled={isLoading}
+    >
+      Lembaga Sertifikasi
     </Button>
   );
 };

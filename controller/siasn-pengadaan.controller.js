@@ -579,6 +579,7 @@ const cekPertekByNomerPeserta = async (req, res) => {
         "rsu.nama as status_usulan_nama"
       )
       .whereRaw("sp.usulan_data->'data'->>'no_peserta' = ?", [trim(no_peserta)])
+      // .andWhereRaw("sp.nip = ?", [nip])
       .andWhereRaw("sp.usulan_data->'data'->>'ket_kelakuanbaik_nomor' = ?", [
         trim(ket_kelakuanbaik_nomor),
       ])
@@ -932,7 +933,44 @@ const getRwPengadaanPersonal = async (req, res) => {
   }
 };
 
+const proxyRekapPengadaanStats = async (req, res) => {
+  try {
+    const { tahun = dayjs().format("YYYY") } = req.query;
+
+    const knex = SiasnPengadaanProxy.knex();
+
+    // Query untuk statistik berdasarkan jenis formasi dan status usulan
+    const statsQuery = knex("siasn_pengadaan_proxy as sp")
+      .select("sp.jenis_formasi_nama", "rsu.nama as status_usulan_nama")
+      .count("* as total")
+      .leftJoin("ref_siasn.status_usul as rsu", "sp.status_usulan", "rsu.id")
+      .where("sp.periode", tahun)
+      .groupBy("sp.jenis_formasi_nama", "rsu.nama")
+      .orderBy(["sp.jenis_formasi_nama", "rsu.nama"]);
+
+    // Query untuk statistik berdasarkan jenis formasi saja
+    const formasiQuery = knex("siasn_pengadaan_proxy as sp")
+      .select("sp.jenis_formasi_nama")
+      .count("* as total")
+      .where("sp.periode", tahun)
+      .groupBy("sp.jenis_formasi_nama")
+      .orderBy("sp.jenis_formasi_nama");
+
+    // Eksekusi kedua query secara paralel
+    const [stats, formasi] = await Promise.all([statsQuery, formasiQuery]);
+
+    res.json({
+      periode: tahun,
+      data: stats,
+      data_formasi: formasi,
+    });
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
 module.exports = {
+  proxyRekapPengadaanStats,
   resetUploadDokumen,
   downloadDokumenPengadaan,
   downloadAllDokumenPengadaan,

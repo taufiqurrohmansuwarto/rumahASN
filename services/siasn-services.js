@@ -928,6 +928,12 @@ export const getPengadaanProxy = async (query) => {
     .then((res) => res.data);
 };
 
+export const getPengadaanProxyStats = async (query) => {
+  return api
+    .get(`/admin/pengadaan/proxy/stats?${queryString.stringify(query)}`)
+    .then((res) => res.data);
+};
+
 // detail pengadaan proxy
 export const getDetailPengadaanProxy = async (id) => {
   return api.get(`/admin/pengadaan/proxy/detail/${id}`).then((res) => res.data);

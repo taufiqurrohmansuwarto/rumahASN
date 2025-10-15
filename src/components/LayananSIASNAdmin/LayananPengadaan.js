@@ -38,6 +38,7 @@ import { useCallback, useEffect, useState } from "react";
 import * as ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import { trim } from "lodash";
+import LayananPengadaanStats from "./LayananPengadaanStats";
 
 const jenisJabatan = (data) => {
   if (data?.jenis_jabatan_id === 2) {
@@ -850,6 +851,9 @@ function LayananPengadaan() {
             />
           </div>
         </Card>
+
+        {/* Statistik Pengadaan */}
+        <LayananPengadaanStats tahun={tahun} />
       </div>
     </div>
   );
