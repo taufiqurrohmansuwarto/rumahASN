@@ -135,17 +135,6 @@ const Filter = ({ isFetching, refetch }) => {
                   borderRadius: "8px",
                 }}
                 size="middle"
-                disabledDate={(current) => {
-                  return (
-                    current &&
-                    (current.month() === 0 || // Januari
-                      current.month() === 2 || // Maret
-                      current.month() === 4 || // Mei
-                      current.month() === 6 || // Juli
-                      current.month() === 8 || // September
-                      current.month() === 10) // November
-                  );
-                }}
               />
             </Col>
           </Row>

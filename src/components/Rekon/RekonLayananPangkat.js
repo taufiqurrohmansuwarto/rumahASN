@@ -1,6 +1,11 @@
 import { dashboardKPJatim } from "@/services/rekon.services";
 import { Badge, Group, Skeleton, Stack, Text, Title } from "@mantine/core";
-import { IconUsers, IconCalendar, IconFileText, IconEye } from "@tabler/icons-react";
+import {
+  IconUsers,
+  IconCalendar,
+  IconFileText,
+  IconEye,
+} from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
 import { Table, DatePicker, Button } from "antd";
 import dayjs from "dayjs";
@@ -108,17 +113,6 @@ function RekonLayananPangkat() {
             style={{
               width: "160px",
               borderRadius: "8px",
-            }}
-            disabledDate={(current) => {
-              return (
-                current &&
-                (current.month() === 0 ||
-                  current.month() === 2 ||
-                  current.month() === 4 ||
-                  current.month() === 6 ||
-                  current.month() === 8 ||
-                  current.month() === 10)
-              );
             }}
           />
         </div>
