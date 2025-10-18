@@ -113,7 +113,8 @@ const ModalCekPertek = ({ open, onCancel }) => {
     const values = await form.validateFields();
     const payload = {
       no_peserta: values?.no_peserta,
-      ket_kelakuanbaik_nomor: values?.ket_kelakuanbaik_nomor,
+      no_ijazah: values?.no_ijazah,
+      tahun_lulus: values?.tahun_lulus,
       tahun: values?.tahun,
     };
 
@@ -145,14 +146,20 @@ const ModalCekPertek = ({ open, onCancel }) => {
           </Col>
           <Col md={12} xs={24}>
             <Form.Item
-              rules={[
-                { required: true, message: "Ket Kelakuan Baik harus diisi" },
-              ]}
-              name="ket_kelakuanbaik_nomor"
-              label="Ket Kelakuan Baik (Nomor SKCK)"
-              style={{ marginBottom: 16 }}
+              rules={[{ required: true, message: "No Ijazah harus diisi" }]}
+              name="no_ijazah"
+              label="No Ijazah"
             >
-              <Input placeholder="Masukkan keterangan kelakuan baik" />
+              <Input placeholder="Masukkan nomor ijazah" />
+            </Form.Item>
+          </Col>
+          <Col md={12} xs={24}>
+            <Form.Item
+              rules={[{ required: true, message: "Tahun Lulus harus diisi" }]}
+              name="tahun_lulus"
+              label="Tahun Lulus"
+            >
+              <Input placeholder="Masukkan tahun lulus" />
             </Form.Item>
           </Col>
           <Col span={24}>

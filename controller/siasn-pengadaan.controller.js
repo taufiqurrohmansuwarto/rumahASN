@@ -2,6 +2,7 @@ const {
   daftarPengadaanInstansi,
   daftarPengadaanDokumen,
   downloadDokumenAPI,
+  daftarDokumenPengadaan,
 } = require("@/utils/siasn-utils");
 const { z } = require("zod");
 const archiver = require("archiver");
@@ -61,11 +62,10 @@ const syncPengadaan = async (req, res) => {
 
 const listPengadaanInstansi = async (req, res) => {
   try {
-    const tahun = req?.query?.tahun || dayjs().format("YYYY");
-    const result = await SiasnPengadaan.query()
-      .where("periode", tahun)
-      .orderBy("nama", "asc");
-    res.json(result);
+    const { siasnRequest: request } = req;
+    const currentYears = dayjs().format("YYYY");
+    const result = await daftarPengadaanInstansi(request, currentYears);
+    res.json(result?.data);
   } catch (error) {
     console.log(error);
     const errorMessage =
@@ -520,11 +520,11 @@ const proxyRekapPengadaan = async (req, res) => {
 const cekPertekByNomerPeserta = async (req, res) => {
   try {
     const knex = SiasnPengadaanProxy.knex();
-    const { no_peserta, ket_kelakuanbaik_nomor, tahun } = req?.body;
+    const { no_peserta, no_ijazah, tahun, tahun_lulus } = req?.body;
     const { siasnRequest } = req;
 
     // buat syarat untuk req?.body beserta format
-    if (!no_peserta || !ket_kelakuanbaik_nomor || !tahun) {
+    if (!no_peserta || !no_ijazah || !tahun_lulus || !tahun) {
       return res.status(400).json({
         message: "Data tidak boleh kosong",
       });
@@ -532,7 +532,8 @@ const cekPertekByNomerPeserta = async (req, res) => {
 
     if (
       typeof no_peserta !== "string" ||
-      typeof ket_kelakuanbaik_nomor !== "string" ||
+      typeof no_ijazah !== "string" ||
+      typeof tahun_lulus !== "string" ||
       typeof tahun !== "string"
     ) {
       return res.status(400).json({
@@ -580,8 +581,14 @@ const cekPertekByNomerPeserta = async (req, res) => {
       )
       .whereRaw("sp.usulan_data->'data'->>'no_peserta' = ?", [trim(no_peserta)])
       // .andWhereRaw("sp.nip = ?", [nip])
-      .andWhereRaw("sp.usulan_data->'data'->>'ket_kelakuanbaik_nomor' = ?", [
-        trim(ket_kelakuanbaik_nomor),
+      // .andWhereRaw("sp.usulan_data->'data'->>'ket_kelakuanbaik_nomor' = ?", [
+      //   trim(ket_kelakuanbaik_nomor),
+      // ])
+      .andWhereRaw("sp.usulan_data->'data'->>'nomor_ijazah' = ?", [
+        trim(no_ijazah),
+      ])
+      .andWhereRaw("sp.usulan_data->'data'->>'tahun_lulus' = ?", [
+        trim(tahun_lulus),
       ])
       .limit(1);
 

@@ -209,6 +209,19 @@ module.exports.daftarPengadaanInstansi = (
     .then((res) => res?.data);
 };
 
+module.exports.daftarDokumenPengadaan = async (
+  fetcher,
+  tahunAnggaran,
+  limit = 10,
+  offset = 0
+) => {
+  const result = await fetcher.get(
+    `/pengadaan/dokumen-pengadaan?tahun=${tahunAnggaran}`
+  );
+  console.log(result);
+  return result?.data;
+};
+
 module.exports.daftarPengadaanDokumen = (fetcher, tahunAnggaran) => {
   return fetcher
     .get(`/pengadaan/dokumen-pengadaan?tahun=${tahunAnggaran}`)
