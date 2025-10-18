@@ -149,6 +149,7 @@ const ModalCekPertek = ({ open, onCancel }) => {
               rules={[{ required: true, message: "No Ijazah harus diisi" }]}
               name="no_ijazah"
               label="No Ijazah"
+              help="Bisa melihat di SSCASN"
             >
               <Input placeholder="Masukkan nomor ijazah" />
             </Form.Item>
@@ -158,6 +159,7 @@ const ModalCekPertek = ({ open, onCancel }) => {
               rules={[{ required: true, message: "Tahun Lulus harus diisi" }]}
               name="tahun_lulus"
               label="Tahun Lulus"
+              help="Bisa melihat di SSCASN"
             >
               <Input placeholder="Masukkan tahun lulus" />
             </Form.Item>
