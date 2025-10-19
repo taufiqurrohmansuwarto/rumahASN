@@ -1,5 +1,7 @@
 import { cekPertekService } from "@/services/public.services";
 import { FileWordOutlined } from "@ant-design/icons";
+import { Alert, Stack } from "@mantine/core";
+import { IconAlertCircle } from "@tabler/icons-react";
 import { useMutation } from "@tanstack/react-query";
 import {
   Button,
@@ -123,74 +125,81 @@ const ModalCekPertek = ({ open, onCancel }) => {
 
   return (
     <Modal
-      title="Cek Pertek"
+      title="Cek Status Usulan CASN"
       open={open}
       onCancel={onCancel}
       onOk={null}
-      okText="Cek"
+      okText="Submit"
       footer={null}
       width={800}
     >
-      <Form form={form} layout="vertical">
-        <Row gutter={16}>
-          <Col md={12} xs={24}>
-            <Form.Item
-              rules={[{ required: true, message: "No Peserta harus diisi" }]}
-              normalize={(values) => values.replace(/\s/g, "")}
-              name="no_peserta"
-              label="No Peserta"
-              style={{ marginBottom: 16 }}
-            >
-              <Input placeholder="Masukkan nomor peserta" />
-            </Form.Item>
-          </Col>
-          <Col md={12} xs={24}>
-            <Form.Item
-              rules={[{ required: true, message: "No Ijazah harus diisi" }]}
-              name="no_ijazah"
-              label="No Ijazah"
-              help="Bisa melihat di SSCASN"
-            >
-              <Input placeholder="Masukkan nomor ijazah" />
-            </Form.Item>
-          </Col>
-          <Col md={12} xs={24}>
-            <Form.Item
-              rules={[{ required: true, message: "Tahun Lulus harus diisi" }]}
-              name="tahun_lulus"
-              label="Tahun Lulus"
-              help="Bisa melihat di SSCASN"
-            >
-              <Input placeholder="Masukkan tahun lulus" />
-            </Form.Item>
-          </Col>
-          <Col span={24}>
-            <Form.Item
-              rules={[{ required: true, message: "Tahun harus diisi" }]}
-              name="tahun"
-              label="Tahun"
-              style={{ marginBottom: 16 }}
-            >
-              <Radio.Group>
-                <Radio.Button value="2025">2025</Radio.Button>
-                <Radio.Button value="2024">2024</Radio.Button>
-                <Radio.Button value="2023">2023</Radio.Button>
-                <Radio.Button value="2022">2022</Radio.Button>
-              </Radio.Group>
-            </Form.Item>
-          </Col>
-        </Row>
-        <Button
-          loading={isLoading}
-          disabled={isLoading}
-          type="primary"
-          htmlType="submit"
-          onClick={handleSubmit}
+      <Stack>
+        <Alert
+          color="red"
+          variant="filled"
+          icon={<IconAlertCircle size="1rem" />}
         >
-          Cek
-        </Button>
-      </Form>
-      <ShowData data={data} loading={isLoading} />
+          Hanya untuk Pemerintah Provinsi Jawa Timur
+        </Alert>
+        <Form form={form} layout="vertical">
+          <Row gutter={16}>
+            <Col md={12} xs={24}>
+              <Form.Item
+                rules={[{ required: true, message: "No Peserta harus diisi" }]}
+                normalize={(values) => values.replace(/\s/g, "")}
+                name="no_peserta"
+                label="No Peserta"
+                style={{ marginBottom: 16 }}
+              >
+                <Input placeholder="Masukkan nomor peserta" />
+              </Form.Item>
+            </Col>
+            <Col md={12} xs={24}>
+              <Form.Item
+                rules={[{ required: true, message: "No Ijazah harus diisi" }]}
+                name="no_ijazah"
+                label="No Ijazah (lihat di SSCASN)"
+              >
+                <Input placeholder="Masukkan nomor ijazah" />
+              </Form.Item>
+            </Col>
+            <Col md={12} xs={24}>
+              <Form.Item
+                rules={[{ required: true, message: "Tahun Lulus harus diisi" }]}
+                name="tahun_lulus"
+                label="Tahun Lulus (lihat di SSCASN)"
+              >
+                <Input placeholder="Masukkan tahun lulus" />
+              </Form.Item>
+            </Col>
+            <Col md={12} xs={24}>
+              <Form.Item
+                rules={[{ required: true, message: "Tahun harus diisi" }]}
+                name="tahun"
+                label="Tahun"
+                style={{ marginBottom: 16 }}
+              >
+                <Radio.Group>
+                  <Radio.Button value="2025">2025</Radio.Button>
+                  <Radio.Button value="2024">2024</Radio.Button>
+                  <Radio.Button value="2023">2023</Radio.Button>
+                  <Radio.Button value="2022">2022</Radio.Button>
+                </Radio.Group>
+              </Form.Item>
+            </Col>
+          </Row>
+          <Button
+            loading={isLoading}
+            disabled={isLoading}
+            type="primary"
+            htmlType="submit"
+            onClick={handleSubmit}
+          >
+            Submit
+          </Button>
+        </Form>
+        <ShowData data={data} loading={isLoading} />
+      </Stack>
     </Modal>
   );
 };
@@ -209,7 +218,7 @@ function CekPertek() {
   return (
     <>
       <Button shape="round" type="primary" onClick={handleOpenModal}>
-        Cek Pertek
+        Cek Status Usulan CASN
       </Button>
       <ModalCekPertek
         open={isModalOpen}
