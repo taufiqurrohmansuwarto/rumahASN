@@ -602,15 +602,13 @@ const cekPertekByNomerPeserta = async (req, res) => {
       const urlSk = result[0]?.path_ttd_sk;
 
       if (url) {
-        const file = await downloadDokumenAPI(siasnRequest, url);
-        // arraybuffer to base64
-        fileBase64 = Buffer.from(file).toString("base64");
+        const currentFile = await getFileAsn(url);
+        fileBase64 = Buffer.from(currentFile).toString("base64");
       }
 
       if (urlSk) {
-        const fileSk = await downloadDokumenAPI(siasnRequest, urlSk);
-        // array buffer to base64
-        fileSkBase64 = Buffer.from(fileSk).toString("base64");
+        const currentFileSk = await getFileAsn(urlSk);
+        fileSkBase64 = Buffer.from(currentFileSk).toString("base64");
       }
 
       const data = {
