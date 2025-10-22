@@ -190,6 +190,7 @@ function LayananPengadaan() {
       "Status Usulan",
       "Kode Pendidikan",
       "Jenis Jabatan",
+      "Alasan Tolak Tambahan",
     ];
 
     // Menambahkan header ke worksheet
@@ -264,6 +265,7 @@ function LayananPengadaan() {
         row.status_usulan_nama,
         row?.usulan_data?.data?.tk_pendidikan_id,
         row?.usulan_data?.data?.jenis_jabatan_nama,
+        row?.alasan_tolak_tambahan,
       ]);
 
       // Menambahkan border untuk setiap sel data
@@ -414,6 +416,16 @@ function LayananPengadaan() {
             </div>
           )}
         </div>
+      ),
+    },
+    {
+      title: "Alasan Tolak Tambahan",
+      dataIndex: "alasan_tolak_tambahan",
+      width: 200,
+      render: (_, record) => (
+        <Text size="10px" c="dimmed" ff="monospace">
+          {record?.alasan_tolak_tambahan}
+        </Text>
       ),
     },
     {
