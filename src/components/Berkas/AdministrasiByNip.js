@@ -30,6 +30,7 @@ import { useState } from "react";
 
 // Data TMT dengan keterangan yang lebih jelas
 const list_tmt = [
+  { value: "01012022", label: "1 Januari 2022" },
   { value: "01042024", label: "1 April 2024" },
   { value: "01052024", label: "1 Mei 2024" },
   { value: "01062024", label: "1 Juni 2024" },
