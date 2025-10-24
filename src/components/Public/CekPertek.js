@@ -100,6 +100,7 @@ const ShowData = ({ data, loading }) => {
 const ModalCekPertek = ({ open, onCancel }) => {
   const [form] = Form.useForm();
   const [data, setData] = useState(null);
+  const [useSkck, setUseSkck] = useState(false);
 
   const { mutate, isLoading } = useMutation({
     mutationFn: (data) => cekPertekService(data),
@@ -115,12 +116,29 @@ const ModalCekPertek = ({ open, onCancel }) => {
     const values = await form.validateFields();
     const payload = {
       no_peserta: values?.no_peserta,
-      no_ijazah: values?.no_ijazah,
-      tahun_lulus: values?.tahun_lulus,
       tahun: values?.tahun,
+      use_skck: useSkck,
     };
 
+    if (useSkck) {
+      payload.no_skck = values?.no_skck;
+    } else {
+      payload.no_ijazah = values?.no_ijazah;
+      payload.tahun_lulus = values?.tahun_lulus;
+    }
+
     mutate(payload);
+  };
+
+  const handleDocumentTypeChange = (e) => {
+    setUseSkck(e.target.value);
+    // Reset field yang tidak digunakan
+    if (e.target.value) {
+      form.setFieldValue("no_ijazah", undefined);
+      form.setFieldValue("tahun_lulus", undefined);
+    } else {
+      form.setFieldValue("no_skck", undefined);
+    }
   };
 
   return (
@@ -143,6 +161,17 @@ const ModalCekPertek = ({ open, onCancel }) => {
         </Alert>
         <Form form={form} layout="vertical">
           <Row gutter={16}>
+            <Col span={24}>
+              <Form.Item label="Jenis Dokumen" style={{ marginBottom: 16 }}>
+                <Radio.Group
+                  value={useSkck}
+                  onChange={handleDocumentTypeChange}
+                >
+                  <Radio value={false}>Nomor Ijazah</Radio>
+                  <Radio value={true}>Nomor SKCK</Radio>
+                </Radio.Group>
+              </Form.Item>
+            </Col>
             <Col md={12} xs={24}>
               <Form.Item
                 rules={[{ required: true, message: "No Peserta harus diisi" }]}
@@ -154,24 +183,42 @@ const ModalCekPertek = ({ open, onCancel }) => {
                 <Input placeholder="Masukkan nomor peserta" />
               </Form.Item>
             </Col>
-            <Col md={12} xs={24}>
-              <Form.Item
-                rules={[{ required: true, message: "No Ijazah harus diisi" }]}
-                name="no_ijazah"
-                label="No Ijazah (lihat di SSCASN)"
-              >
-                <Input placeholder="Masukkan nomor ijazah" />
-              </Form.Item>
-            </Col>
-            <Col md={12} xs={24}>
-              <Form.Item
-                rules={[{ required: true, message: "Tahun Lulus harus diisi" }]}
-                name="tahun_lulus"
-                label="Tahun Lulus (lihat di SSCASN)"
-              >
-                <Input placeholder="Masukkan tahun lulus" />
-              </Form.Item>
-            </Col>
+            {!useSkck ? (
+              <>
+                <Col md={12} xs={24}>
+                  <Form.Item
+                    rules={[
+                      { required: true, message: "No Ijazah harus diisi" },
+                    ]}
+                    name="no_ijazah"
+                    label="No Ijazah (lihat di SSCASN)"
+                  >
+                    <Input placeholder="Masukkan nomor ijazah" />
+                  </Form.Item>
+                </Col>
+                <Col md={12} xs={24}>
+                  <Form.Item
+                    rules={[
+                      { required: true, message: "Tahun Lulus harus diisi" },
+                    ]}
+                    name="tahun_lulus"
+                    label="Tahun Lulus (lihat di SSCASN)"
+                  >
+                    <Input placeholder="Masukkan tahun lulus" />
+                  </Form.Item>
+                </Col>
+              </>
+            ) : (
+              <Col md={12} xs={24}>
+                <Form.Item
+                  rules={[{ required: true, message: "No SKCK harus diisi" }]}
+                  name="no_skck"
+                  label="No SKCK (lihat di SSCASN)"
+                >
+                  <Input placeholder="Masukkan nomor SKCK" />
+                </Form.Item>
+              </Col>
+            )}
             <Col md={12} xs={24}>
               <Form.Item
                 rules={[{ required: true, message: "Tahun harus diisi" }]}

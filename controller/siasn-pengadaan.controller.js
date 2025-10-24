@@ -520,22 +520,32 @@ const proxyRekapPengadaan = async (req, res) => {
 const cekPertekByNomerPeserta = async (req, res) => {
   try {
     const knex = SiasnPengadaanProxy.knex();
-    const { no_peserta, no_ijazah, tahun, tahun_lulus } = req?.body;
+    const { no_peserta, no_ijazah, tahun, tahun_lulus, use_skck, no_skck } =
+      req?.body;
+
     const { siasnRequest } = req;
 
     // buat syarat untuk req?.body beserta format
-    if (!no_peserta || !no_ijazah || !tahun_lulus || !tahun) {
+    if (!no_peserta || !tahun) {
       return res.status(400).json({
         message: "Data tidak boleh kosong",
       });
     }
 
-    if (
-      typeof no_peserta !== "string" ||
-      typeof no_ijazah !== "string" ||
-      typeof tahun_lulus !== "string" ||
-      typeof tahun !== "string"
-    ) {
+    // Validasi tambahan berdasarkan use_skck
+    if (use_skck && !no_skck) {
+      return res.status(400).json({
+        message: "Nomor SKCK harus diisi jika menggunakan SKCK",
+      });
+    }
+
+    if (!use_skck && (!no_ijazah || !tahun_lulus)) {
+      return res.status(400).json({
+        message: "Nomor ijazah dan tahun lulus harus diisi",
+      });
+    }
+
+    if (typeof no_peserta !== "string" || typeof tahun !== "string") {
       return res.status(400).json({
         message: "Data harus berupa string",
       });
@@ -579,18 +589,27 @@ const cekPertekByNomerPeserta = async (req, res) => {
         "rsu.id as status_usulan_id",
         "rsu.nama as status_usulan_nama"
       )
-      .whereRaw("sp.usulan_data->'data'->>'no_peserta' = ?", [trim(no_peserta)])
-      // .andWhereRaw("sp.nip = ?", [nip])
-      // .andWhereRaw("sp.usulan_data->'data'->>'ket_kelakuanbaik_nomor' = ?", [
-      //   trim(ket_kelakuanbaik_nomor),
-      // ])
-      .andWhereRaw("sp.usulan_data->'data'->>'nomor_ijazah' = ?", [
-        trim(no_ijazah),
-      ])
-      .andWhereRaw("sp.usulan_data->'data'->>'tahun_lulus' = ?", [
-        trim(tahun_lulus),
-      ])
-      .limit(1);
+      .whereRaw("sp.usulan_data->'data'->>'no_peserta' = ?", [
+        trim(no_peserta),
+      ]);
+
+    // Tambahkan kondisi berdasarkan use_skck
+    if (use_skck) {
+      baseQuery.andWhereRaw(
+        "sp.usulan_data->'data'->>'ket_kelakuanbaik_nomor' = ?",
+        [trim(no_skck)]
+      );
+    } else {
+      baseQuery
+        .andWhereRaw("sp.usulan_data->'data'->>'nomor_ijazah' = ?", [
+          trim(no_ijazah),
+        ])
+        .andWhereRaw("sp.usulan_data->'data'->>'tahun_lulus' = ?", [
+          trim(tahun_lulus),
+        ]);
+    }
+
+    baseQuery.limit(1);
 
     const result = await baseQuery;
 
