@@ -139,15 +139,7 @@ export const appLists = [
     icon: "https://siasn.bkd.jatimprov.go.id:9000/public/icon-log.png",
     userType: ["admin"],
   },
-  {
-    rightIcon: <IconTransfer />,
-    title: "Layanan Kominfo",
-    desc: "Layanan Kominfo",
-    color: "#FBBC05",
-    url: "/kominfo-services/dashboard",
-    icon: "https://siasn.bkd.jatimprov.go.id:9000/public/icon-kominfo.png",
-    userType: ["admin"],
-  },
+
   {
     rightIcon: <IconAi />,
     title: "AI Tools",

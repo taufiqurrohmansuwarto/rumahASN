@@ -15,6 +15,7 @@ import {
   Skeleton,
   Space,
 } from "antd";
+import { useSession } from "next-auth/react";
 import { useState } from "react";
 
 const ShowData = ({ data, loading }) => {
@@ -252,6 +253,7 @@ const ModalCekPertek = ({ open, onCancel }) => {
 };
 
 function CekPertek() {
+  const { data: session } = useSession();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleOpenModal = () => {
@@ -264,14 +266,19 @@ function CekPertek() {
 
   return (
     <>
-      <Button shape="round" type="primary" onClick={handleOpenModal}>
-        Cek Status Usulan CASN
-      </Button>
-      <ModalCekPertek
-        open={isModalOpen}
-        onCancel={handleCloseModal}
-        onOk={handleCloseModal}
-      />
+      {(session?.user?.group === "MASTER" ||
+        session?.user?.group === "NONASN") && (
+        <>
+          <Button shape="round" type="primary" onClick={handleOpenModal}>
+            Cek Status Usulan CASN
+          </Button>
+          <ModalCekPertek
+            open={isModalOpen}
+            onCancel={handleCloseModal}
+            onOk={handleCloseModal}
+          />
+        </>
+      )}
     </>
   );
 }
