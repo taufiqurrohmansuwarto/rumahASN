@@ -35,6 +35,7 @@ const {
   proxyLayananRekapPengadaan,
   getFileAsn,
 } = require("@/utils/siasn-proxy.utils");
+const { createLogSIASN } = require("@/utils/logs");
 
 const syncPengadaan = async (req, res) => {
   const knex = SiasnPengadaan.knex();
@@ -614,6 +615,15 @@ const cekPertekByNomerPeserta = async (req, res) => {
     const result = await baseQuery;
 
     if (result?.length) {
+      // untuk logging
+      await createLogSIASN({
+        userId: req?.user?.custom_id,
+        type: "READ",
+        siasnService: "cek-pertek",
+        employeeNumber: "",
+        request_data: JSON.stringify(req?.body),
+      });
+
       let fileBase64 = null;
       let fileSkBase64 = null;
 
