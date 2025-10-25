@@ -9,25 +9,116 @@ const isEmpty = (value) => {
 // import { createOpenAI } from "@ai-sdk/openai";
 import OpenAI from "openai";
 const prod = process.env.NODE_ENV === "production";
-const API_KEY = process.env.API_KEY;
+const TOOL_SERVICE_API_KEY =
+  process.env.TOOL_SERVICE_API_KEY ||
+  process.env.INTERNAL_API_KEY ||
+  process.env.API_KEY;
+
+const resolveBaseUrl = () => {
+  const url =
+    process.env.TOOL_SERVICE_BASE_URL ||
+    process.env.INTERNAL_API_URL ||
+    process.env.NEXT_PUBLIC_API_URL ||
+    process.env.NEXTAUTH_URL;
+
+  return url?.replace(/\/$/, "") || "";
+};
+
+const resolvePrefix = () => {
+  const explicitPrefix = process.env.TOOL_SERVICE_PREFIX;
+
+  if (explicitPrefix) {
+    return explicitPrefix.trim().replace(/\/$/, "") || "";
+  }
+
+  const basePath = (process.env.BASE_PATH || "").trim().replace(/\/$/, "");
+  const prefix = `${basePath ? `/${basePath.replace(/^\//, "")}` : ""}/api`;
+  return prefix.replace(/\/{2,}/g, "/");
+};
+
+const API_BASE_URL = resolveBaseUrl();
+const TOOL_SERVICE_PREFIX = resolvePrefix();
+
+const isAbsoluteUrl = (value) => /^https?:\/\//i.test(value);
+
+const buildEndpointPath = (endpoint) => {
+  if (isAbsoluteUrl(endpoint)) {
+    return endpoint;
+  }
+
+  const normalizedEndpoint = endpoint.startsWith("/")
+    ? endpoint
+    : `/${endpoint}`;
+
+  const combined = `${TOOL_SERVICE_PREFIX}${normalizedEndpoint}`.replace(
+    /\/{2,}/g,
+    "/"
+  );
+
+  return combined.startsWith("/") ? combined : `/${combined}`;
+};
 
 const makeRequest = async (endpoint, data) => {
+  if (!API_BASE_URL) {
+    throw new Error("API base URL is not configured");
+  }
+
+  if (!TOOL_SERVICE_API_KEY) {
+    throw new Error("Tool service API key is not configured");
+  }
+
   try {
-    const url = `${process.env.NEXT_PUBLIC_API_URL}${endpoint}`;
+    const normalizedEndpoint = buildEndpointPath(endpoint);
+    const url = isAbsoluteUrl(normalizedEndpoint)
+      ? normalizedEndpoint
+      : new URL(normalizedEndpoint, API_BASE_URL).toString();
+
+    console.debug("[tool-service] request", {
+      endpoint,
+      normalizedEndpoint,
+      baseUrl: API_BASE_URL,
+      url,
+    });
+
     const response = await fetch(url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        // use api key
-        Authorization: `Bearer ${API_KEY}`,
+        Authorization: `Bearer ${TOOL_SERVICE_API_KEY}`,
+        ...(process.env.ALLOWED_ORIGIN && {
+          Referer: process.env.ALLOWED_ORIGIN,
+        }),
       },
-      body: JSON.stringify(data),
+      body: JSON.stringify(data ?? {}),
+      cache: "no-store",
     });
+
+    if (!response.ok) {
+      const errorPayload = await response.json().catch(() => null);
+      console.error("[tool-service] error response", {
+        endpoint,
+        normalizedEndpoint,
+        status: response.status,
+        body: errorPayload,
+      });
+      const errorMessage =
+        errorPayload?.message ||
+        errorPayload?.error ||
+        response.statusText ||
+        "Unknown error";
+      throw new Error(
+        `Request to ${endpoint} failed with ${response.status}: ${errorMessage}`
+      );
+    }
+
     const result = await response.json();
-    console.log(`${endpoint} result`, result);
+    console.debug("[tool-service] result", { endpoint, result });
     return result;
   } catch (error) {
-    console.error(error);
+    console.error("[tool-service] makeRequest error", {
+      endpoint,
+      message: error.message,
+    });
     throw new Error(`Failed to make request to ${endpoint}`);
   }
 };
@@ -351,9 +442,8 @@ export const assistant = async (req, res) => {
 
         runResult = await forwardStream(
           openai.beta.threads.runs.submitToolOutputsStream(
-            threadId,
             runResult.id,
-            { tool_outputs },
+            { thread_id: threadId, tool_outputs },
             { signal: req?.signal }
           )
         );

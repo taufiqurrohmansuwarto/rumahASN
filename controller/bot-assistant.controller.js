@@ -64,7 +64,7 @@ export const handleChat = async (req, res) => {
       currentThreadId,
       result.message.content,
       "assistant",
-      result?.message?.attachments,
+      result?.message?.attachments || null,
       user?.customId
     );
 
@@ -92,12 +92,18 @@ const processChatInteraction = async (threadId, message, user, assistantId) => {
 
     // Create and process run
     const run = await createRun(threadId, assistantId);
-    await processRun(threadId, run.id, user);
+    const finalRun = await processRun(threadId, run.id, user);
 
     // Get and format final message
     const messages = await getMessages(threadId);
+
+    if (!messages?.data || messages.data.length === 0) {
+      throw new ChatError("No messages found in thread");
+    }
+
     return formatResponse(threadId, messages.data[0]);
   } catch (error) {
+    console.error("processChatInteraction error:", error);
     throw new ChatError("Failed to process chat interaction", error);
   }
 };
@@ -105,23 +111,45 @@ const processChatInteraction = async (threadId, message, user, assistantId) => {
 // Process the run and handle tool calls
 const processRun = async (threadId, runId, user) => {
   try {
+    const MAX_ITERATIONS = 30; // Prevent infinite loops
+    const POLL_INTERVAL = 1000; // 1 second
+    let iterations = 0;
+
     let runStatus = await waitForRunCompletion(threadId, runId);
 
-    while (runStatus.status !== "completed") {
+    while (runStatus.status !== "completed" && iterations < MAX_ITERATIONS) {
+      iterations++;
+
       if (requiresToolAction(runStatus)) {
         runStatus = await handleToolCalls(threadId, runId, runStatus, user);
+        continue; // Check status immediately after submitting tool outputs
       }
 
       if (isFailedStatus(runStatus.status)) {
-        throw new ChatError(`Run failed with status: ${runStatus.status}`);
+        const errorMessage = runStatus.last_error?.message || runStatus.status;
+        throw new ChatError(`Run failed: ${errorMessage}`);
       }
 
-      await delay(1000); // Prevent too frequent polling
-      runStatus = await waitForRunCompletion(threadId, runId);
+      // Only delay if still in progress
+      if (runStatus.status === "in_progress" || runStatus.status === "queued") {
+        await delay(POLL_INTERVAL);
+        runStatus = await waitForRunCompletion(threadId, runId);
+      } else {
+        break;
+      }
+    }
+
+    if (iterations >= MAX_ITERATIONS) {
+      throw new ChatError("Run timeout: Maximum iterations reached");
+    }
+
+    if (runStatus.status !== "completed") {
+      throw new ChatError(`Run ended with status: ${runStatus.status}`);
     }
 
     return runStatus;
   } catch (error) {
+    console.error("processRun error:", error);
     throw new ChatError("Failed to process run", error);
   }
 };
@@ -129,15 +157,23 @@ const processRun = async (threadId, runId, user) => {
 // Handle tool calls
 const handleToolCalls = async (threadId, runId, runStatus, user) => {
   try {
-    const toolCalls = runStatus.required_action.submit_tool_outputs.tool_calls;
+    const toolCalls =
+      runStatus.required_action?.submit_tool_outputs?.tool_calls;
+
+    if (!toolCalls || toolCalls.length === 0) {
+      throw new ChatError("No tool calls found in required_action");
+    }
+
     const toolOutputs = await Promise.all(
       toolCalls.map((toolCall) => processToolCall(toolCall, user))
     );
 
-    return await openai.beta.threads.runs.submitToolOutputs(threadId, runId, {
+    return await openai.beta.threads.runs.submitToolOutputs(runId, {
+      thread_id: threadId,
       tool_outputs: toolOutputs,
     });
   } catch (error) {
+    console.error("handleToolCalls error:", error);
     throw new ChatError("Failed to handle tool calls", error);
   }
 };
@@ -164,24 +200,66 @@ const processToolCall = async (toolCall, user) => {
       output: JSON.stringify(result),
     };
   } catch (error) {
-    console.error(`Tool call error: ${error.message}`);
+    console.error(
+      `Tool call error for ${toolCall?.function?.name}:`,
+      error.message
+    );
     return {
       tool_call_id: toolCall.id,
-      output: JSON.stringify({ error: error.message }),
+      output: JSON.stringify({
+        error: error.message,
+        status: "error",
+      }),
     };
   }
 };
 
 // Helper functions
-const formatResponse = (threadId, message) => ({
-  threadId,
-  message: {
-    id: message.id,
-    role: message.role,
-    content: message.content[0].text.value,
-  },
-  status: "completed",
-});
+const formatResponse = (threadId, message) => {
+  try {
+    // Extract text content safely
+    let content = "";
+    let attachments = [];
+
+    if (message.content && Array.isArray(message.content)) {
+      // Find text content
+      const textContent = message.content.find((c) => c.type === "text");
+      if (textContent?.text?.value) {
+        content = textContent.text.value;
+      }
+
+      // Extract file attachments if any
+      const fileContents = message.content.filter(
+        (c) => c.type === "image_file" || c.type === "file"
+      );
+      if (fileContents.length > 0) {
+        attachments = fileContents.map((f) => ({
+          type: f.type,
+          file_id: f.image_file?.file_id || f.file?.file_id,
+        }));
+      }
+    }
+
+    // Fallback if no content found
+    if (!content) {
+      content = "No response generated";
+    }
+
+    return {
+      threadId,
+      message: {
+        id: message.id,
+        role: message.role,
+        content: content,
+        attachments: attachments.length > 0 ? attachments : undefined,
+      },
+      status: "completed",
+    };
+  } catch (error) {
+    console.error("formatResponse error:", error);
+    throw new ChatError("Failed to format response", error);
+  }
+};
 
 const requiresToolAction = (runStatus) =>
   runStatus.status === "requires_action" &&
@@ -196,6 +274,7 @@ const handleError = (res, error) => {
   const statusCode = error.statusCode || 500;
   return res.status(statusCode).json({
     error: error.message || "An error occurred",
+    details: process.env.NODE_ENV === "development" ? error.stack : undefined,
     status: "error",
   });
 };
@@ -203,8 +282,11 @@ const handleError = (res, error) => {
 // Wait for run completion
 const waitForRunCompletion = async (threadId, runId) => {
   try {
-    return await openai.beta.threads.runs.retrieve(threadId, runId);
+    return await openai.beta.threads.runs.retrieve(runId, {
+      thread_id: threadId,
+    });
   } catch (error) {
+    console.error("waitForRunCompletion error:", error);
     throw new ChatError("Failed to retrieve run status", error);
   }
 };
