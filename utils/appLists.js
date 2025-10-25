@@ -140,6 +140,15 @@ export const appLists = [
     userType: ["admin"],
   },
   {
+    rightIcon: <IconTransfer />,
+    title: "Layanan Kominfo",
+    desc: "Layanan Kominfo",
+    color: "#FBBC05",
+    url: "/kominfo-services/dashboard",
+    icon: "https://siasn.bkd.jatimprov.go.id:9000/public/icon-kominfo.png",
+    userType: ["admin"],
+  },
+  {
     rightIcon: <IconAi />,
     title: "AI Tools",
     desc: "Tools AI untuk Rumah ASN",
@@ -208,7 +217,8 @@ export const getMenuItems = (menuItems, user) => {
 
   const asn = user?.group === "MASTER";
 
-  const isBKD = user?.organization_id?.startsWith("123");
+  const isBKD = user?.organization_id?.startsWith("123") && asn;
+  const isKominfo = user?.organization_id?.startsWith("107") && asn;
 
   const isFasilitator =
     user?.role === "FASILITATOR" &&
@@ -220,23 +230,21 @@ export const getMenuItems = (menuItems, user) => {
     user?.group === "MASTER" &&
     user?.id === "master|56543";
 
+  // Kumpulkan semua roles user dalam array
+  const userRoles = [];
+  if (isAdmin) userRoles.push("admin");
+  if (isFasilitator) userRoles.push("fasilitator");
+  if (isPrakom) userRoles.push("prakom");
+  if (asn) userRoles.push("asn");
+  if (isBKD) userRoles.push("bkd");
+  if (isKominfo) userRoles.push("kominfo");
+
   // Fungsi untuk memeriksa apakah item menu sesuai dengan role user
   const checkItemRole = (item) => {
     const { role } = item;
 
-    // Jika user memiliki role prakom dan admin
-    if (isPrakom && isAdmin) {
-      return role.includes("admin") || role.includes("prakom");
-    }
-
-    // Filter berdasarkan single role
-    if (isAdmin) return role.includes("admin");
-    if (isFasilitator) return role.includes("fasilitator");
-    if (isPrakom) return role.includes("prakom");
-    if (asn) return role.includes("asn");
-    if (isBKD) return role.includes("bkd");
-
-    return false;
+    // Check apakah ada role user yang match dengan role item
+    return role?.some((itemRole) => userRoles.includes(itemRole));
   };
 
   // Filter menu berdasarkan role
