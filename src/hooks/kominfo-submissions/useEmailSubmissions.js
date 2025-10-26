@@ -6,6 +6,7 @@ import {
   listEmailSubmissionAdmin,
   updateEmailSubmissionAdmin,
   listEmailJatimprovPegawaiAdmin,
+  uploadEmailJatimprovExcel,
   getPhone,
 } from "@/services/kominfo-submissions.services";
 
@@ -126,5 +127,19 @@ export const useGetPhone = () => {
     queryKey: KOMINFO_SUBMISSION_KEYS.getPhone(),
     queryFn: () => getPhone(),
     staleTime: 60000, // 1 minute
+  });
+};
+
+// Upload Email Jatimprov Excel
+export const useUploadEmailJatimprovExcel = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (formData) => uploadEmailJatimprovExcel(formData),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: KOMINFO_SUBMISSION_KEYS.emailJatimprovPegawaiAdmin(),
+      });
+    },
   });
 };

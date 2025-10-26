@@ -2,6 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const paparse = require("papaparse");
 const Sinkronisasi = require("@/models/sinkronisasi.model");
+const { log } = require("@/utils/logger");
 
 // melihat total pegawai berdasarkan perangkat daerah di table rekon (sync_pegawai) bukan realtime
 module.exports.checkTotalPegawai = async (knex, opdId) => {
@@ -14,8 +15,8 @@ module.exports.checkTotalPegawai = async (knex, opdId) => {
 };
 
 module.exports.handleError = (res, error) => {
-  console.log("ini error", error);
   const errorCode = error?.response?.data?.code || error?.code || 500;
+  log.error(error);
 
   const message =
     error?.response?.data?.message || error?.message || "Internal server error";

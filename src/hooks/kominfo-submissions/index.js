@@ -1,3 +1,4 @@
+// Email Submissions - User & Admin
 export {
   useEmailSubmissions,
   useCheckEmailJatimprov,
@@ -5,6 +6,16 @@ export {
   useEmailSubmissionsAdmin,
   useUpdateEmailSubmissionAdmin,
   useEmailJatimprovPegawaiAdmin,
+  useUploadEmailJatimprovExcel,
   useGetPhone,
   KOMINFO_SUBMISSION_KEYS,
 } from "./useEmailSubmissions";
+
+// TTE Submissions
+export {
+  useCheckTTE,
+  useCreatePengajuanTTE,
+  usePengajuanTTE,
+  usePengajuanTTEById,
+  TTE_SUBMISSION_KEYS,
+} from "./useTTESubmissions";

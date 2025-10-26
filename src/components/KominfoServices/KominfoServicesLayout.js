@@ -2,7 +2,13 @@ import { layoutToken } from "@/styles/rasn.theme";
 import { appList } from "@/utils/app-lists";
 import { getMenuItems, mappingItems } from "@/utils/appLists";
 import { LogoutOutlined, UserOutlined } from "@ant-design/icons";
-import { IconHome, IconInbox, IconSend } from "@tabler/icons-react";
+import {
+  IconHome,
+  IconInbox,
+  IconSend,
+  IconSignature,
+  IconClipboardList,
+} from "@tabler/icons-react";
 import { Dropdown, Space } from "antd";
 import { signOut, useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
@@ -21,6 +27,18 @@ const menuItems = [
     icon: <IconInbox size={16} />,
     label: "Email Aktif",
     role: ["asn"],
+  },
+  {
+    key: "/kominfo-services/tte",
+    icon: <IconSignature size={16} />,
+    label: "Tanda Tangan Elektronik",
+    role: ["asn"],
+  },
+  {
+    key: "/kominfo-services/tte-submission",
+    icon: <IconClipboardList size={16} />,
+    label: "Kelola Pengajuan TTE",
+    role: ["prakom", "kominfo"],
   },
   {
     key: "/kominfo-services/email-submission",

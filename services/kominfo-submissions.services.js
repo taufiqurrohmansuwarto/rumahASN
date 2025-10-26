@@ -60,3 +60,30 @@ export const uploadEmailJatimprovExcel = async (formData) => {
 export const getPhone = async () => {
   return api.get(`/email/user/phone`).then((res) => res.data);
 };
+
+// tanda tangan elektronik
+export const checkTTE = async () => {
+  return api.get(`/tte/user/check-tte`).then((res) => res.data);
+};
+
+export const createPengajuanTTE = async (data) => {
+  return api.post(`/tte/user/tte`, data).then((res) => res.data);
+};
+
+export const getPengajuanTTE = async () => {
+  return api.get(`/tte/user/tte`).then((res) => res.data);
+};
+
+export const getPengajuanTTEById = async (id) => {
+  return api.get(`/tte/user/tte/${id}`).then((res) => res.data);
+};
+
+export const uploadFilePengajuanTTE = async ({ id, formData }) => {
+  return api
+    .post(`/tte/user/tte/${id}/upload`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    })
+    .then((res) => res.data);
+};

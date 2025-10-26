@@ -14,6 +14,7 @@ import {
   Row,
   Skeleton,
   Space,
+  Tooltip,
 } from "antd";
 import { useSession } from "next-auth/react";
 import { useState } from "react";
@@ -256,6 +257,9 @@ function CekPertek() {
   const { data: session } = useSession();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const pegawaiPemprov =
+    session?.user?.group === "MASTER" || session?.user?.group === "NONASN";
+
   const handleOpenModal = () => {
     setIsModalOpen(true);
   };
@@ -266,10 +270,14 @@ function CekPertek() {
 
   return (
     <>
-      {(session?.user?.group === "MASTER" ||
-        session?.user?.group === "NONASN") && (
-        <>
-          <Button shape="round" type="primary" onClick={handleOpenModal}>
+      {
+        <Tooltip title="Masuk menggunakan akun Pegawai Pemerintah Provinsi Jawa Timur (Non ASN / ASN)">
+          <Button
+            disabled={!pegawaiPemprov}
+            shape="round"
+            type="primary"
+            onClick={handleOpenModal}
+          >
             Cek Status Usulan CASN
           </Button>
           <ModalCekPertek
@@ -277,8 +285,8 @@ function CekPertek() {
             onCancel={handleCloseModal}
             onOk={handleCloseModal}
           />
-        </>
-      )}
+        </Tooltip>
+      }
     </>
   );
 }
