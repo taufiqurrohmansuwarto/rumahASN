@@ -1,7 +1,6 @@
-import { uploadFilePengajuanTTE } from "@/controller/tte-submission/email-submission.controller";
+import { uploadFilePengajuanTTE } from "@/controller/tte-submission/tte-submission.controller";
 import auth from "@/middleware/auth.middleware";
 import multer from "multer";
-import adminKominfoMiddleware from "@/middleware/admin-kominfo.middleware";
 import { createRouter } from "next-connect";
 
 // Setup multer untuk handle upload file
@@ -11,14 +10,17 @@ const upload = multer({
     fileSize: 5 * 1024 * 1024, // 5MB max
   },
   fileFilter: (req, file, cb) => {
-    if (
-      file.mimetype ===
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
-      file.mimetype === "application/vnd.ms-excel"
-    ) {
+    const allowedMimes = [
+      "image/jpeg",
+      "image/jpg",
+      "image/png",
+      "application/pdf",
+    ];
+
+    if (allowedMimes.includes(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(new Error("Only Excel files are allowed"));
+      cb(new Error("Only JPG, PNG, and PDF files are allowed"));
     }
   },
 });
@@ -32,9 +34,6 @@ export const config = {
 
 const router = createRouter();
 
-router
-  .use(auth)
-  .use(adminKominfoMiddleware)
-  .post(upload.single("file"), uploadFilePengajuanTTE);
+router.use(auth).post(upload.single("file"), uploadFilePengajuanTTE);
 
 export default router.handler({});

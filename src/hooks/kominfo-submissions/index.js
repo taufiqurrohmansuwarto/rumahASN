@@ -17,5 +17,11 @@ export {
   useCreatePengajuanTTE,
   usePengajuanTTE,
   usePengajuanTTEById,
+  useUploadFilePengajuanTTE,
+  useSubmitPengajuanTTE,
+  useGetDokumenTTE,
+  useUploadFileFromUrl,
+  usePengajuanTTEAdmin,
+  useUpdatePengajuanTTEAdmin,
   TTE_SUBMISSION_KEYS,
 } from "./useTTESubmissions";

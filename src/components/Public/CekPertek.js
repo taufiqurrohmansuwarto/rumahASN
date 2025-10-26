@@ -258,7 +258,7 @@ function CekPertek() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const pegawaiPemprov =
-    session?.user?.group === "MASTER" || session?.user?.group === "NONASN";
+    session?.user?.group === "MASTER" || session?.user?.group === "PTTPK";
 
   const handleOpenModal = () => {
     setIsModalOpen(true);

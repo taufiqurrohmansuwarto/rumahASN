@@ -1,5 +1,6 @@
 import KominfoServicesLayout from "@/components/KominfoServices/KominfoServicesLayout";
 import PageContainer from "@/components/PageContainer";
+import DaftarTTEPengajuanAdmin from "@/components/KominfoServices/DaftarTTEPengajuanAdmin";
 import Head from "next/head";
 
 function TTESubmissionPage() {
@@ -16,7 +17,7 @@ function TTESubmissionPage() {
         title="Kelola Pengajuan TTE"
         subTitle="Kelola pengajuan dan daftar tanda tangan elektronik"
       >
-        <div>hello world</div>
+        <DaftarTTEPengajuanAdmin />
       </PageContainer>
     </>
   );

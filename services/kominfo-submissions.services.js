@@ -78,12 +78,42 @@ export const getPengajuanTTEById = async (id) => {
   return api.get(`/tte/user/tte/${id}`).then((res) => res.data);
 };
 
-export const uploadFilePengajuanTTE = async ({ id, formData }) => {
+export const uploadFilePengajuanTTE = async (id, formData) => {
   return api
     .post(`/tte/user/tte/${id}/upload`, formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
     })
+    .then((res) => res.data);
+};
+
+export const submitPengajuanTTE = async (id) => {
+  return api.post(`/tte/user/tte/${id}/submit`).then((res) => res.data);
+};
+
+export const getDokumenTTE = async () => {
+  return api.get(`/tte/user/document`).then((res) => res.data);
+};
+
+export const uploadFileFromUrl = async (id, data) => {
+  return api
+    .post(`/tte/user/tte/${id}/upload-from-url`, data)
+    .then((res) => res.data);
+};
+
+export const listPengajuanTTEAdmin = async (params) => {
+  const queryParams = queryString.stringify(params, {
+    skipNull: true,
+    skipEmptyString: true,
+  });
+  return api
+    .get(`/tte/admin/submissions?${queryParams}`)
+    .then((res) => res.data);
+};
+
+export const updatePengajuanTTEAdmin = async (id, data) => {
+  return api
+    .patch(`/tte/admin/submissions/${id}`, data)
     .then((res) => res.data);
 };

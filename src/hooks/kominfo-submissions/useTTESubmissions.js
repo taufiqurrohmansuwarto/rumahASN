@@ -4,6 +4,12 @@ import {
   createPengajuanTTE,
   getPengajuanTTE,
   getPengajuanTTEById,
+  uploadFilePengajuanTTE,
+  submitPengajuanTTE,
+  getDokumenTTE,
+  uploadFileFromUrl,
+  listPengajuanTTEAdmin,
+  updatePengajuanTTEAdmin,
 } from "@/services/kominfo-submissions.services";
 
 // Query Keys
@@ -13,6 +19,12 @@ export const TTE_SUBMISSION_KEYS = {
   pengajuanTTE: () => [...TTE_SUBMISSION_KEYS.all, "pengajuan"],
   pengajuanTTEList: () => [...TTE_SUBMISSION_KEYS.pengajuanTTE(), "list"],
   pengajuanTTEDetail: (id) => [...TTE_SUBMISSION_KEYS.pengajuanTTE(), id],
+  pengajuanTTEAdmin: (params) => [
+    ...TTE_SUBMISSION_KEYS.all,
+    "admin",
+    "list",
+    params,
+  ],
 };
 
 // Check TTE Status
@@ -54,5 +66,110 @@ export const usePengajuanTTEById = (id) => {
     queryFn: () => getPengajuanTTEById(id),
     enabled: !!id,
     staleTime: 30000, // 30 seconds
+  });
+};
+
+// Upload File Pengajuan TTE
+export const useUploadFilePengajuanTTE = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, formData }) => uploadFilePengajuanTTE(id, formData),
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: TTE_SUBMISSION_KEYS.pengajuanTTEDetail(variables.id),
+      });
+      queryClient.invalidateQueries({
+        queryKey: TTE_SUBMISSION_KEYS.pengajuanTTEList(),
+      });
+    },
+  });
+};
+
+// Submit Pengajuan TTE
+export const useSubmitPengajuanTTE = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id) => submitPengajuanTTE(id),
+    onSuccess: (data, id) => {
+      queryClient.invalidateQueries({
+        queryKey: TTE_SUBMISSION_KEYS.pengajuanTTEDetail(id),
+      });
+      queryClient.invalidateQueries({
+        queryKey: TTE_SUBMISSION_KEYS.pengajuanTTEList(),
+      });
+      queryClient.invalidateQueries({
+        queryKey: TTE_SUBMISSION_KEYS.checkTTE(),
+      });
+    },
+  });
+};
+
+// Get Dokumen TTE (KTP & Riwayat Jabatan)
+export const useGetDokumenTTE = () => {
+  return useQuery({
+    queryKey: [...TTE_SUBMISSION_KEYS.all, "dokumen"],
+    queryFn: () => getDokumenTTE(),
+    staleTime: 300000, // 5 minutes
+  });
+};
+
+// Upload File from URL
+export const useUploadFileFromUrl = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, data }) => uploadFileFromUrl(id, data),
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: TTE_SUBMISSION_KEYS.pengajuanTTEDetail(variables.id),
+      });
+      queryClient.invalidateQueries({
+        queryKey: TTE_SUBMISSION_KEYS.pengajuanTTEList(),
+      });
+    },
+  });
+};
+
+// Admin - Get List Pengajuan TTE
+export const usePengajuanTTEAdmin = (params = {}) => {
+  const { page = 1, limit = 10, search = "", status = "DIAJUKAN" } = params;
+
+  return useQuery({
+    queryKey: TTE_SUBMISSION_KEYS.pengajuanTTEAdmin({
+      page,
+      limit,
+      search,
+      status,
+    }),
+    queryFn: () =>
+      listPengajuanTTEAdmin({
+        page,
+        limit,
+        search,
+        status,
+      }),
+    staleTime: 30000, // 30 seconds
+    keepPreviousData: true, // Keep previous data while fetching new data
+  });
+};
+
+// Admin - Update Pengajuan TTE
+export const useUpdatePengajuanTTEAdmin = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, data }) => updatePengajuanTTEAdmin(id, data),
+    onSuccess: (data, variables) => {
+      // Invalidate all admin lists
+      queryClient.invalidateQueries({
+        queryKey: [...TTE_SUBMISSION_KEYS.all, "admin"],
+      });
+      // Invalidate specific detail if needed
+      queryClient.invalidateQueries({
+        queryKey: TTE_SUBMISSION_KEYS.pengajuanTTEDetail(variables.id),
+      });
+    },
   });
 };

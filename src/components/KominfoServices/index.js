@@ -4,3 +4,4 @@ export { default as EmailManagement } from "./EmailManagement";
 export { default as CheckUserTTE } from "./CheckUserTTE";
 export { default as FormTTE } from "./FormTTE";
 export { default as DaftarPengajuanTTEUser } from "./DaftarPengajuanTTEUser";
+export { default as DaftarTTEPengajuanAdmin } from "./DaftarTTEPengajuanAdmin";

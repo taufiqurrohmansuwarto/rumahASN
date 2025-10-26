@@ -12,6 +12,29 @@ class PengajuanTTE extends Model {
   static get tableName() {
     return "tte_submission.pengajuan_tte";
   }
+
+  static get relationMappings() {
+    const User = require("@/models/users.model");
+
+    return {
+      user: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: User,
+        join: {
+          from: "tte_submission.pengajuan_tte.user_id",
+          to: "users.custom_id",
+        },
+      },
+      korektor: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: User,
+        join: {
+          from: "tte_submission.pengajuan_tte.diproses_oleh",
+          to: "users.custom_id",
+        },
+      },
+    };
+  }
 }
 
 module.exports = PengajuanTTE;

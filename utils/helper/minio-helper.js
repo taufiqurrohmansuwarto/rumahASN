@@ -17,6 +17,8 @@
 // UPLOAD FUNCTIONS
 // ==========================================
 
+require("dotenv").config();
+
 /**
  * Upload file to Minio bucket with buffer
  * @param {Object} mc - Minio client
@@ -28,11 +30,19 @@
  * @param {Object} metadata - Additional metadata
  * @returns {Promise}
  */
-export const uploadFileToMinio = (mc, bucket, fileBuffer, filename, size, mimetype, metadata = {}) => {
+export const uploadFileToMinio = (
+  mc,
+  bucket,
+  fileBuffer,
+  filename,
+  size,
+  mimetype,
+  metadata = {}
+) => {
   return new Promise((resolve, reject) => {
     const defaultMetadata = {
       "Content-Type": mimetype,
-      ...metadata
+      ...metadata,
     };
 
     mc.putObject(
@@ -63,8 +73,23 @@ export const uploadFileToMinio = (mc, bucket, fileBuffer, filename, size, mimety
  * @param {Object} metadata - Additional metadata
  * @returns {Promise}
  */
-export const uploadFilePublic = (mc, fileBuffer, filename, size, mimetype, metadata = {}) => {
-  return uploadFileToMinio(mc, "public", fileBuffer, filename, size, mimetype, metadata);
+export const uploadFilePublic = (
+  mc,
+  fileBuffer,
+  filename,
+  size,
+  mimetype,
+  metadata = {}
+) => {
+  return uploadFileToMinio(
+    mc,
+    "public",
+    fileBuffer,
+    filename,
+    size,
+    mimetype,
+    metadata
+  );
 };
 
 /**
@@ -77,8 +102,23 @@ export const uploadFilePublic = (mc, fileBuffer, filename, size, mimetype, metad
  * @param {Object} metadata - Additional metadata
  * @returns {Promise}
  */
-export const uploadFileBkd = (mc, fileBuffer, filename, size, mimetype, metadata = {}) => {
-  return uploadFileToMinio(mc, "bkd", fileBuffer, filename, size, mimetype, metadata);
+export const uploadFileBkd = (
+  mc,
+  fileBuffer,
+  filename,
+  size,
+  mimetype,
+  metadata = {}
+) => {
+  return uploadFileToMinio(
+    mc,
+    "bkd",
+    fileBuffer,
+    filename,
+    size,
+    mimetype,
+    metadata
+  );
 };
 
 /**
@@ -92,16 +132,32 @@ export const uploadFileBkd = (mc, fileBuffer, filename, size, mimetype, metadata
  * @param {String} userId - User ID for metadata
  * @returns {Promise}
  */
-export const uploadEsignDocument = (mc, fileBuffer, filename, documentCode, size, mimetype, userId) => {
+export const uploadEsignDocument = (
+  mc,
+  fileBuffer,
+  filename,
+  documentCode,
+  size,
+  mimetype,
+  userId
+) => {
   const esignPath = `esign/documents/${documentCode}_${filename}`;
   const metadata = {
     "Content-Type": mimetype,
     "uploaded-by": userId,
     "document-code": documentCode,
-    "upload-date": new Date().toISOString()
+    "upload-date": new Date().toISOString(),
   };
 
-  return uploadFileToMinio(mc, "public", fileBuffer, esignPath, size, mimetype, metadata);
+  return uploadFileToMinio(
+    mc,
+    "public",
+    fileBuffer,
+    esignPath,
+    size,
+    mimetype,
+    metadata
+  );
 };
 
 /**
@@ -113,17 +169,31 @@ export const uploadEsignDocument = (mc, fileBuffer, filename, documentCode, size
  * @param {String} userId - User who signed
  * @returns {Promise}
  */
-export const uploadSignedDocument = (mc, fileBuffer, originalPath, signatureId, userId) => {
+export const uploadSignedDocument = (
+  mc,
+  fileBuffer,
+  originalPath,
+  signatureId,
+  userId
+) => {
   const signedPath = originalPath.replace("esign/documents/", "esign/signed/");
   const metadata = {
     "Content-Type": "application/pdf",
     "signed-by": userId,
     "signature-id": signatureId,
     "signed-date": new Date().toISOString(),
-    "original-path": originalPath
+    "original-path": originalPath,
   };
 
-  return uploadFileToMinio(mc, "public", fileBuffer, signedPath, fileBuffer.length, "application/pdf", metadata);
+  return uploadFileToMinio(
+    mc,
+    "public",
+    fileBuffer,
+    signedPath,
+    fileBuffer.length,
+    "application/pdf",
+    metadata
+  );
 };
 
 // ==========================================
@@ -139,14 +209,21 @@ export const uploadSignedDocument = (mc, fileBuffer, originalPath, signatureId, 
  */
 export const downloadFileAsBase64 = (mc, bucket, filename) => {
   return new Promise((resolve, reject) => {
-    console.log(`      [downloadFileAsBase64] Getting object from bucket: ${bucket}, file: ${filename}`);
+    console.log(
+      `      [downloadFileAsBase64] Getting object from bucket: ${bucket}, file: ${filename}`
+    );
 
     mc.getObject(bucket, filename, function (err, dataStream) {
       if (err) {
-        console.error("      [downloadFileAsBase64] Minio download error:", err);
+        console.error(
+          "      [downloadFileAsBase64] Minio download error:",
+          err
+        );
         reject(err);
       } else {
-        console.log("      [downloadFileAsBase64] Stream received, reading data...");
+        console.log(
+          "      [downloadFileAsBase64] Stream received, reading data..."
+        );
         let fileBuffer = [];
         let chunkCount = 0;
 
@@ -154,21 +231,32 @@ export const downloadFileAsBase64 = (mc, bucket, filename) => {
           chunkCount++;
           fileBuffer.push(chunk);
           if (chunkCount % 10 === 0) {
-            console.log(`      [downloadFileAsBase64] Received ${chunkCount} chunks...`);
+            console.log(
+              `      [downloadFileAsBase64] Received ${chunkCount} chunks...`
+            );
           }
         });
 
         dataStream.on("end", function () {
-          console.log(`      [downloadFileAsBase64] Stream ended. Total chunks: ${chunkCount}`);
+          console.log(
+            `      [downloadFileAsBase64] Stream ended. Total chunks: ${chunkCount}`
+          );
           const chunks = Buffer.concat(fileBuffer);
-          console.log(`      [downloadFileAsBase64] Buffer size: ${chunks.length} bytes`);
+          console.log(
+            `      [downloadFileAsBase64] Buffer size: ${chunks.length} bytes`
+          );
           const base64 = Buffer.from(chunks).toString("base64");
-          console.log(`      [downloadFileAsBase64] Base64 size: ${base64.length} chars`);
+          console.log(
+            `      [downloadFileAsBase64] Base64 size: ${base64.length} chars`
+          );
           resolve(base64);
         });
 
-        dataStream.on("error", function(streamErr) {
-          console.error("      [downloadFileAsBase64] Stream error:", streamErr);
+        dataStream.on("error", function (streamErr) {
+          console.error(
+            "      [downloadFileAsBase64] Stream error:",
+            streamErr
+          );
           reject(streamErr);
         });
       }
@@ -337,7 +425,13 @@ export const deleteFileBkd = (mc, filename) => {
  * @param {String} destFile - Destination file path
  * @returns {Promise}
  */
-export const copyFile = (mc, sourceBucket, sourceFile, destBucket, destFile) => {
+export const copyFile = (
+  mc,
+  sourceBucket,
+  sourceFile,
+  destBucket,
+  destFile
+) => {
   return new Promise((resolve, reject) => {
     const copyConditions = new mc.CopyConditions();
 
@@ -367,7 +461,13 @@ export const copyFile = (mc, sourceBucket, sourceFile, destBucket, destFile) => 
  * @param {String} destFile - Destination file path
  * @returns {Promise}
  */
-export const moveFile = async (mc, sourceBucket, sourceFile, destBucket, destFile) => {
+export const moveFile = async (
+  mc,
+  sourceBucket,
+  sourceFile,
+  destBucket,
+  destFile
+) => {
   try {
     // Copy file to destination
     await copyFile(mc, sourceBucket, sourceFile, destBucket, destFile);
@@ -462,10 +562,18 @@ export const moveToSignedFolder = (mc, originalPath, signedPath) => {
 export const uploadMultipleFiles = async (mc, bucket, files, basePath = "") => {
   const uploadPromises = files.map((file, index) => {
     const filename = basePath ? `${basePath}/${file.filename}` : file.filename;
-    return uploadFileToMinio(mc, bucket, file.buffer, filename, file.size, file.mimetype, {
-      "batch-upload": "true",
-      "batch-index": index.toString()
-    });
+    return uploadFileToMinio(
+      mc,
+      bucket,
+      file.buffer,
+      filename,
+      file.size,
+      file.mimetype,
+      {
+        "batch-upload": "true",
+        "batch-index": index.toString(),
+      }
+    );
   });
 
   try {
@@ -485,7 +593,9 @@ export const uploadMultipleFiles = async (mc, bucket, files, basePath = "") => {
  * @returns {Promise<Array>} - Array of delete results
  */
 export const deleteMultipleFiles = async (mc, bucket, filenames) => {
-  const deletePromises = filenames.map(filename => deleteFile(mc, bucket, filename));
+  const deletePromises = filenames.map((filename) =>
+    deleteFile(mc, bucket, filename)
+  );
 
   try {
     const results = await Promise.all(deletePromises);
@@ -507,7 +617,10 @@ export const deleteMultipleFiles = async (mc, bucket, filenames) => {
  * @returns {String} - Public URL
  */
 export const generatePublicUrl = (filename, bucket = "public") => {
-  const baseUrl = "https://siasn.bkd.jatimprov.go.id:9000";
+  const isProduction = process.env.NODE_ENV === "production";
+  const baseUrl = isProduction
+    ? "https://siasn.bkd.jatimprov.go.id:9000"
+    : "http://localhost:9000";
   return `${baseUrl}/${bucket}/${filename}`;
 };
 
@@ -559,7 +672,7 @@ export const getFilenameFromUrl = (url) => {
   if (url.startsWith(baseUrl)) {
     // Remove base URL and bucket name
     const pathPart = url.replace(baseUrl, "");
-    const parts = pathPart.split("/").filter(part => part.length > 0);
+    const parts = pathPart.split("/").filter((part) => part.length > 0);
     if (parts.length > 1) {
       // Remove bucket name (first part) and return the rest
       return parts.slice(1).join("/");
@@ -577,12 +690,12 @@ export const parseMinioUrl = (url) => {
   const baseUrl = "https://siasn.bkd.jatimprov.go.id:9000";
   if (url.startsWith(baseUrl)) {
     const pathPart = url.replace(baseUrl, "");
-    const parts = pathPart.split("/").filter(part => part.length > 0);
+    const parts = pathPart.split("/").filter((part) => part.length > 0);
     if (parts.length > 1) {
       return {
         baseUrl,
         bucket: parts[0],
-        filename: parts.slice(1).join("/")
+        filename: parts.slice(1).join("/"),
       };
     }
   }
@@ -610,7 +723,7 @@ export const getFileMetadata = async (mc, bucket, filename) => {
       size: stat.size,
       etag: stat.etag,
       lastModified: stat.lastModified,
-      metadata: stat.metaData || {}
+      metadata: stat.metaData || {},
     };
   } catch (error) {
     console.error("Error getting file metadata:", error);
@@ -628,14 +741,19 @@ export const getFileMetadata = async (mc, bucket, filename) => {
  */
 export const generatePresignedUrl = (mc, bucket, filename, expiry = 3600) => {
   return new Promise((resolve, reject) => {
-    mc.presignedGetObject(bucket, filename, expiry, function (err, presignedUrl) {
-      if (err) {
-        console.error("Error generating presigned URL:", err);
-        reject(err);
-      } else {
-        resolve(presignedUrl);
+    mc.presignedGetObject(
+      bucket,
+      filename,
+      expiry,
+      function (err, presignedUrl) {
+        if (err) {
+          console.error("Error generating presigned URL:", err);
+          reject(err);
+        } else {
+          resolve(presignedUrl);
+        }
       }
-    });
+    );
   });
 };
 
@@ -652,21 +770,21 @@ export const listFiles = (mc, bucket, prefix = "", recursive = false) => {
     const files = [];
     const stream = mc.listObjectsV2(bucket, prefix, recursive);
 
-    stream.on('data', function(obj) {
+    stream.on("data", function (obj) {
       files.push({
         name: obj.name,
         size: obj.size,
         etag: obj.etag,
-        lastModified: obj.lastModified
+        lastModified: obj.lastModified,
       });
     });
 
-    stream.on('error', function(err) {
+    stream.on("error", function (err) {
       console.error("Error listing files:", err);
       reject(err);
     });
 
-    stream.on('end', function() {
+    stream.on("end", function () {
       resolve(files);
     });
   });
