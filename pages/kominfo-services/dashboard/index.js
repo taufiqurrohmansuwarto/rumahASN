@@ -1,20 +1,32 @@
 import PageContainer from "@/components/PageContainer";
 import KominfoServicesLayout from "@/components/KominfoServices/KominfoServicesLayout";
+import FlushAdmin from "@/components/KominfoServices/FlushAdmin";
 import Head from "next/head";
+import { Breadcrumb } from "antd";
+import Link from "next/link";
 
 const KominfoServicesDashboardPage = () => {
   return (
     <>
       <Head>
-        <title>Beranda - Layanan Kominfo Jatim</title>
-        <meta name="description" content="Dashboard layanan Kominfo Jatim" />
+        <title>Rumah ASN - Layanan Kominfo Jatim</title>
       </Head>
       <PageContainer
-        title="Beranda Layanan Kominfo Jatim"
-        subTitle="Selamat datang di portal layanan Kominfo Jawa Timur"
+        title="Dashboard Layanan Kominfo"
+        content="Portal layanan email dan tanda tangan elektronik dari Kominfo Jawa Timur"
+        header={{
+          breadcrumbRender: () => (
+            <Breadcrumb>
+              <Breadcrumb.Item>
+                <Link href="/feeds">Beranda</Link>
+              </Breadcrumb.Item>
+              <Breadcrumb.Item>Dashboard Layanan Kominfo</Breadcrumb.Item>
+            </Breadcrumb>
+          ),
+        }}
       >
         <div>
-          <h1>Dashboard</h1>
+          <FlushAdmin />
         </div>
       </PageContainer>
     </>

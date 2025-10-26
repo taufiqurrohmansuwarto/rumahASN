@@ -117,3 +117,7 @@ export const updatePengajuanTTEAdmin = async (id, data) => {
     .patch(`/tte/admin/submissions/${id}`, data)
     .then((res) => res.data);
 };
+
+export const flushDataPengajuan = async () => {
+  return api.post(`/flush`).then((res) => res.data);
+};

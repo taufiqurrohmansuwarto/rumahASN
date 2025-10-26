@@ -11,7 +11,9 @@ const { verifyUserWithNik } = require("@/utils/esign-utils");
 const User = require("@/models/users.model");
 
 const PengajuanTTE = require("@/models/tte_submission/pengajuan-tte.model");
+const EmailSubmission = require("@/models/tte_submission/pengajuan-email.model");
 const EmailPegawai = require("@/models/tte_submission/email-pegawai.model");
+
 const SiasnEmployee = require("@/models/siasn-employees.model");
 
 require("dotenv").config();
@@ -460,6 +462,23 @@ export const updatePengajuanTTEAdmin = async (req, res) => {
     res.status(200).json({
       success: true,
       message: "Pengajuan TTE berhasil diupdate",
+    });
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+export const flushDataPengajuan = async (req, res) => {
+  try {
+    log.info("Flushing data pengajuan TTE");
+    await Promise.all([
+      PengajuanTTE.query().delete(),
+      EmailSubmission.query().delete(),
+      EmailPegawai.query().delete(),
+    ]);
+    res.status(200).json({
+      success: true,
+      message: "Data pengajuan TTE berhasil dihapus",
     });
   } catch (error) {
     handleError(res, error);

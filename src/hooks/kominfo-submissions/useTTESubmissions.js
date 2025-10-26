@@ -173,3 +173,22 @@ export const useUpdatePengajuanTTEAdmin = () => {
     },
   });
 };
+
+// Admin - Flush Data Pengajuan (Delete all draft/rejected)
+export const useFlushDataPengajuan = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: flushDataPengajuan,
+    onSuccess: () => {
+      // Invalidate all admin lists to refresh data
+      queryClient.invalidateQueries({
+        queryKey: [...TTE_SUBMISSION_KEYS.all, "admin"],
+      });
+      // Also invalidate user's pengajuan list
+      queryClient.invalidateQueries({
+        queryKey: TTE_SUBMISSION_KEYS.pengajuanTTEList(),
+      });
+    },
+  });
+};

@@ -23,5 +23,6 @@ export {
   useUploadFileFromUrl,
   usePengajuanTTEAdmin,
   useUpdatePengajuanTTEAdmin,
+  useFlushDataPengajuan,
   TTE_SUBMISSION_KEYS,
 } from "./useTTESubmissions";
