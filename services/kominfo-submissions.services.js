@@ -57,6 +57,22 @@ export const uploadEmailJatimprovExcel = async (formData) => {
     .then((res) => res.data);
 };
 
+export const createEmailJatimprovPegawaiAdmin = async (data) => {
+  return api.post(`/email/admin/jatimprov-mails`, data).then((res) => res.data);
+};
+
+export const updateEmailJatimprovPegawaiAdmin = async (id, data) => {
+  return api
+    .patch(`/email/admin/jatimprov-mails/${id}`, data)
+    .then((res) => res.data);
+};
+
+export const deleteEmailJatimprovPegawaiAdmin = async (id) => {
+  return api
+    .delete(`/email/admin/jatimprov-mails/${id}`)
+    .then((res) => res.data);
+};
+
 export const getPhone = async () => {
   return api.get(`/email/user/phone`).then((res) => res.data);
 };

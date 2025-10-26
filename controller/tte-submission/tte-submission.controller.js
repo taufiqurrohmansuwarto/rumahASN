@@ -7,7 +7,10 @@ import {
 } from "@/utils/helper/minio-helper";
 import axios from "axios";
 
-const { verifyUserWithNik } = require("@/utils/esign-utils");
+const {
+  verifyUserWithNik,
+  getDataProfileWithNik,
+} = require("@/utils/esign-utils");
 const User = require("@/models/users.model");
 
 const PengajuanTTE = require("@/models/tte_submission/pengajuan-tte.model");
@@ -42,12 +45,14 @@ export const checkTTE = async (req, res) => {
     }
 
     const result = await verifyUserWithNik({ nik: removeChar(nik) });
+    const profile = await getDataProfileWithNik({ nik: removeChar(nik) });
+
     const EmailJatimprov = await EmailPegawai.query().where("nip", nip).first();
 
     const data = {
       bsre: result?.data?.status_code === "1111" ? true : false,
       mail_jatim: EmailJatimprov ? true : false,
-      bsre_info: result?.data,
+      bsre_info: profile?.data || null,
       mail_jatim_info: EmailJatimprov?.email_jatimprov || null,
     };
 

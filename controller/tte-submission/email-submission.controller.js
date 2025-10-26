@@ -377,3 +377,43 @@ export const getPhone = async (req, res) => {
     handleError(res, error);
   }
 };
+
+export const updateEmailJatimprovPegawai = async (req, res) => {
+  try {
+    const { id } = req.query;
+    const payload = req.body;
+    await EmailJatimProvPegawai.query().patchAndFetchById(id, payload);
+    res.status(200).json({
+      success: true,
+      message: "Email jatimprov berhasil diupdate",
+    });
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+export const deleteEmailJatimprovPegawai = async (req, res) => {
+  try {
+    const { id } = req.query;
+    await EmailJatimProvPegawai.query().deleteById(id);
+    res.status(200).json({
+      success: true,
+      message: "Email jatimprov berhasil dihapus",
+    });
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+export const createEmailJatimprovPegawai = async (req, res) => {
+  try {
+    const payload = req.body;
+    await EmailJatimProvPegawai.query().insert(payload);
+    res.status(200).json({
+      success: true,
+      message: "Email jatimprov berhasil dibuat",
+    });
+  } catch (error) {
+    handleError(res, error);
+  }
+};

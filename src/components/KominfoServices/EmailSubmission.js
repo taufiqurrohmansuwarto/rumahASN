@@ -464,21 +464,10 @@ function EmailSubmission() {
                 },
               }}
             >
-              <Text size="sm" mb="md">
+              <Text size="sm">
                 Anda belum memiliki email @jatimprov.go.id. Silakan ajukan email
                 dengan mengklik tombol &quot;Ajukan Email&quot; di atas.
               </Text>
-              <Button
-                type="primary"
-                icon={<IconPlus size={16} />}
-                onClick={handleOpenModal}
-                style={{
-                  background: "#ff6b35",
-                  borderColor: "#ff6b35",
-                }}
-              >
-                Ajukan Email Sekarang
-              </Button>
             </Alert>
           )}
 

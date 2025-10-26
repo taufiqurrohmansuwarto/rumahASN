@@ -7,6 +7,9 @@ export {
   useUpdateEmailSubmissionAdmin,
   useEmailJatimprovPegawaiAdmin,
   useUploadEmailJatimprovExcel,
+  useCreateEmailJatimprovPegawaiAdmin,
+  useUpdateEmailJatimprovPegawaiAdmin,
+  useDeleteEmailJatimprovPegawaiAdmin,
   useGetPhone,
   KOMINFO_SUBMISSION_KEYS,
 } from "./useEmailSubmissions";

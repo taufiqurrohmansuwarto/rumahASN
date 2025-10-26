@@ -7,6 +7,9 @@ import {
   updateEmailSubmissionAdmin,
   listEmailJatimprovPegawaiAdmin,
   uploadEmailJatimprovExcel,
+  createEmailJatimprovPegawaiAdmin,
+  updateEmailJatimprovPegawaiAdmin,
+  deleteEmailJatimprovPegawaiAdmin,
   getPhone,
 } from "@/services/kominfo-submissions.services";
 
@@ -139,6 +142,72 @@ export const useUploadEmailJatimprovExcel = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: KOMINFO_SUBMISSION_KEYS.emailJatimprovPegawaiAdmin(),
+      });
+    },
+  });
+};
+
+// Create Email Jatimprov Pegawai Admin
+export const useCreateEmailJatimprovPegawaiAdmin = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data) => createEmailJatimprovPegawaiAdmin(data),
+    onSuccess: () => {
+      // Invalidate all jatimprov mails admin lists
+      queryClient.invalidateQueries({
+        queryKey: [
+          ...KOMINFO_SUBMISSION_KEYS.emailSubmissions(),
+          "jatimprov-mails-admin",
+        ],
+      });
+      // Also invalidate check email status
+      queryClient.invalidateQueries({
+        queryKey: KOMINFO_SUBMISSION_KEYS.checkEmailJatimprov(),
+      });
+    },
+  });
+};
+
+// Update Email Jatimprov Pegawai Admin
+export const useUpdateEmailJatimprovPegawaiAdmin = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, data }) => updateEmailJatimprovPegawaiAdmin(id, data),
+    onSuccess: (data, variables) => {
+      // Invalidate all jatimprov mails admin lists
+      queryClient.invalidateQueries({
+        queryKey: [
+          ...KOMINFO_SUBMISSION_KEYS.emailSubmissions(),
+          "jatimprov-mails-admin",
+        ],
+      });
+      // Also invalidate check email status
+      queryClient.invalidateQueries({
+        queryKey: KOMINFO_SUBMISSION_KEYS.checkEmailJatimprov(),
+      });
+    },
+  });
+};
+
+// Delete Email Jatimprov Pegawai Admin
+export const useDeleteEmailJatimprovPegawaiAdmin = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id) => deleteEmailJatimprovPegawaiAdmin(id),
+    onSuccess: () => {
+      // Invalidate all jatimprov mails admin lists
+      queryClient.invalidateQueries({
+        queryKey: [
+          ...KOMINFO_SUBMISSION_KEYS.emailSubmissions(),
+          "jatimprov-mails-admin",
+        ],
+      });
+      // Also invalidate check email status
+      queryClient.invalidateQueries({
+        queryKey: KOMINFO_SUBMISSION_KEYS.checkEmailJatimprov(),
       });
     },
   });

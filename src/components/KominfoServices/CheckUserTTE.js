@@ -39,6 +39,8 @@ function CheckUserTTE() {
   const [bsreDetailOpen, setBsreDetailOpen] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [showEmail, setShowEmail] = useState(false);
+  const [showBsreNip, setShowBsreNip] = useState(false);
+  const [showBsreEmail, setShowBsreEmail] = useState(false);
 
   const { data: tteData, isLoading: tteLoading, refetch } = useCheckTTE();
   const { mutateAsync: createPengajuan, isPending: isCreatingPengajuan } =
@@ -90,6 +92,11 @@ function CheckUserTTE() {
     if (!domain) return "•••••••";
     const maskedLocal = "•".repeat(Math.min(localPart.length, 10));
     return `${maskedLocal}@${domain}`;
+  };
+
+  const maskNip = (nip) => {
+    if (!nip) return "";
+    return "•".repeat(nip.length);
   };
 
   if (tteLoading) {
@@ -181,7 +188,7 @@ function CheckUserTTE() {
 
         <Stack gap="md" mt="md">
           {/* Status TTE Aktif (BSRE = true) */}
-          {hasBSRE && bsreInfo && (
+          {hasBSRE && bsreInfo?.data && (
             <Alert
               icon={<IconCircleCheck size={16} />}
               color="green"
@@ -202,11 +209,11 @@ function CheckUserTTE() {
                       Sertifikat TTE Aktif
                     </Text>
                     <Badge color="green" size="sm" variant="light">
-                      {bsreInfo.status}
+                      {bsreInfo.data.status_user}
                     </Badge>
                   </Group>
                   <Text size="xs" c="green.7">
-                    {bsreInfo.message}
+                    {bsreInfo.data.nama}
                   </Text>
                 </div>
                 <Button
@@ -231,27 +238,115 @@ function CheckUserTTE() {
 
               {bsreDetailOpen && (
                 <Stack
-                  gap={6}
+                  gap={8}
                   mt="sm"
                   pt="sm"
                   style={{ borderTop: "1px solid #d9f7be" }}
                 >
-                  <Group justify="space-between">
+                  <Group justify="space-between" align="center" wrap="nowrap">
                     <Text size="xs" c="dimmed">
-                      Status Code:
+                      NIP:
                     </Text>
-                    <Text size="xs" fw={500}>
-                      {bsreInfo.status_code}
-                    </Text>
+                    <Group gap={4} align="center" wrap="nowrap">
+                      <Text
+                        size="xs"
+                        fw={500}
+                        style={{
+                          fontFamily: "monospace",
+                          letterSpacing: showBsreNip ? "normal" : "1px",
+                        }}
+                      >
+                        {showBsreNip
+                          ? bsreInfo.data.nip
+                          : maskNip(bsreInfo.data.nip)}
+                      </Text>
+                      <Button
+                        type="text"
+                        size="small"
+                        icon={
+                          showBsreNip ? (
+                            <IconEyeOff size={12} />
+                          ) : (
+                            <IconEye size={12} />
+                          )
+                        }
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setShowBsreNip(!showBsreNip);
+                        }}
+                        style={{
+                          padding: "0 2px",
+                          height: 18,
+                          minWidth: 18,
+                        }}
+                      />
+                    </Group>
                   </Group>
-                  <Group justify="space-between">
+
+                  <Group justify="space-between" align="center" wrap="nowrap">
                     <Text size="xs" c="dimmed">
-                      Status:
+                      Email:
                     </Text>
-                    <Badge color="green" size="xs">
-                      {bsreInfo.status}
-                    </Badge>
+                    <Group gap={4} align="center" wrap="nowrap">
+                      <Text
+                        size="xs"
+                        fw={500}
+                        style={{
+                          fontFamily: "monospace",
+                          letterSpacing: showBsreEmail ? "normal" : "1px",
+                          maxWidth: 200,
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                        }}
+                      >
+                        {showBsreEmail
+                          ? bsreInfo.data.email
+                          : maskEmail(bsreInfo.data.email)}
+                      </Text>
+                      <Button
+                        type="text"
+                        size="small"
+                        icon={
+                          showBsreEmail ? (
+                            <IconEyeOff size={12} />
+                          ) : (
+                            <IconEye size={12} />
+                          )
+                        }
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setShowBsreEmail(!showBsreEmail);
+                        }}
+                        style={{
+                          padding: "0 2px",
+                          height: 18,
+                          minWidth: 18,
+                        }}
+                      />
+                    </Group>
                   </Group>
+
+                  {bsreInfo.data.sertifikat &&
+                    bsreInfo.data.sertifikat.length > 0 && (
+                      <>
+                        <Group justify="space-between">
+                          <Text size="xs" c="dimmed">
+                            Jenis:
+                          </Text>
+                          <Badge color="green" size="xs" variant="light">
+                            {bsreInfo.data.sertifikat[0].jenis_sertifikat}
+                          </Badge>
+                        </Group>
+                        <Group justify="space-between">
+                          <Text size="xs" c="dimmed">
+                            Berlaku sampai:
+                          </Text>
+                          <Text size="xs" fw={500}>
+                            {bsreInfo.data.sertifikat[0].berlaku_sampai}
+                          </Text>
+                        </Group>
+                      </>
+                    )}
                 </Stack>
               )}
             </Alert>

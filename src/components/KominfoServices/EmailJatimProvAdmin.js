@@ -1,4 +1,9 @@
-import { useEmailJatimprovPegawaiAdmin } from "@/hooks/kominfo-submissions";
+import {
+  useEmailJatimprovPegawaiAdmin,
+  useCreateEmailJatimprovPegawaiAdmin,
+  useUpdateEmailJatimprovPegawaiAdmin,
+  useDeleteEmailJatimprovPegawaiAdmin,
+} from "@/hooks/kominfo-submissions";
 import {
   IconMail,
   IconUser,
@@ -8,6 +13,9 @@ import {
   IconUpload,
   IconDownload,
   IconCalendar,
+  IconEdit,
+  IconTrash,
+  IconPlus,
 } from "@tabler/icons-react";
 import {
   Card,
@@ -22,6 +30,8 @@ import {
   message,
   Modal,
   Alert,
+  Form,
+  Popconfirm,
 } from "antd";
 import { Text } from "@mantine/core";
 import { useRouter } from "next/router";
@@ -45,6 +55,11 @@ function EmailJatimProvAdmin() {
   const { page = 1, limit = 10, search = "" } = router.query;
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
   const [fileList, setFileList] = useState([]);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [selectedRecord, setSelectedRecord] = useState(null);
+  const [form] = Form.useForm();
+  const [createForm] = Form.useForm();
 
   // Fetch data dengan params dari URL
   const { data, isLoading, isFetching, refetch } =
@@ -69,6 +84,14 @@ function EmailJatimProvAdmin() {
       message.error(errorMessage);
     },
   });
+
+  // Create, Update and Delete mutations
+  const { mutateAsync: createEmail, isPending: isCreating } =
+    useCreateEmailJatimprovPegawaiAdmin();
+  const { mutateAsync: updateEmail, isPending: isUpdating } =
+    useUpdateEmailJatimprovPegawaiAdmin();
+  const { mutateAsync: deleteEmail, isPending: isDeleting } =
+    useDeleteEmailJatimprovPegawaiAdmin();
 
   // Handle search
   const handleSearchChange = (value) => {
@@ -100,6 +123,68 @@ function EmailJatimProvAdmin() {
       pathname: router.pathname,
       query: {},
     });
+  };
+
+  // Handle create
+  const handleCreate = async () => {
+    try {
+      const values = await createForm.validateFields();
+      await createEmail(values);
+      message.success("Email berhasil ditambahkan!");
+      setCreateModalOpen(false);
+      createForm.resetFields();
+      refetch();
+    } catch (error) {
+      const errorMessage =
+        error?.response?.data?.message ||
+        "Terjadi kesalahan saat menambahkan email";
+      message.error(errorMessage);
+    }
+  };
+
+  // Handle edit
+  const handleEdit = (record) => {
+    setSelectedRecord(record);
+    form.setFieldsValue({
+      email_jatimprov: record.email_jatimprov,
+      no_hp: record.no_hp,
+    });
+    setEditModalOpen(true);
+  };
+
+  // Handle update
+  const handleUpdate = async () => {
+    try {
+      const values = await form.validateFields();
+      await updateEmail({
+        id: selectedRecord.id,
+        data: values,
+      });
+      message.success("Email berhasil diperbarui!");
+      setEditModalOpen(false);
+      form.resetFields();
+      setSelectedRecord(null);
+      refetch();
+    } catch (error) {
+      const errorMessage =
+        error?.response?.data?.message ||
+        "Terjadi kesalahan saat memperbarui email";
+      message.error(errorMessage);
+    }
+  };
+
+  // Handle delete
+  const handleDelete = async (id) => {
+    try {
+      await deleteEmail(id);
+      message.success("Email berhasil dihapus!");
+      refetch();
+    } catch (error) {
+      const errorMessage =
+        error?.response?.data?.message ||
+        "Terjadi kesalahan saat menghapus email";
+      message.error(errorMessage);
+    }
   };
 
   // Handle upload
@@ -314,6 +399,54 @@ function EmailJatimProvAdmin() {
         </Tooltip>
       ),
     },
+    {
+      title: "Aksi",
+      key: "action",
+      width: 120,
+      align: "center",
+      fixed: "right",
+      render: (_, record) => (
+        <Space size="small">
+          <Tooltip title="Edit">
+            <Button
+              type="primary"
+              size="small"
+              icon={<IconEdit size={12} />}
+              onClick={() => handleEdit(record)}
+              style={{
+                background: "#1890ff",
+                borderColor: "#1890ff",
+                padding: "0 8px",
+                height: 24,
+              }}
+            />
+          </Tooltip>
+          <Popconfirm
+            title="Hapus Email"
+            description="Yakin ingin menghapus email ini?"
+            onConfirm={() => handleDelete(record.id)}
+            okText="Ya, Hapus"
+            cancelText="Batal"
+            okButtonProps={{
+              danger: true,
+              loading: isDeleting,
+            }}
+          >
+            <Tooltip title="Hapus">
+              <Button
+                danger
+                size="small"
+                icon={<IconTrash size={12} />}
+                style={{
+                  padding: "0 8px",
+                  height: 24,
+                }}
+              />
+            </Tooltip>
+          </Popconfirm>
+        </Space>
+      ),
+    },
   ];
 
   return (
@@ -385,36 +518,48 @@ function EmailJatimProvAdmin() {
           <Space size="small" wrap>
             <Button
               size="small"
+              icon={<IconPlus size={14} />}
+              type="primary"
+              onClick={() => setCreateModalOpen(true)}
+              style={{
+                background: "#1890ff",
+                borderColor: "#1890ff",
+              }}
+            >
+              Tambah
+            </Button>
+            <Button
+              size="small"
               icon={<IconRefresh size={14} />}
               loading={isLoading || isFetching}
               onClick={() => refetch()}
             >
               Refresh
             </Button>
-            <Button
-              size="small"
-              icon={<IconDownload size={14} />}
-              onClick={handleDownload}
-              style={{
-                background: "#52c41a",
-                borderColor: "#52c41a",
-                color: "white",
-              }}
-            >
-              Download Excel
-            </Button>
-            <Button
-              type="primary"
-              size="small"
-              icon={<IconUpload size={14} />}
-              onClick={() => setUploadModalOpen(true)}
-              style={{
-                background: "#ff6b35",
-                borderColor: "#ff6b35",
-              }}
-            >
-              Upload Excel
-            </Button>
+            <Tooltip title="Download Excel">
+              <Button
+                size="small"
+                icon={<IconDownload size={16} />}
+                onClick={handleDownload}
+                style={{
+                  background: "#52c41a",
+                  borderColor: "#52c41a",
+                  color: "white",
+                }}
+              />
+            </Tooltip>
+            <Tooltip title="Upload Excel">
+              <Button
+                type="primary"
+                size="small"
+                icon={<IconUpload size={16} />}
+                onClick={() => setUploadModalOpen(true)}
+                style={{
+                  background: "#ff6b35",
+                  borderColor: "#ff6b35",
+                }}
+              />
+            </Tooltip>
           </Space>
         </Space>
 
@@ -536,6 +681,205 @@ function EmailJatimProvAdmin() {
             Hanya file .xlsx atau .xls yang diperbolehkan
           </p>
         </Upload.Dragger>
+      </Modal>
+
+      {/* Create Modal */}
+      <Modal
+        title={
+          <Space size="small">
+            <IconPlus size={18} />
+            <Text strong style={{ fontSize: 14 }}>
+              Tambah Email Jatimprov
+            </Text>
+          </Space>
+        }
+        open={createModalOpen}
+        onCancel={() => {
+          setCreateModalOpen(false);
+          createForm.resetFields();
+        }}
+        footer={[
+          <Button
+            key="cancel"
+            size="small"
+            onClick={() => {
+              setCreateModalOpen(false);
+              createForm.resetFields();
+            }}
+          >
+            Batal
+          </Button>,
+          <Button
+            key="create"
+            type="primary"
+            size="small"
+            loading={isCreating}
+            onClick={handleCreate}
+            style={{
+              background: "#1890ff",
+              borderColor: "#1890ff",
+            }}
+          >
+            Simpan
+          </Button>,
+        ]}
+        width={500}
+      >
+        <Form form={createForm} layout="vertical" size="small">
+          <Form.Item
+            name="nip"
+            label="NIP"
+            rules={[
+              { required: true, message: "NIP wajib diisi!" },
+              {
+                pattern: /^[0-9]{18}$/,
+                message: "NIP harus 18 digit angka!",
+              },
+            ]}
+          >
+            <Input
+              prefix={<IconUser size={14} />}
+              placeholder="199103052019031008"
+              maxLength={18}
+            />
+          </Form.Item>
+
+          <Form.Item
+            name="email_jatimprov"
+            label="Email Jatimprov"
+            rules={[
+              { required: true, message: "Email wajib diisi!" },
+              { type: "email", message: "Format email tidak valid!" },
+            ]}
+          >
+            <Input
+              prefix={<IconMail size={14} />}
+              placeholder="contoh@jatimprov.go.id"
+            />
+          </Form.Item>
+
+          <Form.Item
+            name="no_hp"
+            label="Nomor HP"
+            rules={[
+              {
+                pattern: /^[0-9]{10,13}$/,
+                message: "Nomor HP harus 10-13 digit angka!",
+              },
+            ]}
+          >
+            <Input prefix={<IconPhone size={14} />} placeholder="08123456789" />
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      {/* Edit Modal */}
+      <Modal
+        title={
+          <Space size="small">
+            <IconEdit size={18} />
+            <Text strong style={{ fontSize: 14 }}>
+              Edit Email Jatimprov
+            </Text>
+          </Space>
+        }
+        open={editModalOpen}
+        onCancel={() => {
+          setEditModalOpen(false);
+          form.resetFields();
+          setSelectedRecord(null);
+        }}
+        footer={[
+          <Button
+            key="cancel"
+            size="small"
+            onClick={() => {
+              setEditModalOpen(false);
+              form.resetFields();
+              setSelectedRecord(null);
+            }}
+          >
+            Batal
+          </Button>,
+          <Button
+            key="update"
+            type="primary"
+            size="small"
+            loading={isUpdating}
+            onClick={handleUpdate}
+            style={{
+              background: "#1890ff",
+              borderColor: "#1890ff",
+            }}
+          >
+            Simpan
+          </Button>,
+        ]}
+        width={500}
+      >
+        {selectedRecord && (
+          <>
+            <Alert
+              message="Informasi Pegawai"
+              description={
+                <Space direction="vertical" size={4} style={{ width: "100%" }}>
+                  <Space>
+                    <Avatar
+                      src={selectedRecord?.user?.foto}
+                      size={32}
+                      icon={<IconUser size={14} />}
+                    />
+                    <div>
+                      <Text strong style={{ fontSize: 12 }}>
+                        {selectedRecord?.user?.nama_master || "-"}
+                      </Text>
+                      <div>
+                        <Text type="secondary" style={{ fontSize: 11 }}>
+                          NIP: {selectedRecord?.nip}
+                        </Text>
+                      </div>
+                    </div>
+                  </Space>
+                </Space>
+              }
+              type="info"
+              showIcon
+              style={{ marginBottom: 16 }}
+            />
+
+            <Form form={form} layout="vertical" size="small">
+              <Form.Item
+                name="email_jatimprov"
+                label="Email Jatimprov"
+                rules={[
+                  { required: true, message: "Email wajib diisi!" },
+                  { type: "email", message: "Format email tidak valid!" },
+                ]}
+              >
+                <Input
+                  prefix={<IconMail size={14} />}
+                  placeholder="contoh@jatimprov.go.id"
+                />
+              </Form.Item>
+
+              <Form.Item
+                name="no_hp"
+                label="Nomor HP"
+                rules={[
+                  {
+                    pattern: /^[0-9]{10,13}$/,
+                    message: "Nomor HP harus 10-13 digit angka!",
+                  },
+                ]}
+              >
+                <Input
+                  prefix={<IconPhone size={14} />}
+                  placeholder="08123456789"
+                />
+              </Form.Item>
+            </Form>
+          </>
+        )}
       </Modal>
     </>
   );

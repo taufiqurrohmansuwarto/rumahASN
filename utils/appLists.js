@@ -57,7 +57,16 @@ export const appLists = [
     userType: ["asn", "umum", "non_asn"],
     target: "_blank",
   },
-
+  {
+    rightIcon: <IconMailbox />,
+    title: "Layanan Kominfo",
+    desc: "Layanan Kominfo",
+    color: "#FBBC05",
+    url: "/kominfo-services/dashboard",
+    icon: "https://siasn.bkd.jatimprov.go.id:9000/public/icon-temu-bkd.png",
+    userType: ["admin"],
+    target: "_blank",
+  },
   {
     rightIcon: <IconRobot />,
     title: "Bestie AI",

@@ -1,13 +1,18 @@
 import { layoutToken } from "@/styles/rasn.theme";
 import { appList } from "@/utils/app-lists";
 import { getMenuItems, mappingItems } from "@/utils/appLists";
+import MegaMenuTop from "@/components/MegaMenu/MegaMenuTop";
+import NotifikasiASNConnect from "@/components/Notification/NotifikasiASNConnect";
+import NotifikasiForumKepegawaian from "@/components/Notification/NotifikasiForumKepegawaian";
+import NotifikasiKepegawaian from "@/components/Notification/NotifikasiKepegawaian";
+import NotifikasiPrivateMessage from "@/components/Notification/NotifikasiPrivateMessage";
 import { LogoutOutlined, UserOutlined } from "@ant-design/icons";
 import {
+  IconClipboardList,
   IconHome,
   IconInbox,
   IconSend,
   IconSignature,
-  IconClipboardList,
 } from "@tabler/icons-react";
 import { Dropdown, Space } from "antd";
 import { signOut, useSession } from "next-auth/react";
@@ -70,6 +75,32 @@ function KominfoServicesLayout({ children, active = "/" }) {
       logo={null}
       layout="mix"
       token={layoutToken}
+      actionsRender={(props) => {
+        // if (props.isMobile) return [];
+        return [
+          <NotifikasiKepegawaian
+            key="kepegawaian"
+            url="kepegawaian"
+            title="Inbox Kepegawaian"
+          />,
+          <NotifikasiPrivateMessage
+            key="private-message"
+            url="/mails/inbox"
+            title="Inbox Pesan Pribadi"
+          />,
+          <NotifikasiASNConnect
+            key="asn-connect"
+            url="asn-connect"
+            title="Inbox ASN Connect"
+          />,
+          <NotifikasiForumKepegawaian
+            key="forum-kepegawaian"
+            url="forum-kepegawaian"
+            title="Inbox Forum Kepegawaian"
+          />,
+          <MegaMenuTop key="mega-menu" url="" title="Menu" />,
+        ];
+      }}
       avatarProps={{
         src: data?.user?.image,
         size: "large",

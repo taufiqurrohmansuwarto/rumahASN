@@ -2,7 +2,7 @@ import PageContainer from "@/components/PageContainer";
 import KominfoServicesLayout from "@/components/KominfoServices/KominfoServicesLayout";
 import FlushAdmin from "@/components/KominfoServices/FlushAdmin";
 import Head from "next/head";
-import { Breadcrumb } from "antd";
+import { Breadcrumb, Watermark } from "antd";
 import Link from "next/link";
 
 const KominfoServicesDashboardPage = () => {
@@ -25,9 +25,7 @@ const KominfoServicesDashboardPage = () => {
           ),
         }}
       >
-        <div>
-          <FlushAdmin />
-        </div>
+        <FlushAdmin />
       </PageContainer>
     </>
   );
