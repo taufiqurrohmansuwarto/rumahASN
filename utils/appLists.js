@@ -64,7 +64,7 @@ export const appLists = [
     color: "#FBBC05",
     url: "/kominfo-services/dashboard",
     icon: "https://siasn.bkd.jatimprov.go.id:9000/public/icon-temu-bkd.png",
-    userType: ["admin"],
+    userType: ["asn"],
     target: "_blank",
   },
   {
