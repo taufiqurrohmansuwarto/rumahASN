@@ -162,6 +162,7 @@ function LayananPengadaan() {
 
     // Menambahkan header dengan format yang lebih baik
     const headers = [
+      "ID",
       "NIP",
       "Nama Lengkap",
       "Gelar Depan",
@@ -233,6 +234,7 @@ function LayananPengadaan() {
     // Menambahkan data
     data?.data?.forEach((row) => {
       const dataRow = worksheet.addRow([
+        row.id,
         row.nip,
         row.nama,
         row?.usulan_data?.data?.glr_depan,
