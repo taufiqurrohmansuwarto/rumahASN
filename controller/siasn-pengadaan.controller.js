@@ -36,6 +36,7 @@ const {
   getFileAsn,
 } = require("@/utils/siasn-proxy.utils");
 const { createLogSIASN } = require("@/utils/logs");
+const { insightAIForParuhWaktu } = require("@/utils/helper/ai-insight.helper");
 
 const syncPengadaan = async (req, res) => {
   const knex = SiasnPengadaan.knex();
@@ -577,6 +578,25 @@ const cekPertekByNomerPeserta = async (req, res) => {
         knex.raw(
           "sp.usulan_data->'data'->>'pendidikan_ijazah_nama' as pendidikan_ijazah_nama"
         ),
+        knex.raw("sp.usulan_data->'data'->>'tahun_lulus' as tahun_lulus"),
+        knex.raw(
+          "sp.usulan_data->'data'->>'jabatan_fungsional_umum_nama' as jabatan_fungsional_umum_nama"
+        ),
+        knex.raw(
+          "sp.usulan_data->'data'->>'jabatan_fungsional_nama' as jabatan_fungsional_nama"
+        ),
+        knex.raw("sp.usulan_data->'data'->>'unor_nama' as unor_nama"),
+        knex.raw(
+          "sp.usulan_data->'data'->>'instansi_kerja_nama' as instansi_kerja_nama"
+        ),
+        knex.raw(
+          "sp.usulan_data->'data'->>'tgl_kontrak_mulai' as tgl_kontrak_mulai"
+        ),
+        knex.raw(
+          "sp.usulan_data->'data'->>'tgl_kontrak_akhir' as tgl_kontrak_akhir"
+        ),
+        knex.raw("sp.usulan_data->'data'->>'golongan' as golongan"),
+        knex.raw("sp.usulan_data->'data'->>'eselon' as eselon"),
         knex.raw(
           "sp.usulan_data->'data'->>'pendidikan_pertama_nama' as pendidikan_pertama_nama"
         ),
@@ -1003,6 +1023,23 @@ const proxyRekapPengadaanStats = async (req, res) => {
   }
 };
 
+const aiInsightById = async (req, res) => {
+  try {
+    const { id } = req.query;
+    const result = await SiasnPengadaanProxy.query().where("id", id).first();
+    if (result) {
+      const insight = await insightAIForParuhWaktu(result);
+      res.json(insight);
+    } else {
+      res.status(404).json({
+        message: "Data tidak ditemukan",
+      });
+    }
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
 module.exports = {
   proxyRekapPengadaanStats,
   resetUploadDokumen,
@@ -1024,4 +1061,5 @@ module.exports = {
 
   // api
   syncPengadaanApi,
+  aiInsightById,
 };

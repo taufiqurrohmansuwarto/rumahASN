@@ -16,6 +16,10 @@ export const cekPertekService = (data) => {
   return api.post(`/casn/cek-pertek`, data).then((res) => res?.data);
 };
 
+export const aiInsightByIdService = (id) => {
+  return api.get(`/casn/ai-insight-by-id?id=${id}`).then((res) => res?.data);
+};
+
 export const checkQRDocumentService = (documentCode) => {
   return api
     .get(`/check-qr/esign/${documentCode}`)

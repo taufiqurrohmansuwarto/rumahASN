@@ -1,4 +1,5 @@
 import { cekPertekService } from "@/services/public.services";
+import ASNAIInsight from "./ASNAIInsight";
 import { FileWordOutlined } from "@ant-design/icons";
 import { Alert, Stack } from "@mantine/core";
 import { IconAlertCircle } from "@tabler/icons-react";
@@ -45,6 +46,7 @@ const ShowData = ({ data, loading }) => {
   };
   return (
     <div className="result-container" style={{ marginTop: 20 }}>
+      <ASNAIInsight id={data?.id} />
       <h3 style={{ marginBottom: 16 }}>Informasi Pertek</h3>
       <Row gutter={[16, 16]}>
         <Col span={12}>
