@@ -1028,7 +1028,8 @@ const aiInsightById = async (req, res) => {
     const { id } = req.query;
     const result = await SiasnPengadaanProxy.query().where("id", id).first();
     if (result) {
-      const insight = await insightAIForParuhWaktu(result);
+      const profile = result?.usulan_data?.data;
+      const insight = await insightAIForParuhWaktu(profile);
       res.json(insight);
     } else {
       res.status(404).json({

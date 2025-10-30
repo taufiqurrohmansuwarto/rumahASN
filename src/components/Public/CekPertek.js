@@ -1,8 +1,15 @@
 import { cekPertekService } from "@/services/public.services";
 import ASNAIInsight from "./ASNAIInsight";
-import { FileWordOutlined } from "@ant-design/icons";
-import { Alert, Stack } from "@mantine/core";
-import { IconAlertCircle } from "@tabler/icons-react";
+import { Stack, Text, Group } from "@mantine/core";
+import {
+  IconUser,
+  IconHash,
+  IconBriefcase,
+  IconBuilding,
+  IconFileText,
+  IconDownload,
+  IconChecklist,
+} from "@tabler/icons-react";
 import { useMutation } from "@tanstack/react-query";
 import {
   Button,
@@ -16,19 +23,14 @@ import {
   Skeleton,
   Space,
   Tooltip,
+  Divider,
+  Tag,
+  Alert,
 } from "antd";
 import { useSession } from "next-auth/react";
 import { useState } from "react";
 
-const ShowData = ({ data, loading }) => {
-  if (loading) {
-    return <Skeleton active paragraph={{ rows: 6 }} />;
-  }
-
-  if (!data) {
-    return null;
-  }
-
+const ShowData = ({ data }) => {
   const handleDownload = () => {
     const base64String = `data:application/pdf;base64,${data?.file}`;
     const a = document.createElement("a");
@@ -44,62 +46,102 @@ const ShowData = ({ data, loading }) => {
     a.download = "sk.pdf";
     a.click();
   };
+
   return (
-    <div className="result-container" style={{ marginTop: 20 }}>
-      <ASNAIInsight id={data?.id} />
-      <h3 style={{ marginBottom: 16 }}>Informasi Pertek</h3>
-      <Row gutter={[16, 16]}>
-        <Col span={12}>
-          <div className="info-item">
-            <strong>Nama:</strong> {data.nama}
-          </div>
-          <div className="info-item">
-            <strong>NIP:</strong> {data.nip}
-          </div>
-          <div className="info-item">
-            <strong>Nomor Peserta:</strong> {data.no_peserta}
-          </div>
-          <div className="info-item">
-            <strong>Jenis Formasi:</strong> {data.jenis_formasi_nama}
-          </div>
-        </Col>
-        <Col span={12}>
-          <div className="info-item">
-            <strong>Status Usulan:</strong>{" "}
-            <span style={{ color: "#1890ff" }}>{data.status_usulan_nama}</span>
-          </div>
-          <div className="info-item">
-            <strong>Unit Organisasi:</strong> {data.unor_siasn || "-"}
-          </div>
-          <Space>
-            {data?.file && (
-              <div className="info-item" style={{ marginTop: 16 }}>
+    <Stack gap="sm">
+      {/* Data Pertek */}
+      <div>
+        <Text size="sm" fw={600} mb={8} c="#fa8c16">
+          Status Usulan
+        </Text>
+        <Row gutter={[16, 0]}>
+          <Col lg={12} xs={24}>
+            <DetailItem icon={IconUser} label="Nama" value={data.nama} />
+            <DetailItem icon={IconHash} label="NIP" value={data.nip} />
+          </Col>
+          <Col lg={12} xs={24}>
+            <DetailItem
+              icon={IconFileText}
+              label="Nomor Peserta"
+              value={data.no_peserta}
+            />
+            <DetailItem
+              icon={IconBriefcase}
+              label="Jenis Formasi"
+              value={data.jenis_formasi_nama}
+            />
+          </Col>
+        </Row>
+
+        <Divider style={{ margin: "10px 0" }} />
+
+        <DetailItem
+          icon={IconChecklist}
+          label="Status"
+          value={
+            <Tag color="orange" style={{ padding: "2px 8px", fontSize: 12 }}>
+              {data.status_usulan_nama}
+            </Tag>
+          }
+        />
+        <DetailItem
+          icon={IconBuilding}
+          label="Unit Organisasi"
+          value={data.unor_siasn || "-"}
+        />
+
+        {/* Download Buttons */}
+        {(data?.file || data?.fileSk) && (
+          <>
+            <Divider style={{ margin: "10px 0" }} />
+            <Space size="small" wrap>
+              {data?.file && (
                 <Button
                   type="primary"
-                  icon={<FileWordOutlined />}
+                  icon={<IconDownload size={16} />}
                   onClick={handleDownload}
+                  size="small"
                 >
-                  Unduh Pertek
+                  Pertek
                 </Button>
-              </div>
-            )}
-            {data?.fileSk && (
-              <div className="info-item" style={{ marginTop: 16 }}>
+              )}
+              {data?.fileSk && (
                 <Button
-                  type="primary"
-                  icon={<FileWordOutlined />}
+                  icon={<IconDownload size={16} />}
                   onClick={handleDownloadSk}
+                  size="small"
                 >
-                  Unduh SK
+                  SK
                 </Button>
-              </div>
-            )}
-          </Space>
-        </Col>
-      </Row>
-    </div>
+              )}
+            </Space>
+          </>
+        )}
+      </div>
+
+      {/* AI Insight - Load separately */}
+      <ASNAIInsight id={data?.id} />
+    </Stack>
   );
 };
+
+const DetailItem = ({ icon: Icon, label, value }) => (
+  <Group gap={8} align="flex-start" mb={8} wrap="nowrap">
+    {Icon && (
+      <div style={{ marginTop: 2 }}>
+        <Icon size={16} color="#6b7280" />
+      </div>
+    )}
+    <div style={{ flex: 1 }}>
+      <Text size="xs" c="dimmed" mb={2}>
+        {label}
+      </Text>
+      <Text size="sm" fw={500} style={{ color: "#1f2937" }}>
+        {value || "-"}
+      </Text>
+    </div>
+  </Group>
+);
 
 const ModalCekPertek = ({ open, onCancel }) => {
   const [form] = Form.useForm();
@@ -110,6 +152,9 @@ const ModalCekPertek = ({ open, onCancel }) => {
     mutationFn: (data) => cekPertekService(data),
     onSuccess: (data) => {
       setData(data);
+    },
+    onMutate: () => {
+      setData(null);
     },
     onError: (error) => {
       message.error(error?.response?.data?.message);
@@ -147,110 +192,154 @@ const ModalCekPertek = ({ open, onCancel }) => {
 
   return (
     <Modal
+      centered
       title="Cek Status Usulan CASN"
       open={open}
       onCancel={onCancel}
-      onOk={null}
-      okText="Submit"
       footer={null}
-      width={800}
+      width={700}
+      styles={{
+        body: {
+          maxHeight: "70vh",
+          overflowY: "auto",
+        },
+      }}
     >
-      <Stack>
-        <Alert
-          color="red"
-          variant="filled"
-          icon={<IconAlertCircle size="1rem" />}
-        >
-          Hanya untuk Pemerintah Provinsi Jawa Timur
-        </Alert>
+      <Alert
+        message="Hanya untuk Pemerintah Provinsi Jawa Timur"
+        type="warning"
+        showIcon
+        style={{ marginBottom: 16 }}
+      />
+
+      {/* Form */}
+      {!data && (
         <Form form={form} layout="vertical">
-          <Row gutter={16}>
-            <Col span={24}>
-              <Form.Item label="Jenis Dokumen" style={{ marginBottom: 16 }}>
-                <Radio.Group
-                  value={useSkck}
-                  onChange={handleDocumentTypeChange}
-                >
-                  <Radio value={false}>Nomor Ijazah</Radio>
-                  <Radio value={true}>Nomor SKCK</Radio>
-                </Radio.Group>
-              </Form.Item>
-            </Col>
-            <Col md={12} xs={24}>
-              <Form.Item
-                rules={[{ required: true, message: "No Peserta harus diisi" }]}
-                normalize={(values) => values.replace(/\s/g, "")}
-                name="no_peserta"
-                label="No Peserta"
-                style={{ marginBottom: 16 }}
-              >
-                <Input placeholder="Masukkan nomor peserta" />
-              </Form.Item>
-            </Col>
-            {!useSkck ? (
-              <>
-                <Col md={12} xs={24}>
-                  <Form.Item
-                    rules={[
-                      { required: true, message: "No Ijazah harus diisi" },
-                    ]}
-                    name="no_ijazah"
-                    label="No Ijazah (lihat di SSCASN)"
-                  >
-                    <Input placeholder="Masukkan nomor ijazah" />
-                  </Form.Item>
-                </Col>
-                <Col md={12} xs={24}>
-                  <Form.Item
-                    rules={[
-                      { required: true, message: "Tahun Lulus harus diisi" },
-                    ]}
-                    name="tahun_lulus"
-                    label="Tahun Lulus (lihat di SSCASN)"
-                  >
-                    <Input placeholder="Masukkan tahun lulus" />
-                  </Form.Item>
-                </Col>
-              </>
-            ) : (
-              <Col md={12} xs={24}>
-                <Form.Item
-                  rules={[{ required: true, message: "No SKCK harus diisi" }]}
-                  name="no_skck"
-                  label="No SKCK (lihat di SSCASN)"
-                >
-                  <Input placeholder="Masukkan nomor SKCK" />
-                </Form.Item>
-              </Col>
-            )}
-            <Col md={12} xs={24}>
-              <Form.Item
-                rules={[{ required: true, message: "Tahun harus diisi" }]}
-                name="tahun"
-                label="Tahun"
-                style={{ marginBottom: 16 }}
-              >
-                <Radio.Group>
-                  <Radio.Button value="2025">2025</Radio.Button>
-                  <Radio.Button value="2024">2024</Radio.Button>
-                  <Radio.Button value="2023">2023</Radio.Button>
-                  <Radio.Button value="2022">2022</Radio.Button>
-                </Radio.Group>
-              </Form.Item>
-            </Col>
-          </Row>
-          <Button
-            loading={isLoading}
-            disabled={isLoading}
-            type="primary"
-            htmlType="submit"
-            onClick={handleSubmit}
-          >
-            Submit
-          </Button>
+                    <Row gutter={16}>
+                      <Col span={24}>
+                        <Form.Item
+                          label="Jenis Dokumen"
+                          style={{ marginBottom: 16 }}
+                        >
+                          <Radio.Group
+                            value={useSkck}
+                            onChange={handleDocumentTypeChange}
+                            buttonStyle="solid"
+                          >
+                            <Radio.Button value={false}>
+                              Nomor Ijazah
+                            </Radio.Button>
+                            <Radio.Button value={true}>Nomor SKCK</Radio.Button>
+                          </Radio.Group>
+                        </Form.Item>
+                      </Col>
+                      <Col md={12} xs={24}>
+                        <Form.Item
+                          rules={[
+                            {
+                              required: true,
+                              message: "No Peserta harus diisi",
+                            },
+                          ]}
+                          normalize={(values) => values.replace(/\s/g, "")}
+                          name="no_peserta"
+                          label="No Peserta"
+                          style={{ marginBottom: 16 }}
+                        >
+                          <Input placeholder="Masukkan nomor peserta" />
+                        </Form.Item>
+                      </Col>
+                      {!useSkck ? (
+                        <>
+                          <Col md={12} xs={24}>
+                            <Form.Item
+                              rules={[
+                                {
+                                  required: true,
+                                  message: "No Ijazah harus diisi",
+                                },
+                              ]}
+                              name="no_ijazah"
+                              label="No Ijazah (lihat di SSCASN)"
+                            >
+                              <Input placeholder="Masukkan nomor ijazah" />
+                            </Form.Item>
+                          </Col>
+                          <Col md={12} xs={24}>
+                            <Form.Item
+                              rules={[
+                                {
+                                  required: true,
+                                  message: "Tahun Lulus harus diisi",
+                                },
+                              ]}
+                              name="tahun_lulus"
+                              label="Tahun Lulus (lihat di SSCASN)"
+                            >
+                              <Input placeholder="Masukkan tahun lulus" />
+                            </Form.Item>
+                          </Col>
+                        </>
+                      ) : (
+                        <Col md={12} xs={24}>
+                          <Form.Item
+                            rules={[
+                              {
+                                required: true,
+                                message: "No SKCK harus diisi",
+                              },
+                            ]}
+                            name="no_skck"
+                            label="No SKCK (lihat di SSCASN)"
+                          >
+                            <Input placeholder="Masukkan nomor SKCK" />
+                          </Form.Item>
+                        </Col>
+                      )}
+                      <Col md={12} xs={24}>
+                        <Form.Item
+                          rules={[
+                            { required: true, message: "Tahun harus diisi" },
+                          ]}
+                          name="tahun"
+                          label="Tahun"
+                          style={{ marginBottom: 16 }}
+                        >
+                          <Radio.Group buttonStyle="solid">
+                            <Radio.Button value="2025">2025</Radio.Button>
+                            <Radio.Button value="2024">2024</Radio.Button>
+                            <Radio.Button value="2023">2023</Radio.Button>
+                            <Radio.Button value="2022">2022</Radio.Button>
+                          </Radio.Group>
+                        </Form.Item>
+                      </Col>
+                    </Row>
+          <Space>
+            <Button
+              loading={isLoading}
+              disabled={isLoading}
+              type="primary"
+              htmlType="submit"
+              onClick={handleSubmit}
+            >
+              Cek Status
+            </Button>
+            <Button onClick={() => form.resetFields()} disabled={isLoading}>
+              Reset
+            </Button>
+          </Space>
         </Form>
-        <ShowData data={data} loading={isLoading} />
-      </Stack>
+      )}
+
+      {/* Loading State */}
+      {isLoading && !data && (
+        <div style={{ padding: "20px 0" }}>
+          <Skeleton active paragraph={{ rows: 3 }} />
+        </div>
+      )}
+
+      {/* Result */}
+      {data && <ShowData data={data} />}
     </Modal>
   );
 };
