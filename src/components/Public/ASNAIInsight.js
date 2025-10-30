@@ -50,7 +50,7 @@ function ASNAIInsight({ id }) {
   const closing = insight?.closing || {};
 
   return (
-    <div style={{ marginTop: 16 }}>
+    <div style={{ marginTop: 16, width: "100%", overflow: "hidden" }}>
       <div style={{
         fontSize: 14,
         fontWeight: 600,
@@ -64,7 +64,7 @@ function ASNAIInsight({ id }) {
         <span>BestieAI</span>
       </div>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 8, width: "100%" }}>
         {/* Sapaan Hangat */}
         {header?.sapaan_hangat && (
           <div
@@ -74,6 +74,8 @@ function ASNAIInsight({ id }) {
               padding: 10,
               borderRadius: 6,
               fontStyle: "italic",
+              wordWrap: "break-word",
+              overflowWrap: "break-word",
             }}
           >
             <div style={{ fontSize: 13, lineHeight: 1.5, color: "#594a3a" }}>
@@ -140,6 +142,8 @@ function ASNAIInsight({ id }) {
               border: "1px solid #bbf7d0",
               padding: 8,
               borderRadius: 6,
+              wordWrap: "break-word",
+              overflowWrap: "break-word",
             }}
           >
             <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 4, color: "#166534" }}>
@@ -159,6 +163,8 @@ function ASNAIInsight({ id }) {
               border: "1px solid #ffd591",
               padding: 8,
               borderRadius: 6,
+              wordWrap: "break-word",
+              overflowWrap: "break-word",
             }}
           >
             <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 4, color: "#1f2937" }}>
@@ -178,6 +184,8 @@ function ASNAIInsight({ id }) {
               border: "1px solid #ffd591",
               padding: 8,
               borderRadius: 6,
+              wordWrap: "break-word",
+              overflowWrap: "break-word",
             }}
           >
             <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 4, color: "#1f2937" }}>
@@ -197,6 +205,8 @@ function ASNAIInsight({ id }) {
               border: "1px solid #fecaca",
               padding: 8,
               borderRadius: 6,
+              wordWrap: "break-word",
+              overflowWrap: "break-word",
             }}
           >
             <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 4, color: "#991b1b" }}>

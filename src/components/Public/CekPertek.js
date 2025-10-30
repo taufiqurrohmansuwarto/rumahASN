@@ -197,11 +197,12 @@ const ModalCekPertek = ({ open, onCancel }) => {
       open={open}
       onCancel={onCancel}
       footer={null}
-      width={700}
+      width={900}
       styles={{
         body: {
           maxHeight: "70vh",
           overflowY: "auto",
+          overflowX: "hidden",
         },
       }}
     >
