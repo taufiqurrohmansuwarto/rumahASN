@@ -268,7 +268,7 @@ Gunakan File Search untuk temukan dokumen yang relevan. Output HARUS ikuti JSON 
 `.trim();
 
     const resp = await openai.responses.create({
-      model: "gpt-4.1", // Model tertinggi untuk kualitas maksimal
+      model: "gpt-4o-mini", // Model tertinggi untuk kualitas maksimal
       temperature: 0.5, // Sedikit lebih warm untuk tone yang hangat & personal
 
       tools: [{ type: "file_search", vector_store_ids: [VECTOR_STORE_ID] }],
