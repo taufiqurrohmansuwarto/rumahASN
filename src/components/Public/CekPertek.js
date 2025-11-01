@@ -147,6 +147,7 @@ const ModalCekPertek = ({ open, onCancel }) => {
   const [form] = Form.useForm();
   const [data, setData] = useState(null);
   const [useSkck, setUseSkck] = useState(false);
+  const [isParuhWaktu, setIsParuhWaktu] = useState(false);
 
   const { mutate, isLoading } = useMutation({
     mutationFn: (data) => cekPertekService(data),
@@ -163,8 +164,19 @@ const ModalCekPertek = ({ open, onCancel }) => {
 
   const handleSubmit = async () => {
     const values = await form.validateFields();
+
+    // Add "PW" prefix if paruh waktu
+    let noPeserta = values?.no_peserta;
+    if (
+      isParuhWaktu &&
+      noPeserta &&
+      !noPeserta.toUpperCase().startsWith("PW")
+    ) {
+      noPeserta = `PW${noPeserta}`;
+    }
+
     const payload = {
-      no_peserta: values?.no_peserta,
+      no_peserta: noPeserta,
       tahun: values?.tahun,
       use_skck: useSkck,
     };
@@ -216,105 +228,133 @@ const ModalCekPertek = ({ open, onCancel }) => {
       {/* Form */}
       {!data && (
         <Form form={form} layout="vertical">
-                    <Row gutter={16}>
-                      <Col span={24}>
-                        <Form.Item
-                          label="Jenis Dokumen"
-                          style={{ marginBottom: 16 }}
-                        >
-                          <Radio.Group
-                            value={useSkck}
-                            onChange={handleDocumentTypeChange}
-                            buttonStyle="solid"
-                          >
-                            <Radio.Button value={false}>
-                              Nomor Ijazah
-                            </Radio.Button>
-                            <Radio.Button value={true}>Nomor SKCK</Radio.Button>
-                          </Radio.Group>
-                        </Form.Item>
-                      </Col>
-                      <Col md={12} xs={24}>
-                        <Form.Item
-                          rules={[
-                            {
-                              required: true,
-                              message: "No Peserta harus diisi",
-                            },
-                          ]}
-                          normalize={(values) => values.replace(/\s/g, "")}
-                          name="no_peserta"
-                          label="No Peserta"
-                          style={{ marginBottom: 16 }}
-                        >
-                          <Input placeholder="Masukkan nomor peserta" />
-                        </Form.Item>
-                      </Col>
-                      {!useSkck ? (
-                        <>
-                          <Col md={12} xs={24}>
-                            <Form.Item
-                              rules={[
-                                {
-                                  required: true,
-                                  message: "No Ijazah harus diisi",
-                                },
-                              ]}
-                              name="no_ijazah"
-                              label="No Ijazah (lihat di SSCASN)"
-                            >
-                              <Input placeholder="Masukkan nomor ijazah" />
-                            </Form.Item>
-                          </Col>
-                          <Col md={12} xs={24}>
-                            <Form.Item
-                              rules={[
-                                {
-                                  required: true,
-                                  message: "Tahun Lulus harus diisi",
-                                },
-                              ]}
-                              name="tahun_lulus"
-                              label="Tahun Lulus (lihat di SSCASN)"
-                            >
-                              <Input placeholder="Masukkan tahun lulus" />
-                            </Form.Item>
-                          </Col>
-                        </>
-                      ) : (
-                        <Col md={12} xs={24}>
-                          <Form.Item
-                            rules={[
-                              {
-                                required: true,
-                                message: "No SKCK harus diisi",
-                              },
-                            ]}
-                            name="no_skck"
-                            label="No SKCK (lihat di SSCASN)"
-                          >
-                            <Input placeholder="Masukkan nomor SKCK" />
-                          </Form.Item>
-                        </Col>
-                      )}
-                      <Col md={12} xs={24}>
-                        <Form.Item
-                          rules={[
-                            { required: true, message: "Tahun harus diisi" },
-                          ]}
-                          name="tahun"
-                          label="Tahun"
-                          style={{ marginBottom: 16 }}
-                        >
-                          <Radio.Group buttonStyle="solid">
-                            <Radio.Button value="2025">2025</Radio.Button>
-                            <Radio.Button value="2024">2024</Radio.Button>
-                            <Radio.Button value="2023">2023</Radio.Button>
-                            <Radio.Button value="2022">2022</Radio.Button>
-                          </Radio.Group>
-                        </Form.Item>
-                      </Col>
-                    </Row>
+          <Row gutter={16}>
+            <Col span={24}>
+              <Form.Item label="Jenis Dokumen" style={{ marginBottom: 16 }}>
+                <Radio.Group
+                  value={useSkck}
+                  onChange={handleDocumentTypeChange}
+                  buttonStyle="solid"
+                >
+                  <Radio.Button value={false}>Nomor Ijazah</Radio.Button>
+                  <Radio.Button value={true}>Nomor SKCK</Radio.Button>
+                </Radio.Group>
+              </Form.Item>
+            </Col>
+            <Col md={12} xs={24}>
+              <Form.Item
+                label={
+                  <Space size={8}>
+                    <span>No Peserta</span>
+                    <Form.Item
+                      name="is_paruh_waktu"
+                      valuePropName="checked"
+                      noStyle
+                    >
+                      <input
+                        type="checkbox"
+                        checked={isParuhWaktu}
+                        onChange={(e) => setIsParuhWaktu(e.target.checked)}
+                        style={{ marginRight: 4 }}
+                      />
+                    </Form.Item>
+                    <span style={{ fontSize: 12, color: "#666" }}>
+                      Paruh Waktu
+                    </span>
+                  </Space>
+                }
+              >
+                <Form.Item
+                  rules={[
+                    {
+                      required: true,
+                      message: "No Peserta harus diisi",
+                    },
+                  ]}
+                  normalize={(values) => values.replace(/\s/g, "")}
+                  name="no_peserta"
+                  noStyle
+                >
+                  <Input
+                    placeholder={
+                      isParuhWaktu
+                        ? "Contoh: 123456 (otomatis jadi PW123456)"
+                        : "Masukkan nomor peserta"
+                    }
+                    prefix={
+                      isParuhWaktu ? (
+                        <span style={{ color: "#1890ff", fontWeight: 600 }}>
+                          PW
+                        </span>
+                      ) : null
+                    }
+                  />
+                </Form.Item>
+              </Form.Item>
+            </Col>
+            {!useSkck ? (
+              <>
+                <Col md={12} xs={24}>
+                  <Form.Item
+                    rules={[
+                      {
+                        required: true,
+                        message: "No Ijazah harus diisi",
+                      },
+                    ]}
+                    name="no_ijazah"
+                    label="No Ijazah (lihat di SSCASN)"
+                  >
+                    <Input placeholder="Masukkan nomor ijazah" />
+                  </Form.Item>
+                </Col>
+                <Col md={12} xs={24}>
+                  <Form.Item
+                    rules={[
+                      {
+                        required: true,
+                        message: "Tahun Lulus harus diisi",
+                      },
+                    ]}
+                    name="tahun_lulus"
+                    label="Tahun Lulus (lihat di SSCASN)"
+                  >
+                    <Input placeholder="Masukkan tahun lulus" />
+                  </Form.Item>
+                </Col>
+              </>
+            ) : (
+              <Col md={12} xs={24}>
+                <Form.Item
+                  rules={[
+                    {
+                      required: true,
+                      message: "No SKCK harus diisi",
+                    },
+                  ]}
+                  name="no_skck"
+                  label="No SKCK (lihat di SSCASN)"
+                >
+                  <Input placeholder="Masukkan nomor SKCK" />
+                </Form.Item>
+              </Col>
+            )}
+            <Col md={12} xs={24}>
+              <Form.Item
+                rules={[{ required: true, message: "Tahun harus diisi" }]}
+                name="tahun"
+                label="Tahun"
+                style={{ marginBottom: 16 }}
+              >
+                <Radio.Group buttonStyle="solid">
+                  <Radio.Button value="2025">2025</Radio.Button>
+                  <Radio.Button value="2024">2024</Radio.Button>
+                  <Radio.Button value="2023">2023</Radio.Button>
+                  <Radio.Button value="2022">2022</Radio.Button>
+                </Radio.Group>
+              </Form.Item>
+            </Col>
+          </Row>
           <Space>
             <Button
               loading={isLoading}
