@@ -37,6 +37,9 @@ const {
 } = require("@/utils/siasn-proxy.utils");
 const { createLogSIASN } = require("@/utils/logs");
 const { insightAIForParuhWaktu } = require("@/utils/helper/ai-insight.helper");
+const AIInsightParuhWaktu = require("@/models/ai-insight-paruh-waktu.model");
+const { nanoid } = require("nanoid");
+const { log } = require("@/utils/logger");
 
 const syncPengadaan = async (req, res) => {
   const knex = SiasnPengadaan.knex();
@@ -649,6 +652,7 @@ const cekPertekByNomerPeserta = async (req, res) => {
 
       const url = result[0]?.path_ttd_pertek;
       const urlSk = result[0]?.path_ttd_sk;
+      log.info(JSON.stringify({ result: result[0] }));
 
       if (url) {
         const currentFile = await getFileAsn(url);
@@ -1023,20 +1027,99 @@ const proxyRekapPengadaanStats = async (req, res) => {
   }
 };
 
+/**
+ * Generate AI insight untuk PPPK Paruh Waktu dengan database caching
+ *
+ * FLOW:
+ * 1. Cek apakah insight sudah pernah di-generate (berdasarkan source_id = pengadaan id)
+ * 2. Jika sudah ada di database → return data dari database (no AI call)
+ * 3. Jika belum ada → generate dengan AI, simpan ke database, return result
+ *
+ * KEAMANAN:
+ * - Data yang dikirim ke AI sudah di-protect (hybrid approach)
+ * - Data yang disimpan di database adalah data ASLI (tidak di-mask)
+ * - Data yang di-return ke client adalah data ASLI (karena sudah di server)
+ */
 const aiInsightById = async (req, res) => {
   try {
     const { id } = req.query;
-    const result = await SiasnPengadaanProxy.query().where("id", id).first();
-    if (result) {
-      const profile = result?.usulan_data?.data;
-      const insight = await insightAIForParuhWaktu(profile);
-      res.json(insight);
-    } else {
-      res.status(404).json({
-        message: "Data tidak ditemukan",
+    const { custom_id: userId } = req?.user;
+
+    // 1. Cari data pengadaan
+    const pengadaan = await SiasnPengadaanProxy.query().where("id", id).first();
+
+    if (!pengadaan) {
+      return res.status(404).json({
+        message: "Data pengadaan tidak ditemukan",
       });
     }
+
+    // 2. Cek apakah insight sudah pernah di-generate
+    const existingInsight = await AIInsightParuhWaktu.query()
+      .where("source_id", id)
+      .first();
+
+    if (existingInsight) {
+      // ✅ Sudah ada di database, return dari cache
+      log.info(`✅ AI Insight found in cache for pengadaan ID: ${id}`);
+      return res.json({
+        success: true,
+        from_cache: true,
+        cached_at: existingInsight.created_at,
+        profile_summary: existingInsight.data.profile_summary,
+        insight: existingInsight.result.insight,
+        metadata: {
+          ...existingInsight.result.metadata,
+          retrieved_from: "database_cache",
+          retrieved_at: new Date().toISOString(),
+        },
+      });
+    }
+
+    // 3. Belum ada di database, generate dengan AI
+    log.info(`🤖 Generating new AI insight for pengadaan ID: ${id}`);
+    const profile = pengadaan?.usulan_data?.data;
+
+    const aiResult = await insightAIForParuhWaktu(profile);
+
+    // 4. Simpan ke database untuk caching
+    const savedInsight = await AIInsightParuhWaktu.query().insert({
+      id: nanoid(),
+      source_id: id, // ID pengadaan sebagai unique identifier
+      user_id: userId,
+      data: {
+        profile_summary: aiResult.profile_summary, // Data asli (nama lengkap, dll)
+        profile_raw: profile, // Raw data dari SIASN
+      },
+      result: {
+        insight: aiResult.insight, // Hasil AI (sudah di-fill dengan nama asli)
+        metadata: aiResult.metadata,
+      },
+      metadata: {
+        generated_at: new Date().toISOString(),
+        source_type: "pengadaan",
+        model: aiResult.metadata.model,
+        response_id: aiResult.metadata.response_id,
+      },
+    });
+
+    log.info(`✅ AI Insight saved to database with ID: ${savedInsight.id}`);
+
+    // 5. Return hasil yang baru di-generate
+    res.json({
+      success: true,
+      from_cache: false,
+      generated_at: savedInsight.created_at,
+      profile_summary: aiResult.profile_summary,
+      insight: aiResult.insight,
+      metadata: {
+        ...aiResult.metadata,
+        saved_to_database: true,
+        database_id: savedInsight.id,
+      },
+    });
   } catch (error) {
+    log.error("Error in aiInsightById:", error);
     handleError(res, error);
   }
 };

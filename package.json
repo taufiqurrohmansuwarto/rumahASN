@@ -46,6 +46,7 @@
     "antd-style": "^3.7.1",
     "array-to-tree": "^3.3.2",
     "axios": "^1.7.9",
+    "bcrypt": "^6.0.0",
     "bull": "^4.16.5",
     "client-oauth2": "^4.3.3",
     "dayjs": "^1.11.13",
