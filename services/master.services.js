@@ -9,6 +9,10 @@ export const getDisparitasByNip = (nip) => {
   return api.get(`/admin/${nip}/disparitas`).then((res) => res.data);
 };
 
+export const checkFotoPersonalByNipServices = ({ nip, data }) => {
+  return api.post(`/admin/${nip}/check-foto`, data).then((res) => res.data);
+};
+
 export const getDokumenFasilitator = () => {
   return api.get("/fasilitator/download-sk", {
     responseType: "arraybuffer",
@@ -292,4 +296,8 @@ export const simasterJfuBackup = () => {
 
 export const getAtasan = (nip) => {
   return masterApi.get(`/get-atasan?nip=${nip}`).then((res) => res.data);
+};
+
+export const checkFotoPersonalMasterWs = (refresh = false) => {
+  return api.post("/check-foto", { refresh }).then((res) => res.data);
 };

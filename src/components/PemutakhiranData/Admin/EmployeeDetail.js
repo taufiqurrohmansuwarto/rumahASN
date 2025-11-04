@@ -1,6 +1,7 @@
 import IPAsnByNip from "@/components/LayananSIASN/IPASNByNip";
 import PengaturanGelarByNip from "@/components/LayananSIASN/PengaturanGelarByNip";
 import CekPencantumanGelar from "@/components/PemutakhiranData/Button/CekPencantumanGelar";
+import CheckFotoPersonalByNip from "@/components/PemutakhiranData/OCR/CheckFotoPersonalByNip";
 import { dataUtamaMasterByNip } from "@/services/master.services";
 import {
   dataUtamSIASNByNip,
@@ -38,7 +39,16 @@ import {
   IconX,
 } from "@tabler/icons-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Avatar, Button, Col, Popconfirm, Row, Tooltip, message } from "antd";
+import {
+  Avatar,
+  Button,
+  Col,
+  Popconfirm,
+  Row,
+  Space,
+  Tooltip,
+  message,
+} from "antd";
 import { useRouter } from "next/router";
 import SyncGolonganByNip from "../Sync/SyncGolonganByNip";
 import SyncJabatanByNip from "../Sync/SyncJabatanByNip";
@@ -565,15 +575,18 @@ const EmployeeContent = ({ data, loading, nip }) => {
           </Stack>
 
           <Stack align="center" spacing="xs">
-            <Button
-              type="primary"
-              size="small"
-              onClick={handleUpdateFoto}
-              loading={isLoadingUpdateFoto}
-              icon={<IconUpload size={14} />}
-            >
-              Transfer Foto
-            </Button>
+            <Space>
+              <CheckFotoPersonalByNip nip={nip} />
+              <Button
+                type="primary"
+                size="small"
+                onClick={handleUpdateFoto}
+                loading={isLoadingUpdateFoto}
+                icon={<IconUpload size={14} />}
+              >
+                Transfer Foto
+              </Button>
+            </Space>
             <Group spacing={4} wrap="wrap" justify="center">
               <SyncJabatanByNip nip={nip} />
               <SyncGolonganByNip nip={nip} />

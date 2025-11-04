@@ -1,6 +1,8 @@
 import IPAsn from "@/components/LayananSIASN/IPAsn";
-import AnalyzeFoto from "@/components/PemutakhiranData/OCR/AnalyzeFoto";
+import CekPencantumanGelar from "@/components/PemutakhiranData/Button/CekPencantumanGelar";
+import CheckFotoPersonal from "@/components/PemutakhiranData/OCR/CheckFotoPersonal";
 import { getDisparitas } from "@/services/master.services";
+import { updateFotoSiasn } from "@/services/siasn-services";
 import { mysapkMenu } from "@/utils/client-utils";
 import {
   CheckCircleFilled,
@@ -24,13 +26,12 @@ import {
   Tag,
   Tooltip,
   Typography,
+  Space,
 } from "antd";
 import { useRouter } from "next/router";
 import DisparitasData from "../LayananSIASN/DisparitasData";
 import GantiEmail from "../LayananSIASN/GantiEmail";
 import PengaturanGelar from "../LayananSIASN/PengaturanGelar";
-import { updateFotoSiasn } from "@/services/siasn-services";
-import CekPencantumanGelar from "@/components/PemutakhiranData/Button/CekPencantumanGelar";
 
 const { Title, Text } = Typography;
 
@@ -351,10 +352,6 @@ export function MenuMySAPK({
                     >
                       SIMASTER
                     </Text>
-                    <AnalyzeFoto
-                      url={simaster?.foto}
-                      jenis_jabatan={simaster?.jabatan_nama}
-                    />
                   </div>
 
                   <div style={{ textAlign: "center", position: "relative" }}>
@@ -406,31 +403,34 @@ export function MenuMySAPK({
                 </div>
 
                 {/* Transfer Photo Button */}
-                <Button
-                  type="default"
-                  size={isMobile ? "small" : "middle"}
-                  style={{
-                    backgroundColor: "#FFFFFF",
-                    border: "1px solid #FF4500",
-                    color: "#FF4500",
-                    borderRadius: "6px",
-                    fontWeight: 500,
-                    width: isMobile ? "100%" : "auto",
-                    minWidth: "140px",
-                  }}
-                  loading={isTransferFotoLoading}
-                  onClick={handleTransferFoto}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = "#FF4500";
-                    e.currentTarget.style.color = "#FFFFFF";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = "#FFFFFF";
-                    e.currentTarget.style.color = "#FF4500";
-                  }}
-                >
-                  🔄 Transfer Foto
-                </Button>
+                <Space>
+                  <Button
+                    type="default"
+                    size={isMobile ? "small" : "middle"}
+                    style={{
+                      backgroundColor: "#FFFFFF",
+                      border: "1px solid #FF4500",
+                      color: "#FF4500",
+                      borderRadius: "6px",
+                      fontWeight: 500,
+                      width: isMobile ? "100%" : "auto",
+                      minWidth: "140px",
+                    }}
+                    loading={isTransferFotoLoading}
+                    onClick={handleTransferFoto}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = "#FF4500";
+                      e.currentTarget.style.color = "#FFFFFF";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = "#FFFFFF";
+                      e.currentTarget.style.color = "#FF4500";
+                    }}
+                  >
+                    🔄 Transfer Foto
+                  </Button>
+                  <CheckFotoPersonal />
+                </Space>
               </div>
 
               {/* Profile Info */}
