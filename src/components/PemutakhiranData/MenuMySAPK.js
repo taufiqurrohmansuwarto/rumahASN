@@ -1,4 +1,5 @@
 import IPAsn from "@/components/LayananSIASN/IPAsn";
+import AnalyzeFoto from "@/components/PemutakhiranData/OCR/AnalyzeFoto";
 import { getDisparitas } from "@/services/master.services";
 import { mysapkMenu } from "@/utils/client-utils";
 import {
@@ -350,6 +351,10 @@ export function MenuMySAPK({
                     >
                       SIMASTER
                     </Text>
+                    <AnalyzeFoto
+                      url={simaster?.foto}
+                      jenis_jabatan={simaster?.jabatan_nama}
+                    />
                   </div>
 
                   <div style={{ textAlign: "center", position: "relative" }}>
