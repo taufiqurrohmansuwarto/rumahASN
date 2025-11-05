@@ -1001,3 +1001,13 @@ export const getListMfa = async (query) => {
 export const syncMfa = async () => {
   return api.get(`/mfa/sync`).then((res) => res.data);
 };
+
+export const getPengadaanParuhWaktu = async (query) => {
+  const currentQuery = queryString.stringify(query, {
+    skipEmptyString: true,
+    skipNull: true,
+  });
+  return api
+    .get(`/admin/pengadaan/paruh-waktu/employees?${currentQuery}`)
+    .then((res) => res.data);
+};

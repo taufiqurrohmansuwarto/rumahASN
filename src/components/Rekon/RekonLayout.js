@@ -16,6 +16,7 @@ import {
 import {
   IconBuilding,
   IconChartBar,
+  IconClock,
   IconDatabase,
   IconEdit,
   IconFileText,
@@ -41,6 +42,12 @@ const menuItems = [
     key: "/pegawai",
     icon: <IconUsers size={16} />,
     label: "Daftar Pegawai",
+    role: ["admin", "fasilitator"],
+  },
+  {
+    key: "/paruh-waktu",
+    icon: <IconClock size={16} />,
+    label: "Paruh Waktu",
     role: ["admin", "fasilitator"],
   },
   {

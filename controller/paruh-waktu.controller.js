@@ -1,0 +1,183 @@
+import { log } from "@/utils/logger";
+
+const { handleError } = require("@/utils/helper/controller-helper");
+const P3KParuhWaktu = require("@/models/pengadaan/p3k-paruh-waktu.model");
+
+export const getPengadaanParuhWaktu = async (req, res) => {
+  const knex = P3KParuhWaktu.knex();
+  try {
+    const { current_role, skpd_id } = req?.user;
+    const {
+      limit = 10,
+      page = 1,
+      opd_id,
+      nama = "",
+      nip = "",
+      no_peserta = "",
+    } = req?.query;
+
+    // Determine OPD ID based on user role
+    // Admin can access all OPDs (starts with "1")
+    // Non-admin can only access their own OPD and its children (e.g., 123 can access 123, 1231, 1232, etc.)
+    const opdIdFilter = opd_id || (current_role === "admin" ? "1" : skpd_id);
+
+    // Authorization check: non-admin users can only access their own OPD or its children
+    if (current_role !== "admin") {
+      if (!opdIdFilter.startsWith(skpd_id)) {
+        return res.status(403).json({
+          success: false,
+          message:
+            "Forbidden: You can only access your own OPD or its children",
+        });
+      }
+    }
+
+    // Build base query
+    const baseQuery = P3KParuhWaktu.query()
+      .select(
+        "*",
+        knex.raw("get_hierarchy_siasn(unor_id_siasn) as unor_siasn"),
+        knex.raw("get_hierarchy_simaster(unor_id_simaster) as unor_simaster")
+      )
+      .where("unor_id_simaster", "ILIKE", `${opdIdFilter}%`)
+      .where((builder) => {
+        if (nama) {
+          builder.where("nama", "ILIKE", `%${nama}%`);
+        }
+        if (nip) {
+          builder.where("nip", "ILIKE", `%${nip}%`);
+        }
+        if (no_peserta) {
+          builder.where("no_peserta", "ILIKE", `%${no_peserta}%`);
+        }
+      })
+      .withGraphFetched("[detail]");
+
+    // Check if limit = -1 for downloading all data
+    if (Number(limit) === -1) {
+      const result = await baseQuery;
+      return res.json({
+        success: true,
+        total: result.length,
+        data: result,
+      });
+    }
+
+    // Pagination mode
+    const pageNum = Math.max(1, Number(page));
+    const lim = Math.max(1, Math.min(100, Number(limit))); // Cap limit at 100
+
+    const result = await baseQuery.page(pageNum - 1, lim);
+
+    res.json({
+      success: true,
+      page: pageNum,
+      limit: lim,
+      total: result.total,
+      data: result.results,
+    });
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+/**
+ * Sync/Insert data pengadaan paruh waktu ke tabel p3k_paruh_waktu
+ * Strategi: Truncate (hapus semua) kemudian Insert ulang semua data (tanpa deduplikasi)
+ * Kolom: id, nama, nip, unor_id_siasn, unor_id_simaster, gaji
+ */
+export const syncPengadaanParuhWaktu = async (req, res) => {
+  const knex = P3KParuhWaktu.knex();
+
+  try {
+    // Query ringan - hanya ambil kolom yang diperlukan
+    const dataToSync = await knex("siasn_pengadaan_proxy as sp")
+      .where("sp.periode", "2025")
+      .andWhere("sp.jenis_formasi_id", "0210") // Filter untuk PPPK Paruh Waktu
+      .leftJoin(
+        knex.raw(`(
+          SELECT DISTINCT ON (id_siasn) id_siasn, id_simaster
+          FROM rekon.unor
+          ORDER BY id_siasn, id_simaster
+        ) as ru`),
+        knex.raw("sp.usulan_data->'data'->>'unor_id'"),
+        "ru.id_siasn"
+      )
+      .select(
+        "sp.id",
+        "sp.nama",
+        "sp.usulan_data->'data'->>'no_peserta' as no_peserta",
+        "sp.nip",
+        "ru.id_siasn as unor_id_siasn",
+        "ru.id_simaster as unor_id_simaster"
+      );
+
+    if (dataToSync.length === 0) {
+      return res.json({
+        success: true,
+        message: "Tidak ada data untuk di-sync",
+        data: {
+          total: 0,
+          processed: 0,
+        },
+      });
+    }
+
+    // Transform ke format sederhana dengan gaji default 0
+    const transformedData = dataToSync.map((row) => ({
+      id: row?.id,
+      nama: row?.nama,
+      no_peserta: row?.no_peserta,
+      nip: row.nip,
+      unor_id_siasn: row.unor_id_siasn,
+      unor_id_simaster: row.unor_id_simaster,
+      gaji: 0, // Default 0
+    }));
+
+    // Hapus semua data dulu (truncate)
+    const deleteResult = await knex("pengadaan.p3k_paruh_waktu").del();
+    const deletedCount = deleteResult;
+
+    // Insert semua data baru tanpa deduplikasi (insert semua, termasuk NIP duplikat)
+    const result = await knex.raw(
+      `
+      INSERT INTO pengadaan.p3k_paruh_waktu (id, nama, no_peserta, nip, unor_id_siasn, unor_id_simaster, gaji)
+      SELECT * FROM json_populate_recordset(NULL::record, ?::json) 
+        AS t(id text, nama text, no_peserta text, nip text, unor_id_siasn text, unor_id_simaster text, gaji bigint)
+    `,
+      [JSON.stringify(transformedData)]
+    );
+
+    res.json({
+      success: true,
+      message: `Berhasil sync data pengadaan paruh waktu ke tabel p3k_paruh_waktu`,
+      data: {
+        deleted: deletedCount,
+        total: dataToSync.length,
+        inserted: result.rowCount || transformedData.length,
+      },
+    });
+  } catch (error) {
+    log.error("Error sync pengadaan paruh waktu:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error sync pengadaan paruh waktu",
+      error: error?.message,
+    });
+  }
+};
+
+export const setGajiPengadaanParuhWaktu = async (req, res) => {
+  try {
+    const { id } = req?.query;
+    const { gaji } = req?.body;
+    const result = await P3KParuhWaktu.query().where("id", id).patch({ gaji });
+    res.json({
+      success: true,
+      message: "Berhasil set gaji pengadaan paruh waktu",
+      data: result,
+    });
+  } catch (error) {
+    handleError(res, error);
+  }
+};
