@@ -6,7 +6,7 @@ const P3KParuhWaktu = require("@/models/pengadaan/p3k-paruh-waktu.model");
 export const getPengadaanParuhWaktu = async (req, res) => {
   const knex = P3KParuhWaktu.knex();
   try {
-    const { current_role, skpd_id } = req?.user;
+    const { current_role, organization_id: skpd_id } = req?.user;
     const {
       limit = 10,
       page = 1,
