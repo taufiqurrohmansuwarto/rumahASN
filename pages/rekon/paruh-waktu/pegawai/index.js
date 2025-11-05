@@ -36,7 +36,7 @@ const ParuhWaktu = () => {
 };
 
 ParuhWaktu.getLayout = (page) => {
-  return <RekonLayout active="/rekon/paruh-waktu">{page}</RekonLayout>;
+  return <RekonLayout active="/rekon/paruh-waktu/pegawai">{page}</RekonLayout>;
 };
 
 ParuhWaktu.Auth = {
