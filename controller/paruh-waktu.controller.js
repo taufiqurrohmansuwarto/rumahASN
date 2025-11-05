@@ -39,7 +39,12 @@ export const getPengadaanParuhWaktu = async (req, res) => {
         knex.raw("get_hierarchy_siasn(unor_id_siasn) as unor_siasn"),
         knex.raw("get_hierarchy_simaster(unor_id_simaster) as unor_simaster")
       )
-      .where("unor_id_simaster", "ILIKE", `${opdIdFilter}%`)
+      .where((builder) => {
+        builder.whereRaw("LEFT(unor_id_simaster, ?) = ?", [
+          opdIdFilter.length,
+          opdIdFilter,
+        ]);
+      })
       .where((builder) => {
         if (nama) {
           builder.where("nama", "ILIKE", `%${nama}%`);
@@ -51,7 +56,8 @@ export const getPengadaanParuhWaktu = async (req, res) => {
           builder.where("no_peserta", "ILIKE", `%${no_peserta}%`);
         }
       })
-      .withGraphFetched("[detail]");
+      .withGraphFetched("[detail, status_usulan]")
+      .orderBy("nama", "asc");
 
     // Check if limit = -1 for downloading all data
     if (Number(limit) === -1) {
@@ -82,9 +88,11 @@ export const getPengadaanParuhWaktu = async (req, res) => {
 };
 
 /**
- * Sync/Insert data pengadaan paruh waktu ke tabel p3k_paruh_waktu
- * Strategi: Truncate (hapus semua) kemudian Insert ulang semua data (tanpa deduplikasi)
- * Kolom: id, nama, nip, unor_id_siasn, unor_id_simaster, gaji
+ * Sync/Upsert data pengadaan paruh waktu ke tabel p3k_paruh_waktu
+ * Strategi: UPSERT (INSERT ... ON CONFLICT DO UPDATE)
+ * - Insert jika record belum ada (gaji default 0)
+ * - Update jika sudah ada (kecuali gaji, biar tetap sesuai yang sudah di-set)
+ * Kolom: id (unique), usulan_id, nama, no_peserta, nip, unor_id_siasn, unor_id_simaster, gaji
  */
 export const syncPengadaanParuhWaktu = async (req, res) => {
   const knex = P3KParuhWaktu.knex();
@@ -106,10 +114,11 @@ export const syncPengadaanParuhWaktu = async (req, res) => {
       .select(
         "sp.id",
         "sp.nama",
-        "sp.usulan_data->'data'->>'no_peserta' as no_peserta",
+        knex.raw("sp.usulan_data->'data'->>'no_peserta' as no_peserta"),
         "sp.nip",
         "ru.id_siasn as unor_id_siasn",
-        "ru.id_simaster as unor_id_simaster"
+        "ru.id_simaster as unor_id_simaster",
+        "sp.status_usulan as usulan_id"
       );
 
     if (dataToSync.length === 0) {
@@ -118,7 +127,8 @@ export const syncPengadaanParuhWaktu = async (req, res) => {
         message: "Tidak ada data untuk di-sync",
         data: {
           total: 0,
-          processed: 0,
+          inserted: 0,
+          updated: 0,
         },
       });
     }
@@ -126,35 +136,41 @@ export const syncPengadaanParuhWaktu = async (req, res) => {
     // Transform ke format sederhana dengan gaji default 0
     const transformedData = dataToSync.map((row) => ({
       id: row?.id,
+      usulan_id: row?.usulan_id,
       nama: row?.nama,
       no_peserta: row?.no_peserta,
       nip: row.nip,
       unor_id_siasn: row.unor_id_siasn,
       unor_id_simaster: row.unor_id_simaster,
-      gaji: 0, // Default 0
+      gaji: 0, // Default 0 untuk record baru
     }));
 
-    // Hapus semua data dulu (truncate)
-    const deleteResult = await knex("pengadaan.p3k_paruh_waktu").del();
-    const deletedCount = deleteResult;
-
-    // Insert semua data baru tanpa deduplikasi (insert semua, termasuk NIP duplikat)
+    // UPSERT: Insert jika baru, Update jika sudah ada (kecuali gaji)
     const result = await knex.raw(
       `
-      INSERT INTO pengadaan.p3k_paruh_waktu (id, nama, no_peserta, nip, unor_id_siasn, unor_id_simaster, gaji)
+      INSERT INTO pengadaan.p3k_paruh_waktu (id, usulan_id, nama, no_peserta, nip, unor_id_siasn, unor_id_simaster, gaji)
       SELECT * FROM json_populate_recordset(NULL::record, ?::json) 
-        AS t(id text, nama text, no_peserta text, nip text, unor_id_siasn text, unor_id_simaster text, gaji bigint)
+        AS t(id text, usulan_id text, nama text, no_peserta text, nip text, unor_id_siasn text, unor_id_simaster text, gaji bigint)
+      ON CONFLICT (id) 
+      DO UPDATE SET 
+        usulan_id = EXCLUDED.usulan_id,
+        nama = EXCLUDED.nama,
+        no_peserta = EXCLUDED.no_peserta,
+        nip = EXCLUDED.nip,
+        unor_id_siasn = EXCLUDED.unor_id_siasn,
+        unor_id_simaster = EXCLUDED.unor_id_simaster,
+        updated_at = NOW()
+        -- gaji tidak di-update, tetap menggunakan nilai yang sudah ada
     `,
       [JSON.stringify(transformedData)]
     );
 
     res.json({
       success: true,
-      message: `Berhasil sync data pengadaan paruh waktu ke tabel p3k_paruh_waktu`,
+      message: `Berhasil sync data pengadaan paruh waktu (UPSERT)`,
       data: {
-        deleted: deletedCount,
         total: dataToSync.length,
-        inserted: result.rowCount || transformedData.length,
+        processed: result.rowCount || transformedData.length,
       },
     });
   } catch (error) {

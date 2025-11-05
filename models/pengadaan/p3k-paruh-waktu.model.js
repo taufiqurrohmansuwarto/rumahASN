@@ -10,8 +10,17 @@ class P3KParuhWaktu extends Model {
 
   static get relationMappings() {
     const SiasnPengadaanProxy = require("@/models/siasn-pengadaan-proxy.model");
+    const RefStatusUsulan = require("@/models/ref_siasn/status-usul.model");
 
     return {
+      status_usulan: {
+        relation: Model.HasOneRelation,
+        modelClass: RefStatusUsulan,
+        join: {
+          from: "pengadaan.p3k_paruh_waktu.usulan_id",
+          to: "ref_siasn.status_usul.id",
+        },
+      },
       detail: {
         relation: Model.BelongsToOneRelation,
         modelClass: SiasnPengadaanProxy,

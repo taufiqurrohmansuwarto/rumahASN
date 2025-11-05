@@ -2,6 +2,7 @@ import {
   getPengadaanProxy,
   syncPengadaanProxy,
 } from "@/services/siasn-services";
+import { SyncPengadaanParuhWaktu } from "../Rekon/SyncPengadaanParuhWaktu";
 import { Badge, Text, Title } from "@mantine/core";
 import {
   IconAward,
@@ -620,6 +621,8 @@ function LayananPengadaan() {
             }}
           >
             {/* Search Filters */}
+            <SyncPengadaanParuhWaktu />
+
             <Row gutter={[12, 12]} style={{ marginBottom: "16px" }}>
               <Col xs={24}>
                 <Text

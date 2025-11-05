@@ -49,6 +49,14 @@ const menuItems = [
     icon: <IconClock size={16} />,
     label: "Paruh Waktu",
     role: ["admin", "fasilitator"],
+    children: [
+      {
+        key: "/pegawai",
+        icon: <IconUsers size={16} />,
+        label: "Daftar Pegawai",
+        role: ["admin", "fasilitator"],
+      },
+    ],
   },
   {
     key: "/anomali",

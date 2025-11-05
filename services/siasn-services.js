@@ -1011,3 +1011,7 @@ export const getPengadaanParuhWaktu = async (query) => {
     .get(`/admin/pengadaan/paruh-waktu/employees?${currentQuery}`)
     .then((res) => res.data);
 };
+
+export const syncPengadaanParuhWaktu = async () => {
+  return api.get(`/admin/pengadaan/paruh-waktu/sync`).then((res) => res.data);
+};
