@@ -36,14 +36,11 @@ export const getPengadaanParuhWaktu = async (req, res) => {
     const baseQuery = P3KParuhWaktu.query()
       .select(
         "*",
-        knex.raw("get_hierarchy_siasn(unor_id_siasn) as unor_siasn"),
-        knex.raw("get_hierarchy_simaster(unor_id_simaster) as unor_simaster")
+        "unor_siasn_text as unor_siasn",
+        "unor_simaster_text as unor_simaster"
       )
       .where((builder) => {
-        builder.whereRaw("LEFT(unor_id_simaster, ?) = ?", [
-          opdIdFilter.length,
-          opdIdFilter,
-        ]);
+        builder.where("unor_id_simaster", "ILIKE", `${opdIdFilter}%`);
       })
       .where((builder) => {
         if (nama) {
@@ -115,6 +112,12 @@ export const syncPengadaanParuhWaktu = async (req, res) => {
         "sp.id",
         "sp.nama",
         knex.raw("sp.usulan_data->'data'->>'no_peserta' as no_peserta"),
+        knex.raw(
+          "get_hierarchy_siasn(sp.usulan_data->'data'->>'unor_id') as unor_siasn_text"
+        ),
+        knex.raw(
+          "CASE WHEN ru.id_simaster IS NOT NULL THEN get_hierarchy_simaster(ru.id_simaster) ELSE NULL END as unor_simaster_text"
+        ),
         "sp.nip",
         "ru.id_siasn as unor_id_siasn",
         "ru.id_simaster as unor_id_simaster",
@@ -136,6 +139,8 @@ export const syncPengadaanParuhWaktu = async (req, res) => {
     // Transform ke format sederhana dengan gaji default 0
     const transformedData = dataToSync.map((row) => ({
       id: row?.id,
+      unor_siasn_text: row?.unor_siasn_text,
+      unor_simaster_text: row?.unor_simaster_text,
       usulan_id: row?.usulan_id,
       nama: row?.nama,
       no_peserta: row?.no_peserta,
@@ -148,11 +153,13 @@ export const syncPengadaanParuhWaktu = async (req, res) => {
     // UPSERT: Insert jika baru, Update jika sudah ada (kecuali gaji)
     const result = await knex.raw(
       `
-      INSERT INTO pengadaan.p3k_paruh_waktu (id, usulan_id, nama, no_peserta, nip, unor_id_siasn, unor_id_simaster, gaji)
+      INSERT INTO pengadaan.p3k_paruh_waktu (id, unor_siasn_text, unor_simaster_text, usulan_id, nama, no_peserta, nip, unor_id_siasn, unor_id_simaster, gaji)
       SELECT * FROM json_populate_recordset(NULL::record, ?::json) 
-        AS t(id text, usulan_id text, nama text, no_peserta text, nip text, unor_id_siasn text, unor_id_simaster text, gaji bigint)
+        AS t(id text, unor_siasn_text text, unor_simaster_text text, usulan_id text, nama text, no_peserta text, nip text, unor_id_siasn text, unor_id_simaster text, gaji bigint)
       ON CONFLICT (id) 
       DO UPDATE SET 
+        unor_siasn_text = EXCLUDED.unor_siasn_text,
+        unor_simaster_text = EXCLUDED.unor_simaster_text,
         usulan_id = EXCLUDED.usulan_id,
         nama = EXCLUDED.nama,
         no_peserta = EXCLUDED.no_peserta,
