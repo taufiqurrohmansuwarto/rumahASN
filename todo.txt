@@ -1,4 +1,7 @@
-1. cek foto 
-    data utama master, data utama siasn, ambil jabatannya saja.
-2. buat table paruh waktu id,nip, skpd_id master, skpd_siasn, skpd_baru, dan gaji
-3. upsert dari table
+table pengadaan.operator_gaji_pw
+
+id unor_id user_id created_at updated_at created_by updated_by
+
+
+table pengadaan.audit_log
+id table_name record_id action old_data new_data change_by change_at

@@ -113,6 +113,10 @@ export const getOpdFasilitator = () => {
   return api.get(`/fasilitator/unor`).then((res) => res.data);
 };
 
+export const getOpdFasilitatorFull = () => {
+  return api.get(`/fasilitator/unor-full`).then((res) => res.data);
+};
+
 export const getOpdAdmin = () => {
   return api.get(`/admin/unor`).then((res) => res.data);
 };

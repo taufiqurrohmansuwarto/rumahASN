@@ -1,22 +1,124 @@
-import { Badge, Text } from "@mantine/core";
-import { Modal, Form, InputNumber, Button, Space } from "antd";
-import { useEffect } from "react";
+import {
+  Text,
+  Stack,
+  Group,
+  Paper,
+  Switch as MantineSwitch,
+  Divider,
+  Collapse,
+} from "@mantine/core";
+import {
+  IconUser,
+  IconId,
+  IconBuilding,
+  IconCash,
+  IconMapPin,
+  IconBriefcase,
+  IconSchool,
+  IconChevronDown,
+  IconChevronRight,
+} from "@tabler/icons-react";
+import { Modal, Button, TreeSelect, Input, message } from "antd";
+import { useEffect, useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { updateGajiPengadaanParuhWaktu as updateGajiPengadaanParuhWaktuService } from "@/services/siasn-services";
 
-const ModalDetailParuhWaktu = ({ visible, onClose, data }) => {
-  const [form] = Form.useForm();
+const useUpdateGajiPengadaanParuhWaktu = () => {
+  const queryClient = useQueryClient();
+
+  const { mutateAsync: update, isPending: isUpdating } = useMutation({
+    mutationFn: ({ id, data }) =>
+      updateGajiPengadaanParuhWaktuService({ id, data }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["daftar-pegawai-paruh-waktu"],
+      });
+      message.success("Berhasil update gaji pengadaan paruh waktu");
+    },
+    onError: (error) => {
+      message.error(error?.response?.data?.message);
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["daftar-pegawai-paruh-waktu"],
+      });
+    },
+  });
+
+  return { update, isUpdating };
+};
+
+const ModalDetailParuhWaktu = ({
+  visible,
+  onClose,
+  data,
+  unor,
+  unorFull,
+  isLoadingUnor,
+  isLoadingUnorFull,
+}) => {
+  const [luarPerangkatDaerah, setLuarPerangkatDaerah] = useState(false);
+  const [upah, setUpah] = useState("0");
+  const [unorId, setUnorId] = useState("");
+  const [errors, setErrors] = useState({});
+  const [unorExpanded, setUnorExpanded] = useState(false);
+  const { update, isUpdating } = useUpdateGajiPengadaanParuhWaktu();
 
   useEffect(() => {
     if (data && visible) {
-      form.setFieldsValue({
-        gaji: data?.gaji || data?.detail?.usulan_data?.data?.gaji_pokok || "0",
-      });
+      const gajiValue =
+        data?.gaji || data?.detail?.usulan_data?.data?.gaji_pokok || "0";
+      setUpah(gajiValue.toString());
+      setUnorId(data?.unor_pk || data?.unor_id_simaster || "");
+      setLuarPerangkatDaerah(data?.luar_perangkat_daerah || false);
+      setErrors({});
+      setUnorExpanded(false);
     }
-  }, [data, visible, form]);
+  }, [data, visible]);
 
-  const handleSubmit = (values) => {
-    console.log("Gaji baru:", values.gaji);
-    // Di sini bisa tambahkan logic untuk save/update gaji
-    onClose();
+  const formatRupiah = (value) => {
+    const number = value.replace(/[^0-9]/g, "");
+    return number.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  };
+
+  const handleUpahChange = (e) => {
+    const value = e.target.value;
+    const numericValue = value.replace(/[^0-9]/g, "");
+    setUpah(numericValue);
+    setErrors({ ...errors, upah: null });
+  };
+
+  const handleSubmit = async () => {
+    try {
+      const newErrors = {};
+
+      if (!unorId) {
+        newErrors.unorId = "Unit organisasi wajib dipilih";
+      }
+      if (!upah || parseInt(upah) <= 0) {
+        newErrors.upah = "Upah wajib diisi";
+      }
+
+      if (Object.keys(newErrors).length > 0) {
+        setErrors(newErrors);
+        return;
+      }
+
+      const payload = {
+        data: {
+          gaji: parseInt(upah),
+          unor_pk: unorId,
+          luar_perangkat_daerah: !!luarPerangkatDaerah,
+        },
+        id: data?.id,
+      };
+
+      await update(payload);
+      // Di sini bisa tambahkan logic untuk save/update upah dan unor
+      onClose();
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
@@ -25,171 +127,254 @@ const ModalDetailParuhWaktu = ({ visible, onClose, data }) => {
       open={visible}
       onCancel={onClose}
       footer={null}
-      width={450}
+      confirmLoading={isUpdating}
+      width={650}
       centered
       styles={{
         body: { padding: "24px" },
       }}
     >
       {data && (
-        <div>
+        <Stack spacing="md">
           {/* Header */}
-          <div style={{ marginBottom: 20, textAlign: "center" }}>
-            <Text
-              fw={700}
-              size="lg"
-              style={{ color: "#FF4500", display: "block", marginBottom: 4 }}
-            >
-              Detail Pegawai
+          <div>
+            <Text size="lg" fw={600} c="#FF4500">
+              Kelola Data Pegawai
             </Text>
             <Text size="xs" c="dimmed">
-              Update informasi gaji pegawai
+              Update informasi upah pegawai PPPK paruh waktu
             </Text>
           </div>
 
-          {/* Info Cards */}
-          <div
-            style={{
-              backgroundColor: "#f8f9fa",
-              borderRadius: 8,
-              padding: 16,
-              marginBottom: 16,
-            }}
-          >
-            <Space direction="vertical" size={12} style={{ width: "100%" }}>
-              <div>
-                <Text size="10px" c="dimmed" fw={600} tt="uppercase">
-                  Nama
-                </Text>
-                <Text
-                  size="sm"
-                  fw={600}
-                  style={{ display: "block", marginTop: 2 }}
-                >
+          <Divider size="xs" />
+
+          {/* Info Data Pegawai */}
+          <Paper p="sm" radius="md" withBorder>
+            <Stack spacing="xs">
+              <Group spacing="xs" position="apart">
+                <Group spacing="xs">
+                  <IconUser
+                    size={14}
+                    stroke={1.5}
+                    style={{ color: "#868e96" }}
+                  />
+                  <Text size="xs" c="dimmed" fw={500}>
+                    Nama
+                  </Text>
+                </Group>
+                <Text size="xs" fw={600}>
                   {data?.nama || "-"}
                 </Text>
-              </div>
+              </Group>
 
-              <div>
-                <Text size="10px" c="dimmed" fw={600} tt="uppercase">
-                  NIP
-                </Text>
-                <Text
-                  size="sm"
-                  ff="monospace"
-                  style={{ display: "block", marginTop: 2 }}
-                >
+              <Group spacing="xs" position="apart">
+                <Group spacing="xs">
+                  <IconId size={14} stroke={1.5} style={{ color: "#868e96" }} />
+                  <Text size="xs" c="dimmed" fw={500}>
+                    NIP
+                  </Text>
+                </Group>
+                <Text size="xs" fw={500} ff="monospace">
                   {data?.nip || "-"}
                 </Text>
-              </div>
+              </Group>
+
+              <Divider size="xs" />
 
               <div>
-                <Text size="10px" c="dimmed" fw={600} tt="uppercase">
-                  SIMASTER
-                </Text>
-                <div
-                  style={{
-                    marginTop: 4,
-                    padding: "6px 10px",
-                    backgroundColor: "#f0e6ff",
-                    borderRadius: 6,
-                    border: "1px solid #d3adf7",
-                  }}
+                <Group
+                  spacing="xs"
+                  mb={4}
+                  onClick={() => setUnorExpanded(!unorExpanded)}
+                  style={{ cursor: "pointer" }}
                 >
-                  <Text
-                    size="10px"
-                    ff="monospace"
-                    style={{
-                      color: "#722ed1",
-                      wordBreak: "break-all",
-                      lineHeight: 1.4,
-                    }}
-                  >
-                    {data?.unor_simaster || "-"}
+                  {unorExpanded ? (
+                    <IconChevronDown
+                      size={14}
+                      stroke={1.5}
+                      style={{ color: "#868e96" }}
+                    />
+                  ) : (
+                    <IconChevronRight
+                      size={14}
+                      stroke={1.5}
+                      style={{ color: "#868e96" }}
+                    />
+                  )}
+                  <IconBuilding
+                    size={14}
+                    stroke={1.5}
+                    style={{ color: "#868e96" }}
+                  />
+                  <Text size="xs" c="dimmed" fw={500}>
+                    Unit Organisasi
                   </Text>
-                </div>
+                </Group>
+                <Collapse in={unorExpanded}>
+                  <Stack spacing={6} pl={20}>
+                    <div>
+                      <Text size="10px" c="purple" fw={600} mb={2}>
+                        SIMASTER
+                      </Text>
+                      <Text size="xs" fw={500} ff="monospace" c="dimmed">
+                        {data?.unor_simaster || "-"}
+                      </Text>
+                    </div>
+                    <div>
+                      <Text size="10px" c="cyan" fw={600} mb={2}>
+                        SIASN
+                      </Text>
+                      <Text size="xs" fw={500} ff="monospace" c="dimmed">
+                        {data?.unor_siasn || "-"}
+                      </Text>
+                    </div>
+                    <div>
+                      <Text size="10px" c="cyan" fw={600} mb={2}>
+                        Unit Organisasi Perjanjian Kerja
+                      </Text>
+                      <Text size="xs" fw={500} ff="monospace" c="dimmed">
+                        {data?.unor_pk_text || "-"}
+                      </Text>
+                    </div>
+                  </Stack>
+                </Collapse>
               </div>
 
-              <div>
-                <Text size="10px" c="dimmed" fw={600} tt="uppercase">
-                  SIASN
-                </Text>
-                <div
-                  style={{
-                    marginTop: 4,
-                    padding: "6px 10px",
-                    backgroundColor: "#e6f7ff",
-                    borderRadius: 6,
-                    border: "1px solid #91d5ff",
-                    maxHeight: 60,
-                    overflowY: "auto",
-                  }}
-                >
-                  <Text
-                    size="10px"
-                    ff="monospace"
-                    style={{
-                      color: "#0958d9",
-                      wordBreak: "break-all",
-                      lineHeight: 1.4,
-                    }}
-                  >
-                    {data?.unor_siasn || "-"}
-                  </Text>
-                </div>
-              </div>
-            </Space>
-          </div>
+              <Divider size="xs" />
 
-          {/* Form Gaji */}
-          <Form form={form} layout="vertical" onFinish={handleSubmit}>
-            <div
-              style={{
-                backgroundColor: "#fff7e6",
-                border: "1px solid #ffd591",
-                borderRadius: 8,
-                padding: 16,
-                marginBottom: 20,
-              }}
-            >
-              <Form.Item
-                label={
-                  <Text size="sm" fw={600} style={{ color: "#fa8c16" }}>
-                    💰 Gaji Pokok
+              <Group spacing="xs" position="apart">
+                <Group spacing="xs">
+                  <IconBriefcase
+                    size={14}
+                    stroke={1.5}
+                    style={{ color: "#868e96" }}
+                  />
+                  <Text size="xs" c="dimmed" fw={500}>
+                    Jabatan
                   </Text>
-                }
-                name="gaji"
-                rules={[{ required: true, message: "Gaji wajib diisi" }]}
-                style={{ marginBottom: 0 }}
-              >
-                <InputNumber
-                  size="large"
-                  style={{ width: "100%" }}
-                  formatter={(value) =>
-                    `Rp ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".")
-                  }
-                  parser={(value) => value.replace(/Rp\s?|(\.*)/g, "")}
-                  placeholder="Masukkan gaji pokok"
+                </Group>
+                <Text size="xs" fw={500}>
+                  {data?.detail?.usulan_data?.data
+                    ?.jabatan_fungsional_umum_nama ||
+                    data?.detail?.usulan_data?.data?.jabatan_fungsional_nama ||
+                    "-"}
+                </Text>
+              </Group>
+
+              <Group spacing="xs" position="apart">
+                <Group spacing="xs">
+                  <IconSchool
+                    size={14}
+                    stroke={1.5}
+                    style={{ color: "#868e96" }}
+                  />
+                  <Text size="xs" c="dimmed" fw={500}>
+                    Pendidikan
+                  </Text>
+                </Group>
+                <Text size="xs" fw={500}>
+                  {data?.detail?.usulan_data?.data?.pendidikan_pertama_nama ||
+                    "-"}
+                </Text>
+              </Group>
+            </Stack>
+          </Paper>
+
+          {/* Form */}
+          <Stack spacing="sm">
+            {/* Toggle Luar Perangkat Daerah */}
+            <Paper p="sm" radius="md" withBorder>
+              <Group position="apart">
+                <Group spacing="xs">
+                  <IconBuilding size={14} stroke={1.5} />
+                  <Text size="xs" fw={500}>
+                    Luar Perangkat Daerah
+                  </Text>
+                </Group>
+                <MantineSwitch
+                  size="sm"
+                  checked={luarPerangkatDaerah}
+                  onChange={(event) => {
+                    setLuarPerangkatDaerah(event.currentTarget.checked);
+                    setUnorId("");
+                    setErrors({ ...errors, unorId: null });
+                  }}
+                  color="#FF4500"
                 />
-              </Form.Item>
+              </Group>
+            </Paper>
+
+            {/* Unit Organisasi */}
+            <div>
+              <Group spacing={4} mb={6}>
+                <IconMapPin size={14} stroke={1.5} />
+                <Text size="xs" fw={500}>
+                  Unit Organisasi Perjanjian Kerja
+                </Text>
+              </Group>
+              <TreeSelect
+                style={{ width: "100%" }}
+                treeNodeFilterProp="label"
+                showSearch
+                treeData={luarPerangkatDaerah ? unorFull : unor}
+                placeholder="Pilih unit organisasi"
+                allowClear
+                value={unorId}
+                onChange={(value) => {
+                  setUnorId(value);
+                  setErrors({ ...errors, unorId: null });
+                }}
+                loading={
+                  luarPerangkatDaerah ? isLoadingUnorFull : isLoadingUnor
+                }
+                dropdownStyle={{ maxHeight: 400, overflow: "auto" }}
+                status={errors.unorId ? "error" : ""}
+              />
+              {errors.unorId && (
+                <Text size="xs" c="red" mt={4}>
+                  {errors.unorId}
+                </Text>
+              )}
             </div>
 
-            {/* Actions */}
-            <Space style={{ width: "100%", justifyContent: "flex-end" }}>
-              <Button onClick={onClose}>Batal</Button>
-              <Button
-                type="primary"
-                htmlType="submit"
-                style={{
-                  backgroundColor: "#FF4500",
-                  borderColor: "#FF4500",
-                }}
-              >
-                Simpan Gaji
-              </Button>
-            </Space>
-          </Form>
-        </div>
+            {/* Upah */}
+            <div>
+              <Group spacing={4} mb={6}>
+                <IconCash size={14} stroke={1.5} />
+                <Text size="xs" fw={500}>
+                  Upah Pokok
+                </Text>
+              </Group>
+              <Input
+                value={upah ? `Rp ${formatRupiah(upah)}` : ""}
+                onChange={handleUpahChange}
+                placeholder="Masukkan upah pokok"
+                status={errors.upah ? "error" : ""}
+                style={{ width: "100%" }}
+              />
+              {errors.upah && (
+                <Text size="xs" c="red" mt={4}>
+                  {errors.upah}
+                </Text>
+              )}
+            </div>
+          </Stack>
+
+          <Divider size="xs" />
+
+          {/* Actions */}
+          <Group position="right" spacing="xs">
+            <Button onClick={onClose}>Batal</Button>
+            <Button
+              type="primary"
+              onClick={handleSubmit}
+              loading={isUpdating}
+              disabled={isUpdating}
+            >
+              Simpan Data
+            </Button>
+          </Group>
+        </Stack>
       )}
     </Modal>
   );

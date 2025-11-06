@@ -1015,3 +1015,9 @@ export const getPengadaanParuhWaktu = async (query) => {
 export const syncPengadaanParuhWaktu = async () => {
   return api.get(`/admin/pengadaan/paruh-waktu/sync`).then((res) => res.data);
 };
+
+export const updateGajiPengadaanParuhWaktu = async ({ id, data }) => {
+  return api
+    .patch(`/admin/pengadaan/paruh-waktu/employees/${id}`, data)
+    .then((res) => res.data);
+};

@@ -115,7 +115,7 @@ const create = async (req, res) => {
     }
 
     // Check score for v3 (optional - adjust threshold as needed)
-    if (hasil.data.score < 0.6) {
+    if (hasil.data.score < 0.01) {
       return res.status(400).json({
         message: "Captcha score too low",
         score: hasil.data.score,

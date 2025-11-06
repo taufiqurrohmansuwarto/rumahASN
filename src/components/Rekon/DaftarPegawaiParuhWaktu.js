@@ -1,4 +1,7 @@
-import { getOpdFasilitator } from "@/services/master.services";
+import {
+  getOpdFasilitator,
+  getOpdFasilitatorFull,
+} from "@/services/master.services";
 import { getPengadaanParuhWaktu } from "@/services/siasn-services";
 import { DownloadOutlined, ReloadOutlined } from "@ant-design/icons";
 import { Text } from "@mantine/core";
@@ -34,6 +37,14 @@ const DaftarPegawaiParuhWaktu = () => {
   const { data: unor, isLoading: isLoadingUnor } = useQuery(
     ["unor-fasilitator"],
     () => getOpdFasilitator(),
+    {
+      refetchOnWindowFocus: false,
+    }
+  );
+
+  const { data: unorFull, isLoading: isLoadingUnorFull } = useQuery(
+    ["unor-fasilitator-full-master"],
+    () => getOpdFasilitatorFull(),
     {
       refetchOnWindowFocus: false,
     }
@@ -221,6 +232,10 @@ const DaftarPegawaiParuhWaktu = () => {
 
       {/* Modal Detail */}
       <ModalDetailParuhWaktu
+        unorFull={unorFull}
+        isLoadingUnorFull={isLoadingUnorFull}
+        unor={unor}
+        isLoadingUnor={isLoadingUnor}
         visible={modalVisible}
         onClose={handleCloseModal}
         data={selectedData}

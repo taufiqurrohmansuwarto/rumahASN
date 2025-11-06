@@ -2,6 +2,8 @@ import { log } from "@/utils/logger";
 
 const { handleError } = require("@/utils/helper/controller-helper");
 const P3KParuhWaktu = require("@/models/pengadaan/p3k-paruh-waktu.model");
+const OperatorGajiPW = require("@/models/pengadaan/operator-gaji-pw.model");
+const AuditLog = require("@/models/pengadaan/audit-log.model");
 
 export const getPengadaanParuhWaktu = async (req, res) => {
   const knex = P3KParuhWaktu.knex();
@@ -190,17 +192,128 @@ export const syncPengadaanParuhWaktu = async (req, res) => {
   }
 };
 
-export const setGajiPengadaanParuhWaktu = async (req, res) => {
+// crud untuk operator gaji pw
+export const createOperatorGajiPW = async (req, res) => {
   try {
-    const { id } = req?.query;
-    const { gaji } = req?.body;
-    const result = await P3KParuhWaktu.query().where("id", id).patch({ gaji });
-    res.json({
+    const { unor_id, user_id } = req?.body;
+    const result = await OperatorGajiPW.query()
+      .insert({ unor_id, user_id })
+      .onConflict("unor_id", "user_id")
+      .ignore();
+    return result;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getAuditLogPengadaanParuhWaktu = async (req, res) => {
+  try {
+    const { current_role, customId } = req?.user;
+    const { page = 1, limit = 10 } = req?.query;
+    const pageNum = Math.max(1, Number(page));
+    const lim = Math.max(1, Math.min(100, Number(limit))); // Cap limit at 100
+
+    const isAdmin = current_role === "admin";
+
+    let query = AuditLog.query();
+
+    if (!isAdmin) {
+      query = query.where("change_by", customId);
+    }
+
+    const result = await query.page(pageNum - 1, lim);
+    return {
       success: true,
-      message: "Berhasil set gaji pengadaan paruh waktu",
+      page: pageNum,
+      limit: lim,
+      total: result.total,
+      data: result.results,
+    };
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+// update
+export const updateGajiPengadaanParuhWaktu = async (req, res) => {
+  try {
+    const knex = P3KParuhWaktu.knex();
+    const { id } = req?.query;
+    const { gaji, unor_pk, luar_perangkat_daerah } = req?.body;
+    const { customId } = req?.user;
+
+    // Fetch current data before update
+    const currentData = await P3KParuhWaktu.query().where("id", id).first();
+
+    if (!currentData) {
+      return res.status(404).json({
+        success: false,
+        message: "Data tidak ditemukan",
+      });
+    }
+
+    // get text unor text pk from database
+    const textPk = await knex.raw(
+      `select get_hierarchy_simaster('${unor_pk?.toString()}') as text_pk`
+    );
+
+    // Prepare update data
+    const updateData = {
+      gaji,
+      unor_pk,
+      unor_pk_text: textPk?.rows[0]?.text_pk,
+      luar_perangkat_daerah,
+      updated_at: new Date(),
+      last_updated_by: customId,
+    };
+
+    // Update the record
+    const result = await P3KParuhWaktu.query()
+      .where("id", id)
+      .patch(updateData)
+      .returning("*");
+
+    // Prepare audit log values
+    const auditFields = [
+      "gaji",
+      "unor_pk",
+      "unor_pk_text",
+      "luar_perangkat_daerah",
+      "updated_at",
+      "last_updated_by",
+    ];
+    const oldValue = auditFields.reduce((acc, field) => {
+      acc[field] = currentData[field];
+      return acc;
+    }, {});
+
+    const newValue = auditFields.reduce((acc, field) => {
+      acc[field] = updateData[field];
+      return acc;
+    }, {});
+
+    // Create audit log entry
+    await AuditLog.query().insert({
+      table_name: "pengadaan.p3k_paruh_waktu",
+      record_id: id,
+      action: "update",
+      old_data: JSON.stringify(oldValue),
+      new_data: JSON.stringify(newValue),
+      change_by: customId,
+      change_at: new Date(),
+    });
+
+    return res.json({
+      success: true,
+      message: "Berhasil update gaji pengadaan paruh waktu",
       data: result,
     });
   } catch (error) {
-    handleError(res, error);
+    console.log(error);
+    res.status(500).json({
+      success: false,
+      message: "Error update gaji pengadaan paruh waktu",
+      error: error?.message,
+    });
   }
 };

@@ -42,7 +42,7 @@ export const useDownloadParuhWaktu = (query) => {
             ? dayjs(item.detail.usulan_data.data.tgl_lahir).format("DD/MM/YYYY")
             : "-",
           "Tempat Lahir": item?.detail?.usulan_data?.data?.tempat_lahir || "-",
-          Gaji: item?.gaji || item?.detail?.usulan_data?.data?.gaji_pokok || "0",
+          Upah: item?.gaji || item?.detail?.usulan_data?.data?.gaji_pokok || "0",
           "Nomor Peserta":
             item?.no_peserta || item?.detail?.usulan_data?.data?.no_peserta || "-",
           Periode: item?.detail?.periode || "-",
@@ -102,7 +102,7 @@ export const useDownloadParuhWaktu = (query) => {
         { wch: 35 }, // Nama Lengkap (Gelar)
         { wch: 15 }, // Tanggal Lahir
         { wch: 20 }, // Tempat Lahir
-        { wch: 15 }, // Gaji
+        { wch: 15 }, // Upah
         { wch: 25 }, // Nomor Peserta
         { wch: 10 }, // Periode
         { wch: 25 }, // Jenis Formasi

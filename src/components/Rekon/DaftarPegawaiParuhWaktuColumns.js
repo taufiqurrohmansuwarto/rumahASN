@@ -92,15 +92,15 @@ export const createColumns = (handleShowDetail) => [
     ),
   },
   {
-    title: "Gaji",
-    key: "gaji",
+    title: "Upah",
+    key: "upah",
     width: 110,
     render: (_, record) => {
-      const gaji =
+      const upah =
         record?.gaji || record?.detail?.usulan_data?.data?.gaji_pokok || "0";
       return (
         <Text size="10px" fw={600} c="green" ff="monospace">
-          Rp {parseInt(gaji).toLocaleString("id-ID")}
+          Rp {parseInt(upah).toLocaleString("id-ID")}
         </Text>
       );
     },
@@ -211,7 +211,7 @@ export const createColumns = (handleShowDetail) => [
     align: "center",
     fixed: "right",
     render: (_, record) => (
-      <Tooltip title="Lihat Detail">
+      <Tooltip title="Kelola Data">
         <Button
           type="link"
           size="small"
@@ -224,7 +224,7 @@ export const createColumns = (handleShowDetail) => [
           }}
         >
           <Text size="10px" span style={{ color: "#FF4500" }}>
-            Detail
+            Aksi
           </Text>
         </Button>
       </Tooltip>

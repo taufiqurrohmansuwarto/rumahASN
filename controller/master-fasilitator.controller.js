@@ -40,46 +40,59 @@ const fetchDetailedEmployeeData = async (siasnFetcher, nips) => {
   const MAX_RETRIES = 3;
   const TIMEOUT_MS = 30000; // Increase to 30 seconds
   const BATCH_SIZE = 5; // Process in smaller batches to reduce load
-  
+
   // Function to fetch single NIP with retry
   const fetchWithRetry = async (nip, retryCount = 0) => {
     try {
       const result = await Promise.race([
         dataUtama(siasnFetcher, nip),
-        new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Timeout')), TIMEOUT_MS)
-        )
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error("Timeout")), TIMEOUT_MS)
+        ),
       ]);
       return { nip, data: result, success: true };
     } catch (error) {
       if (retryCount < MAX_RETRIES) {
-        console.warn(`Retry ${retryCount + 1}/${MAX_RETRIES} for NIP ${nip}: ${error.message}`);
+        console.warn(
+          `Retry ${retryCount + 1}/${MAX_RETRIES} for NIP ${nip}: ${
+            error.message
+          }`
+        );
         // Exponential backoff: wait longer between retries
-        await new Promise(resolve => setTimeout(resolve, (retryCount + 1) * 2000));
+        await new Promise((resolve) =>
+          setTimeout(resolve, (retryCount + 1) * 2000)
+        );
         return fetchWithRetry(nip, retryCount + 1);
       }
-      console.error(`Failed to fetch data for NIP ${nip} after ${MAX_RETRIES} retries:`, error.message);
+      console.error(
+        `Failed to fetch data for NIP ${nip} after ${MAX_RETRIES} retries:`,
+        error.message
+      );
       return { nip, data: null, success: false, error: error.message };
     }
   };
-  
+
   // Process NIPs in batches to avoid overwhelming the API
   const results = [];
   for (let i = 0; i < nips.length; i += BATCH_SIZE) {
     const batch = nips.slice(i, i + BATCH_SIZE);
-    console.log(`Processing batch ${Math.floor(i/BATCH_SIZE) + 1}/${Math.ceil(nips.length/BATCH_SIZE)} (${batch.length} NIPs)`);
-    
-    const batchPromises = batch.map(nip => fetchWithRetry(nip));
+    console.log(
+      `Processing batch ${Math.floor(i / BATCH_SIZE) + 1}/${Math.ceil(
+        nips.length / BATCH_SIZE
+      )} (${batch.length} NIPs)`
+    );
+
+    const batchPromises = batch.map((nip) => fetchWithRetry(nip));
     const batchResults = await Promise.allSettled(batchPromises);
-    
+
     results.push(...batchResults);
-    
+
     // Add delay between batches to avoid rate limiting
     if (i + BATCH_SIZE < nips.length) {
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
     }
   }
-  
+
   // Create a map with NIP as key for proper matching
   const dataMap = new Map();
   results.forEach((result) => {
@@ -88,9 +101,9 @@ const fetchDetailedEmployeeData = async (siasnFetcher, nips) => {
       dataMap.set(nip, { data, success });
     }
   });
-  
+
   // Return array in same order as input NIPs
-  const finalResults = nips.map(nip => {
+  const finalResults = nips.map((nip) => {
     const result = dataMap.get(nip);
     if (result?.success) {
       return result.data;
@@ -98,10 +111,12 @@ const fetchDetailedEmployeeData = async (siasnFetcher, nips) => {
     console.warn(`Missing or failed data for NIP: ${nip}`);
     return null;
   });
-  
-  const successCount = finalResults.filter(r => r !== null).length;
-  console.log(`Fetched ${successCount}/${nips.length} employee records successfully`);
-  
+
+  const successCount = finalResults.filter((r) => r !== null).length;
+  console.log(
+    `Fetched ${successCount}/${nips.length} employee records successfully`
+  );
+
   return finalResults;
 };
 
@@ -109,10 +124,12 @@ const fetchDetailedEmployeeData = async (siasnFetcher, nips) => {
 const constructResponsePayload = (employeeData, detailedEmployeeData) => {
   const results = employeeData?.data?.results?.map((item, idx) => {
     const currentEmployees = detailedEmployeeData[idx];
-    
+
     // Check if we have valid SIASN data
     if (!currentEmployees) {
-      console.warn(`No SIASN data for employee: ${item?.nama_master} (NIP: ${item?.nip_master})`);
+      console.warn(
+        `No SIASN data for employee: ${item?.nama_master} (NIP: ${item?.nip_master})`
+      );
       return {
         ...item,
         komparasi: {
@@ -127,10 +144,10 @@ const constructResponsePayload = (employeeData, detailedEmployeeData) => {
         },
         siasn: {
           nama: null,
-          status: 'Data tidak tersedia',
-          error: 'Failed to fetch SIASN data'
+          status: "Data tidak tersedia",
+          error: "Failed to fetch SIASN data",
         },
-        data_complete: false
+        data_complete: false,
       };
     }
 
@@ -184,7 +201,7 @@ const constructResponsePayload = (employeeData, detailedEmployeeData) => {
         unor: `${currentEmployees?.unorIndukNama} - ${currentEmployees?.unorNama}`,
         valid_nik: currentEmployees?.validNik,
       },
-      data_complete: true
+      data_complete: true,
     };
   });
 
@@ -614,6 +631,29 @@ const getOpd = async (req, res) => {
   }
 };
 
+const getOpdFull = async (req, res) => {
+  try {
+    const fetcher = req?.clientCredentialsFetcher;
+    const result = await fetcher.get(`/master-ws/pemprov/opd/1/departments`);
+
+    const hasil = result?.data?.map((d) => ({
+      id: d.id,
+      pId: d.pId,
+      title: d.name,
+      key: d.id,
+      label: d.name,
+      value: d.id,
+    }));
+
+    const treeData = arrayToTree(hasil, {
+      parentProperty: "pId",
+      customID: "id",
+    });
+
+    res.json(treeData);
+  } catch (error) {}
+};
+
 const getOpdAdmin = async (req, res) => {
   try {
     const fetcher = req?.clientCredentialsFetcher;
@@ -672,4 +712,5 @@ module.exports = {
   getAllEmployeesMasterPagingAdmin,
   getOpdAdmin,
   getAllEmployeesFullDownload,
+  getOpdFull,
 };
