@@ -42,6 +42,7 @@ const useDownloadAuditUpahParuhWaktu = () => {
             "Unit Kerja PK Lama": oldUnor,
             "Unit Kerja PK Baru": newUnor,
             "Status Perubahan Unit Kerja PK": unorChanged ? "Berubah" : "Tidak Berubah",
+            "IP Address": item.ip_address || "N/A",
             "Luar Perangkat Daerah": item.new_data?.luar_perangkat_daerah
               ? "Ya"
               : "Tidak",
@@ -74,6 +75,7 @@ const useDownloadAuditUpahParuhWaktu = () => {
         { wch: 50 }, // Unit Kerja PK Lama
         { wch: 50 }, // Unit Kerja PK Baru
         { wch: 25 }, // Status Perubahan Unit Kerja PK
+        { wch: 18 }, // IP Address
         { wch: 20 }, // Luar Perangkat Daerah
         { wch: 10 }, // Aksi
         { wch: 30 }, // Waktu Perubahan

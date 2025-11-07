@@ -305,3 +305,7 @@ export const getAtasan = (nip) => {
 export const checkFotoPersonalMasterWs = (refresh = false) => {
   return api.post("/check-foto", { refresh }).then((res) => res.data);
 };
+
+export const cekFasilitatorByOpdIdServices = (opdId) => {
+  return api.get(`/admin/fasilitator?opdId=${opdId}`).then((res) => res.data);
+};

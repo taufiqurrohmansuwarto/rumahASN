@@ -5,7 +5,12 @@ import { Breadcrumb, FloatButton } from "antd";
 import Head from "next/head";
 import Link from "next/link";
 
-const OperatorUpahParuhWaktu = () => {
+import OperatorUpahParuhWaktu from "@/components/Rekon/OperatorUpahParuhWaktu/OperatorUpahParuhWaktu";
+
+// Export komponen OperatorUpahParuhWaktu
+export { OperatorUpahParuhWaktu };
+
+const OperatorUpahParuhWaktuPage = () => {
   useScrollRestoration();
 
   return (
@@ -28,12 +33,13 @@ const OperatorUpahParuhWaktu = () => {
         }}
       >
         <FloatButton.BackTop />
+        <OperatorUpahParuhWaktu />
       </PageContainer>
     </>
   );
 };
 
-OperatorUpahParuhWaktu.getLayout = (page) => {
+OperatorUpahParuhWaktuPage.getLayout = (page) => {
   return (
     <RekonLayout active="/rekon/paruh-waktu/operator-gaji-pw">
       {page}
@@ -41,9 +47,9 @@ OperatorUpahParuhWaktu.getLayout = (page) => {
   );
 };
 
-OperatorUpahParuhWaktu.Auth = {
+OperatorUpahParuhWaktuPage.Auth = {
   action: "manage",
   subject: "Tickets",
 };
 
-export default OperatorUpahParuhWaktu;
+export default OperatorUpahParuhWaktuPage;

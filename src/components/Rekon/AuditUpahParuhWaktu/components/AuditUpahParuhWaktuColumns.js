@@ -2,6 +2,7 @@ import AvatarUser from "@/components/Users/AvatarUser";
 import UserText from "@/components/Users/UserText";
 import { Badge, Text } from "@mantine/core";
 import { Space, Tooltip } from "antd";
+import { IconWorld } from "@tabler/icons-react";
 import dayjs from "dayjs";
 import "dayjs/locale/id";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -139,6 +140,34 @@ const AuditUpahParuhWaktuColumns = () => {
               </div>
             )}
           </div>
+        );
+      },
+    },
+    {
+      title: "IP Address",
+      dataIndex: "ip_address",
+      key: "ip_address",
+      width: 140,
+      render: (ip) => {
+        const isLocalhost =
+          ip && (ip.includes("127.0.0.1") || ip.includes("::ffff:127.0.0.1"));
+        return (
+          <Badge
+            color={isLocalhost ? "orange" : "blue"}
+            size="sm"
+            variant="outline"
+            leftSection={
+              <div style={{ display: "flex", alignItems: "center" }}>
+                <IconWorld size={12} />
+              </div>
+            }
+            styles={{
+              section: { display: "flex", alignItems: "center" },
+              label: { display: "flex", alignItems: "center" },
+            }}
+          >
+            {isLocalhost ? "LOCALHOST" : ip || "N/A"}
+          </Badge>
         );
       },
     },

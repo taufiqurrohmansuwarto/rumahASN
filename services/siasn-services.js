@@ -1040,3 +1040,26 @@ export const getAuditLogOperatorGajiPW = async (query) => {
     )
     .then((res) => res.data);
 };
+
+// operator gaji pw
+export const getOperatorGajiPW = async (query) => {
+  const currentQuery = queryString.stringify(query, {
+    skipEmptyString: true,
+    skipNull: true,
+  });
+  return api
+    .get(`/admin/pengadaan/paruh-waktu/operator-gaji-pw?${currentQuery}`)
+    .then((res) => res.data);
+};
+
+export const addOperatorGajiPW = async (data) => {
+  return api
+    .post(`/admin/pengadaan/paruh-waktu/operator-gaji-pw`, data)
+    .then((res) => res.data);
+};
+
+export const deleteOperatorGajiPW = async ({ id }) => {
+  return api
+    .delete(`/admin/pengadaan/paruh-waktu/operator-gaji-pw/${id}`)
+    .then((res) => res.data);
+};

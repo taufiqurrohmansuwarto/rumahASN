@@ -299,6 +299,9 @@ export const updateGajiPengadaanParuhWaktu = async (req, res) => {
     const { gaji, unor_pk, luar_perangkat_daerah } = req?.body;
     const { customId } = req?.user;
 
+    const ipAddress =
+      req?.headers["x-forwarded-for"] || req?.socket?.remoteAddress;
+
     // Fetch current data before update
     const currentData = await P3KParuhWaktu.query().where("id", id).first();
 
@@ -358,6 +361,7 @@ export const updateGajiPengadaanParuhWaktu = async (req, res) => {
       new_data: JSON.stringify(newValue),
       change_by: customId,
       change_at: new Date(),
+      ip_address: ipAddress,
     });
 
     return res.json({
@@ -385,6 +389,68 @@ export const getAuditLogById = async (req, res) => {
       success: true,
       data: result,
     });
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+export const addOperatorGajiPW = async (req, res) => {
+  try {
+    const { unor_id, user_id } = req?.body;
+
+    // Check if already exists
+    const existing = await OperatorGajiPW.query()
+      .where({ unor_id, user_id })
+      .first();
+
+    if (existing) {
+      return res.status(400).json({
+        success: false,
+        message: "Operator sudah terdaftar untuk unit organisasi ini",
+      });
+    }
+
+    const result = await OperatorGajiPW.query()
+      .insert({ unor_id, user_id })
+      .returning("*");
+    const resultWithUser = await OperatorGajiPW.query()
+      .where("id", result.id)
+      .withGraphFetched("user(simpleWithImage)")
+      .first();
+    res.json(resultWithUser || result);
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+export const getOperatorGajiPW = async (req, res) => {
+  try {
+    const knex = OperatorGajiPW.knex();
+    const { unor_id } = req?.query;
+
+    let query = OperatorGajiPW.query()
+      .withGraphFetched("user(simpleWithImage)")
+      .select(
+        "*",
+        knex.raw("get_hierarchy_simaster(unor_id) as unit_organisasi")
+      );
+
+    if (unor_id) {
+      query = query.where("unor_id", unor_id);
+    }
+
+    const result = await query;
+    res.json(result);
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+export const deleteOperatorGajiPW = async (req, res) => {
+  try {
+    const { id } = req?.query;
+    const result = await OperatorGajiPW.query().where("id", id).delete();
+    res.json({ success: true, deleted: result });
   } catch (error) {
     handleError(res, error);
   }

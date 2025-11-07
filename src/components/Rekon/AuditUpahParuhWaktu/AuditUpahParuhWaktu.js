@@ -106,7 +106,7 @@ const AuditLogUpahParuhWaktu = () => {
               dataSource={tableData}
               rowKey="id"
               loading={isLoading || isFetching}
-              scroll={{ x: 950 }}
+              scroll={{ x: 1090 }}
               size="middle"
               style={{
                 borderRadius: "12px",
