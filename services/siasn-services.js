@@ -1021,3 +1021,22 @@ export const updateGajiPengadaanParuhWaktu = async ({ id, data }) => {
     .patch(`/admin/pengadaan/paruh-waktu/employees/${id}`, data)
     .then((res) => res.data);
 };
+
+export const getAuditLogPengadaanParuhWaktu = async (id) => {
+  return api
+    .get(`/admin/pengadaan/paruh-waktu/employees/${id}/log`)
+    .then((res) => res.data);
+};
+
+export const getAuditLogOperatorGajiPW = async (query) => {
+  const currentQuery = queryString.stringify(query, {
+    skipEmptyString: true,
+    skipNull: true,
+  });
+
+  return api
+    .get(
+      `/admin/pengadaan/paruh-waktu/operator-gaji-pw/audit-log?${currentQuery}`
+    )
+    .then((res) => res.data);
+};

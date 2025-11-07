@@ -1,4 +1,4 @@
-import { log } from "@/utils/logger";
+import { log, logger } from "@/utils/logger";
 
 const { handleError } = require("@/utils/helper/controller-helper");
 const P3KParuhWaktu = require("@/models/pengadaan/p3k-paruh-waktu.model");
@@ -208,27 +208,84 @@ export const createOperatorGajiPW = async (req, res) => {
 
 export const getAuditLogPengadaanParuhWaktu = async (req, res) => {
   try {
-    const { current_role, customId } = req?.user;
-    const { page = 1, limit = 10 } = req?.query;
-    const pageNum = Math.max(1, Number(page));
-    const lim = Math.max(1, Math.min(100, Number(limit))); // Cap limit at 100
+    const { current_role, customId, organization_id } = req?.user;
+    const {
+      page = 1,
+      limit = 10,
+      nama_operator = "",
+      nama_pegawai = "",
+      organization_id: filter_organization_id = "",
+    } = req?.query;
 
     const isAdmin = current_role === "admin";
 
-    let query = AuditLog.query();
+    let query = AuditLog.query()
+      .leftJoin("users", "users.custom_id", "pengadaan.audit_log.change_by")
+      .leftJoin(
+        "pengadaan.p3k_paruh_waktu",
+        "pengadaan.p3k_paruh_waktu.id",
+        "pengadaan.audit_log.record_id"
+      );
 
     if (!isAdmin) {
-      query = query.where("change_by", customId);
+      query = query.where("pengadaan.audit_log.change_by", customId);
     }
 
-    const result = await query.page(pageNum - 1, lim);
-    return {
+    // Filter berdasarkan organization_id
+    if (filter_organization_id) {
+      query = query.where("users.organization_id", filter_organization_id);
+    } else if (!isAdmin && organization_id) {
+      // Jika bukan admin dan tidak ada filter, gunakan organization_id user yang login
+      query = query.where("users.organization_id", organization_id);
+    }
+
+    // Pencarian nama operator (users.username)
+    if (nama_operator) {
+      query = query.where("users.username", "ILIKE", `%${nama_operator}%`);
+    }
+
+    // Pencarian nama pegawai (detail.nama)
+    if (nama_pegawai) {
+      query = query.where(
+        "pengadaan.p3k_paruh_waktu.nama",
+        "ILIKE",
+        `%${nama_pegawai}%`
+      );
+    }
+
+    // Select kolom dari audit_log untuk menghindari duplikasi
+    query = query.select("pengadaan.audit_log.*");
+
+    // Check if limit = -1 for downloading all data
+    if (Number(limit) === -1) {
+      const result = await query.withGraphFetched(
+        "[user(simpleWithImage), detail]"
+      );
+      return res.json({
+        success: true,
+        total: result.length,
+        data: result,
+      });
+    }
+
+    // Pagination mode
+    const pageNum = Math.max(1, Number(page));
+    const lim = Math.max(1, Math.min(100, Number(limit))); // Cap limit at 100
+
+    const result = await query
+      .page(pageNum - 1, lim)
+      .withGraphFetched("[user(simpleWithImage), detail]")
+      .orderBy("change_at", "desc");
+
+    const data = {
       success: true,
       page: pageNum,
       limit: lim,
       total: result.total,
       data: result.results,
     };
+
+    res.json(data);
   } catch (error) {
     handleError(res, error);
   }
@@ -315,5 +372,20 @@ export const updateGajiPengadaanParuhWaktu = async (req, res) => {
       message: "Error update gaji pengadaan paruh waktu",
       error: error?.message,
     });
+  }
+};
+
+export const getAuditLogById = async (req, res) => {
+  try {
+    const { id } = req?.query;
+    const result = await AuditLog.query()
+      .where("record_id", id)
+      .orderBy("change_at", "desc");
+    return res.json({
+      success: true,
+      data: result,
+    });
+  } catch (error) {
+    handleError(res, error);
   }
 };

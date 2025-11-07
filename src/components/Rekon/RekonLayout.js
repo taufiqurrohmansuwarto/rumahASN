@@ -15,6 +15,7 @@ import {
 } from "@ant-design/icons";
 import {
   IconBuilding,
+  IconHistory,
   IconChartBar,
   IconClock,
   IconDatabase,
@@ -55,6 +56,18 @@ const menuItems = [
         icon: <IconUsers size={16} />,
         label: "Daftar Pegawai",
         role: ["admin", "fasilitator"],
+      },
+      {
+        key: "/audit-log",
+        icon: <IconHistory size={16} />,
+        label: "Audit Log",
+        role: ["admin", "fasilitator"],
+      },
+      {
+        key: "/operator-gaji-pw",
+        icon: <IconHistory size={16} />,
+        label: "Operator Upah Paruh Waktu",
+        role: ["admin"],
       },
     ],
   },
