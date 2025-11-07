@@ -16,18 +16,21 @@ const AuditLogUpahParuhWaktuPage = () => {
   return (
     <>
       <Head>
-        <title>Rumah ASN - Rekon - Audit Upah Paruh Waktu</title>
+        <title>Rumah ASN - Rekon - Audit Log Upah Paruh Waktu</title>
       </Head>
       <PageContainer
-        title="Rekon"
-        content="Audit Upah Paruh Waktu"
+        title="Audit Log Upah Paruh Waktu"
+        content="Riwayat perubahan upah pegawai paruh waktu"
         breadcrumbRender={() => {
           return (
             <Breadcrumb>
               <Breadcrumb.Item>
                 <Link href="/rekon/dashboard">Dashboard</Link>
               </Breadcrumb.Item>
-              <Breadcrumb.Item>Audit Upah Paruh Waktu</Breadcrumb.Item>
+              <Breadcrumb.Item>
+                <Link href="/rekon/paruh-waktu/pegawai">Paruh Waktu</Link>
+              </Breadcrumb.Item>
+              <Breadcrumb.Item>Audit Log</Breadcrumb.Item>
             </Breadcrumb>
           );
         }}
