@@ -7,10 +7,16 @@ import {
   useUnorFasilitator,
   useOperatorGajiPW,
 } from "./hooks/useOperatorQueries";
+import { useAllOperators } from "./hooks/useAllOperators";
 import {
   useAddOperator,
   useDeleteOperator,
 } from "./hooks/useOperatorMutations";
+import {
+  useToggleLockOperator,
+  useLockAllOperators,
+  useUnlockAllOperators,
+} from "./hooks/useLockOperator";
 import { useDownloadOperator } from "./hooks/useDownloadOperator";
 import { formatUsername } from "./utils/helpers";
 import {
@@ -18,6 +24,7 @@ import {
   OperatorFilters,
   OperatorTransfer,
   EmptyState,
+  OperatorListTable,
 } from "./components";
 
 const OperatorUpahParuhWaktu = () => {
@@ -51,6 +58,13 @@ const OperatorUpahParuhWaktu = () => {
     refetch: refetchOperator,
   } = useOperatorGajiPW(unorId);
 
+  // Query untuk mendapatkan semua operator (tanpa filter)
+  const {
+    data: allOperators,
+    isLoading: isLoadingAllOperators,
+    refetch: refetchAllOperators,
+  } = useAllOperators();
+
   // Update targetKeys ketika operatorGajiPW berubah
   useEffect(() => {
     if (operatorGajiPW && Array.isArray(operatorGajiPW)) {
@@ -73,6 +87,14 @@ const OperatorUpahParuhWaktu = () => {
 
   const { mutate: downloadAllOperators, isLoading: isDownloading } =
     useDownloadOperator(unor);
+
+  // Mutations untuk lock
+  const { mutate: toggleLockOperator, isLoading: isLocking } =
+    useToggleLockOperator();
+  const { mutate: lockAllOperators, isLoading: isLockingAll } =
+    useLockAllOperators();
+  const { mutate: unlockAllOperators, isLoading: isUnlockingAll } =
+    useUnlockAllOperators();
 
   // Handlers
   const handleDownload = () => {
@@ -106,12 +128,30 @@ const OperatorUpahParuhWaktu = () => {
     }
   };
 
-  const handleRefresh = () => {
-    refetchUnor();
-    if (unorId) {
-      refetchFasilitator();
-      refetchOperator();
-    }
+  const handleRefresh = async () => {
+    // Refetch semua query secara paralel
+    await Promise.all([
+      refetchUnor(),
+      refetchAllOperators(),
+      unorId ? refetchFasilitator() : Promise.resolve(),
+      unorId ? refetchOperator() : Promise.resolve(),
+    ]);
+  };
+
+  const handleToggleLock = ({ id, data }) => {
+    toggleLockOperator({ id, data });
+  };
+
+  const handleLockAll = () => {
+    lockAllOperators();
+  };
+
+  const handleUnlockAll = () => {
+    unlockAllOperators();
+  };
+
+  const handleDeleteOperator = ({ id }) => {
+    deleteOperator({ id });
   };
 
   // Prepare data untuk Transfer
@@ -194,6 +234,20 @@ const OperatorUpahParuhWaktu = () => {
           ) : (
             <EmptyState />
           )}
+
+          {/* Daftar Semua Operator */}
+          <OperatorListTable
+            operators={allOperators}
+            isLoading={isLoadingAllOperators}
+            onToggleLock={handleToggleLock}
+            onDelete={handleDeleteOperator}
+            onLockAll={handleLockAll}
+            onUnlockAll={handleUnlockAll}
+            isLocking={isLocking}
+            isDeleting={isDeletingOperator}
+            isLockingAll={isLockingAll}
+            isUnlockingAll={isUnlockingAll}
+          />
         </Card>
       </div>
     </div>

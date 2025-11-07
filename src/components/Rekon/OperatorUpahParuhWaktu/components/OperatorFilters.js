@@ -1,8 +1,7 @@
 import { ReloadOutlined, DownloadOutlined } from "@ant-design/icons";
 import { Text } from "@mantine/core";
 import { IconSearch } from "@tabler/icons-react";
-import { Button, Col, Grid, Row, Space, TreeSelect, message } from "antd";
-import { useQueryClient } from "@tanstack/react-query";
+import { Button, Col, Grid, Row, Space, TreeSelect } from "antd";
 
 const { useBreakpoint } = Grid;
 
@@ -21,22 +20,6 @@ export const OperatorFilters = ({
 }) => {
   const screens = useBreakpoint();
   const isXs = !screens?.sm;
-  const queryClient = useQueryClient();
-
-  const handleRefresh = () => {
-    onRefresh();
-    if (unorId) {
-      queryClient.invalidateQueries({
-        queryKey: ["unor-fasilitator"],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["unor-fasilitator-fasilitator", unorId],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["operator-gaji-pw", unorId],
-      });
-    }
-  };
 
   return (
     <div
@@ -104,7 +87,7 @@ export const OperatorFilters = ({
                 isAddingOperator ||
                 isDeletingOperator
               }
-              onClick={handleRefresh}
+              onClick={onRefresh}
               style={{ borderRadius: 6, fontWeight: 500 }}
             >
               Refresh

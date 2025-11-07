@@ -1,5 +1,5 @@
 import { Text } from "@mantine/core";
-import { Button, Col, Input, Row, TreeSelect } from "antd";
+import { Button, Col, Input, Row, TreeSelect, InputNumber, Radio } from "antd";
 
 const { Search } = Input;
 
@@ -8,10 +8,15 @@ const DaftarPegawaiParuhWaktuFilter = ({
   nip,
   no_peserta,
   opd_id,
+  min_gaji,
+  max_gaji,
+  unor_type,
   unor,
   hasFilter,
   onSearch,
   onTreeSelectChange,
+  onGajiChange,
+  onUnorTypeChange,
   onClearFilter,
 }) => {
   return (
@@ -22,7 +27,7 @@ const DaftarPegawaiParuhWaktuFilter = ({
       }}
     >
       <Row gutter={[12, 12]}>
-        <Col xs={24} md={5}>
+        <Col xs={24} md={8}>
           <div style={{ marginBottom: 4 }}>
             <Text fw={600} size="sm" c="dimmed">
               Nama:
@@ -36,7 +41,7 @@ const DaftarPegawaiParuhWaktuFilter = ({
             style={{ width: "100%" }}
           />
         </Col>
-        <Col xs={24} md={5}>
+        <Col xs={24} md={8}>
           <div style={{ marginBottom: 4 }}>
             <Text fw={600} size="sm" c="dimmed">
               NIP:
@@ -50,7 +55,7 @@ const DaftarPegawaiParuhWaktuFilter = ({
             style={{ width: "100%" }}
           />
         </Col>
-        <Col xs={24} md={5}>
+        <Col xs={24} md={8}>
           <div style={{ marginBottom: 4 }}>
             <Text fw={600} size="sm" c="dimmed">
               No. Peserta:
@@ -64,7 +69,9 @@ const DaftarPegawaiParuhWaktuFilter = ({
             style={{ width: "100%" }}
           />
         </Col>
-        <Col xs={24} md={9}>
+      </Row>
+      <Row gutter={[12, 12]} style={{ marginTop: 12 }}>
+        <Col xs={24}>
           <div style={{ marginBottom: 4 }}>
             <Text fw={600} size="sm" c="dimmed">
               Perangkat Daerah:
@@ -80,6 +87,61 @@ const DaftarPegawaiParuhWaktuFilter = ({
             value={opd_id}
             onChange={onTreeSelectChange}
           />
+        </Col>
+      </Row>
+      <Row gutter={[12, 12]} style={{ marginTop: 12 }}>
+        <Col xs={24} md={8}>
+          <div style={{ marginBottom: 4 }}>
+            <Text fw={600} size="sm" c="dimmed">
+              Gaji Min:
+            </Text>
+          </div>
+          <InputNumber
+            style={{ width: "100%" }}
+            placeholder="Min: 100.000"
+            min={100000}
+            max={25000000}
+            formatter={(value) =>
+              `Rp ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+            }
+            parser={(value) => value.replace(/Rp\s?|(\.*)/g, "")}
+            value={min_gaji ? Number(min_gaji) : undefined}
+            onChange={(value) => onGajiChange("min_gaji", value)}
+          />
+        </Col>
+        <Col xs={24} md={8}>
+          <div style={{ marginBottom: 4 }}>
+            <Text fw={600} size="sm" c="dimmed">
+              Gaji Max:
+            </Text>
+          </div>
+          <InputNumber
+            style={{ width: "100%" }}
+            placeholder="Max: 25.000.000"
+            min={100000}
+            max={25000000}
+            formatter={(value) =>
+              `Rp ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+            }
+            parser={(value) => value.replace(/Rp\s?|(\.*)/g, "")}
+            value={max_gaji ? Number(max_gaji) : undefined}
+            onChange={(value) => onGajiChange("max_gaji", value)}
+          />
+        </Col>
+        <Col xs={24} md={8}>
+          <div style={{ marginBottom: 4 }}>
+            <Text fw={600} size="sm" c="dimmed">
+              Tipe UNOR:
+            </Text>
+          </div>
+          <Radio.Group
+            value={unor_type || "simaster"}
+            onChange={(e) => onUnorTypeChange(e.target.value)}
+            style={{ width: "100%" }}
+          >
+            <Radio.Button value="simaster">SIMASTER</Radio.Button>
+            <Radio.Button value="pk">PK</Radio.Button>
+          </Radio.Group>
         </Col>
       </Row>
       {hasFilter && (

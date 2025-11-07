@@ -19,7 +19,17 @@ const { Title } = Typography;
 
 const DaftarPegawaiParuhWaktu = () => {
   const router = useRouter();
-  const { page = 1, limit = 10, nama, nip, no_peserta, opd_id } = router.query;
+  const {
+    page = 1,
+    limit = 10,
+    nama,
+    nip,
+    no_peserta,
+    opd_id,
+    min_gaji,
+    max_gaji,
+    unor_type = "simaster",
+  } = router.query;
 
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedData, setSelectedData] = useState(null);
@@ -71,6 +81,40 @@ const DaftarPegawaiParuhWaktu = () => {
     });
   };
 
+  const handleGajiChange = (field, value) => {
+    router.push({
+      pathname: router.pathname,
+      query: {
+        ...router.query,
+        [field]: value || undefined,
+        page: 1,
+      },
+    });
+  };
+
+  const handleGajiRangeChange = (minValue, maxValue) => {
+    router.push({
+      pathname: router.pathname,
+      query: {
+        ...router.query,
+        min_gaji: minValue || undefined,
+        max_gaji: maxValue || undefined,
+        page: 1,
+      },
+    });
+  };
+
+  const handleUnorTypeChange = (value) => {
+    router.push({
+      pathname: router.pathname,
+      query: {
+        ...router.query,
+        unor_type: value || undefined,
+        page: 1,
+      },
+    });
+  };
+
   const handleTreeSelectChange = (value) => {
     router.push({
       pathname: router.pathname,
@@ -89,8 +133,8 @@ const DaftarPegawaiParuhWaktu = () => {
     });
   };
 
-  const columns = createColumns(handleShowDetail);
-  const hasFilter = nama || nip || no_peserta || opd_id;
+  const columns = createColumns(handleShowDetail, data?.has_action);
+  const hasFilter = nama || nip || no_peserta || opd_id || min_gaji || max_gaji;
 
   return (
     <div>
@@ -128,12 +172,59 @@ const DaftarPegawaiParuhWaktu = () => {
             nip={nip}
             no_peserta={no_peserta}
             opd_id={opd_id}
+            min_gaji={min_gaji}
+            max_gaji={max_gaji}
+            unor_type={unor_type}
             unor={unor}
             hasFilter={hasFilter}
             onSearch={handleSearch}
             onTreeSelectChange={handleTreeSelectChange}
+            onGajiChange={handleGajiChange}
+            onUnorTypeChange={handleUnorTypeChange}
             onClearFilter={clearFilter}
           />
+
+          {/* Total Gaji Section */}
+          {data?.total_gaji !== undefined && (
+            <div
+              style={{
+                padding: "16px",
+                background: "#f5f5f5",
+                borderRadius: "8px",
+                marginTop: "16px",
+                marginBottom: "16px",
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  flexWrap: "wrap",
+                  gap: "12px",
+                }}
+              >
+                <div>
+                  <Text fw={600} size="sm" c="dimmed">
+                    Total Gaji:
+                  </Text>
+                  <Text
+                    fw={700}
+                    size="lg"
+                    c="green"
+                    style={{ marginLeft: "8px" }}
+                  >
+                    Rp {Number(data?.total_gaji || 0).toLocaleString("id-ID")}
+                  </Text>
+                </div>
+                <div>
+                  <Text size="xs" c="dimmed">
+                    Total Records: {data?.total || 0}
+                  </Text>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Actions Section */}
           <div

@@ -45,7 +45,7 @@ export const useDownloadOperator = (unor) => {
             No: index + 1,
             "ID Operator": item.id,
             "Unit Organisasi ID": item.unor_id,
-            "Unit Organisasi": unorName,
+            "Unit Organisasi": unorName || item.unit_organisasi || "-",
             "User ID": item.user_id,
             "Nama Operator": username,
             Username: item.user?.username || "-",
@@ -54,6 +54,12 @@ export const useDownloadOperator = (unor) => {
             "Status Kepegawaian": item.user?.status_kepegawaian || "-",
             "Nama Jabatan": item.user?.nama_jabatan || "-",
             "Perangkat Daerah": item.user?.perangkat_daerah_detail || "-",
+            "Status Lock": item.is_locked ? "Locked" : "Unlocked",
+            "Locked By": item.locked_by || "-",
+            "Username Pengunci": item.pengunci?.username || item.locked_by || "-",
+            "Tanggal Lock": item.locked_at
+              ? dayjs(item.locked_at).format("DD/MM/YYYY HH:mm:ss")
+              : "-",
             "Tanggal Dibuat": dayjs(item.created_at).format(
               "DD/MM/YYYY HH:mm:ss"
             ),
@@ -81,6 +87,10 @@ export const useDownloadOperator = (unor) => {
           { wch: 20 }, // Status Kepegawaian
           { wch: 40 }, // Nama Jabatan
           { wch: 50 }, // Perangkat Daerah
+          { wch: 15 }, // Status Lock
+          { wch: 30 }, // Locked By
+          { wch: 30 }, // Username Pengunci
+          { wch: 20 }, // Tanggal Lock
           { wch: 20 }, // Tanggal Dibuat
           { wch: 20 }, // Tanggal Diupdate
         ];

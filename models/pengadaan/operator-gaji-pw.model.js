@@ -20,6 +20,14 @@ class OperatorGajiPW extends Model {
           to: "users.custom_id",
         },
       },
+      pengunci: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: User,
+        join: {
+          from: "pengadaan.operator_gaji_pw.locked_by",
+          to: "users.custom_id",
+        },
+      },
     };
   }
 }

@@ -1063,3 +1063,15 @@ export const deleteOperatorGajiPW = async ({ id }) => {
     .delete(`/admin/pengadaan/paruh-waktu/operator-gaji-pw/${id}`)
     .then((res) => res.data);
 };
+
+export const toggleLockOperatorGajiPW = async ({ id, data }) => {
+  return api
+    .put(`/admin/pengadaan/paruh-waktu/operator-gaji-pw/${id}/lock`, data)
+    .then((res) => res.data);
+};
+
+export const lockAllOperatorGajiPW = async (data = { is_locked: true }) => {
+  return api
+    .post(`/admin/pengadaan/paruh-waktu/operator-gaji-pw/lock`, data)
+    .then((res) => res.data);
+};

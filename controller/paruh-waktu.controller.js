@@ -6,9 +6,9 @@ const OperatorGajiPW = require("@/models/pengadaan/operator-gaji-pw.model");
 const AuditLog = require("@/models/pengadaan/audit-log.model");
 
 export const getPengadaanParuhWaktu = async (req, res) => {
-  const knex = P3KParuhWaktu.knex();
   try {
     const { current_role, organization_id: skpd_id } = req?.user;
+
     const {
       limit = 10,
       page = 1,
@@ -16,7 +16,16 @@ export const getPengadaanParuhWaktu = async (req, res) => {
       nama = "",
       nip = "",
       no_peserta = "",
+      unor_type = "simaster", // "simaster" or "pk"
+      min_gaji,
+      max_gaji,
     } = req?.query;
+
+    const currentOperator = await OperatorGajiPW.query()
+      .where("user_id", req?.user?.customId)
+      .first();
+
+    const unorId = currentOperator?.unor_id;
 
     // Determine OPD ID based on user role
     // Admin can access all OPDs (starts with "1")
@@ -54,6 +63,12 @@ export const getPengadaanParuhWaktu = async (req, res) => {
         if (no_peserta) {
           builder.where("no_peserta", "ILIKE", `%${no_peserta}%`);
         }
+        if (min_gaji) {
+          builder.where("gaji", ">=", Number(min_gaji));
+        }
+        if (max_gaji) {
+          builder.where("gaji", "<=", Number(max_gaji));
+        }
       })
       .withGraphFetched("[detail, status_usulan]")
       .orderBy("nama", "asc");
@@ -61,10 +76,114 @@ export const getPengadaanParuhWaktu = async (req, res) => {
     // Check if limit = -1 for downloading all data
     if (Number(limit) === -1) {
       const result = await baseQuery;
+
+      // Process data: check if operator has access and sensor gaji
+      const processedData = result.map((item) => {
+        // Admin can see all gaji but has_action is false
+        if (current_role === "admin") {
+          return {
+            ...item,
+            // Gaji tetap ditampilkan untuk admin
+          };
+        }
+
+        // For non-admin: check operator access
+        const unorFieldToCheck =
+          unor_type === "pk" ? item.unor_pk : item.unor_id_simaster;
+
+        const hasAccess =
+          currentOperator &&
+          unorId &&
+          unorFieldToCheck &&
+          String(unorFieldToCheck).startsWith(String(unorId));
+
+        return {
+          ...item,
+          gaji: hasAccess ? item.gaji : null, // Sensor gaji jika tidak ada akses
+        };
+      });
+
+      // Calculate total gaji using SQL
+      const knex = P3KParuhWaktu.knex();
+      let totalGaji = 0;
+
+      if (current_role === "admin") {
+        // Admin: SUM semua gaji
+        const totalResult = await knex("pengadaan.p3k_paruh_waktu")
+          .where("unor_id_simaster", "ILIKE", `${opdIdFilter}%`)
+          .where((builder) => {
+            if (nama) {
+              builder.where("nama", "ILIKE", `%${nama}%`);
+            }
+            if (nip) {
+              builder.where("nip", "ILIKE", `%${nip}%`);
+            }
+            if (no_peserta) {
+              builder.where("no_peserta", "ILIKE", `%${no_peserta}%`);
+            }
+            if (min_gaji) {
+              builder.where("gaji", ">=", Number(min_gaji));
+            }
+            if (max_gaji) {
+              builder.where("gaji", "<=", Number(max_gaji));
+            }
+          })
+          .sum("gaji as total")
+          .first();
+
+        totalGaji = Number(totalResult?.total || 0);
+      } else if (currentOperator && unorId) {
+        // Non-admin: SUM gaji yang memiliki akses
+        const unorField = unor_type === "pk" ? "unor_pk" : "unor_id_simaster";
+        const totalResult = await knex("pengadaan.p3k_paruh_waktu")
+          .where("unor_id_simaster", "ILIKE", `${opdIdFilter}%`)
+          .where(unorField, "ILIKE", `${unorId}%`)
+          .where((builder) => {
+            if (nama) {
+              builder.where("nama", "ILIKE", `%${nama}%`);
+            }
+            if (nip) {
+              builder.where("nip", "ILIKE", `%${nip}%`);
+            }
+            if (no_peserta) {
+              builder.where("no_peserta", "ILIKE", `%${no_peserta}%`);
+            }
+            if (min_gaji) {
+              builder.where("gaji", ">=", Number(min_gaji));
+            }
+            if (max_gaji) {
+              builder.where("gaji", "<=", Number(max_gaji));
+            }
+          })
+          .sum("gaji as total")
+          .first();
+
+        totalGaji = Number(totalResult?.total || 0);
+      }
+
+      // Check if operator has action (can access any data)
+      // Admin always has has_action: false
+      let hasAction = false;
+      if (current_role !== "admin") {
+        hasAction =
+          currentOperator &&
+          unorId &&
+          processedData.some((item) => {
+            const unorFieldToCheck =
+              unor_type === "pk" ? item.unor_pk : item.unor_id_simaster;
+            return (
+              unorFieldToCheck &&
+              String(unorFieldToCheck).startsWith(String(unorId))
+            );
+          });
+      }
+
       return res.json({
         success: true,
-        total: result.length,
-        data: result,
+        total: processedData.length,
+        total_gaji: totalGaji,
+        has_action: hasAction,
+        data: processedData,
       });
     }
 
@@ -74,12 +193,103 @@ export const getPengadaanParuhWaktu = async (req, res) => {
 
     const result = await baseQuery.page(pageNum - 1, lim);
 
+    // Process data: check if operator has access and sensor gaji
+    const processedData = result.results.map((item) => {
+      // Admin can see all gaji but has_action is false
+      if (current_role === "admin") {
+        return {
+          ...item,
+          // Gaji tetap ditampilkan untuk admin
+        };
+      }
+
+      // For non-admin: check operator access
+      const unorFieldToCheck =
+        unor_type === "pk" ? item.unor_pk : item.unor_id_simaster;
+
+      const hasAccess =
+        currentOperator &&
+        unorId &&
+        unorFieldToCheck &&
+        String(unorFieldToCheck).startsWith(String(unorId));
+
+      return {
+        ...item,
+        gaji: hasAccess ? item.gaji : null, // Sensor gaji jika tidak ada akses
+      };
+    });
+
+    // Calculate total gaji using SQL
+    const knex = P3KParuhWaktu.knex();
+    let totalGaji = 0;
+
+    if (current_role === "admin") {
+      // Admin: SUM semua gaji
+      const totalResult = await knex("pengadaan.p3k_paruh_waktu")
+        .where("unor_id_simaster", "ILIKE", `${opdIdFilter}%`)
+        .where((builder) => {
+          if (nama) {
+            builder.where("nama", "ILIKE", `%${nama}%`);
+          }
+          if (nip) {
+            builder.where("nip", "ILIKE", `%${nip}%`);
+          }
+          if (no_peserta) {
+            builder.where("no_peserta", "ILIKE", `%${no_peserta}%`);
+          }
+        })
+        .sum("gaji as total")
+        .first();
+
+      totalGaji = Number(totalResult?.total || 0);
+    } else if (currentOperator && unorId) {
+      // Non-admin: SUM gaji yang memiliki akses
+      const unorField = unor_type === "pk" ? "unor_pk" : "unor_id_simaster";
+      const totalResult = await knex("pengadaan.p3k_paruh_waktu")
+        .where("unor_id_simaster", "ILIKE", `${opdIdFilter}%`)
+        .where(unorField, "ILIKE", `${unorId}%`)
+        .where((builder) => {
+          if (nama) {
+            builder.where("nama", "ILIKE", `%${nama}%`);
+          }
+          if (nip) {
+            builder.where("nip", "ILIKE", `%${nip}%`);
+          }
+          if (no_peserta) {
+            builder.where("no_peserta", "ILIKE", `%${no_peserta}%`);
+          }
+        })
+        .sum("gaji as total")
+        .first();
+
+      totalGaji = Number(totalResult?.total || 0);
+    }
+
+    // Check if operator has action (can access any data in current page)
+    // Admin always has has_action: false
+    let hasAction = false;
+    if (current_role !== "admin") {
+      hasAction =
+        currentOperator &&
+        unorId &&
+        processedData.some((item) => {
+          const unorFieldToCheck =
+            unor_type === "pk" ? item.unor_pk : item.unor_id_simaster;
+          return (
+            unorFieldToCheck &&
+            String(unorFieldToCheck).startsWith(String(unorId))
+          );
+        });
+    }
+
     res.json({
       success: true,
       page: pageNum,
       limit: lim,
       total: result.total,
-      data: result.results,
+      total_gaji: totalGaji,
+      has_action: hasAction || false,
+      data: processedData,
     });
   } catch (error) {
     handleError(res, error);
@@ -295,9 +505,32 @@ export const getAuditLogPengadaanParuhWaktu = async (req, res) => {
 export const updateGajiPengadaanParuhWaktu = async (req, res) => {
   try {
     const knex = P3KParuhWaktu.knex();
+
     const { id } = req?.query;
     const { gaji, unor_pk, luar_perangkat_daerah } = req?.body;
     const { customId } = req?.user;
+
+    const currentOperator = await OperatorGajiPW.query()
+      .where("user_id", customId)
+      .first();
+
+    // Validasi: Harus merupakan operator
+    if (!currentOperator) {
+      return res.status(403).json({
+        success: false,
+        message: "Forbidden: Anda bukan operator",
+      });
+    }
+
+    const unorId = currentOperator?.unor_id;
+
+    // Validasi: Operator tidak boleh terkunci
+    if (currentOperator?.is_locked) {
+      return res.status(403).json({
+        success: false,
+        message: "Forbidden: Operator terkunci",
+      });
+    }
 
     const ipAddress =
       req?.headers["x-forwarded-for"] || req?.socket?.remoteAddress;
@@ -310,6 +543,21 @@ export const updateGajiPengadaanParuhWaktu = async (req, res) => {
         success: false,
         message: "Data tidak ditemukan",
       });
+    }
+
+    // Validasi: unorId harus children dari unor_id pegawai
+    if (unorId) {
+      const hasAccess =
+        currentData.unor_id_simaster &&
+        String(currentData.unor_id_simaster).startsWith(String(unorId));
+
+      if (!hasAccess) {
+        return res.status(403).json({
+          success: false,
+          message:
+            "Forbidden: Anda tidak memiliki akses untuk mengupdate data ini",
+        });
+      }
     }
 
     // get text unor text pk from database
@@ -429,11 +677,12 @@ export const getOperatorGajiPW = async (req, res) => {
     const { unor_id } = req?.query;
 
     let query = OperatorGajiPW.query()
-      .withGraphFetched("user(simpleWithImage)")
+      .withGraphFetched("[user(simpleWithImage), pengunci(simpleWithImage)]")
       .select(
         "*",
         knex.raw("get_hierarchy_simaster(unor_id) as unit_organisasi")
-      );
+      )
+      .orderBy("created_at", "asc");
 
     if (unor_id) {
       query = query.where("unor_id", unor_id);
@@ -452,6 +701,62 @@ export const deleteOperatorGajiPW = async (req, res) => {
     const result = await OperatorGajiPW.query().where("id", id).delete();
     res.json({ success: true, deleted: result });
   } catch (error) {
+    handleError(res, error);
+  }
+};
+
+export const toggleLockOperatorGajiPW = async (req, res) => {
+  try {
+    const { customId } = req?.user;
+    const { id } = req?.query;
+    const { is_locked } = req?.body;
+
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: "ID operator tidak ditemukan",
+      });
+    }
+
+    // Jika is_locked tidak dikirim, ambil dari database dulu untuk toggle
+    let newLockStatus;
+    if (is_locked !== undefined) {
+      newLockStatus = is_locked;
+    } else {
+      const operator = await OperatorGajiPW.query().where("id", id).first();
+      if (!operator) {
+        return res.status(404).json({
+          success: false,
+          message: "Operator tidak ditemukan",
+        });
+      }
+      newLockStatus = !operator.is_locked;
+    }
+
+    const result = await OperatorGajiPW.query().where("id", id).update({
+      is_locked: newLockStatus,
+      locked_at: new Date(),
+      locked_by: customId,
+    });
+    res.json({ success: true, locked: result });
+  } catch (error) {
+    console.log(error);
+    handleError(res, error);
+  }
+};
+
+export const lockAllOperatorGajiPW = async (req, res) => {
+  try {
+    const { customId } = req?.user;
+    const { is_locked = true } = req?.body;
+    const result = await OperatorGajiPW.query().update({
+      is_locked: is_locked,
+      locked_at: new Date(),
+      locked_by: customId.toString(),
+    });
+    res.json({ success: true, locked: result });
+  } catch (error) {
+    console.log(error);
     handleError(res, error);
   }
 };

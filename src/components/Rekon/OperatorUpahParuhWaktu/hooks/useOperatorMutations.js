@@ -15,6 +15,9 @@ export const useAddOperator = (unorId, refetchOperator, refetchFasilitator) => {
       message.success("Berhasil menambahkan operator");
       queryClient.invalidateQueries({ queryKey: ["operator-gaji-pw", unorId] });
       queryClient.invalidateQueries({
+        queryKey: ["operator-gaji-pw-all"],
+      });
+      queryClient.invalidateQueries({
         queryKey: ["unor-fasilitator-fasilitator", unorId],
       });
       refetchOperator();
@@ -46,6 +49,9 @@ export const useDeleteOperator = (
       message.success("Berhasil menghapus operator");
       queryClient.invalidateQueries({
         queryKey: ["operator-gaji-pw", unorId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["operator-gaji-pw-all"],
       });
       queryClient.invalidateQueries({
         queryKey: ["unor-fasilitator-fasilitator", unorId],
