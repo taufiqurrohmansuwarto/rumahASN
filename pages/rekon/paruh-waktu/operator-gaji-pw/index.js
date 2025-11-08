@@ -16,11 +16,11 @@ const OperatorUpahParuhWaktuPage = () => {
   return (
     <>
       <Head>
-        <title>Rumah ASN - Rekon - Operator Gaji Paruh Waktu</title>
+        <title>Rumah ASN - Operator Gaji Paruh Waktu</title>
       </Head>
       <PageContainer
         title="Operator Gaji Paruh Waktu"
-        content="Kelola operator yang dapat mengelola gaji pegawai paruh waktu"
+        subTitle="Kelola operator pengelola gaji"
         breadcrumbRender={() => {
           return (
             <Breadcrumb>

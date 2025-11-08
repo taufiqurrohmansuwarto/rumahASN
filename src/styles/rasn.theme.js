@@ -89,13 +89,13 @@ export const useGlobalStyle = createStyles(({ prefixCls, css, token }) => ({
           border: 1px solid #edeff1; // Light border
 
           &:hover {
-            border-color: #FF4500; // Reddit orange
-            color: #FF4500; // Reddit orange
+            border-color: #ff4500; // Reddit orange
+            color: #ff4500; // Reddit orange
           }
 
           &.${prefixCls}-pagination-item-active {
-            background: #FF4500; // Reddit orange
-            border-color: #FF4500; // Reddit orange
+            background: #ff4500; // Reddit orange
+            border-color: #ff4500; // Reddit orange
           }
         }
       }
@@ -114,7 +114,7 @@ export const useGlobalStyle = createStyles(({ prefixCls, css, token }) => ({
 
       &:focus,
       &.${prefixCls}-input-affix-wrapper-focused {
-        border-color: #FF4500; // Reddit orange
+        border-color: #ff4500; // Reddit orange
         box-shadow: 0 0 0 2px rgba(255, 69, 0, 0.2); // Orange outline
       }
     }
@@ -131,7 +131,7 @@ export const useGlobalStyle = createStyles(({ prefixCls, css, token }) => ({
       }
 
       &.${prefixCls}-select-focused .${prefixCls}-select-selector {
-        border-color: #FF4500; // Reddit orange
+        border-color: #ff4500; // Reddit orange
         box-shadow: 0 0 0 2px rgba(255, 69, 0, 0.2); // Orange outline
       }
     }
@@ -148,11 +148,11 @@ export const useGlobalStyle = createStyles(({ prefixCls, css, token }) => ({
 
         &:hover {
           background: #f6f7f8; // Very light hover
-          color: #FF4500; // Reddit orange
+          color: #ff4500; // Reddit orange
         }
 
         &.${prefixCls}-select-item-option-selected {
-          background: #FF4500; // Reddit orange
+          background: #ff4500; // Reddit orange
           color: white;
           font-weight: 500;
         }
@@ -204,7 +204,7 @@ export const useGlobalStyle = createStyles(({ prefixCls, css, token }) => ({
             transition: color 0.2s ease;
 
             &:hover {
-              color: #FF4500; // Reddit orange
+              color: #ff4500; // Reddit orange
             }
           }
         }
@@ -247,7 +247,6 @@ export const useGlobalStyle = createStyles(({ prefixCls, css, token }) => ({
         border-color: #0079d3;
       }
     }
-
 
     // Enhanced Message & Notification
     .${prefixCls}-message {
@@ -297,7 +296,7 @@ export const useGlobalStyle = createStyles(({ prefixCls, css, token }) => ({
         }
 
         &.${prefixCls}-menu-item-selected {
-          background: #FF4500; // Orange background
+          background: #ff4500; // Orange background
           color: #1c1c1c; // Black text
           font-weight: 500;
         }
@@ -310,7 +309,7 @@ export const useGlobalStyle = createStyles(({ prefixCls, css, token }) => ({
 
         &:hover {
           background: #f6f7f8; // Very light hover
-          color: #FF4500; // Reddit orange
+          color: #ff4500; // Reddit orange
         }
       }
     }
@@ -369,8 +368,8 @@ export const useGlobalStyle = createStyles(({ prefixCls, css, token }) => ({
     // Reddit-style Steps
     .${prefixCls}-steps {
       .${prefixCls}-steps-item-process .${prefixCls}-steps-item-icon {
-        background: #FF4500; // Reddit orange
-        border-color: #FF4500; // Reddit orange
+        background: #ff4500; // Reddit orange
+        border-color: #ff4500; // Reddit orange
       }
 
       .${prefixCls}-steps-item-finish .${prefixCls}-steps-item-icon {
@@ -397,11 +396,11 @@ export const useGlobalStyle = createStyles(({ prefixCls, css, token }) => ({
         font-weight: 500;
 
         &:hover {
-          color: #FF4500; // Reddit orange
+          color: #ff4500; // Reddit orange
         }
 
         &.${prefixCls}-tabs-tab-active {
-          background: #FF4500; // Orange background
+          background: #ff4500; // Orange background
           color: #1c1c1c; // Black text
           font-weight: 600;
           padding: 12px 16px;
@@ -410,7 +409,7 @@ export const useGlobalStyle = createStyles(({ prefixCls, css, token }) => ({
       }
 
       .${prefixCls}-tabs-ink-bar {
-        background: #FF4500; // Reddit orange
+        background: #ff4500; // Reddit orange
         height: 3px;
         border-radius: 2px;
       }
@@ -535,8 +534,8 @@ export const useGlobalStyle = createStyles(({ prefixCls, css, token }) => ({
 
         &.${prefixCls}-picker-cell-selected .${prefixCls}-picker-cell-inner {
           background: transparent !important; // No background
-          border: 2px solid #FF4500 !important; // Orange border all sides
-          color: #FF4500 !important; // Orange text
+          border: 2px solid #ff4500 !important; // Orange border all sides
+          color: #ff4500 !important; // Orange text
           font-weight: 600 !important;
           box-sizing: border-box !important; // Ensure border is included in dimensions
         }
@@ -544,15 +543,15 @@ export const useGlobalStyle = createStyles(({ prefixCls, css, token }) => ({
         &.${prefixCls}-picker-cell-in-view.${prefixCls}-picker-cell-selected
           .${prefixCls}-picker-cell-inner {
           background: transparent !important; // No background
-          border: 2px solid #FF4500 !important; // Orange border all sides
-          color: #FF4500 !important; // Orange text
+          border: 2px solid #ff4500 !important; // Orange border all sides
+          color: #ff4500 !important; // Orange text
           font-weight: 600 !important;
           box-sizing: border-box !important;
         }
 
         &.${prefixCls}-picker-cell-today .${prefixCls}-picker-cell-inner {
-          border: 1px solid #FF4500 !important; // Orange border all sides
-          color: #FF4500 !important;
+          border: 1px solid #ff4500 !important; // Orange border all sides
+          color: #ff4500 !important;
           background: rgba(255, 69, 0, 0.1) !important;
           box-sizing: border-box; // Ensure border is included in dimensions
         }
@@ -568,7 +567,7 @@ export const useGlobalStyle = createStyles(({ prefixCls, css, token }) => ({
 
           &:hover {
             background: #f6f7f8 !important;
-            color: #FF4500 !important;
+            color: #ff4500 !important;
           }
         }
       }
@@ -590,14 +589,14 @@ export const useGlobalStyle = createStyles(({ prefixCls, css, token }) => ({
           }
 
           &.${prefixCls}-picker-cell-selected .${prefixCls}-picker-cell-inner {
-            background: #FF4500 !important; // Orange background for month/year
+            background: #ff4500 !important; // Orange background for month/year
             color: #ffffff !important; // White text
             font-weight: 600 !important;
           }
 
           &.${prefixCls}-picker-cell-in-view.${prefixCls}-picker-cell-selected
             .${prefixCls}-picker-cell-inner {
-            background: #FF4500 !important; // Orange background for month/year
+            background: #ff4500 !important; // Orange background for month/year
             color: #ffffff !important; // White text
             font-weight: 600 !important;
           }
@@ -622,30 +621,30 @@ export const useGlobalStyle = createStyles(({ prefixCls, css, token }) => ({
 
       .${prefixCls}-calendar-cell-selected {
         background: transparent !important; // No background
-        border: 2px solid #FF4500 !important; // Orange border all sides
+        border: 2px solid #ff4500 !important; // Orange border all sides
         box-sizing: border-box !important; // Ensure border is included in dimensions
 
         .${prefixCls}-calendar-date {
-          color: #FF4500 !important; // Orange text
+          color: #ff4500 !important; // Orange text
           font-weight: 600 !important;
         }
       }
 
       .${prefixCls}-calendar-cell-in-view.${prefixCls}-calendar-cell-selected {
         background: transparent !important; // No background
-        border: 2px solid #FF4500 !important; // Orange border all sides
+        border: 2px solid #ff4500 !important; // Orange border all sides
         box-sizing: border-box !important;
 
         .${prefixCls}-calendar-date {
-          color: #FF4500 !important; // Orange text
+          color: #ff4500 !important; // Orange text
           font-weight: 600 !important;
         }
       }
 
       .${prefixCls}-calendar-today {
         .${prefixCls}-calendar-date {
-          border: 1px solid #FF4500 !important; // Orange border all sides
-          color: #FF4500 !important;
+          border: 1px solid #ff4500 !important; // Orange border all sides
+          color: #ff4500 !important;
           background: rgba(255, 69, 0, 0.1) !important;
           border-radius: 6px;
           box-sizing: border-box; // Ensure border is included in dimensions
@@ -681,9 +680,9 @@ export const useButtonStyle = createStyles(({ prefixCls, css }) => ({
         content: "";
         background: linear-gradient(
           135deg,
-          #FF4500 0%,
+          #ff4500 0%,
           #ff6b35 50%,
-          #FF4500 100%
+          #ff4500 100%
         ); // Reddit orange gradient
         position: absolute;
         inset: -1px;
@@ -763,21 +762,21 @@ export const useButtonStyle = createStyles(({ prefixCls, css }) => ({
 
       &:hover {
         background: #f6f7f8; // Very light hover
-        border-color: #FF4500; // Reddit orange border on hover
-        color: #FF4500; // Reddit orange text on hover
+        border-color: #ff4500; // Reddit orange border on hover
+        color: #ff4500; // Reddit orange text on hover
         transform: translateY(-1px);
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
       }
 
       &:active {
         background: #edeff1; // Light active
-        border-color: #FF4500;
+        border-color: #ff4500;
         transform: scale(0.98);
         box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
       }
 
       &:focus {
-        border-color: #FF4500; // Orange focus
+        border-color: #ff4500; // Orange focus
         box-shadow: 0 0 0 3px rgba(255, 69, 0, 0.2);
       }
     }
@@ -790,13 +789,13 @@ export const useButtonStyle = createStyles(({ prefixCls, css }) => ({
 
       &:hover {
         background: #f6f7f8; // Very light hover
-        color: #FF4500; // Orange on hover
+        color: #ff4500; // Orange on hover
         transform: translateY(-1px);
       }
 
       &:active {
         background: #edeff1;
-        color: #FF4500;
+        color: #ff4500;
         transform: scale(0.95);
       }
     }

@@ -12,11 +12,11 @@ const ParuhWaktu = () => {
   return (
     <>
       <Head>
-        <title>Rumah ASN - Rekon - Pegawai Paruh Waktu</title>
+        <title>Rumah ASN - Pegawai Paruh Waktu</title>
       </Head>
       <PageContainer
         title="Pegawai Paruh Waktu"
-        content="Daftar pegawai PPPK paruh waktu"
+        subTitle="Daftar PPPK paruh waktu"
         breadcrumbRender={() => {
           return (
             <Breadcrumb>
