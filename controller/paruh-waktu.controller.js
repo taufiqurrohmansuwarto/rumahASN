@@ -760,3 +760,11 @@ export const lockAllOperatorGajiPW = async (req, res) => {
     handleError(res, error);
   }
 };
+
+export const getStatsPengadaanParuhWaktu = async (req, res) => {
+  try {
+    res.json([]);
+  } catch (error) {
+    handleError(res, error);
+  }
+};

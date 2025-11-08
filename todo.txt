@@ -1,7 +1,6 @@
-table pengadaan.operator_gaji_pw
-
-id unor_id user_id created_at updated_at created_by updated_by
-
-
-table pengadaan.audit_log
-id table_name record_id action old_data new_data change_by change_at
+1. aplikasi PKPH (konsultasi hukum)
+2. perbaikan webinar karena tte error 
+3. perbaikan perbaikan pendidikan siasn (untuk disparitas)
+4. penambahan fitur tambah spesimen untuk esign bkd
+5. penambahan endpoint tugas belajar
+6. penyederhanaan kppn
