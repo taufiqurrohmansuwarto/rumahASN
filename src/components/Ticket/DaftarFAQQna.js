@@ -7,10 +7,14 @@ import useFaqQnaDownload from "@/components/Ticket/FaqQna/useFaqQnaDownload";
 import useFaqQnaMutations from "@/components/Ticket/FaqQna/useFaqQnaMutations";
 import ReactMarkdownCustom from "@/components/MarkdownEditor/ReactMarkdownCustom";
 import { Text } from "@mantine/core";
-import { getFaqQna, getFaqQnaHistory } from "@/services/tickets-ref.services";
+import {
+  getFaqQna,
+  getFaqQnaHistory,
+  resyncFaqQna,
+} from "@/services/tickets-ref.services";
 import { subCategories } from "@/services/index";
-import { useQuery } from "@tanstack/react-query";
-import { Card, Modal, Tag } from "antd";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Card, Modal, Tag, message } from "antd";
 import dayjs from "dayjs";
 import { useRouter } from "next/router";
 import { useState } from "react";
@@ -94,6 +98,21 @@ function DaftarFAQQna() {
   // Mutations
   const { create, update, handleDelete, isLoadingCreate, isLoadingUpdate } =
     useFaqQnaMutations(router);
+
+  // Query client for invalidation
+  const queryClient = useQueryClient();
+
+  // Resync mutation
+  const resyncMutation = useMutation({
+    mutationFn: resyncFaqQna,
+    onSuccess: () => {
+      message.success("FAQ berhasil di-resync ke Qdrant");
+      queryClient.invalidateQueries(["faq-qna"]);
+    },
+    onError: (error) => {
+      message.error(error?.response?.data?.message || "Gagal resync FAQ");
+    },
+  });
 
   // Download
   const { downloadFaq, isDownloading } = useFaqQnaDownload();
@@ -198,6 +217,20 @@ function DaftarFAQQna() {
     });
   };
 
+  const handleResync = (id) => {
+    Modal.confirm({
+      title: "Resync FAQ ke Qdrant",
+      content:
+        "Sync ulang FAQ ini ke Qdrant? Ini akan memperbarui vector embeddings dan metadata.",
+      okText: "Ya, Resync",
+      cancelText: "Batal",
+      confirmLoading: resyncMutation.isPending,
+      onOk: () => {
+        return resyncMutation.mutateAsync(id);
+      },
+    });
+  };
+
   const hasActiveFilters =
     search ||
     is_active !== undefined ||
@@ -238,7 +271,7 @@ function DaftarFAQQna() {
         <FaqQnaTable
           data={data}
           isLoading={isLoading}
-          isFetching={isFetching}
+          isFetching={isFetching || resyncMutation.isPending}
           page={page}
           limit={limit}
           handleChangePage={handleChangePage}
@@ -247,6 +280,7 @@ function DaftarFAQQna() {
           handleViewHistory={handleViewHistory}
           handleCreateVersion={handleCreateVersion}
           handleViewDetail={handleViewDetail}
+          handleResync={handleResync}
         />
       </Card>
 

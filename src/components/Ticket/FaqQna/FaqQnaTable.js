@@ -4,6 +4,7 @@ import {
   EyeOutlined,
   HistoryOutlined,
   QuestionCircleOutlined,
+  SyncOutlined,
 } from "@ant-design/icons";
 import { Badge, Group, Stack, Text } from "@mantine/core";
 import { Button, Collapse, Dropdown, Table } from "antd";
@@ -23,6 +24,7 @@ function FaqQnaTable({
   handleViewHistory,
   handleCreateVersion,
   handleViewDetail,
+  handleResync,
 }) {
   const columns = [
     {
@@ -151,6 +153,12 @@ function FaqQnaTable({
             icon: <HistoryOutlined />,
             label: "Lihat History",
             onClick: () => handleViewHistory(record.id),
+          },
+          {
+            key: "resync",
+            icon: <SyncOutlined />,
+            label: "Resync ke Qdrant",
+            onClick: () => handleResync(record.id),
           },
           {
             type: "divider",

@@ -238,22 +238,40 @@ export const updateFaqQna = async (req, res) => {
       await oldFaq.$relatedQuery("sub_categories").relate(sub_category_ids);
     }
 
-    // Update Qdrant
-    if (question && process.env.QDRANT_ENABLED === "true") {
+    // Update Qdrant - sync semua perubahan, tidak hanya question
+    if (process.env.QDRANT_ENABLED === "true" && oldFaq.qdrant_point_id) {
       try {
-        const embeddingResult = await generateEmbedding(question);
+        // Generate embedding dari question (yang baru atau lama)
+        const questionToEmbed = question || oldFaq.question;
+        const embeddingResult = await generateEmbedding(questionToEmbed);
 
-        if (embeddingResult.success && oldFaq.qdrant_point_id) {
+        if (embeddingResult.success) {
           const { updateVector } = await import(
             "@/utils/services/qdrant.services"
           );
+
+          // Update vector dengan payload lengkap
           await updateVector(oldFaq.qdrant_point_id, embeddingResult.data, {
-            sub_category_ids,
-            is_active: patchPayload.is_active || oldFaq.is_active,
+            sub_category_ids:
+              sub_category_ids.length > 0
+                ? sub_category_ids
+                : oldFaq.sub_categories?.map((sc) => sc.id) || [],
+            is_active:
+              patchPayload.is_active !== undefined
+                ? patchPayload.is_active
+                : oldFaq.is_active,
+            effective_date: patchPayload.effective_date
+              ? patchPayload.effective_date.toISOString()
+              : oldFaq.effective_date?.toISOString(),
+            expired_date: patchPayload.expired_date
+              ? patchPayload.expired_date.toISOString()
+              : oldFaq.expired_date?.toISOString(),
           });
+
+          log.info(`✅ FAQ ${id} synced to Qdrant after patch`);
         }
       } catch (qdrantError) {
-        console.warn("⚠️ Failed to update Qdrant:", qdrantError.message);
+        log.warn("⚠️ Failed to update Qdrant:", qdrantError.message);
       }
     }
 
@@ -653,6 +671,88 @@ export const bulkSyncToQdrant = async (req, res) => {
       total: faqs.length,
       errors: failed > 0 ? errors : undefined,
     });
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+// RESYNC single FAQ by ID (force sync)
+export const resyncFaqQna = async (req, res) => {
+  try {
+    const { id } = req.query;
+
+    if (!id) {
+      return res.status(400).json({ message: "FAQ ID is required" });
+    }
+
+    const faq = await FaqQna.query()
+      .findById(id)
+      .withGraphFetched("sub_categories");
+
+    if (!faq) {
+      return res.status(404).json({ message: "FAQ tidak ditemukan" });
+    }
+
+    if (process.env.QDRANT_ENABLED !== "true") {
+      return res.status(400).json({ message: "Qdrant is not enabled" });
+    }
+
+    log.info(`🔄 Starting resync for FAQ ID: ${id}`);
+
+    try {
+      // Generate embedding
+      const embeddingResult = await generateEmbedding(faq.question);
+
+      if (!embeddingResult.success) {
+        log.error(`❌ Embedding generation failed for FAQ ${id}`);
+        return res.status(500).json({
+          message: "Failed to generate embedding",
+          error: embeddingResult.error,
+        });
+      }
+
+      // Upsert to Qdrant (akan overwrite jika sudah ada)
+      const pointResult = await upsertVector(faq.id, embeddingResult.data, {
+        sub_category_ids: faq.sub_categories?.map((sc) => sc.id) || [],
+        is_active: faq.is_active,
+        effective_date: faq.effective_date
+          ? new Date(faq.effective_date).toISOString()
+          : null,
+        expired_date: faq.expired_date
+          ? new Date(faq.expired_date).toISOString()
+          : null,
+      });
+
+      if (!pointResult.success) {
+        log.error(`❌ Qdrant upsert failed for FAQ ${id}`);
+        return res.status(500).json({
+          message: "Failed to sync to Qdrant",
+          error: pointResult.error,
+        });
+      }
+
+      // Update qdrant_point_id di database
+      await FaqQna.query()
+        .findById(faq.id)
+        .patch({ qdrant_point_id: pointResult.data });
+
+      log.info(`✅ FAQ ${id} resynced successfully to Qdrant`);
+
+      res.status(200).json({
+        message: "FAQ berhasil di-resync ke Qdrant",
+        data: {
+          id: faq.id,
+          question: faq.question,
+          qdrant_point_id: pointResult.data,
+        },
+      });
+    } catch (error) {
+      log.error(`❌ Resync failed for FAQ ${id}:`, error);
+      return res.status(500).json({
+        message: "Resync failed",
+        error: error.message,
+      });
+    }
   } catch (error) {
     handleError(res, error);
   }

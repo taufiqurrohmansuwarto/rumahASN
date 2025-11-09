@@ -50,3 +50,7 @@ export const bulkSyncFaqQna = async (query = {}) => {
 export const getFaqQnaHealth = async () => {
   return api.get("/faq-qna/health").then((res) => res?.data);
 };
+
+export const resyncFaqQna = async (id) => {
+  return api.post(`/faq-qna/${id}/resync`).then((res) => res?.data);
+};
