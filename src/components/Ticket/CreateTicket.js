@@ -2,11 +2,11 @@ import { recommendationFaq } from "@/services/index";
 import { createTickets } from "@/services/users.services";
 import { renderMarkdown, uploadFile } from "@/utils/client-utils";
 import {
-  QuestionCircleFilled,
-  EditOutlined,
   BookOutlined,
+  EditOutlined,
+  QuestionCircleFilled,
 } from "@ant-design/icons";
-import { Stack, Text, TypographyStylesProvider } from "@mantine/core";
+import { Stack } from "@mantine/core";
 import { useDebouncedValue } from "@mantine/hooks";
 import { MarkdownEditor } from "@primer/react/drafts";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -15,7 +15,9 @@ import {
   Card,
   Checkbox,
   Col,
+  Flex,
   Form,
+  Grid,
   Input,
   List,
   Modal,
@@ -23,12 +25,10 @@ import {
   Space,
   Typography,
   message,
-  Grid,
-  Flex,
 } from "antd";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 import PopularSubcategories from "./PopularSubcategories";
 

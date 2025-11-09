@@ -32,7 +32,7 @@ class FaqQna extends Model {
   }
 
   // Full-text search (if search_vector exists)
-  static async fullTextSearch(query, subCategoryId = null, limit = 5) {
+  static async fullTextSearch(query, subCategoryIds = [], limit = 5) {
     let qb = this.query()
       .select(
         "faq_qna.*",
@@ -46,8 +46,11 @@ class FaqQna extends Model {
       .orderBy("rank", "desc")
       .limit(limit);
 
-    if (subCategoryId) {
-      qb = qb.where("sub_category_id", subCategoryId);
+    // Filter by sub categories (via join)
+    if (subCategoryIds.length > 0) {
+      qb = qb
+        .joinRelated("sub_categories")
+        .whereIn("sub_categories.id", subCategoryIds);
     }
 
     return qb;
@@ -55,7 +58,20 @@ class FaqQna extends Model {
 
   static get relationMappings() {
     const SubCategory = require("@/models/sub-categories.model");
+
     return {
+      sub_categories: {
+        relation: Model.ManyToManyRelation,
+        modelClass: SubCategory,
+        join: {
+          from: "faq_qna.id",
+          through: {
+            from: "faq_sub_category.faq_qna_id",
+            to: "faq_sub_category.sub_category_id",
+          },
+          to: "sub_categories.id",
+        },
+      },
       previous_version: {
         relation: Model.BelongsToOneRelation,
         modelClass: FaqQna,

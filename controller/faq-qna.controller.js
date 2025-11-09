@@ -1,14 +1,17 @@
 // controllers/faq-qna.controller.js
 import { handleError } from "@/utils/helper/controller-helper";
-import { generateEmbedding, generateAnswer } from "@/services/openai.service";
 import {
-  upsertVector,
-  updateVector,
-  deleteVector,
-} from "@/services/qdrant.service";
-import { smartSearch, searchHealthCheck } from "@/services/search.service";
+  generateEmbedding,
+  generateAnswer,
+} from "@/utils/services/open-ai.services";
+import { upsertVector, deleteVector } from "@/utils/services/qdrant.services";
+import {
+  smartSearch,
+  searchHealthCheck,
+} from "@/utils/services/search.services";
 
 const FaqQna = require("@/models/faq-qna.model");
+const { log } = require("@/utils/logger");
 
 // CREATE FAQ dengan Qdrant Sync
 export const createFaqQna = async (req, res) => {
@@ -20,7 +23,7 @@ export const createFaqQna = async (req, res) => {
       is_active = true,
       effective_date = new Date(),
       expired_date,
-      sub_category_ids = [],
+      sub_category_ids = [], // Array of IDs
       tags = [],
       confidence_score = 1.0,
     } = req.body;
@@ -48,42 +51,60 @@ export const createFaqQna = async (req, res) => {
       confidence_score,
       created_by: customId,
       version: 1,
+      // NO sub_category_id! (removed from table)
     };
 
-    // Insert to PostgreSQL
+    // Insert FAQ
     const faq = await FaqQna.query().insert(payload);
 
-    // Relate sub categories
+    // Relate multiple sub categories via pivot table
     await faq.$relatedQuery("sub_categories").relate(sub_category_ids);
 
-    // Sync to Qdrant (non-blocking, tidak fail jika error)
+    // Sync to Qdrant
     if (process.env.QDRANT_ENABLED === "true") {
       try {
+        log.info("🚀 Starting Qdrant sync for FAQ ID:", faq.id);
+        log.debug("Qdrant config:", {
+          enabled: process.env.QDRANT_ENABLED,
+          host: process.env.QDRANT_HOST,
+          port: process.env.QDRANT_PORT,
+        });
+        log.debug("Question:", question);
+
         const embeddingResult = await generateEmbedding(question);
+        log.debug("Embedding result:", {
+          success: embeddingResult.success,
+          dataLength: embeddingResult.data?.length,
+          error: embeddingResult.error,
+        });
 
         if (embeddingResult.success) {
           const pointResult = await upsertVector(faq.id, embeddingResult.data, {
-            sub_category_ids,
+            sub_category_ids, // Store as array in Qdrant payload
             is_active: true,
             effective_date: effective_date.toISOString(),
             expired_date: expired_date ? expired_date.toISOString() : null,
           });
+
+          log.debug("Point result:", pointResult);
 
           if (pointResult.success) {
             await FaqQna.query()
               .findById(faq.id)
               .patch({ qdrant_point_id: pointResult.data });
 
-            console.log("✓ FAQ synced to Qdrant");
+            log.info("✅ FAQ synced to Qdrant successfully");
+          } else {
+            log.error("❌ Point upsert failed:", pointResult.error);
           }
+        } else {
+          log.error("❌ Embedding generation failed:", embeddingResult.error);
         }
       } catch (qdrantError) {
-        console.warn(
-          "⚠️ Failed to sync to Qdrant (non-critical):",
-          qdrantError.message
-        );
-        // Continue anyway - data tetap aman di PostgreSQL
+        log.error("❌ Exception during Qdrant sync:", qdrantError);
       }
+    } else {
+      log.info("ℹ️ Qdrant sync disabled (QDRANT_ENABLED != true)");
     }
 
     res.status(201).json({
@@ -109,12 +130,11 @@ export const updateFaqQna = async (req, res) => {
       sub_category_ids = [],
       tags,
       confidence_score,
-      create_new_version = true, // Flag: true = versioning, false = patch
+      create_new_version = true,
     } = req.body;
 
     const { customId } = req?.user;
 
-    // Get existing FAQ
     const oldFaq = await FaqQna.query()
       .findById(id)
       .withGraphFetched("sub_categories");
@@ -123,7 +143,7 @@ export const updateFaqQna = async (req, res) => {
       return res.status(404).json({ message: "FAQ tidak ditemukan" });
     }
 
-    // Option 1: CREATE NEW VERSION (recommended untuk regulatory changes)
+    // CREATE NEW VERSION
     if (create_new_version) {
       // Close old version
       await FaqQna.query().findById(id).patch({
@@ -132,7 +152,7 @@ export const updateFaqQna = async (req, res) => {
       });
 
       // Create new version
-      const newVersionPayload = {
+      const newFaq = await FaqQna.query().insert({
         question: question || oldFaq.question,
         answer: answer || oldFaq.answer,
         regulation_ref: regulation_ref || oldFaq.regulation_ref,
@@ -145,11 +165,9 @@ export const updateFaqQna = async (req, res) => {
         updated_by: customId,
         version: oldFaq.version + 1,
         previous_version_id: id,
-      };
+      });
 
-      const newFaq = await FaqQna.query().insert(newVersionPayload);
-
-      // Relate sub categories to new version
+      // Relate sub categories
       const subCatIds =
         sub_category_ids.length > 0
           ? sub_category_ids
@@ -170,6 +188,7 @@ export const updateFaqQna = async (req, res) => {
                 sub_category_ids: subCatIds,
                 is_active: newFaq.is_active,
                 effective_date: effective_date.toISOString(),
+                expired_date: expired_date ? expired_date.toISOString() : null,
               }
             );
 
@@ -185,7 +204,7 @@ export const updateFaqQna = async (req, res) => {
       }
 
       return res.status(200).json({
-        message: "FAQ berhasil diperbarui (versi baru dibuat)",
+        message: "FAQ berhasil diperbarui (versi baru)",
         data: {
           old_version_id: id,
           new_version_id: newFaq.id,
@@ -194,7 +213,7 @@ export const updateFaqQna = async (req, res) => {
       });
     }
 
-    // Option 2: PATCH EXISTING (untuk minor changes)
+    // PATCH EXISTING
     const patchPayload = {
       question,
       answer,
@@ -207,7 +226,6 @@ export const updateFaqQna = async (req, res) => {
       updated_by: customId,
     };
 
-    // Remove undefined values
     Object.keys(patchPayload).forEach(
       (key) => patchPayload[key] === undefined && delete patchPayload[key]
     );
@@ -220,12 +238,15 @@ export const updateFaqQna = async (req, res) => {
       await oldFaq.$relatedQuery("sub_categories").relate(sub_category_ids);
     }
 
-    // Update Qdrant if question changed
+    // Update Qdrant
     if (question && process.env.QDRANT_ENABLED === "true") {
       try {
         const embeddingResult = await generateEmbedding(question);
 
         if (embeddingResult.success && oldFaq.qdrant_point_id) {
+          const { updateVector } = await import(
+            "@/utils/services/qdrant.services"
+          );
           await updateVector(oldFaq.qdrant_point_id, embeddingResult.data, {
             sub_category_ids,
             is_active: patchPayload.is_active || oldFaq.is_active,
@@ -236,9 +257,7 @@ export const updateFaqQna = async (req, res) => {
       }
     }
 
-    res.status(200).json({
-      message: "FAQ berhasil diubah",
-    });
+    res.status(200).json({ message: "FAQ berhasil diubah" });
   } catch (error) {
     handleError(res, error);
   }
@@ -289,8 +308,9 @@ export const getFaqQna = async (req, res) => {
       limit = 10,
       search,
       is_active,
-      sub_category_id,
-      show_expired = false, // Tampilkan yang sudah expired?
+      sub_category_id, // Single ID
+      sub_category_ids, // Multiple IDs (comma-separated)
+      show_expired = false,
     } = req.query;
 
     let query = FaqQna.query().withGraphFetched("[sub_categories.[category]]");
@@ -310,14 +330,22 @@ export const getFaqQna = async (req, res) => {
       query = query.where("is_active", is_active);
     }
 
-    // Filter sub category (via join)
+    // Filter by single sub_category
     if (sub_category_id) {
       query = query
         .joinRelated("sub_categories")
         .where("sub_categories.id", sub_category_id);
     }
 
-    // Filter expired (default: hide expired)
+    // Filter by multiple sub_categories
+    if (sub_category_ids) {
+      const ids = sub_category_ids.split(",").map((id) => parseInt(id));
+      query = query
+        .joinRelated("sub_categories")
+        .whereIn("sub_categories.id", ids);
+    }
+
+    // Filter expired
     if (show_expired === "false" || !show_expired) {
       const now = new Date();
       query = query.where((builder) => {
@@ -329,7 +357,6 @@ export const getFaqQna = async (req, res) => {
 
     let data;
     if (parseInt(limit) === -1) {
-      // Tampilkan semua data
       data = await query.orderBy("created_at", "desc");
     } else {
       const offset = (page - 1) * limit;
@@ -384,17 +411,28 @@ export const askQuestion = async (req, res) => {
       limit = 5,
     } = req.body;
 
+    log.info("🤖 AI Ask Question:", { query, sub_category_id, limit });
+
     if (!query) {
       return res.status(400).json({ message: "Query wajib diisi" });
     }
 
+    // Convert sub_category_id to array for smartSearch
+    const subCategoryIds = sub_category_id ? [sub_category_id] : [];
+
     // Smart search dengan fallback (Qdrant -> Full-text -> Keyword)
     const searchResult = await smartSearch(
       query,
-      sub_category_id,
+      subCategoryIds, // Pass as array
       limit,
       new Date(reference_date)
     );
+
+    log.debug("Search result:", {
+      success: searchResult.success,
+      method: searchResult.method,
+      count: searchResult.data?.length,
+    });
 
     if (!searchResult.success || searchResult.data.length === 0) {
       return res.status(200).json({
@@ -405,8 +443,33 @@ export const askQuestion = async (req, res) => {
       });
     }
 
+    // Additional safety check: filter by similarity threshold (minimum 50%)
+    const SIMILARITY_THRESHOLD = 0.5;
+    const relevantResults = searchResult.data.filter(
+      (faq) => !faq.similarity || faq.similarity >= SIMILARITY_THRESHOLD
+    );
+
+    if (relevantResults.length === 0) {
+      log.warn("All search results below similarity threshold");
+      return res.status(200).json({
+        answer:
+          "Maaf, tidak ada informasi yang cukup relevan untuk menjawab pertanyaan Anda. Silakan coba dengan kata kunci yang lebih spesifik atau hubungi layanan bantuan kami.",
+        sources: [],
+        search_method: searchResult.method,
+      });
+    }
+
+    log.info(
+      `Using ${relevantResults.length} relevant results (threshold: ${SIMILARITY_THRESHOLD})`
+    );
+
     // Generate answer dengan GPT
-    const answerResult = await generateAnswer(query, searchResult.data);
+    const answerResult = await generateAnswer(query, relevantResults);
+
+    log.debug("AI answer result:", {
+      success: answerResult.success,
+      hasAnswer: !!answerResult.data,
+    });
 
     if (!answerResult.success) {
       return res.status(500).json({
@@ -417,10 +480,11 @@ export const askQuestion = async (req, res) => {
 
     res.status(200).json({
       answer: answerResult.data,
-      sources: searchResult.data.map((faq) => ({
+      sources: relevantResults.map((faq) => ({
         id: faq.id,
         question: faq.question,
         similarity: faq.similarity,
+        similarity_level: faq.similarity_level,
         sub_categories: faq.sub_categories?.map((sc) => sc.name),
         regulation_ref: faq.regulation_ref,
       })),
@@ -499,24 +563,43 @@ export const healthCheck = async (req, res) => {
 // Bulk Sync to Qdrant (untuk data existing)
 export const bulkSyncToQdrant = async (req, res) => {
   try {
-    const { limit = 100 } = req.query;
+    const { limit = 100, force = "false" } = req.query;
+    const isForceSync = force === "true";
 
-    // Get FAQs yang belum di-sync
-    const faqs = await FaqQna.query()
-      .whereNull("qdrant_point_id")
-      .where("is_active", true)
-      .limit(limit)
-      .withGraphFetched("sub_categories");
+    log.info("🔄 Bulk Sync to Qdrant:", { limit, force: isForceSync });
+
+    // Jika force=true, reset semua qdrant_point_id dan sync ulang SEMUA
+    let query = FaqQna.query().where("is_active", true);
+
+    if (isForceSync) {
+      log.warn("⚠️ FORCE SYNC: Resetting all qdrant_point_id...");
+
+      // Reset semua qdrant_point_id
+      await FaqQna.query()
+        .where("is_active", true)
+        .patch({ qdrant_point_id: null });
+
+      log.info("✅ All qdrant_point_id reset to null");
+    } else {
+      // Normal mode: hanya sync yang belum ada qdrant_point_id
+      query = query.whereNull("qdrant_point_id");
+    }
+
+    const faqs = await query.limit(limit).withGraphFetched("sub_categories");
 
     if (faqs.length === 0) {
       return res.status(200).json({
         message: "Semua FAQ sudah di-sync ke Qdrant",
         synced: 0,
+        mode: isForceSync ? "force" : "incremental",
       });
     }
 
+    log.info(`📊 Found ${faqs.length} FAQs to sync`);
+
     let synced = 0;
     let failed = 0;
+    const errors = [];
 
     for (const faq of faqs) {
       try {
@@ -526,6 +609,12 @@ export const bulkSyncToQdrant = async (req, res) => {
           const pointResult = await upsertVector(faq.id, embeddingResult.data, {
             sub_category_ids: faq.sub_categories.map((sc) => sc.id),
             is_active: faq.is_active,
+            effective_date: faq.effective_date
+              ? new Date(faq.effective_date).toISOString()
+              : null,
+            expired_date: faq.expired_date
+              ? new Date(faq.expired_date).toISOString()
+              : null,
           });
 
           if (pointResult.success) {
@@ -533,23 +622,36 @@ export const bulkSyncToQdrant = async (req, res) => {
               .findById(faq.id)
               .patch({ qdrant_point_id: pointResult.data });
             synced++;
+            log.debug(`✅ Synced FAQ ${faq.id}`);
           } else {
             failed++;
+            errors.push({ id: faq.id, error: pointResult.error });
+            log.error(`❌ Failed to sync FAQ ${faq.id}:`, pointResult.error);
           }
         } else {
           failed++;
+          errors.push({ id: faq.id, error: embeddingResult.error });
+          log.error(
+            `❌ Failed to generate embedding for FAQ ${faq.id}:`,
+            embeddingResult.error
+          );
         }
       } catch (error) {
-        console.error(`Failed to sync FAQ ${faq.id}:`, error.message);
         failed++;
+        errors.push({ id: faq.id, error: error.message });
+        log.error(`❌ Failed to sync FAQ ${faq.id}:`, error.message);
       }
     }
 
+    log.info(`✅ Bulk sync completed: ${synced} synced, ${failed} failed`);
+
     res.status(200).json({
       message: "Bulk sync completed",
+      mode: isForceSync ? "force" : "incremental",
       synced,
       failed,
       total: faqs.length,
+      errors: failed > 0 ? errors : undefined,
     });
   } catch (error) {
     handleError(res, error);

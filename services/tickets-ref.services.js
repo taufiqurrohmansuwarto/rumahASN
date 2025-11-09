@@ -28,3 +28,25 @@ export const deleteFaqQna = async (id) => {
 export const getFaqQnaById = async (id) => {
   return api.get(`/faq-qna/${id}`).then((res) => res?.data);
 };
+
+export const askFaqQna = async (data) => {
+  return api.post("/faq-qna/ask", data).then((res) => res?.data);
+};
+
+export const getFaqQnaHistory = async (id) => {
+  return api.get(`/faq-qna/${id}/history`).then((res) => res?.data);
+};
+
+export const bulkSyncFaqQna = async (query = {}) => {
+  const currentQuery = queryString.stringify(query, {
+    skipNull: true,
+    skipEmptyString: true,
+  });
+  return api
+    .post(`/faq-qna/bulk-sync?${currentQuery}`)
+    .then((res) => res?.data);
+};
+
+export const getFaqQnaHealth = async () => {
+  return api.get("/faq-qna/health").then((res) => res?.data);
+};

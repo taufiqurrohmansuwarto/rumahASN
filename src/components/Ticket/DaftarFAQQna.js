@@ -1,35 +1,19 @@
 import FormFaqQna from "@/components/Ticket/FormFaqQna";
-import {
-  createFaqQna,
-  deleteFaqQna,
-  getFaqQna,
-  updateFaqQna,
-} from "@/services/tickets-ref.services";
-import {
-  DeleteOutlined,
-  EditOutlined,
-  FileExcelOutlined,
-  PlusOutlined,
-} from "@ant-design/icons";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  Button,
-  Card,
-  Flex,
-  Modal,
-  Space,
-  Table,
-  Tag,
-  Typography,
-  message,
-} from "antd";
+import FaqQnaDetailModal from "@/components/Ticket/FaqQna/FaqQnaDetailModal";
+import FaqQnaFilters from "@/components/Ticket/FaqQna/FaqQnaFilters";
+import FaqQnaHeader from "@/components/Ticket/FaqQna/FaqQnaHeader";
+import FaqQnaTable from "@/components/Ticket/FaqQna/FaqQnaTable";
+import useFaqQnaDownload from "@/components/Ticket/FaqQna/useFaqQnaDownload";
+import useFaqQnaMutations from "@/components/Ticket/FaqQna/useFaqQnaMutations";
+import ReactMarkdownCustom from "@/components/MarkdownEditor/ReactMarkdownCustom";
+import { Text } from "@mantine/core";
+import { getFaqQna, getFaqQnaHistory } from "@/services/tickets-ref.services";
+import { subCategories } from "@/services/index";
+import { useQuery } from "@tanstack/react-query";
+import { Card, Modal, Tag } from "antd";
 import dayjs from "dayjs";
 import { useRouter } from "next/router";
 import { useState } from "react";
-
-const { Title, Text } = Typography;
-import { saveAs } from "file-saver";
-import * as XLSX from "xlsx";
 
 const ModalForm = ({ open, onCancel, isLoading, onSubmit, type, data }) => {
   return (
@@ -39,6 +23,8 @@ const ModalForm = ({ open, onCancel, isLoading, onSubmit, type, data }) => {
       onCancel={onCancel}
       footer={null}
       title={type === "create" ? "Tambah FAQ" : "Edit FAQ"}
+      centered
+      destroyOnClose
     >
       <FormFaqQna
         isLoading={isLoading}
@@ -51,13 +37,24 @@ const ModalForm = ({ open, onCancel, isLoading, onSubmit, type, data }) => {
 };
 
 function DaftarFAQQna() {
-  const queryClient = useQueryClient();
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [selectedData, setSelectedData] = useState(null);
   const [modalType, setModalType] = useState("create");
+  const [searchText, setSearchText] = useState(router?.query?.search || "");
+  const [historyModalOpen, setHistoryModalOpen] = useState(false);
+  const [selectedFaqId, setSelectedFaqId] = useState(null);
+  const [detailModalOpen, setDetailModalOpen] = useState(false);
+  const [detailData, setDetailData] = useState(null);
 
-  const [isDownloading, setIsDownloading] = useState(false);
+  const {
+    page = 1,
+    limit = 10,
+    search,
+    is_active,
+    sub_category_id,
+    show_expired = "false",
+  } = router.query;
 
   const handleCancel = () => {
     setOpen(false);
@@ -71,222 +68,185 @@ function DaftarFAQQna() {
     setOpen(true);
   };
 
-  const { data, isLoading, isFetching } = useQuery(
-    ["faq-qna", router.query],
-    () => getFaqQna(router?.query),
-    {
-      enabled: !!router?.query,
-      keepPreviousData: true,
-    }
-  );
+  // Queries
+  const { data, isLoading, isFetching, refetch, isRefetching } = useQuery({
+    queryKey: ["faq-qna", router.query],
+    queryFn: () => getFaqQna(router?.query),
+    enabled: !!router?.query,
+    placeholderData: (previousData) => previousData,
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
+  });
 
-  const { mutate: create, isLoading: isLoadingCreate } = useMutation(
-    (payload) => createFaqQna(payload),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries(["faq-qna", router.query]);
-        handleCancel();
-        message.success("FAQ berhasil ditambahkan");
-      },
-      onError: (error) => {
-        message.error(error?.response?.data?.message);
-      },
-    }
-  );
+  const { data: dataSubCategories } = useQuery({
+    queryKey: ["sub-categories", "all"],
+    queryFn: () => subCategories({ limit: -1 }),
+    placeholderData: (previousData) => previousData,
+  });
 
-  const { mutate: update, isLoading: isLoadingUpdate } = useMutation(
-    (payload) => updateFaqQna(payload),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries(["faq-qna", router.query]);
-        handleCancel();
-        message.success("FAQ berhasil diperbarui");
-      },
-      onError: (error) => {
-        message.error(error?.response?.data?.message);
-      },
-    }
-  );
+  const { data: historyData } = useQuery({
+    queryKey: ["faq-qna-history", selectedFaqId],
+    queryFn: () => getFaqQnaHistory(selectedFaqId),
+    enabled: !!selectedFaqId && historyModalOpen,
+    placeholderData: (previousData) => previousData,
+  });
 
-  const { mutate: remove, isLoading: isLoadingDelete } = useMutation(
-    (id) => deleteFaqQna(id),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries(["faq-qna", router.query]);
-        message.success("FAQ berhasil dihapus");
-      },
-      onError: (error) => {
-        message.error(error?.response?.data?.message);
-      },
-    }
-  );
+  // Mutations
+  const { create, update, handleDelete, isLoadingCreate, isLoadingUpdate } =
+    useFaqQnaMutations(router);
 
+  // Download
+  const { downloadFaq, isDownloading } = useFaqQnaDownload();
+
+  // Handlers
   const handleCreate = (payload) => {
-    create(payload);
+    create(payload, {
+      onSuccess: () => handleCancel(),
+    });
   };
 
   const handleUpdate = (payload) => {
-    update({ id: selectedData.id, data: payload });
-  };
-
-  const handleDelete = (id) => {
-    Modal.confirm({
-      title: "Konfirmasi",
-      content: "Apakah Anda yakin ingin menghapus FAQ ini?",
-      okText: "Ya",
-      cancelText: "Tidak",
-      onOk: () => remove(id),
-    });
-  };
-
-  const handleChangePage = (page, pageSize) => {
-    router.push({
-      pathname: router?.pathname,
-      query: { ...router?.query, page, limit: pageSize },
-    });
-  };
-
-  const handleDownload = async () => {
-    try {
-      setIsDownloading(true);
-      const response = await getFaqQna({ limit: -1 });
-      const workbook = XLSX.utils.book_new();
-      if (response?.data?.length > 0) {
-        const hasil = response?.data?.map((item) => ({
-          pertanyaan: item?.question,
-          jawaban: item?.answer,
-          status: item?.is_active ? "Aktif" : "Tidak Aktif",
-          sub_kategori: item?.sub_categories
-            ?.map((item) => `${item?.name} (${item?.category?.name})`)
-            .join(", "),
-          tanggal_efektif: dayjs(item?.effective_date).format("DD-MM-YYYY"),
-          tanggal_kadaluarsa: dayjs(item?.expired_date).format("DD-MM-YYYY"),
-          referensi_peraturan: item?.regulation_ref,
-        }));
-        const worksheet = XLSX.utils.json_to_sheet(hasil);
-        XLSX.utils.book_append_sheet(workbook, worksheet, "FAQ");
-        const excelBuffer = XLSX.write(workbook, {
-          bookType: "xlsx",
-          type: "array",
-        });
-        const blob = new Blob([excelBuffer], {
-          type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        });
-        saveAs(blob, "FAQ.xlsx");
-      } else {
-        message.error("Tidak ada data untuk diunduh");
+    update(
+      { id: selectedData.id, data: payload },
+      {
+        onSuccess: () => handleCancel(),
       }
-    } catch (error) {
-      message.error("Gagal mengunduh data");
-    } finally {
-      setIsDownloading(false);
-    }
+    );
   };
 
-  const columns = [
-    {
-      title: "Pertanyaan",
-      dataIndex: "question",
-      width: "35%",
-    },
-    {
-      title: "Jawaban",
-      dataIndex: "answer",
-      width: "40%",
-    },
-    {
-      title: "Status",
-      dataIndex: "is_active",
-      width: "10%",
-      render: (value) => (
-        <Tag color={value ? "success" : "error"}>
-          {value ? "Aktif" : "Tidak Aktif"}
-        </Tag>
-      ),
-    },
-    {
-      title: "Sub Kategori",
-      key: "sub_category",
-      width: "15%",
-      render: (_, record) => {
-        const subCategoryName = record?.sub_categories?.map(
-          (item) => item?.name
-        );
-        const categoryName = record?.sub_categories?.map(
-          (item) => item?.category?.name
-        );
-        return (
-          <Text>
-            {subCategoryName && categoryName
-              ? `${subCategoryName} (${categoryName})`
-              : ""}
-          </Text>
-        );
+  const handleDownload = () => {
+    downloadFaq({ ...router.query, limit: -1 });
+  };
+
+  const handleChangePage = (newPage, newPageSize) => {
+    router.push({
+      pathname: router.pathname,
+      query: { ...router.query, page: newPage, limit: newPageSize },
+    });
+  };
+
+  const handleSearch = (value) => {
+    router.push({
+      pathname: router.pathname,
+      query: { ...router.query, search: value, page: 1 },
+    });
+  };
+
+  const handleFilterStatus = (value) => {
+    const { is_active: _, ...restQuery } = router.query;
+    router.push({
+      pathname: router.pathname,
+      query: {
+        ...restQuery,
+        ...(value !== undefined && { is_active: value }),
+        page: 1,
       },
-    },
-    {
-      title: "Aksi",
-      key: "action",
-      width: "15%",
-      render: (_, record) => (
-        <Space>
-          <Button
-            type="primary"
-            icon={<EditOutlined />}
-            size="small"
-            onClick={() => handleOpen("edit", record)}
-          >
-            Edit
-          </Button>
-          <Button
-            danger
-            icon={<DeleteOutlined />}
-            size="small"
-            onClick={() => handleDelete(record.id)}
-          >
-            Hapus
-          </Button>
-        </Space>
-      ),
-    },
-  ];
+    });
+  };
+
+  const handleFilterSubCategory = (value) => {
+    const { sub_category_id: _, ...restQuery } = router.query;
+    router.push({
+      pathname: router.pathname,
+      query: {
+        ...restQuery,
+        ...(value && { sub_category_id: value }),
+        page: 1,
+      },
+    });
+  };
+
+  const handleFilterExpired = (value) => {
+    router.push({
+      pathname: router.pathname,
+      query: { ...router.query, show_expired: value, page: 1 },
+    });
+  };
+
+  const clearFilters = () => {
+    setSearchText("");
+    router.push({
+      pathname: router.pathname,
+      query: { page: 1, limit: 10 },
+    });
+  };
+
+  const handleViewDetail = (faq) => {
+    setDetailData(faq);
+    setDetailModalOpen(true);
+  };
+
+  const handleViewHistory = (id) => {
+    setSelectedFaqId(id);
+    setHistoryModalOpen(true);
+  };
+
+  const handleCreateVersion = (faq) => {
+    Modal.confirm({
+      title: "Buat Versi Baru",
+      content: `Buat versi baru dari FAQ ini (v${faq.version} → v${
+        faq.version + 1
+      })?`,
+      okText: "Ya, Buat",
+      cancelText: "Batal",
+      onOk: () => {
+        handleOpen("edit", {
+          ...faq,
+          create_new_version: true,
+        });
+      },
+    });
+  };
+
+  const hasActiveFilters =
+    search ||
+    is_active !== undefined ||
+    sub_category_id ||
+    show_expired === "true";
 
   return (
-    <>
-      <Card title="Daftar FAQ">
-        <Flex justify="space-between">
-          <Button
-            type="primary"
-            style={{ marginBottom: 16 }}
-            icon={<PlusOutlined />}
-            onClick={() => handleOpen()}
-          >
-            Tambah FAQ
-          </Button>
-          <Button
-            type="primary"
-            icon={<FileExcelOutlined />}
-            onClick={handleDownload}
-            loading={isDownloading}
-          >
-            Download
-          </Button>
-        </Flex>
-        <Table
-          pagination={{
-            current: Number(router?.query?.page) || 1,
-            pageSize: Number(router?.query?.limit) || 10,
-            total: data?.meta?.total,
-            showTotal: (total) => `Total ${total} item`,
-            onChange: handleChangePage,
-            showSizeChanger: false,
-          }}
-          columns={columns}
-          dataSource={data?.data}
-          rowKey={(row) => row?.id}
-          loading={isLoading || isFetching}
-          bordered
-          size="middle"
+    <div>
+      <Card
+        style={{
+          borderRadius: "12px",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+          border: "none",
+        }}
+      >
+        <FaqQnaHeader />
+
+        <FaqQnaFilters
+          searchText={searchText}
+          setSearchText={setSearchText}
+          handleSearch={handleSearch}
+          is_active={is_active}
+          handleFilterStatus={handleFilterStatus}
+          sub_category_id={sub_category_id}
+          handleFilterSubCategory={handleFilterSubCategory}
+          show_expired={show_expired}
+          handleFilterExpired={handleFilterExpired}
+          dataSubCategories={dataSubCategories}
+          hasActiveFilters={hasActiveFilters}
+          clearFilters={clearFilters}
+          isRefetching={isRefetching}
+          refetch={refetch}
+          handleOpen={handleOpen}
+          isDownloading={isDownloading}
+          handleDownload={handleDownload}
+        />
+
+        <FaqQnaTable
+          data={data}
+          isLoading={isLoading}
+          isFetching={isFetching}
+          page={page}
+          limit={limit}
+          handleChangePage={handleChangePage}
+          handleOpen={handleOpen}
+          handleDelete={handleDelete}
+          handleViewHistory={handleViewHistory}
+          handleCreateVersion={handleCreateVersion}
+          handleViewDetail={handleViewDetail}
         />
       </Card>
 
@@ -298,7 +258,105 @@ function DaftarFAQQna() {
         type={modalType}
         data={selectedData}
       />
-    </>
+
+      {/* Detail Modal */}
+      <FaqQnaDetailModal
+        open={detailModalOpen}
+        onClose={() => {
+          setDetailModalOpen(false);
+          setDetailData(null);
+        }}
+        data={detailData}
+      />
+
+      {/* History Modal */}
+      <Modal
+        title="Riwayat Versi FAQ"
+        open={historyModalOpen}
+        onCancel={() => {
+          setHistoryModalOpen(false);
+          setSelectedFaqId(null);
+        }}
+        footer={null}
+        width={900}
+      >
+        {historyData && (
+          <div>
+            {historyData.data?.map((item, idx) => (
+              <div key={item.id}>
+                <div
+                  style={{
+                    padding: "16px",
+                    borderLeft: `3px solid ${
+                      item.is_active ? "#40c057" : "#868e96"
+                    }`,
+                    backgroundColor: "#f8f9fa",
+                    marginBottom: idx < historyData.data.length - 1 ? 16 : 0,
+                  }}
+                >
+                  {/* Header */}
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: 8,
+                      marginBottom: 12,
+                      alignItems: "center",
+                    }}
+                  >
+                    <Tag color="blue">v{item.version}</Tag>
+                    <Tag color={item.is_active ? "success" : "default"}>
+                      {item.is_active ? "Aktif" : "Nonaktif"}
+                    </Tag>
+                    {item.previous_version_id && (
+                      <Tag color="default">dari v{item.version - 1}</Tag>
+                    )}
+                  </div>
+
+                  {/* Content */}
+                  <div style={{ marginBottom: 8 }}>
+                    <Text
+                      size="xs"
+                      color="dimmed"
+                      style={{ display: "block", marginBottom: 4 }}
+                    >
+                      Pertanyaan
+                    </Text>
+                    <Text size="sm" weight={600}>
+                      {item.question}
+                    </Text>
+                  </div>
+
+                  <div style={{ marginBottom: 12 }}>
+                    <Text
+                      size="xs"
+                      color="dimmed"
+                      style={{ display: "block", marginBottom: 4 }}
+                    >
+                      Jawaban
+                    </Text>
+                    <div style={{ fontSize: "14px" }}>
+                      <ReactMarkdownCustom>{item.answer}</ReactMarkdownCustom>
+                    </div>
+                  </div>
+
+                  {/* Footer */}
+                  <Text size="xs" color="dimmed">
+                    Dibuat: {dayjs(item.created_at).format("DD MMM YYYY HH:mm")}
+                    {item.updated_at && item.updated_at !== item.created_at && (
+                      <>
+                        {" "}
+                        • Diubah:{" "}
+                        {dayjs(item.updated_at).format("DD MMM YYYY HH:mm")}
+                      </>
+                    )}
+                  </Text>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </Modal>
+    </div>
   );
 }
 
