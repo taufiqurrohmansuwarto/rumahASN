@@ -152,11 +152,28 @@ export const searchSimilar = async (embedding, filters = {}, limit = 5) => {
 
     log.info(`✅ Qdrant search returned ${searchResult.length} results`);
 
-    const results = searchResult.map((result) => ({
-      qna_id: result.payload.qna_id,
-      similarity: result.score,
-      payload: result.payload,
-    }));
+    const results = searchResult
+      .map((result) => {
+        // Handle potential missing qna_id in old data
+        if (!result.payload || !result.payload.qna_id) {
+          log.warn("Qdrant result missing qna_id:", {
+            pointId: result.id,
+            hasPayload: !!result.payload,
+          });
+          return null;
+        }
+
+        return {
+          qna_id: result.payload.qna_id,
+          similarity: result.score,
+          payload: result.payload,
+        };
+      })
+      .filter((item) => item !== null); // Remove invalid results
+
+    log.debug(
+      `Filtered ${searchResult.length - results.length} invalid results`
+    );
 
     return {
       success: true,

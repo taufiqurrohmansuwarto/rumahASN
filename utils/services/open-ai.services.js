@@ -104,11 +104,45 @@ export const generateEmbedding = async (text) => {
 // Generate answer from context (RAG)
 export const generateAnswer = async (query, contextQnA) => {
   try {
+    log.info("🤖 generateAnswer called:", {
+      query,
+      contextCount: contextQnA?.length || 0,
+    });
+
     if (contextQnA.length === 0) {
+      log.warn("No context provided for answer generation");
       return {
         success: true,
-        data: "Maaf, tidak ada informasi yang relevan untuk menjawab pertanyaan Anda.",
+        data: "Maaf, kami belum memiliki informasi yang relevan untuk pertanyaan Anda. Tenang, pertanyaan Anda akan segera dijawab oleh tim BKD kami.",
       };
+    }
+
+    // Check validity status of FAQs
+    const now = new Date();
+    const validityStatus = contextQnA.map((q) => {
+      const isExpired =
+        q.expired_date && new Date(q.expired_date) < now ? true : false;
+      const isNotYetEffective =
+        q.effective_date && new Date(q.effective_date) > now ? true : false;
+
+      return {
+        id: q.id,
+        similarity: q.similarity?.toFixed(3),
+        status: isExpired
+          ? "KADALUARSA"
+          : isNotYetEffective
+          ? "BELUM_BERLAKU"
+          : "BERLAKU",
+      };
+    });
+
+    log.debug("Context FAQs with validity:", validityStatus);
+
+    const expiredCount = validityStatus.filter(
+      (v) => v.status === "KADALUARSA"
+    ).length;
+    if (expiredCount > 0) {
+      log.warn(`⚠️ ${expiredCount} FAQ(s) are EXPIRED in context`);
     }
 
     const context = contextQnA
@@ -127,12 +161,24 @@ export const generateAnswer = async (query, contextQnA) => {
         const effectiveDate = formatDate(q.effective_date);
         const expiredDate = formatDate(q.expired_date);
 
-        const validInfo =
-          effectiveDate && expiredDate
-            ? `(Berlaku: ${effectiveDate} s/d ${expiredDate})`
-            : effectiveDate
-            ? `(Berlaku sejak: ${effectiveDate})`
-            : "";
+        // Check if expired
+        const now = new Date();
+        const isExpired =
+          q.expired_date && new Date(q.expired_date) < now ? true : false;
+        const isNotYetEffective =
+          q.effective_date && new Date(q.effective_date) > now ? true : false;
+
+        // Build validity info with status indicators
+        let validInfo = "";
+        if (isExpired) {
+          validInfo = `⚠️ KADALUARSA (Berlaku: ${effectiveDate} s/d ${expiredDate}) - Informasi ini sudah tidak berlaku`;
+        } else if (isNotYetEffective) {
+          validInfo = `⏳ BELUM BERLAKU (Akan berlaku mulai: ${effectiveDate})`;
+        } else if (effectiveDate && expiredDate) {
+          validInfo = `✅ MASIH BERLAKU (${effectiveDate} s/d ${expiredDate})`;
+        } else if (effectiveDate) {
+          validInfo = `✅ BERLAKU SEJAK: ${effectiveDate}`;
+        }
 
         // Get sub-category names
         const categories =
@@ -161,28 +207,61 @@ Referensi: ${q.regulation_ref || "-"}`;
       })
       .join("\n\n---\n\n");
 
+    log.debug("Context built:", {
+      contextLength: context.length,
+      contextPreview: context.substring(0, 200) + "...",
+    });
+
+    log.info("Calling OpenAI GPT-4o-mini...");
+
     const response = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
         {
           role: "system",
-          content: `Kamu adalah asisten AI BKD Jawa Timur yang membantu menjawab pertanyaan seputar kepegawaian ASN.
+          content: `Kamu adalah bestieAI BKD Jawa Timur, temen setia yang humble dan siap ngebantu jawab pertanyaan seputar kepegawaian ASN dengan info yang akurat dan helpful!
 
 INSTRUKSI PENTING:
 1. HANYA jawab berdasarkan knowledge base yang diberikan - JANGAN membuat informasi baru
 2. Prioritaskan sumber dengan Skor Relevansi tertinggi (>70% = Sangat Relevan)
 3. Jika skor relevansi <70%, sebut "informasi ini mungkin kurang sesuai dengan pertanyaan Anda"
-4. Perhatikan tanggal berlaku - informasi yang sudah kadaluarsa harus disebutkan
+4. PERHATIKAN STATUS BERLAKU dengan SANGAT TELITI:
+   - ⚠️ KADALUARSA: JANGAN gunakan sebagai jawaban utama, WAJIB sebutkan bahwa informasi sudah tidak berlaku
+   - ⏳ BELUM BERLAKU: Sebutkan kapan akan mulai berlaku
+   - ✅ MASIH BERLAKU: Prioritaskan ini untuk jawaban
 5. Sebutkan referensi regulasi jika tersedia
 6. Jika tidak ada informasi yang relevan, katakan dengan jelas dan sarankan untuk menghubungi bagian terkait
 7. Gunakan bahasa Indonesia formal tapi ramah
 8. Jangan mengarang atau mengira-ngira jawaban
-9. Struktur jawaban: langsung ke inti, tidak bertele-tele
+9. OUTPUT HARUS DALAM FORMAT MARKDOWN yang rapi dan terstruktur
 
-FORMAT JAWABAN:
-- Paragraf 1: Jawaban langsung (berdasarkan FAQ dengan skor tertinggi)
-- Paragraf 2 (opsional): Informasi tambahan dari sumber lain
-- Paragraf 3 (opsional): Referensi dan kontak untuk informasi lebih lanjut`,
+FORMAT MARKDOWN:
+- Gunakan **bold** untuk poin penting
+- Gunakan *italic* untuk emphasis
+- Gunakan numbered list (1., 2., 3.) untuk langkah-langkah
+- Gunakan bullet points (-, *) untuk daftar items
+- Gunakan > blockquote untuk catatan penting atau warning
+- Gunakan \`code\` untuk nama aplikasi/sistem
+- Pisahkan section dengan line break yang cukup
+
+STRUKTUR JAWABAN:
+1. **Jawaban Utama**: Langsung ke inti (PRIORITASKAN sumber ✅ MASIH BERLAKU dengan skor tertinggi)
+2. **Detail/Langkah** (jika ada): Gunakan numbered list atau bullet points
+3. **Catatan Penting** (jika ada): Gunakan blockquote dengan > 
+4. **Referensi** (jika ada): Sebutkan regulasi dengan format rapi
+5. **WAJIB**: Jika ada ⚠️ KADALUARSA, buat warning box dengan > dan **bold**
+
+CONTOH FORMAT:
+**Jawaban singkat dan langsung**
+
+Penjelasan detail dengan formatting yang jelas:
+1. Langkah pertama
+2. Langkah kedua
+3. Langkah ketiga
+
+> **Catatan Penting**: Gunakan blockquote untuk hal-hal penting
+
+*Referensi: PP No. XX Tahun XXXX*`,
         },
         {
           role: "user",
@@ -193,12 +272,31 @@ FORMAT JAWABAN:
       max_tokens: 1000, // Slightly higher for detailed answers
     });
 
+    const answer = response.choices[0].message.content;
+
+    log.info("✅ OpenAI response received:", {
+      answerLength: answer?.length || 0,
+      model: response.model,
+      tokensUsed: response.usage?.total_tokens || 0,
+      promptTokens: response.usage?.prompt_tokens || 0,
+      completionTokens: response.usage?.completion_tokens || 0,
+    });
+
+    log.debug("Answer preview:", {
+      preview: answer?.substring(0, 150) + "...",
+    });
+
     return {
       success: true,
-      data: response.choices[0].message.content,
+      data: answer,
     };
   } catch (error) {
-    log.error("OpenAI completion error:", error.message);
+    log.error("❌ OpenAI completion error:", {
+      message: error.message,
+      type: error.type,
+      code: error.code,
+      status: error.status,
+    });
     return {
       success: false,
       error: error.message,

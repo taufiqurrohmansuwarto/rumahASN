@@ -171,7 +171,22 @@ export const searchWithQdrant = async (
   }
 
   // Get full data from PostgreSQL
-  const qnaIds = vectorResult.data.map((v) => v.qna_id);
+  // Filter out undefined/null qna_id values
+  const qnaIds = vectorResult.data
+    .map((v) => v.qna_id)
+    .filter((id) => id !== undefined && id !== null);
+
+  log.debug("QnA IDs for PostgreSQL query:", {
+    total: vectorResult.data.length,
+    valid: qnaIds.length,
+  });
+
+  // Safety check: if no valid IDs, return empty
+  if (qnaIds.length === 0) {
+    log.warn("No valid QnA IDs from Qdrant results");
+    return { success: true, data: [] };
+  }
+
   const qnaData = await FaqQna.query()
     .whereIn("id", qnaIds)
     .where("is_active", true)
