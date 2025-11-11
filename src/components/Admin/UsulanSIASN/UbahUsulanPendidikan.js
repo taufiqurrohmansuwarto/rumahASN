@@ -459,101 +459,6 @@ const ModalUbahPendidikan = ({
           </Form.Item>
         )}
 
-        <Row gutter={12}>
-          <Col span={6}>
-            <Form.Item
-              name="tahunLulus"
-              label="Tahun"
-              style={{ marginBottom: 10 }}
-            >
-              <Input size="small" />
-            </Form.Item>
-          </Col>
-          <Col span={9}>
-            <Form.Item
-              name="tglLulus"
-              label="Tgl Ijazah"
-              style={{ marginBottom: 10 }}
-            >
-              <DatePicker
-                size="small"
-                format="DD-MM-YYYY"
-                style={{ width: "100%" }}
-              />
-            </Form.Item>
-          </Col>
-          <Col span={9}>
-            <Form.Item
-              name="nomorIjasah"
-              label="No"
-              style={{ marginBottom: 10 }}
-            >
-              <Input size="small" />
-            </Form.Item>
-          </Col>
-        </Row>
-
-        <Form.Item
-          name="namaSekolah"
-          label="Sekolah"
-          style={{ marginBottom: 10 }}
-        >
-          <Input size="small" />
-        </Form.Item>
-
-        <Row gutter={12}>
-          <Col span={8}>
-            <Form.Item
-              name="gelarDepan"
-              label="Gelar Depan"
-              style={{ marginBottom: 10 }}
-            >
-              <Input size="small" />
-            </Form.Item>
-          </Col>
-          <Col span={8}>
-            <Form.Item
-              name="gelarBelakang"
-              label="Gelar Belakang"
-              style={{ marginBottom: 10 }}
-            >
-              <Input size="small" />
-            </Form.Item>
-          </Col>
-          <Col span={8}>
-            <Form.Item style={{ marginBottom: 10 }}>
-              <Checkbox
-                checked={isPendidikanPertama}
-                onChange={(e) => setIsPendidikanPertama(e.target.checked)}
-                style={{ marginTop: 28 }}
-              >
-                Pertama
-              </Checkbox>
-            </Form.Item>
-          </Col>
-        </Row>
-
-        <Row gutter={12}>
-          <Col span={12}>
-            <Form.Item
-              name="passphrase"
-              label="Passphrase"
-              style={{ marginBottom: 10 }}
-            >
-              <Input.Password size="small" placeholder="Passphrase" />
-            </Form.Item>
-          </Col>
-          <Col span={12}>
-            <Form.Item
-              name="one_time_code"
-              label="OTP"
-              style={{ marginBottom: 10 }}
-            >
-              <Input size="small" placeholder="One time code" />
-            </Form.Item>
-          </Col>
-        </Row>
-
         <Divider style={{ margin: "10px 0 12px 0" }}>Dokumen</Divider>
 
         <Row gutter={12}>
@@ -639,6 +544,111 @@ const ModalUbahPendidikan = ({
                   </Button>
                 </a>
               )}
+            </Form.Item>
+          </Col>
+        </Row>
+
+        <Divider style={{ margin: "10px 0 12px 0" }}>Data Pendidikan</Divider>
+
+        <Row gutter={12}>
+          <Col span={6}>
+            <Form.Item
+              name="tahunLulus"
+              label="Tahun"
+              style={{ marginBottom: 10 }}
+            >
+              <Input size="small" />
+            </Form.Item>
+          </Col>
+          <Col span={9}>
+            <Form.Item
+              name="tglLulus"
+              label="Tgl Ijazah"
+              style={{ marginBottom: 10 }}
+            >
+              <DatePicker
+                size="small"
+                format="DD-MM-YYYY"
+                style={{ width: "100%" }}
+              />
+            </Form.Item>
+          </Col>
+          <Col span={9}>
+            <Form.Item
+              name="nomorIjasah"
+              label="No"
+              style={{ marginBottom: 10 }}
+            >
+              <Input size="small" />
+            </Form.Item>
+          </Col>
+        </Row>
+
+        <Form.Item
+          name="namaSekolah"
+          label="Sekolah"
+          style={{ marginBottom: 10 }}
+        >
+          <Input size="small" />
+        </Form.Item>
+
+        <Row gutter={12}>
+          <Col span={8}>
+            <Form.Item
+              name="gelarDepan"
+              label="Gelar Depan"
+              style={{ marginBottom: 10 }}
+            >
+              <Input size="small" autoComplete="off" />
+            </Form.Item>
+          </Col>
+          <Col span={8}>
+            <Form.Item
+              name="gelarBelakang"
+              label="Gelar Belakang"
+              style={{ marginBottom: 10 }}
+            >
+              <Input size="small" autoComplete="off" />
+            </Form.Item>
+          </Col>
+          <Col span={8}>
+            <Form.Item style={{ marginBottom: 10 }}>
+              <Checkbox
+                checked={isPendidikanPertama}
+                onChange={(e) => setIsPendidikanPertama(e.target.checked)}
+                style={{ marginTop: 28 }}
+              >
+                Pertama
+              </Checkbox>
+            </Form.Item>
+          </Col>
+        </Row>
+
+        <Row gutter={12}>
+          <Col span={12}>
+            <Form.Item
+              name="passphrase"
+              label="Passphrase"
+              style={{ marginBottom: 10 }}
+            >
+              <Input.Password
+                size="small"
+                placeholder="Passphrase"
+                autoComplete="off"
+              />
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item
+              name="one_time_code"
+              label="OTP"
+              style={{ marginBottom: 10 }}
+            >
+              <Input
+                size="small"
+                placeholder="One time code"
+                autoComplete="off"
+              />
             </Form.Item>
           </Col>
         </Row>

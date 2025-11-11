@@ -202,7 +202,11 @@ const ModalHapusPendidikan = ({ open, row, onCancel, usulanId }) => {
               label="Passphrase"
               style={{ marginBottom: 10 }}
             >
-              <Input.Password size="small" placeholder="Passphrase" />
+              <Input.Password
+                size="small"
+                placeholder="Passphrase"
+                autoComplete="new-password"
+              />
             </Form.Item>
           </Col>
           <Col span={12}>
@@ -211,7 +215,11 @@ const ModalHapusPendidikan = ({ open, row, onCancel, usulanId }) => {
               label="OTP"
               style={{ marginBottom: 10 }}
             >
-              <Input size="small" placeholder="One time code" />
+              <Input
+                size="small"
+                placeholder="One time code"
+                autoComplete="off"
+              />
             </Form.Item>
           </Col>
         </Row>
