@@ -14,6 +14,7 @@ import {
   Col,
   DatePicker,
   Divider,
+  Flex,
   Form,
   Input,
   message,
@@ -21,9 +22,16 @@ import {
   Row,
   Select,
   Space,
+  Typography,
   Upload,
 } from "antd";
-import { UploadOutlined, CloudDownloadOutlined } from "@ant-design/icons";
+import {
+  UploadOutlined,
+  CloudDownloadOutlined,
+  ReloadOutlined,
+} from "@ant-design/icons";
+
+const { Text } = Typography;
 import dayjs from "dayjs";
 import { useState } from "react";
 
@@ -91,7 +99,9 @@ const ModalUbahPendidikan = ({
       }
     },
     onError: (error) => {
-      message.error("Gagal upload file: " + error.message);
+      const messageError =
+        error?.response?.data?.error || "Internal server error";
+      message.error("Gagal upload file: " + messageError);
     },
   });
 
@@ -184,6 +194,11 @@ const ModalUbahPendidikan = ({
     ijazah: null,
     transkrip: null,
   });
+
+  // State untuk toggle pendidikan pertama
+  const [isPendidikanPertama, setIsPendidikanPertama] = useState(
+    formatBoolean(row?.isPendidikanPertama)
+  );
 
   // Fungsi untuk handle upload file ijazah manual
   const handleUploadIjazah = (file) => {
@@ -324,7 +339,7 @@ const ModalUbahPendidikan = ({
           : "",
         pendidikan_id: value?.pendidikanId,
         pendidikan_nama: "",
-        is_pendidikan_pertama: row?.isPendidikanPertama,
+        is_pendidikan_pertama: isPendidikanPertama ? "1" : "0",
         pencantuman_gelar: value?.pencantumanGelar || "",
         tingkat_pendidikan_id: row?.tkPendidikanId || "",
         tingkat_pendidikan_nama: row?.tkPendidikanNama || "",
@@ -332,6 +347,8 @@ const ModalUbahPendidikan = ({
         dok_ijazah: ijazah || null,
         dok_sk_pencantuman_gelar: null,
         keterangan: value?.keterangan || "",
+        passphrase: value?.passphrase || "",
+        one_time_code: value?.one_time_code || "",
       };
 
       submit(payload);
@@ -345,142 +362,214 @@ const ModalUbahPendidikan = ({
       onOk={handleSubmit}
       open={open}
       onCancel={onCancel}
-      title={`Ubah Usulan Pendidikan ${usulanId}`}
-      width={800}
+      title="Ubah Usulan Pendidikan"
+      width={700}
+      centered
+      okText="Simpan"
+      cancelText="Batal"
     >
-      <Button loading={isRefetching} onClick={() => refetch()}>
-        Refresh
-      </Button>
-      <Divider />
-      <Space>
-        <a href={selectedMasterData?.file_ijazah_url} target="_blank">
-          Ijazah
-        </a>
-        <a href={selectedMasterData?.file_nilai_url} target="_blank">
-          Transkrip Nilai
-        </a>
-      </Space>
-      <Form form={form} layout="vertical" initialValues={formattedData}>
-        <Row gutter={16}>
-          <Col span={12}>
-            <Form.Item name="nipBaru" label="NIP Baru">
-              <Input disabled />
+      <Flex justify="space-between" align="center" style={{ marginBottom: 12 }}>
+        <Text type="secondary" style={{ fontSize: 12 }}>
+          ID: {usulanId}
+        </Text>
+        <Space size="small">
+          <Button size="small" loading={isRefetching} onClick={() => refetch()}>
+            Refresh
+          </Button>
+          {selectedMasterData?.file_ijazah_url && (
+            <a
+              href={selectedMasterData.file_ijazah_url}
+              target="_blank"
+              rel="noreferrer"
+            >
+              <Button size="small" type="link" style={{ padding: 0 }}>
+                Ijazah
+              </Button>
+            </a>
+          )}
+          {selectedMasterData?.file_nilai_url && (
+            <a
+              href={selectedMasterData.file_nilai_url}
+              target="_blank"
+              rel="noreferrer"
+            >
+              <Button size="small" type="link" style={{ padding: 0 }}>
+                Transkrip
+              </Button>
+            </a>
+          )}
+        </Space>
+      </Flex>
+      <Form
+        form={form}
+        layout="vertical"
+        initialValues={formattedData}
+        size="small"
+      >
+        <Row gutter={12}>
+          <Col span={8}>
+            <Form.Item name="nipBaru" label="NIP" style={{ marginBottom: 10 }}>
+              <Input disabled size="small" />
             </Form.Item>
           </Col>
-          <Col span={12}>
-            <Form.Item name="nipLama" label="NIP Lama">
-              <Input disabled />
+          <Col span={16}>
+            <Form.Item
+              name="tkPendidikanNama"
+              label="Tingkat Pendidikan"
+              style={{ marginBottom: 10 }}
+            >
+              <Input disabled size="small" />
             </Form.Item>
           </Col>
         </Row>
 
-        <Row gutter={16}>
-          <Col span={12}>
-            <Form.Item name="tkPendidikanNama" label="Tingkat Pendidikan">
-              <Input disabled />
-            </Form.Item>
-          </Col>
-          <Col span={12}>
-            {initialPendidikan?.length && (
-              <Form.Item name="pendidikanId" label="Pendidikan">
-                <Select
-                  showSearch
-                  allowClear
-                  optionFilterProp="label"
-                  options={initialPendidikan?.map((item) => ({
-                    label: item.nama,
-                    value: item.id,
-                  }))}
-                />
-              </Form.Item>
-            )}
-          </Col>
-        </Row>
-
-        {/* Pilih data pendidikan dari Simaster untuk mengisi otomatis */}
-        {data?.length > 0 && (
-          <Row gutter={16}>
-            <Col span={24}>
-              <Form.Item label="Pilih Data Pendidikan dari Simaster (Opsional)">
-                <Select
-                  showSearch
-                  allowClear
-                  placeholder="Pilih data untuk mengisi form secara otomatis"
-                  optionFilterProp="label"
-                  onChange={handleSelectPendidikanSimaster}
-                  options={data?.map((item) => ({
-                    label: `${item.prodi} - ${item.nama_sekolah} (${item.tahun_lulus})`,
-                    value: item.id,
-                  }))}
-                />
-              </Form.Item>
-            </Col>
-          </Row>
+        {initialPendidikan?.length > 0 && (
+          <Form.Item
+            name="pendidikanId"
+            label="Pendidikan"
+            style={{ marginBottom: 10 }}
+          >
+            <Select
+              size="small"
+              showSearch
+              allowClear
+              optionFilterProp="label"
+              options={initialPendidikan?.map((item) => ({
+                label: item.nama,
+                value: item.id,
+              }))}
+            />
+          </Form.Item>
         )}
 
-        <Row gutter={16}>
-          <Col span={12}>
-            <Form.Item name="tahunLulus" label="Tahun Lulus">
-              <Input />
+        {data?.length > 0 && (
+          <Form.Item label="Isi Otomatis" style={{ marginBottom: 10 }}>
+            <Select
+              size="small"
+              showSearch
+              allowClear
+              placeholder="Pilih dari Simaster"
+              optionFilterProp="label"
+              onChange={handleSelectPendidikanSimaster}
+              options={data?.map((item) => ({
+                label: `${item.prodi} - ${item.nama_sekolah} (${item.tahun_lulus})`,
+                value: item.id,
+              }))}
+            />
+          </Form.Item>
+        )}
+
+        <Row gutter={12}>
+          <Col span={6}>
+            <Form.Item
+              name="tahunLulus"
+              label="Tahun"
+              style={{ marginBottom: 10 }}
+            >
+              <Input size="small" />
             </Form.Item>
           </Col>
-          <Col span={12}>
-            <Form.Item name="tglLulus" label="Tanggal Dikeluarkan Ijazah">
-              <DatePicker format="DD-MM-YYYY" />
+          <Col span={9}>
+            <Form.Item
+              name="tglLulus"
+              label="Tgl Ijazah"
+              style={{ marginBottom: 10 }}
+            >
+              <DatePicker
+                size="small"
+                format="DD-MM-YYYY"
+                style={{ width: "100%" }}
+              />
+            </Form.Item>
+          </Col>
+          <Col span={9}>
+            <Form.Item
+              name="nomorIjasah"
+              label="No"
+              style={{ marginBottom: 10 }}
+            >
+              <Input size="small" />
             </Form.Item>
           </Col>
         </Row>
 
-        <Row gutter={16}>
-          <Col span={12}>
-            <Form.Item name="nomorIjasah" label="Nomor Ijazah">
-              <Input />
-            </Form.Item>
-          </Col>
-          <Col span={12}>
-            <Form.Item name="namaSekolah" label="Nama Sekolah">
-              <Input />
-            </Form.Item>
-          </Col>
-        </Row>
-
-        <Row gutter={16}>
-          <Col span={12}>
-            <Form.Item name="gelarDepan" label="Gelar Depan">
-              <Input />
-            </Form.Item>
-          </Col>
-          <Col span={12}>
-            <Form.Item name="gelarBelakang" label="Gelar Belakang">
-              <Input />
-            </Form.Item>
-          </Col>
-        </Row>
-
-        <Form.Item label="Pendidikan Pertama">
-          <Checkbox checked={formatBoolean(row?.isPendidikanPertama)}>
-            Pendidikan Pertama
-          </Checkbox>
+        <Form.Item
+          name="namaSekolah"
+          label="Sekolah"
+          style={{ marginBottom: 10 }}
+        >
+          <Input size="small" />
         </Form.Item>
 
-        <Divider>Upload Dokumen</Divider>
+        <Row gutter={12}>
+          <Col span={8}>
+            <Form.Item
+              name="gelarDepan"
+              label="Gelar Depan"
+              style={{ marginBottom: 10 }}
+            >
+              <Input size="small" />
+            </Form.Item>
+          </Col>
+          <Col span={8}>
+            <Form.Item
+              name="gelarBelakang"
+              label="Gelar Belakang"
+              style={{ marginBottom: 10 }}
+            >
+              <Input size="small" />
+            </Form.Item>
+          </Col>
+          <Col span={8}>
+            <Form.Item style={{ marginBottom: 10 }}>
+              <Checkbox
+                checked={isPendidikanPertama}
+                onChange={(e) => setIsPendidikanPertama(e.target.checked)}
+                style={{ marginTop: 28 }}
+              >
+                Pertama
+              </Checkbox>
+            </Form.Item>
+          </Col>
+        </Row>
 
-        <Row gutter={16}>
+        <Row gutter={12}>
           <Col span={12}>
-            <Form.Item label="File Ijazah">
-              <Space direction="vertical" style={{ width: "100%" }}>
+            <Form.Item
+              name="passphrase"
+              label="Passphrase"
+              style={{ marginBottom: 10 }}
+            >
+              <Input.Password size="small" placeholder="Passphrase" />
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item
+              name="one_time_code"
+              label="OTP"
+              style={{ marginBottom: 10 }}
+            >
+              <Input size="small" placeholder="One time code" />
+            </Form.Item>
+          </Col>
+        </Row>
+
+        <Divider style={{ margin: "10px 0 12px 0" }}>Dokumen</Divider>
+
+        <Row gutter={12}>
+          <Col span={12}>
+            <Form.Item label="Ijazah" style={{ marginBottom: 8 }}>
+              <Space.Compact direction="vertical" style={{ width: "100%" }}>
                 <Button
+                  size="small"
+                  block
                   icon={<CloudDownloadOutlined />}
                   onClick={handleSyncIjazahFromMaster}
                   loading={isUploading}
                   disabled={!selectedMasterData?.file_ijazah_url}
                   type="dashed"
-                  style={{ width: "100%" }}
                 >
-                  Sync dari Master
-                  {selectedMasterData?.file_ijazah_url
-                    ? " ✓"
-                    : " (Tidak tersedia)"}
+                  Sync
                 </Button>
                 <Upload
                   name="ijazah"
@@ -488,47 +577,41 @@ const ModalUbahPendidikan = ({
                   beforeUpload={handleUploadIjazah}
                   showUploadList={false}
                 >
-                  <Button icon={<UploadOutlined />} style={{ width: "100%" }}>
-                    Upload Manual
+                  <Button size="small" block icon={<UploadOutlined />}>
+                    Upload
                   </Button>
                 </Upload>
-                {uploadedFiles.ijazah && (
-                  <div
-                    style={{
-                      padding: "8px",
-                      background: "#f6ffed",
-                      border: "1px solid #b7eb8f",
-                      borderRadius: "4px",
-                    }}
+              </Space.Compact>
+              {uploadedFiles.ijazah && (
+                <a
+                  href={`/helpdesk/api/siasn/ws/download?filePath=${uploadedFiles.ijazah}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Button
+                    size="small"
+                    type="link"
+                    style={{ padding: 0, marginTop: 4 }}
                   >
-                    <a
-                      href={`/helpdesk/api/siasn/ws/download?filePath=${uploadedFiles.ijazah}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{ color: "#52c41a", fontWeight: "bold" }}
-                    >
-                      📄 Download File Ijazah
-                    </a>
-                  </div>
-                )}
-              </Space>
+                    Download
+                  </Button>
+                </a>
+              )}
             </Form.Item>
           </Col>
           <Col span={12}>
-            <Form.Item label="File Transkrip Nilai">
-              <Space direction="vertical" style={{ width: "100%" }}>
+            <Form.Item label="Transkrip" style={{ marginBottom: 8 }}>
+              <Space.Compact direction="vertical" style={{ width: "100%" }}>
                 <Button
+                  size="small"
+                  block
                   icon={<CloudDownloadOutlined />}
                   onClick={handleSyncNilaiFromMaster}
                   loading={isUploading}
                   disabled={!selectedMasterData?.file_nilai_url}
                   type="dashed"
-                  style={{ width: "100%" }}
                 >
-                  Sync dari Master
-                  {selectedMasterData?.file_nilai_url
-                    ? " ✓"
-                    : " (Tidak tersedia)"}
+                  Sync
                 </Button>
                 <Upload
                   name="transkrip"
@@ -536,30 +619,26 @@ const ModalUbahPendidikan = ({
                   beforeUpload={handleUploadNilai}
                   showUploadList={false}
                 >
-                  <Button icon={<UploadOutlined />} style={{ width: "100%" }}>
-                    Upload Manual
+                  <Button size="small" block icon={<UploadOutlined />}>
+                    Upload
                   </Button>
                 </Upload>
-                {uploadedFiles.transkrip && (
-                  <div
-                    style={{
-                      padding: "8px",
-                      background: "#f6ffed",
-                      border: "1px solid #b7eb8f",
-                      borderRadius: "4px",
-                    }}
+              </Space.Compact>
+              {uploadedFiles.transkrip && (
+                <a
+                  href={`/helpdesk/api/siasn/ws/download?filePath=${uploadedFiles.transkrip}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Button
+                    size="small"
+                    type="link"
+                    style={{ padding: 0, marginTop: 4 }}
                   >
-                    <a
-                      href={`/helpdesk/api/siasn/ws/download?filePath=${uploadedFiles.transkrip}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{ color: "#52c41a", fontWeight: "bold" }}
-                    >
-                      📄 Download File Transkrip
-                    </a>
-                  </div>
-                )}
-              </Space>
+                    Download
+                  </Button>
+                </a>
+              )}
             </Form.Item>
           </Col>
         </Row>

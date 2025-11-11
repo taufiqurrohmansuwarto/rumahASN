@@ -14,7 +14,11 @@ import {
   message,
   Modal,
   Row,
+  Space,
+  Typography,
 } from "antd";
+
+const { Text } = Typography;
 import { useState } from "react";
 
 const ModalHapusPendidikan = ({ open, row, onCancel, usulanId }) => {
@@ -27,8 +31,10 @@ const ModalHapusPendidikan = ({ open, row, onCancel, usulanId }) => {
         message.success("Berhasil menghapus pendidikan");
         onCancel();
       },
-      onError: () => {
-        message.error("error");
+      onError: (error) => {
+        const messageError =
+          error?.response?.data?.error || "Internal server error";
+        message.error(messageError);
       },
     }
   );
@@ -88,6 +94,8 @@ const ModalHapusPendidikan = ({ open, row, onCancel, usulanId }) => {
       dok_ijazah: null,
       dok_sk_pencantuman_gelar: null,
       keterangan: value?.keterangan || "",
+      passphrase: value?.passphrase || "",
+      one_time_code: value?.one_time_code || "",
     };
 
     submit(payload);
@@ -122,98 +130,100 @@ const ModalHapusPendidikan = ({ open, row, onCancel, usulanId }) => {
       title="Hapus Usulan Pendidikan"
       open={open}
       onCancel={onCancel}
-      width={800}
-      footer={[
-        <Button key="cancel" onClick={onCancel}>
-          Batal
-        </Button>,
-        <Button
-          loading={submitLoading}
-          disabled={submitLoading}
-          key="delete"
-          type="primary"
-          danger
-          onClick={handleSubmit}
-        >
-          Hapus
-        </Button>,
-      ]}
+      width={550}
+      centered
+      okText="Hapus"
+      cancelText="Batal"
+      okButtonProps={{
+        danger: true,
+        loading: submitLoading,
+      }}
+      onOk={handleSubmit}
     >
-      <Alert message={`Usulan ID: ${usulanId}`} type="info" />
-      <Form form={form} layout="vertical" initialValues={formattedData}>
-        <Row gutter={16}>
-          <Col span={12}>
-            <Form.Item name="nipBaru" label="NIP Baru">
-              <Input disabled />
+      <div style={{ marginBottom: 12 }}>
+        <Text type="secondary" style={{ fontSize: 12 }}>
+          ID: {usulanId}
+        </Text>
+      </div>
+      <Form
+        form={form}
+        layout="vertical"
+        initialValues={formattedData}
+        size="small"
+      >
+        <Row gutter={12}>
+          <Col span={10}>
+            <Form.Item name="nipBaru" label="NIP" style={{ marginBottom: 10 }}>
+              <Input disabled size="small" />
             </Form.Item>
           </Col>
-          <Col span={12}>
-            <Form.Item name="nipLama" label="NIP Lama">
-              <Input disabled />
-            </Form.Item>
-          </Col>
-        </Row>
-
-        <Row gutter={16}>
-          <Col span={12}>
-            <Form.Item name="tkPendidikanNama" label="Tingkat Pendidikan">
-              <Input disabled />
-            </Form.Item>
-          </Col>
-          <Col span={12}>
-            <Form.Item name="pendidikanNama" label="Pendidikan">
-              <Input disabled />
-            </Form.Item>
-          </Col>
-        </Row>
-
-        <Row gutter={16}>
-          <Col span={12}>
-            <Form.Item name="tahunLulus" label="Tahun Lulus">
-              <Input disabled />
-            </Form.Item>
-          </Col>
-          <Col span={12}>
-            <Form.Item name="tglLulus" label="Tanggal Dikeluarkan Ijazah">
-              <Input disabled />
+          <Col span={14}>
+            <Form.Item
+              name="pendidikanNama"
+              label="Pendidikan"
+              style={{ marginBottom: 10 }}
+            >
+              <Input disabled size="small" />
             </Form.Item>
           </Col>
         </Row>
 
-        <Row gutter={16}>
-          <Col span={12}>
-            <Form.Item name="nomorIjasah" label="Nomor Ijazah">
-              <Input disabled />
+        <Row gutter={12}>
+          <Col span={18}>
+            <Form.Item
+              name="namaSekolah"
+              label="Sekolah"
+              style={{ marginBottom: 10 }}
+            >
+              <Input disabled size="small" />
             </Form.Item>
           </Col>
-          <Col span={12}>
-            <Form.Item name="namaSekolah" label="Nama Sekolah">
-              <Input disabled />
-            </Form.Item>
-          </Col>
-        </Row>
-
-        <Row gutter={16}>
-          <Col span={12}>
-            <Form.Item name="gelarDepan" label="Gelar Depan">
-              <Input disabled />
-            </Form.Item>
-          </Col>
-          <Col span={12}>
-            <Form.Item name="gelarBelakang" label="Gelar Belakang">
-              <Input disabled />
+          <Col span={6}>
+            <Form.Item
+              name="tahunLulus"
+              label="Tahun"
+              style={{ marginBottom: 10 }}
+            >
+              <Input disabled size="small" />
             </Form.Item>
           </Col>
         </Row>
 
-        <Form.Item label="Pendidikan Pertama">
+        <Form.Item style={{ marginBottom: 10 }}>
           <Checkbox disabled checked={formatBoolean(row?.isPendidikanPertama)}>
             Pendidikan Pertama
           </Checkbox>
         </Form.Item>
 
-        <Form.Item required name="keterangan" label="Alasan Hapus">
-          <Input.TextArea rows={3} />
+        <Row gutter={12}>
+          <Col span={12}>
+            <Form.Item
+              name="passphrase"
+              label="Passphrase"
+              style={{ marginBottom: 10 }}
+            >
+              <Input.Password size="small" placeholder="Passphrase" />
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item
+              name="one_time_code"
+              label="OTP"
+              style={{ marginBottom: 10 }}
+            >
+              <Input size="small" placeholder="One time code" />
+            </Form.Item>
+          </Col>
+        </Row>
+
+        <Form.Item
+          required
+          name="keterangan"
+          label="Alasan"
+          rules={[{ required: true, message: "Wajib diisi" }]}
+          style={{ marginBottom: 0 }}
+        >
+          <Input.TextArea rows={2} placeholder="Alasan penghapusan..." />
         </Form.Item>
       </Form>
     </Modal>

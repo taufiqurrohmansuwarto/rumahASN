@@ -1,10 +1,10 @@
 import { createRouter } from "next-connect";
-import { index } from "../../../controller/users.controller";
-import auth from "../../../middleware/auth.middleware";
-import checkRole from "@/middleware/role.middleware";
+import adminMiddleware from "@/middleware/admin.middleware";
+const { index } = require("@/controller/users.controller");
+import auth from "@/middleware/auth.middleware";
 
 const router = createRouter();
 
-router.use(auth, checkRole("admin")).get(index);
+router.use(auth).use(adminMiddleware).get(index);
 
 export default router.handler();

@@ -1,5 +1,6 @@
 import axios from "axios";
 import FormData from "form-data";
+import { logger } from "./logger";
 
 // badan kepegawaian daerah
 const UNOR_VERIFIKATOR_ID = "466D9577BDB70F89E050640A29022FEF";
@@ -166,6 +167,35 @@ export const submitPeremajaanPendidikanSIASN = async (token, usulan_id) => {
       ...formData.getHeaders(),
     },
   });
+
+  return response.data;
+};
+
+/**
+ *
+ * @param {{"usulan_data":{"IDUsulan":[""]},"passphrase":"","one_time_code":""}} token
+ * @param {*} usulan_id
+ */
+export const approvePeremajaanPendidikanSIASN = async (
+  token,
+  usulan_id,
+  passphrase,
+  one_time_code
+) => {
+  const fetcher = createFetcher(token);
+  const url = `/siasn-instansi/api/peremajaan/monit-usulan/terima-usulan`;
+
+  const body = {
+    passphrase,
+    one_time_code,
+    usulan_data: {
+      IDUsulan: [usulan_id],
+    },
+  };
+
+  logger.info(JSON.stringify(body, null, 2));
+
+  const response = await fetcher.post(url, body);
 
   return response.data;
 };

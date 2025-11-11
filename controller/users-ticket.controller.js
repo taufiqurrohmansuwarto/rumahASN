@@ -124,6 +124,10 @@ const create = async (req, res) => {
 
     const data = { ...payload, requester: customId, status_code: "DIAJUKAN" };
     const result = await Tickets.query().insert(data).returning("*");
+
+    // disini gunakan ringkasan dan menjawab pertanyaan yang dibuat di qdrant services atau openai services
+    // update kolom summarize_ai dan recomendation_answer
+
     await sendingNotificationToAdmin(result?.id, customId);
     res.status(201).json(result);
   } catch (error) {

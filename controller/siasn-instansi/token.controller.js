@@ -1,6 +1,7 @@
 import SiasnToken from "@/models/siasn-instansi/siasn-token.model";
 import { handleError } from "@/utils/helper/controller-helper";
 import {
+  approvePeremajaanPendidikanSIASN,
   createPeremajaanPendidikanSIASN,
   submitPeremajaanPendidikanSIASN,
   testingFetcher,
@@ -173,6 +174,16 @@ export const submitUsulanPeremajaanPendidikan = async (req, res) => {
     const body = req?.body;
     const tipe = req?.body?.tipe;
     const usulan_id = body?.usulan_id;
+    const passphrase = body?.passphrase;
+    const one_time_code = body?.one_time_code;
+
+    if (!passphrase || !one_time_code) {
+      return res.status(400).json({
+        error: "Passphrase dan one_time_code wajib diisi",
+        message: "Passphrase dan one_time_code wajib diisi",
+      });
+    }
+
     const { customId } = req?.user;
     const token = await SiasnToken.query()
       .where("user_id", customId)
@@ -182,20 +193,34 @@ export const submitUsulanPeremajaanPendidikan = async (req, res) => {
     const accessToken = token?.token?.access_token;
 
     if (tipe === "D") {
+      console.log(body);
       await updateDataPeremajaanPendidikanSIASN(accessToken, body);
       await submitPeremajaanPendidikanSIASN(accessToken, usulan_id);
+      await approvePeremajaanPendidikanSIASN(
+        accessToken,
+        usulan_id,
+        passphrase,
+        one_time_code
+      );
+
       res.json({ message: "success" });
     } else if (tipe === "U") {
       console.log(body);
       await updateDataPeremajaanPendidikanSIASN(accessToken, body);
       await submitPeremajaanPendidikanSIASN(accessToken, usulan_id);
+      await approvePeremajaanPendidikanSIASN(
+        accessToken,
+        usulan_id,
+        passphrase,
+        one_time_code
+      );
       res.json({ message: "success" });
     }
   } catch (error) {
-    console.log(error);
+    const message = error?.response?.data?.message || "Internal server error";
     res.status(500).json({
-      error: "Internal server error",
-      message: "Gagal memperbarui data usulan peremajaan pendidikan",
+      error: message,
+      message: message,
       details:
         process.env.NODE_ENV === "development" ? error.message : undefined,
     });
