@@ -21,6 +21,43 @@ const minioConfig = {
 
 const mc = new Minio.Client(minioConfig);
 
+const updateUserRole = (currentUser) => {
+  const { id, organization_id, role, current_role, group, custom_id } =
+    currentUser;
+  const isBKDOrg = organization_id?.startsWith("123");
+  const isPTTPKOrg = organization_id?.startsWith("134");
+  const isAdminHelpdesk = custom_id === "master-fasilitator|bkdhelpdesk";
+  const isPrakom = id === "master|56543";
+
+  const shouldBeAdmin =
+    (isAdminHelpdesk &&
+      isBKDOrg &&
+      role === "FASILITATOR" &&
+      group === "MASTER") ||
+    isPrakom;
+  const shouldBeAgent =
+    (isBKDOrg &&
+      role === "USER" &&
+      group === "MASTER" &&
+      current_role !== "admin") ||
+    (isPTTPKOrg &&
+      role === "USER" &&
+      group === "PTTPK" &&
+      current_role !== "admin");
+  const shouldBeUser =
+    (role === "FASILITATOR" && group === "MASTER") ||
+    group === "GOOGLE" ||
+    group === "PTTPK";
+
+  if (shouldBeAdmin) {
+    return "admin";
+  } else if (shouldBeAgent) {
+    return "agent";
+  } else if (shouldBeUser) {
+    return "user";
+  }
+};
+
 const auth = async (req, res, next) => {
   try {
     const data = await unstable_getServerSession(req, res, authOptions);
@@ -37,12 +74,21 @@ const auth = async (req, res, next) => {
         .first()
         .withGraphFetched("app_role");
 
+      const newRoke = updateUserRole(result);
+
+      await User.query().findById(customId).patch({ current_role: newRoke });
+
+      const lastResult = await User.query()
+        .where("custom_id", customId)
+        .first()
+        .withGraphFetched("app_role");
+
       const currentUser = {
         ...data?.user,
         userId: parseInt(userId),
         customId,
-        current_role: result?.current_role,
-        ...result,
+        current_role: lastResult?.current_role,
+        ...lastResult,
       };
 
       const ip =

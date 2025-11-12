@@ -80,50 +80,116 @@ const getInformation = async (type, accessToken) => {
   }
 };
 
+// Helper function to check organization types
+const checkOrganizationType = (organization_id) => {
+  return {
+    isBKDOrg: organization_id?.startsWith("123"),
+    isPTTPKOrg: organization_id?.startsWith("134"),
+  };
+};
+
+// Helper function to check special user types
+const checkSpecialUserTypes = (id, custom_id) => {
+  return {
+    isAdminHelpdesk: custom_id === "master-fasilitator|bkdhelpdesk",
+    isPrakom: id === "master|56543",
+  };
+};
+
+// Helper function to determine if user should be admin
+const shouldUserBeAdmin = (specialTypes, orgTypes, role, group) => {
+  const { isAdminHelpdesk, isPrakom } = specialTypes;
+  const { isBKDOrg } = orgTypes;
+
+  return (
+    (isAdminHelpdesk &&
+      isBKDOrg &&
+      role === "FASILITATOR" &&
+      group === "MASTER") ||
+    isPrakom
+  );
+};
+
+// Helper function to determine if user should be agent
+const shouldUserBeAgent = (orgTypes, role, group, current_role) => {
+  const { isBKDOrg, isPTTPKOrg } = orgTypes;
+
+  return (
+    (isBKDOrg &&
+      role === "USER" &&
+      group === "MASTER" &&
+      current_role !== "admin") ||
+    (isPTTPKOrg &&
+      role === "USER" &&
+      group === "PTTPK" &&
+      current_role !== "admin")
+  );
+};
+
+// Helper function to determine if user should be regular user
+const shouldUserBeRegularUser = (role, group) => {
+  return (
+    (role === "FASILITATOR" && group === "MASTER") ||
+    group === "GOOGLE" ||
+    group === "PTTPK"
+  );
+};
+
+// Helper function to determine new role
+const determineNewRole = (
+  specialTypes,
+  orgTypes,
+  role,
+  group,
+  current_role
+) => {
+  if (shouldUserBeAdmin(specialTypes, orgTypes, role, group)) {
+    return "admin";
+  }
+
+  if (shouldUserBeAgent(orgTypes, role, group, current_role)) {
+    return "agent";
+  }
+
+  if (shouldUserBeRegularUser(role, group)) {
+    return "user";
+  }
+
+  return null;
+};
+
+// Main function to update user role
 const updateUser = async (id) => {
   try {
     const currentUser = await User.query().findById(id);
+    if (!currentUser) return null;
 
-    const bkd = currentUser?.organization_id?.startsWith("123");
-    const role = currentUser?.role;
-    const currentRole = currentUser?.current_role;
-    const group = currentUser?.group;
+    const { organization_id, role, current_role, group, custom_id } =
+      currentUser;
 
-    const pttpkBkd = currentUser?.organization_id?.startsWith("134");
+    // Check organization and user types
+    const orgTypes = checkOrganizationType(organization_id);
+    const specialTypes = checkSpecialUserTypes(id, custom_id);
 
-    const isBKDEmployee =
-      bkd && role === "USER" && group === "MASTER" && currentRole !== "admin";
+    // Determine new role
+    const newRole = determineNewRole(
+      specialTypes,
+      orgTypes,
+      role,
+      group,
+      current_role
+    );
 
-    const adminHelpdesk =
-      currentUser?.custom_id === "master-fasilitator|bkdhelpdesk";
-
-    const adminBKD =
-      adminHelpdesk && bkd && role === "FASILITATOR" && group === "MASTER";
-
-    const prakom = "master|56543";
-
-    const fasilitator = role === "FASILITATOR" && group === "MASTER";
-
-    const isBKDEmployeePttpk =
-      pttpkBkd &&
-      role === "USER" &&
-      group === "PTTPK" &&
-      currentRole !== "admin";
-
-    if (adminBKD || prakom) {
-      await User.query().findById(id).patch({ current_role: "admin" });
+    // Update role if needed
+    if (newRole && newRole !== current_role) {
+      await User.query().findById(id).patch({ current_role: newRole });
       return User.query().findById(id);
-    } else if (isBKDEmployee || isBKDEmployeePttpk) {
-      await User.query().findById(id).patch({ current_role: "agent" });
-      return User.query().findById(id);
-    } else if (fasilitator) {
-      await User.query().findById(id).patch({ current_role: "user" });
-      return currentUser;
-    } else {
-      return currentUser;
     }
+
+    return currentUser;
   } catch (error) {
     console.log(error);
+    return null;
   }
 };
 
@@ -221,9 +287,10 @@ const options = (req, res) => {
             };
           }
 
-          const result = await upsertUser(currentUser);
+          await updateUser(currentUser?.id);
+          await upsertUser(currentUser);
 
-          const data = { ...currentUser, current_role: result?.current_role };
+          const data = { ...currentUser, current_role: "user" };
 
           const last = await updateUser(currentUser?.id);
           const lastData = { ...data, ...last, id: last?.custom_id };
@@ -265,7 +332,7 @@ const options = (req, res) => {
           };
 
           const info = await getInformation("MASTER", token?.access_token);
-
+          await updateUser(currentUser?.id);
           const result = await upsertUser({ ...currentUser, info });
 
           const data = { ...currentUser, current_role: result?.current_role };
@@ -309,6 +376,7 @@ const options = (req, res) => {
           };
 
           const info = await getInformation("PTTPK", token?.access_token);
+          await updateUser(currentUser?.id);
           const result = await upsertUser({ ...currentUser, info });
 
           const data = { ...currentUser, current_role: result?.current_role };
@@ -351,6 +419,7 @@ const options = (req, res) => {
             status_kepegawaian: profile.status_kepegawaian || null,
           };
 
+          await updateUser(currentUser?.id);
           const result = await upsertUser({ ...currentUser });
 
           const data = { ...currentUser, current_role: result?.current_role };
