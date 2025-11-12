@@ -100,6 +100,8 @@ const updateUser = async (id) => {
     const adminBKD =
       adminHelpdesk && bkd && role === "FASILITATOR" && group === "MASTER";
 
+    const fasilitator = role === "FASILITATOR" && group === "MASTER";
+
     const isBKDEmployeePttpk =
       pttpkBkd &&
       role === "USER" &&
@@ -112,8 +114,10 @@ const updateUser = async (id) => {
     } else if (adminBKD) {
       await User.query().findById(id).patch({ current_role: "admin" });
       return User.query().findById(id);
-    } else {
+    } else if (fasilitator) {
       await User.query().findById(id).patch({ current_role: "user" });
+      return currentUser;
+    } else {
       return currentUser;
     }
   } catch (error) {
