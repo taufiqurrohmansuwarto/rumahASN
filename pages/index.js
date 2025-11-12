@@ -25,13 +25,17 @@ export default function Home() {
     const userPttpk =
       currentUser?.group === "PTTPK" && currentUser?.role === "USER";
 
+    const adminBKD =
+      currentUser?.role === "FASILITATOR" &&
+      currentUser?.current_role === "admin";
+
     const fasilitatorMaster =
       currentUser?.group === "MASTER" && currentUser?.role === "FASILITATOR";
 
     const pegawaiBKD = asnBkd || pttBkd;
     const pegawaiPemda = userPns || userPttpk;
 
-    if (pegawaiBKD || pegawaiPemda) {
+    if (pegawaiBKD || pegawaiPemda || adminBKD) {
       router.push("/asn-connect/asn-knowledge");
     } else if (fasilitatorMaster) {
       router.push("/rekon/dashboard");

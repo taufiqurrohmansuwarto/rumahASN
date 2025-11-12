@@ -109,12 +109,15 @@ const updateUser = async (id) => {
       currentRole !== "admin";
 
     if (isBKDEmployee || isBKDEmployeePttpk) {
+      console.log("bkd");
       await User.query().findById(id).patch({ current_role: "agent" });
       return User.query().findById(id);
     } else if (adminBKD) {
+      console.log("admin");
       await User.query().findById(id).patch({ current_role: "admin" });
       return User.query().findById(id);
     } else if (fasilitator) {
+      console.log("fasilitator");
       await User.query().findById(id).patch({ current_role: "user" });
       return currentUser;
     } else {
