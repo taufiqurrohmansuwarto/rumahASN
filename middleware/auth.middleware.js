@@ -55,6 +55,8 @@ const updateUserRole = (currentUser) => {
     return "agent";
   } else if (shouldBeUser) {
     return "user";
+  } else {
+    return null;
   }
 };
 
@@ -74,9 +76,11 @@ const auth = async (req, res, next) => {
         .first()
         .withGraphFetched("app_role");
 
-      const newRoke = updateUserRole(result);
+      const newRole = updateUserRole(result);
 
-      await User.query().findById(customId).patch({ current_role: newRoke });
+      if (newRole) {
+        await User.query().findById(customId).patch({ current_role: newRole });
+      }
 
       const lastResult = await User.query()
         .where("custom_id", customId)
