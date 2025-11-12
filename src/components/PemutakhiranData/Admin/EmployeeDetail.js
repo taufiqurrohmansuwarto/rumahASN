@@ -1,6 +1,7 @@
 import IPAsnByNip from "@/components/LayananSIASN/IPASNByNip";
 import PengaturanGelarByNip from "@/components/LayananSIASN/PengaturanGelarByNip";
 import CekPencantumanGelar from "@/components/PemutakhiranData/Button/CekPencantumanGelar";
+import CekPencantumanGelarProfesi from "@/components/PemutakhiranData/Button/CekPencantumanGelarProfesi";
 import CheckFotoPersonalByNip from "@/components/PemutakhiranData/OCR/CheckFotoPersonalByNip";
 import { dataUtamaMasterByNip } from "@/services/master.services";
 import {
@@ -806,6 +807,7 @@ function EmployeeDetail({ nip }) {
         <Group spacing="xs" wrap="wrap">
           <IPAsnByNip tahun={2024} nip={dataSimaster?.nip_baru} />
           <CekPencantumanGelar nip={nip} />
+          <CekPencantumanGelarProfesi nip={nip} />
           <Kppn id={siasn?.kppnId} />
           <PengaturanGelarByNip nip={nip} />
         </Group>

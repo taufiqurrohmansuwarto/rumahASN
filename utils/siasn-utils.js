@@ -558,3 +558,37 @@ module.exports.cekPencantumanGelar = async (fetcher, nip) => {
     }
   });
 };
+
+module.exports.cekPencantumanGelarProfesi = async (fetcher, nip) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const result = await fetcher.get(
+        `/partition/profesi-instansi?nip=${nip}`
+      );
+
+      const data = result?.data?.data;
+      if (!data) {
+        resolve([]);
+      } else {
+        const statusUsul = await StatusUsul.query();
+        const dataResult = data.map((item) => {
+          const statusUsulan = statusUsul.find(
+            (status) => String(status.id) === String(item.status_usulan)
+          );
+          return {
+            ...item,
+            nama_status_usulan: statusUsulan?.nama,
+          };
+        });
+        resolve(dataResult);
+      }
+    } catch (error) {
+      const data = error?.data;
+      if (data === "record not found") {
+        resolve([]);
+      } else {
+        reject(error);
+      }
+    }
+  });
+};

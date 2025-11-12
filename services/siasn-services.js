@@ -336,6 +336,16 @@ export const cekPencantumanGelarSiasnPersonal = (nip) => {
     .then((res) => res?.data);
 };
 
+export const cekPencantumanGelarSiasnPersonalProfesi = () => {
+  return api.get(`/pns/pencantuman-gelar-profesi-ws`).then((res) => res?.data);
+};
+
+export const cekPencantumanGelarSiasnProfesiByNip = (nip) => {
+  return api
+    .get(`/admin/${nip}/layanan-siasn/pencantuman-gelar-profesi-ws`)
+    .then((res) => res?.data);
+};
+
 export const dataPencantumanGelarSKByNip = ({ nip, id }) => {
   return api
     .get(`/admin/${nip}/pencantuman-gelar/${id}`)

@@ -1,5 +1,6 @@
 import IPAsn from "@/components/LayananSIASN/IPAsn";
 import CekPencantumanGelar from "@/components/PemutakhiranData/Button/CekPencantumanGelar";
+import CekPencantumanGelarProfesi from "@/components/PemutakhiranData/Button/CekPencantumanGelarProfesi";
 import CheckFotoPersonal from "@/components/PemutakhiranData/OCR/CheckFotoPersonal";
 import { getDisparitas } from "@/services/master.services";
 import { updateFotoSiasn } from "@/services/siasn-services";
@@ -576,6 +577,7 @@ export function MenuMySAPK({
                   refetchDataIPAsn={refetchDataIPAsn}
                 />
                 <CekPencantumanGelar />
+                <CekPencantumanGelarProfesi />
                 <PengaturanGelar />
                 <GantiEmail />
               </Flex>

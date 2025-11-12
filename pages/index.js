@@ -13,8 +13,12 @@ export default function Home() {
     const currentUser = data?.user;
 
     // asn bkd adalah currentUser.organization_id yang berawalan  123
-    const asnBkd = currentUser?.organization_id?.startsWith("123");
-    const pttBkd = currentUser?.organization_id?.startsWith("134");
+    const asnBkd =
+      currentUser?.organization_id?.startsWith("123") &&
+      currentUser?.role === "USER";
+    const pttBkd =
+      currentUser?.organization_id?.startsWith("134") &&
+      currentUser?.role === "USER";
 
     const userPns =
       currentUser?.group === "MASTER" && currentUser?.role === "USER";
