@@ -217,6 +217,7 @@ export const submitUsulanPeremajaanPendidikan = async (req, res) => {
       res.json({ message: "success" });
     }
   } catch (error) {
+    console.log(error);
     const message = error?.response?.data?.message || "Internal server error";
     res.status(500).json({
       error: message,

@@ -12,18 +12,29 @@ import {
   Space,
 } from "antd";
 import { Text, Stack } from "@mantine/core";
-import { IconTrash } from "@tabler/icons-react";
-import { useState } from "react";
-import ModalKonfirmasiSubmitPendidikan from "./ModalKonfirmasiSubmitPendidikan";
+import { IconTrash, IconKey, IconLock, IconArrowLeft } from "@tabler/icons-react";
+import { useState, useEffect } from "react";
 
 const ModalHapusPendidikan = ({ open, row, onCancel, usulanId }) => {
   const [form] = Form.useForm();
+  const [step, setStep] = useState(1); // 1: Form Hapus, 2: Konfirmasi
+  const [step1Values, setStep1Values] = useState(null); // State untuk menyimpan values step 1
+
+  // Reset step saat modal dibuka/ditutup
+  useEffect(() => {
+    if (open) {
+      setStep(1);
+      setStep1Values(null);
+      form.resetFields();
+    }
+  }, [open, form]);
 
   const { mutate: submit, isLoading: submitLoading } = useMutation(
     (data) => submitUsulanPeremajaanPendidikan(data),
     {
       onSuccess: () => {
         message.success("Berhasil menghapus pendidikan");
+        setStep(1);
         onCancel();
       },
       onError: (error) => {
@@ -66,155 +77,182 @@ const ModalHapusPendidikan = ({ open, row, onCancel, usulanId }) => {
       }
     : {};
 
-  // State untuk modal konfirmasi
-  const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [confirmForm] = Form.useForm();
-
-  const handleShowConfirmModal = async () => {
+  // Handler untuk lanjut ke step 2
+  const handleNext = async () => {
     try {
-      await form.validateFields();
-      setShowConfirmModal(true);
+      const values = await form.validateFields(["keterangan"]);
+      // Simpan semua values dari step 1 (termasuk field disabled)
+      setStep1Values({
+        ...formattedData,
+        keterangan: values.keterangan
+      });
+      setStep(2);
     } catch (error) {
       message.error("Lengkapi alasan penghapusan terlebih dahulu");
     }
   };
 
-  const handleConfirmSubmit = async () => {
+  // Handler untuk kembali ke step 1
+  const handleBack = () => {
+    setStep(1);
+  };
+
+  // Handler untuk submit final
+  const handleSubmit = async () => {
     try {
-      const value = await form.validateFields();
-      const confirmValue = await confirmForm.validateFields();
+      const step2Values = await form.validateFields(['passphrase', 'one_time_code']);
+      
+      // Gabungkan values dari step 1 dan step 2
+      const allValues = { ...step1Values, ...step2Values };
 
       const payload = {
         usulan_id: usulanId,
         tipe: "D",
         pns_orang_id: row?.idPns,
         id_riwayat: row?.id,
-        tahun_lulus: value?.tahunLulus || "",
-        nomor_ijazah: value?.nomorIjasah || "",
-        nama_sek: value?.namaSekolah || "",
-        glr_depan: value?.gelarDepan || "",
-        glr_belakang: value?.gelarBelakang || "",
-        tgl_tahun_lulus: value?.tglLulus || "",
+        tahun_lulus: allValues?.tahunLulus || "",
+        nomor_ijazah: allValues?.nomorIjasah || "",
+        nama_sek: allValues?.namaSekolah || "",
+        glr_depan: allValues?.gelarDepan || "",
+        glr_belakang: allValues?.gelarBelakang || "",
+        tgl_tahun_lulus: allValues?.tglLulus || "",
         pendidikan_id: row?.pendidikanId,
         pendidikan_nama: row?.pendidikanNama || "",
         is_pendidikan_pertama: row?.isPendidikanPertama,
-        pencantuman_gelar: value?.pencantumanGelar || "",
+        pencantuman_gelar: allValues?.pencantumanGelar || "",
         tingkat_pendidikan_id: row?.tkPendidikanId || "",
         tingkat_pendidikan_nama: row?.tkPendidikanNama || "",
         dok_transkrip_nilai: null,
         dok_ijazah: null,
         dok_sk_pencantuman_gelar: null,
-        keterangan: value?.keterangan || "",
-        passphrase: confirmValue?.passphrase || "",
-        one_time_code: confirmValue?.one_time_code || "",
+        keterangan: allValues?.keterangan || "",
+        passphrase: step2Values?.passphrase || "",
+        one_time_code: step2Values?.one_time_code || "",
       };
 
       submit(payload);
-      setShowConfirmModal(false);
-      confirmForm.resetFields();
     } catch (error) {
       message.error("Lengkapi passphrase dan OTP");
     }
   };
 
   return (
-    <>
-      <Modal
-        title={
+    <Modal
+      title={
+        <Space>
+          <IconTrash size={18} />
+          <span>
+            {step === 1 ? "Hapus Usulan Pendidikan" : "Konfirmasi Penghapusan"}
+          </span>
+        </Space>
+      }
+      open={open}
+      onCancel={onCancel}
+      width={550}
+      centered
+      footer={
+        step === 1 ? (
           <Space>
-            <IconTrash size={18} />
-            <span>Hapus Usulan Pendidikan</span>
+            <Button onClick={onCancel}>Batal</Button>
+            <Button type="primary" danger onClick={handleNext}>
+              Lanjut
+            </Button>
           </Space>
-        }
-        open={open}
-        onCancel={onCancel}
-        width={550}
-        centered
-        okText="Hapus"
-        cancelText="Batal"
-        okButtonProps={{
-          danger: true,
-        }}
-        onOk={handleShowConfirmModal}
+        ) : (
+          <Space>
+            <Button icon={<IconArrowLeft size={14} />} onClick={handleBack}>
+              Kembali
+            </Button>
+            <Button
+              type="primary"
+              danger
+              loading={submitLoading}
+              onClick={handleSubmit}
+            >
+              Hapus
+            </Button>
+          </Space>
+        )
+      }
+    >
+      <Stack spacing="xs" style={{ marginBottom: 12 }}>
+        <Text size="xs" c="dimmed">
+          ID: {usulanId}
+        </Text>
+      </Stack>
+
+      <Form
+        form={form}
+        layout="vertical"
+        initialValues={formattedData}
+        size="small"
       >
-        <Stack spacing="xs" style={{ marginBottom: 12 }}>
-          <Text size="xs" c="dimmed">
-            ID: {usulanId}
-          </Text>
-        </Stack>
+        {step === 1 ? (
+          <>
+            {/* Step 1: Form Hapus */}
+            <Row gutter={12}>
+              <Col span={10}>
+                <Text
+                  size="xs"
+                  fw={500}
+                  style={{ display: "block", marginBottom: 4 }}
+                >
+                  NIP
+                </Text>
+                <Form.Item name="nipBaru" style={{ marginBottom: 0 }}>
+                  <Input disabled size="small" />
+                </Form.Item>
+              </Col>
+              <Col span={14}>
+                <Text
+                  size="xs"
+                  fw={500}
+                  style={{ display: "block", marginBottom: 4 }}
+                >
+                  Pendidikan
+                </Text>
+                <Form.Item name="pendidikanNama" style={{ marginBottom: 0 }}>
+                  <Input disabled size="small" />
+                </Form.Item>
+              </Col>
+            </Row>
 
-        <Form
-          form={form}
-          layout="vertical"
-          initialValues={formattedData}
-          size="small"
-        >
-          <Row gutter={12}>
-            <Col span={10}>
-              <Text
-                size="xs"
-                fw={500}
-                style={{ display: "block", marginBottom: 4 }}
-              >
-                NIP
-              </Text>
-              <Form.Item name="nipBaru" style={{ marginBottom: 0 }}>
-                <Input disabled size="small" />
-              </Form.Item>
-            </Col>
-            <Col span={14}>
-              <Text
-                size="xs"
-                fw={500}
-                style={{ display: "block", marginBottom: 4 }}
-              >
-                Pendidikan
-              </Text>
-              <Form.Item name="pendidikanNama" style={{ marginBottom: 0 }}>
-                <Input disabled size="small" />
-              </Form.Item>
-            </Col>
-          </Row>
+            <Row gutter={12} style={{ marginTop: 8 }}>
+              <Col span={18}>
+                <Text
+                  size="xs"
+                  fw={500}
+                  style={{ display: "block", marginBottom: 4 }}
+                >
+                  Sekolah
+                </Text>
+                <Form.Item name="namaSekolah" style={{ marginBottom: 0 }}>
+                  <Input disabled size="small" />
+                </Form.Item>
+              </Col>
+              <Col span={6}>
+                <Text
+                  size="xs"
+                  fw={500}
+                  style={{ display: "block", marginBottom: 4 }}
+                >
+                  Tahun
+                </Text>
+                <Form.Item name="tahunLulus" style={{ marginBottom: 0 }}>
+                  <Input disabled size="small" />
+                </Form.Item>
+              </Col>
+            </Row>
 
-          <Row gutter={12} style={{ marginTop: 8 }}>
-            <Col span={18}>
-              <Text
-                size="xs"
-                fw={500}
-                style={{ display: "block", marginBottom: 4 }}
+            <Form.Item style={{ marginBottom: 12, marginTop: 8 }}>
+              <Checkbox
+                disabled
+                checked={formatBoolean(row?.isPendidikanPertama)}
               >
-                Sekolah
-              </Text>
-              <Form.Item name="namaSekolah" style={{ marginBottom: 0 }}>
-                <Input disabled size="small" />
-              </Form.Item>
-            </Col>
-            <Col span={6}>
-              <Text
-                size="xs"
-                fw={500}
-                style={{ display: "block", marginBottom: 4 }}
-              >
-                Tahun
-              </Text>
-              <Form.Item name="tahunLulus" style={{ marginBottom: 0 }}>
-                <Input disabled size="small" />
-              </Form.Item>
-            </Col>
-          </Row>
+                <Text size="xs">Pendidikan Pertama</Text>
+              </Checkbox>
+            </Form.Item>
 
-          <Form.Item style={{ marginBottom: 12, marginTop: 8 }}>
-            <Checkbox disabled checked={formatBoolean(row?.isPendidikanPertama)}>
-              <Text size="xs">Pendidikan Pertama</Text>
-            </Checkbox>
-          </Form.Item>
-
-          <Form.Item
-            required
-            name="keterangan"
-            rules={[{ required: true, message: "Wajib diisi" }]}
-            style={{ marginBottom: 0 }}
-          >
             <Text
               size="xs"
               fw={500}
@@ -222,23 +260,76 @@ const ModalHapusPendidikan = ({ open, row, onCancel, usulanId }) => {
             >
               Alasan Penghapusan
             </Text>
-            <Input.TextArea rows={3} placeholder="Jelaskan alasan penghapusan..." />
-          </Form.Item>
-        </Form>
-      </Modal>
+            <Form.Item
+              required
+              name="keterangan"
+              rules={[{ required: true, message: "Wajib diisi" }]}
+              style={{ marginBottom: 0 }}
+            >
+              <Input.TextArea
+                rows={3}
+                placeholder="Jelaskan alasan penghapusan..."
+              />
+            </Form.Item>
+          </>
+        ) : (
+          <>
+            {/* Step 2: Konfirmasi dengan Passphrase & OTP */}
+            <Stack spacing="md">
+              <Text size="sm" c="dimmed">
+                Masukkan passphrase dan OTP untuk menghapus usulan pendidikan
+              </Text>
 
-      {/* Modal Konfirmasi Submit */}
-      <ModalKonfirmasiSubmitPendidikan
-        open={showConfirmModal}
-        onCancel={() => {
-          setShowConfirmModal(false);
-          confirmForm.resetFields();
-        }}
-        onOk={handleConfirmSubmit}
-        loading={submitLoading}
-        form={confirmForm}
-      />
-    </>
+              <div>
+                <Text
+                  size="xs"
+                  fw={500}
+                  style={{ display: "block", marginBottom: 4 }}
+                >
+                  Passphrase
+                </Text>
+                <Form.Item
+                  name="passphrase"
+                  rules={[
+                    { required: true, message: "Passphrase wajib diisi" },
+                  ]}
+                  style={{ marginBottom: 12 }}
+                >
+                  <Input.Password
+                    size="small"
+                    placeholder="Passphrase SIASN"
+                    autoComplete="off"
+                    prefix={<IconKey size={14} />}
+                  />
+                </Form.Item>
+              </div>
+
+              <div>
+                <Text
+                  size="xs"
+                  fw={500}
+                  style={{ display: "block", marginBottom: 4 }}
+                >
+                  One Time Code (OTP)
+                </Text>
+                <Form.Item
+                  name="one_time_code"
+                  rules={[{ required: true, message: "OTP wajib diisi" }]}
+                  style={{ marginBottom: 0 }}
+                >
+                  <Input
+                    size="small"
+                    placeholder="Kode OTP"
+                    autoComplete="off"
+                    prefix={<IconLock size={14} />}
+                  />
+                </Form.Item>
+              </div>
+            </Stack>
+          </>
+        )}
+      </Form>
+    </Modal>
   );
 };
 

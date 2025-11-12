@@ -33,10 +33,12 @@ import {
   IconSchool,
   IconCalendar,
   IconUser,
+  IconKey,
+  IconLock,
+  IconArrowLeft,
 } from "@tabler/icons-react";
 import dayjs from "dayjs";
 import { useState, useEffect } from "react";
-import ModalKonfirmasiSubmitPendidikan from "./ModalKonfirmasiSubmitPendidikan";
 
 const ModalUbahPendidikan = ({
   usulanId,
@@ -156,22 +158,28 @@ const ModalUbahPendidikan = ({
     : {};
 
   const [form] = Form.useForm();
+  const [step, setStep] = useState(1); // 1: Form Edit, 2: Konfirmasi
 
   // useEffect untuk set initial values saat modal dibuka
   useEffect(() => {
     if (open && row) {
+      setStep(1); // Reset ke step 1
+      setSelectedMasterData(null); // Reset selected master data
+      setSelectedMasterId(null); // Reset dropdown value
+      
+      // Hanya set field yang read-only (NIP dan Tingkat Pendidikan)
+      // Field lain kosong, user harus pilih dari dropdown atau input manual
       const initialValues = {
         nipBaru: formatValue(row.nipBaru),
-        nipLama: formatValue(row.nipLama),
         tkPendidikanNama: formatValue(row.tkPendidikanNama),
-        pendidikanNama: formatValue(row.pendidikanNama),
-        tahunLulus: formatValue(row.tahunLulus),
-        tglLulus: row.tglLulus ? dayjs(row.tglLulus, "DD-MM-YYYY") : null,
-        nomorIjasah: formatValue(row.nomorIjasah),
-        namaSekolah: formatValue(row.namaSekolah),
-        gelarDepan: formatValueGelar(row.gelarDepan),
-        gelarBelakang: formatValueGelar(row.gelarBelakang),
         pendidikanId: formatValue(row.pendidikanId),
+        // Field editable kosong dulu
+        namaSekolah: "",
+        tahunLulus: "",
+        nomorIjasah: "",
+        tglLulus: null,
+        gelarDepan: "",
+        gelarBelakang: "",
       };
       form.setFieldsValue(initialValues);
     }
@@ -179,16 +187,18 @@ const ModalUbahPendidikan = ({
 
   // Handler untuk memilih data pendidikan dari simaster
   const handleSelectPendidikanSimaster = (value) => {
+    setSelectedMasterId(value); // Set dropdown value
+
     if (!value) {
-      // Reset form jika tidak ada yang dipilih
+      // Clear form jika dropdown di-clear
       setSelectedMasterData(null);
       form.setFieldsValue({
-        namaSekolah: formatValue(row?.namaSekolah),
-        tahunLulus: formatValue(row?.tahunLulus),
-        nomorIjasah: formatValue(row?.nomorIjasah),
-        tglLulus: row?.tglLulus ? dayjs(row.tglLulus, "DD-MM-YYYY") : null,
-        gelarDepan: formatValueGelar(row?.gelarDepan),
-        gelarBelakang: formatValueGelar(row?.gelarBelakang),
+        namaSekolah: "",
+        tahunLulus: "",
+        nomorIjasah: "",
+        tglLulus: null,
+        gelarDepan: "",
+        gelarBelakang: "",
       });
       return;
     }
@@ -198,22 +208,18 @@ const ModalUbahPendidikan = ({
     if (selectedData) {
       setSelectedMasterData(selectedData);
 
-      // Gunakan setTimeout untuk memastikan state sudah update
-      setTimeout(() => {
-        // Isi semua field yang tersedia dari simaster
-        form.setFieldsValue({
-          namaSekolah: selectedData.nama_sekolah || "",
-          tahunLulus: selectedData.tahun_lulus?.toString() || "",
-          nomorIjasah: selectedData.no_ijazah || "",
-          tglLulus: selectedData.tgl_ijazah
-            ? dayjs(selectedData.tgl_ijazah)
-            : null,
-          gelarDepan: selectedData.gelar_depan || "",
-          gelarBelakang: selectedData.gelar_belakang || "",
-        });
+      // Langsung set tanpa setTimeout
+      const newValues = {
+        namaSekolah: selectedData.nama_sekolah || "",
+        tahunLulus: selectedData.tahun_lulus ? String(selectedData.tahun_lulus) : "",
+        nomorIjasah: selectedData.no_ijazah || "",
+        tglLulus: selectedData.tgl_ijazah ? dayjs(selectedData.tgl_ijazah) : null,
+        gelarDepan: selectedData.gelar_depan || "",
+        gelarBelakang: selectedData.gelar_belakang || "",
+      };
 
-        message.success("Data berhasil diisi dari Simaster");
-      }, 100);
+      form.setFieldsValue(newValues);
+      message.success("Data berhasil diisi dari Simaster");
     } else {
       message.warning("Data tidak ditemukan");
     }
@@ -221,6 +227,10 @@ const ModalUbahPendidikan = ({
 
   // State untuk menyimpan data yang dipilih dari master
   const [selectedMasterData, setSelectedMasterData] = useState(null);
+  const [selectedMasterId, setSelectedMasterId] = useState(null);
+  
+  // State untuk menyimpan form values dari step 1
+  const [step1Values, setStep1Values] = useState(null);
 
   // State untuk menyimpan file_uri setelah upload berhasil
   const [uploadedFiles, setUploadedFiles] = useState({
@@ -355,13 +365,10 @@ const ModalUbahPendidikan = ({
     }
   };
 
-  // State untuk modal konfirmasi
-  const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [confirmForm] = Form.useForm();
-
-  const handleSubmit = async () => {
+  // Handler untuk lanjut ke step 2
+  const handleNext = async () => {
     try {
-      await form.validateFields();
+      const values = await form.validateFields();
       const ijazah = uploadedFiles?.ijazah;
       const transkrip = uploadedFiles?.transkrip;
 
@@ -370,78 +377,108 @@ const ModalUbahPendidikan = ({
         return;
       }
 
-      // Show confirmation modal
-      setShowConfirmModal(true);
+      // Simpan values dari step 1
+      setStep1Values(values);
+      setStep(2);
     } catch (error) {
       message.error("Lengkapi form terlebih dahulu");
     }
   };
 
-  const handleConfirmSubmit = async () => {
+  // Handler untuk kembali ke step 1
+  const handleBack = () => {
+    setStep(1);
+  };
+
+  // Handler untuk submit final
+  const handleSubmit = async () => {
     try {
-      const value = await form.validateFields();
-      const confirmValue = await confirmForm.validateFields();
+      const step2Values = await form.validateFields(['passphrase', 'one_time_code']);
       const ijazah = uploadedFiles?.ijazah;
       const transkrip = uploadedFiles?.transkrip;
+
+      // Combine values dari step 1 dan step 2
+      const allValues = { ...step1Values, ...step2Values };
 
       const payload = {
         usulan_id: usulanId,
         tipe: "U",
         pns_orang_id: row?.idPns,
         id_riwayat: row?.id,
-        tahun_lulus: value?.tahunLulus || "",
-        nomor_ijazah: value?.nomorIjasah || "",
-        nama_sek: value?.namaSekolah || "",
-        glr_depan: value?.gelarDepan || "",
-        glr_belakang: value?.gelarBelakang || "",
-        tgl_tahun_lulus: value?.tglLulus
-          ? dayjs(value?.tglLulus).format("YYYY-MM-DD")
+        tahun_lulus: allValues?.tahunLulus || "",
+        nomor_ijazah: allValues?.nomorIjasah || "",
+        nama_sek: allValues?.namaSekolah || "",
+        glr_depan: allValues?.gelarDepan || "",
+        glr_belakang: allValues?.gelarBelakang || "",
+        tgl_tahun_lulus: allValues?.tglLulus
+          ? dayjs(allValues?.tglLulus).format("YYYY-MM-DD")
           : "",
-        pendidikan_id: value?.pendidikanId,
+        pendidikan_id: allValues?.pendidikanId,
         pendidikan_nama: "",
         is_pendidikan_pertama: isPendidikanPertama ? "1" : "0",
-        pencantuman_gelar: value?.pencantumanGelar || "",
+        pencantuman_gelar: allValues?.pencantumanGelar || "",
         tingkat_pendidikan_id: row?.tkPendidikanId || "",
         tingkat_pendidikan_nama: row?.tkPendidikanNama || "",
         dok_transkrip_nilai: transkrip || null,
         dok_ijazah: ijazah || null,
         dok_sk_pencantuman_gelar: null,
-        keterangan: value?.keterangan || "",
-        passphrase: confirmValue?.passphrase || "",
-        one_time_code: confirmValue?.one_time_code || "",
+        keterangan: allValues?.keterangan || "",
+        passphrase: step2Values?.passphrase || "",
+        one_time_code: step2Values?.one_time_code || "",
       };
 
       submit(payload);
-      setShowConfirmModal(false);
-      confirmForm.resetFields();
+      setStep(1); // Reset step after submission
     } catch (error) {
       message.error("Lengkapi passphrase dan OTP");
     }
   };
 
   return (
-    <>
-      <Modal
-        destroyOnHidden
-        onOk={handleSubmit}
-        open={open}
-        onCancel={onCancel}
-        title={
+    <Modal
+      destroyOnHidden
+      open={open}
+      onCancel={onCancel}
+      title={
+        <Space>
+          <IconEdit size={18} />
+          <span>
+            {step === 1 ? "Ubah Usulan Pendidikan" : "Konfirmasi Perubahan"}
+          </span>
+        </Space>
+      }
+      width={step === 1 ? 900 : 550}
+      centered
+      footer={
+        step === 1 ? (
           <Space>
-            <IconEdit size={18} />
-            <span>Ubah Usulan Pendidikan</span>
+            <Button onClick={onCancel}>Batal</Button>
+            <Button type="primary" onClick={handleNext}>
+              Lanjut
+            </Button>
           </Space>
-        }
-        width={900}
-        centered
-        okText="Simpan"
-        cancelText="Batal"
-      >
+        ) : (
+          <Space>
+            <Button icon={<IconArrowLeft size={14} />} onClick={handleBack}>
+              Kembali
+            </Button>
+            <Button
+              type="primary"
+              loading={isLoadingSubmit}
+              onClick={handleSubmit}
+            >
+              Simpan
+            </Button>
+          </Space>
+        )
+      }
+    >
         <Stack spacing="xs" style={{ marginBottom: 16 }}>
-          <Flex justify="space-between" align="center">
-            <Text size="xs" c="dimmed">
-              ID: {usulanId}
-            </Text>
+        <Flex justify="space-between" align="center">
+          <Text size="xs" c="dimmed">
+            ID: {usulanId}
+          </Text>
+          {step === 1 && (
             <Space size="small">
               <Button
                 size="small"
@@ -474,14 +511,18 @@ const ModalUbahPendidikan = ({
                 </Button>
               )}
             </Space>
-          </Flex>
-        </Stack>
-        <Form
-          form={form}
-          layout="vertical"
-          initialValues={formattedData}
-          size="small"
-        >
+          )}
+        </Flex>
+      </Stack>
+
+      <Form
+        form={form}
+        layout="vertical"
+        initialValues={formattedData}
+        size="small"
+      >
+        {step === 1 ? (
+          <>
           <Row gutter={[12, 8]}>
             <Col span={8}>
               <Text
@@ -549,6 +590,7 @@ const ModalUbahPendidikan = ({
                 placeholder="Pilih data dari Simaster untuk mengisi form otomatis"
                 optionFilterProp="label"
                 onChange={handleSelectPendidikanSimaster}
+                value={selectedMasterId}
                 style={{ width: "100%" }}
                 options={data?.map((item) => ({
                   label: `${item.prodi} - ${item.nama_sekolah} (${item.tahun_lulus})`,
@@ -593,7 +635,13 @@ const ModalUbahPendidikan = ({
                     beforeUpload={handleUploadIjazah}
                     showUploadList={false}
                   >
-                    <Button size="small" icon={<IconUpload size={14} />} style={{ flex: 1 }}>
+                    <Button 
+                      size="small" 
+                      icon={<IconUpload size={14} />} 
+                      style={{ flex: 1 }}
+                      loading={isUploading}
+                      disabled={isUploading}
+                    >
                       Upload
                     </Button>
                   </Upload>
@@ -642,7 +690,13 @@ const ModalUbahPendidikan = ({
                     beforeUpload={handleUploadNilai}
                     showUploadList={false}
                   >
-                    <Button size="small" icon={<IconUpload size={14} />} style={{ flex: 1 }}>
+                    <Button 
+                      size="small" 
+                      icon={<IconUpload size={14} />} 
+                      style={{ flex: 1 }}
+                      loading={isUploading}
+                      disabled={isUploading}
+                    >
                       Upload
                     </Button>
                   </Upload>
@@ -679,7 +733,11 @@ const ModalUbahPendidikan = ({
             >
               Nama Sekolah/Universitas
             </Text>
-            <Form.Item name="namaSekolah" style={{ marginBottom: 0 }}>
+            <Form.Item 
+              name="namaSekolah" 
+              rules={[{ required: true, message: "Wajib diisi" }]}
+              style={{ marginBottom: 0 }}
+            >
               <Input
                 size="small"
                 placeholder="Contoh: Universitas Indonesia"
@@ -697,7 +755,11 @@ const ModalUbahPendidikan = ({
               >
                 Tahun Lulus
               </Text>
-              <Form.Item name="tahunLulus" style={{ marginBottom: 0 }}>
+              <Form.Item 
+                name="tahunLulus"
+                rules={[{ required: true, message: "Wajib diisi" }]}
+                style={{ marginBottom: 0 }}
+              >
                 <Input
                   size="small"
                   placeholder="2020"
@@ -713,7 +775,11 @@ const ModalUbahPendidikan = ({
               >
                 Tgl Ijazah
               </Text>
-              <Form.Item name="tglLulus" style={{ marginBottom: 0 }}>
+              <Form.Item 
+                name="tglLulus"
+                rules={[{ required: true, message: "Wajib diisi" }]}
+                style={{ marginBottom: 0 }}
+              >
                 <DatePicker
                   size="small"
                   format="DD-MM-YYYY"
@@ -730,7 +796,11 @@ const ModalUbahPendidikan = ({
               >
                 No Ijazah
               </Text>
-              <Form.Item name="nomorIjasah" style={{ marginBottom: 0 }}>
+              <Form.Item 
+                name="nomorIjasah"
+                rules={[{ required: true, message: "Wajib diisi" }]}
+                style={{ marginBottom: 0 }}
+              >
                 <Input size="small" placeholder="Nomor ijazah" />
               </Form.Item>
             </Col>
@@ -775,21 +845,66 @@ const ModalUbahPendidikan = ({
               <Text size="xs">Pendidikan Pertama</Text>
             </Checkbox>
           </Form.Item>
-        </Form>
-      </Modal>
+          </>
+        ) : (
+          <>
+            {/* Step 2: Konfirmasi dengan Passphrase & OTP */}
+            <Stack spacing="md">
+              <Text size="sm" c="dimmed">
+                Masukkan passphrase dan OTP untuk menyimpan perubahan usulan
+                pendidikan
+              </Text>
 
-      {/* Modal Konfirmasi Submit */}
-      <ModalKonfirmasiSubmitPendidikan
-        open={showConfirmModal}
-        onCancel={() => {
-          setShowConfirmModal(false);
-          confirmForm.resetFields();
-        }}
-        onOk={handleConfirmSubmit}
-        loading={isLoadingSubmit}
-        form={confirmForm}
-      />
-    </>
+              <div>
+                <Text
+                  size="xs"
+                  fw={500}
+                  style={{ display: "block", marginBottom: 4 }}
+                >
+                  Passphrase
+                </Text>
+                <Form.Item
+                  name="passphrase"
+                  rules={[
+                    { required: true, message: "Passphrase wajib diisi" },
+                  ]}
+                  style={{ marginBottom: 12 }}
+                >
+                  <Input.Password
+                    size="small"
+                    placeholder="Passphrase SIASN"
+                    autoComplete="off"
+                    prefix={<IconKey size={14} />}
+                  />
+                </Form.Item>
+              </div>
+
+              <div>
+                <Text
+                  size="xs"
+                  fw={500}
+                  style={{ display: "block", marginBottom: 4 }}
+                >
+                  One Time Code (OTP)
+                </Text>
+                <Form.Item
+                  name="one_time_code"
+                  rules={[{ required: true, message: "OTP wajib diisi" }]}
+                  style={{ marginBottom: 0 }}
+                >
+                  <Input
+                    size="small"
+                    placeholder="Kode OTP"
+                    autoComplete="off"
+                    prefix={<IconLock size={14} />}
+                  />
+                </Form.Item>
+              </div>
+            </Stack>
+          </>
+        )}
+      </Form>
+    </Modal>
   );
 };
 
