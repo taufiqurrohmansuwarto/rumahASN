@@ -4,6 +4,7 @@ const { handleError } = require("@/utils/helper/controller-helper");
 const P3KParuhWaktu = require("@/models/pengadaan/p3k-paruh-waktu.model");
 const OperatorGajiPW = require("@/models/pengadaan/operator-gaji-pw.model");
 const AuditLog = require("@/models/pengadaan/audit-log.model");
+const { operatorVerifyMfa } = require("@/utils/master.utils");
 
 export const getPengadaanParuhWaktu = async (req, res) => {
   try {
@@ -507,8 +508,27 @@ export const updateGajiPengadaanParuhWaktu = async (req, res) => {
     const knex = P3KParuhWaktu.knex();
 
     const { id } = req?.query;
-    const { gaji, unor_pk, luar_perangkat_daerah, is_blud } = req?.body;
+    const { gaji, unor_pk, luar_perangkat_daerah, is_blud, one_time_code } =
+      req?.body;
     const { customId } = req?.user;
+
+    // Validasi: one_time_code wajib ada
+    if (!one_time_code) {
+      return res.status(400).json({
+        success: false,
+        message: "Kode OTP wajib diisi",
+      });
+    }
+
+    // Verifikasi OTP menggunakan operatorVerifyMfa
+    const isOtpValid = await operatorVerifyMfa(req.fetcher, one_time_code);
+
+    if (!isOtpValid) {
+      return res.status(401).json({
+        success: false,
+        message: "Kode OTP tidak valid atau sudah kadaluarsa",
+      });
+    }
 
     const currentOperator = await OperatorGajiPW.query()
       .where("user_id", customId)

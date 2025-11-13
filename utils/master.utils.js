@@ -36,6 +36,20 @@ module.exports.getDataUtamaMaster = async (fetcher, nip) => {
   }
 };
 
+module.exports.operatorVerifyMfa = async (fetcher, otp) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const result = await fetcher.post(`/master-ws/operator/verify-mfa`, {
+        otp,
+      });
+      resolve(result?.data?.success === true);
+    } catch (error) {
+      console.log(error);
+      resolve(false);
+    }
+  });
+};
+
 // keluarga, pasangan, dan anak
 module.exports.getRwPasangan = async (fetcher, nip) => {
   try {

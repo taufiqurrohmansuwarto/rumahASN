@@ -18,6 +18,7 @@ import {
   IconChevronDown,
   IconChevronRight,
   IconBuildingHospital,
+  IconShieldLock,
 } from "@tabler/icons-react";
 import { Modal, Button, TreeSelect, Input, message } from "antd";
 import { useEffect, useState } from "react";
@@ -64,6 +65,9 @@ const ModalDetailParuhWaktu = ({
   const [unorId, setUnorId] = useState("");
   const [errors, setErrors] = useState({});
   const [unorExpanded, setUnorExpanded] = useState(false);
+  const [showOtpModal, setShowOtpModal] = useState(false);
+  const [otpCode, setOtpCode] = useState("");
+  const [otpError, setOtpError] = useState("");
   const { update, isUpdating } = useUpdateGajiPengadaanParuhWaktu();
 
   useEffect(() => {
@@ -76,6 +80,9 @@ const ModalDetailParuhWaktu = ({
       setIsBLUD(data?.is_blud || false);
       setErrors({});
       setUnorExpanded(false);
+      setShowOtpModal(false);
+      setOtpCode("");
+      setOtpError("");
     }
   }, [data, visible]);
 
@@ -91,23 +98,35 @@ const ModalDetailParuhWaktu = ({
     setErrors({ ...errors, upah: null });
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
+    // Validasi form dulu sebelum tampilkan OTP modal
+    const newErrors = {};
+
+    if (!unorId) {
+      newErrors.unorId = "Unit organisasi wajib dipilih";
+    }
+
+    // Validasi upah: jika bukan BLUD, upah wajib diisi dan lebih dari 0
+    if (!isBLUD) {
+      if (!upah || parseInt(upah) <= 0) {
+        newErrors.upah = "Upah wajib diisi (atau aktifkan BLUD jika upah 0)";
+      }
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    // Jika validasi berhasil, tampilkan modal OTP
+    setShowOtpModal(true);
+  };
+
+  const handleFinalSubmit = async () => {
     try {
-      const newErrors = {};
-
-      if (!unorId) {
-        newErrors.unorId = "Unit organisasi wajib dipilih";
-      }
-      
-      // Validasi upah: jika bukan BLUD, upah wajib diisi dan lebih dari 0
-      if (!isBLUD) {
-        if (!upah || parseInt(upah) <= 0) {
-          newErrors.upah = "Upah wajib diisi (atau aktifkan BLUD jika upah 0)";
-        }
-      }
-
-      if (Object.keys(newErrors).length > 0) {
-        setErrors(newErrors);
+      // Validasi OTP
+      if (!otpCode || otpCode.length < 6) {
+        setOtpError("Kode OTP harus 6 digit");
         return;
       }
 
@@ -117,18 +136,28 @@ const ModalDetailParuhWaktu = ({
           unor_pk: unorId,
           luar_perangkat_daerah: !!luarPerangkatDaerah,
           is_blud: !!isBLUD,
+          one_time_code: otpCode,
         },
         id: data?.id,
       };
 
       await update(payload);
+      setShowOtpModal(false);
       onClose();
     } catch (error) {
       console.log(error);
+      setOtpError(error?.response?.data?.message || "Gagal memverifikasi OTP");
     }
   };
 
+  const handleCancelOtp = () => {
+    setShowOtpModal(false);
+    setOtpCode("");
+    setOtpError("");
+  };
+
   return (
+    <>
     <Modal
       title={null}
       open={visible}
@@ -410,15 +439,109 @@ const ModalDetailParuhWaktu = ({
             <Button
               type="primary"
               onClick={handleSubmit}
-              loading={isUpdating}
               disabled={isUpdating}
             >
-              Simpan Data
+              Lanjut
             </Button>
           </Group>
         </Stack>
       )}
     </Modal>
+
+    {/* Modal OTP */}
+    <Modal
+      title={null}
+      open={showOtpModal}
+      onCancel={handleCancelOtp}
+      footer={null}
+      width={450}
+      centered
+      styles={{
+        body: { padding: "24px" },
+      }}
+    >
+      <Stack spacing="md">
+        {/* Header */}
+        <div style={{ textAlign: "center" }}>
+          <div
+            style={{
+              width: 48,
+              height: 48,
+              borderRadius: "50%",
+              background: "#FFF5F0",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              margin: "0 auto 12px",
+            }}
+          >
+            <IconShieldLock size={24} style={{ color: "#FF4500" }} />
+          </div>
+          <Text size="lg" fw={600} c="#FF4500">
+            Verifikasi OTP
+          </Text>
+          <Text size="xs" c="dimmed" style={{ marginTop: 8 }}>
+            Masukkan kode OTP 6 digit yang dikirim ke Authenticator Anda
+          </Text>
+        </div>
+
+        <Divider size="xs" />
+
+        {/* OTP Input */}
+        <div>
+          <Text size="xs" fw={500} mb={6}>
+            Kode OTP
+          </Text>
+          <Input.OTP
+            value={otpCode}
+            onChange={(value) => {
+              setOtpCode(value);
+              setOtpError("");
+            }}
+            length={6}
+            size="large"
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              gap: "8px",
+            }}
+            status={otpError ? "error" : ""}
+          />
+          {otpError && (
+            <Text size="xs" c="red" mt={6}>
+              {otpError}
+            </Text>
+          )}
+          {!otpError && (
+            <Text size="xs" c="dimmed" mt={6}>
+              Kode OTP valid selama 30 detik
+            </Text>
+          )}
+        </div>
+
+        <Divider size="xs" />
+
+        {/* Actions */}
+        <Group position="right" spacing="xs">
+          <Button onClick={handleCancelOtp} disabled={isUpdating}>
+            Batal
+          </Button>
+          <Button
+            type="primary"
+            onClick={handleFinalSubmit}
+            loading={isUpdating}
+            disabled={isUpdating || otpCode.length !== 6}
+            style={{
+              backgroundColor: "#FF4500",
+              borderColor: "#FF4500",
+            }}
+          >
+            Verifikasi & Simpan
+          </Button>
+        </Group>
+      </Stack>
+    </Modal>
+  </>
   );
 };
 
