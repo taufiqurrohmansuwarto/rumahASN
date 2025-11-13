@@ -592,3 +592,13 @@ module.exports.cekPencantumanGelarProfesi = async (fetcher, nip) => {
     }
   });
 };
+
+module.exports.uploadDokumenSiasn = async (fetcher, formData) => {
+  return fetcher
+    .post(`/upload-dok`, formData, {
+      headers: {
+        ...formData.getHeaders(),
+      },
+    })
+    .then((res) => res?.data);
+};

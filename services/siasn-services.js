@@ -582,6 +582,16 @@ export const uploadDokumenKenaikanPangkat = (data) => {
     .then((res) => res.data);
 };
 
+export const uploadDokumenSiasn = async (nip, data) => {
+  return api
+    .post(`/admin/${nip}/upload-dok`, data, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    })
+    .then((res) => res.data);
+};
+
 export const getRwPwkByNip = async (nip) => {
   return api.get(`/admin/${nip}/rw-pwk`).then((res) => res.data);
 };

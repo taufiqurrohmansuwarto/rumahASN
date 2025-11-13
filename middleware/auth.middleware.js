@@ -27,7 +27,7 @@ const updateUserRole = (currentUser) => {
   const isBKDOrg = organization_id?.startsWith("123");
   const isPTTPKOrg = organization_id?.startsWith("134");
   const isAdminHelpdesk = custom_id === "master-fasilitator|bkdhelpdesk";
-  const isPrakom = id === "master|56543";
+  const isPrakom = custom_id === "master|56543";
 
   const shouldBeAdmin =
     (isAdminHelpdesk &&
