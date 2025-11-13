@@ -20,6 +20,8 @@ export const getPengadaanParuhWaktu = async (req, res) => {
       unor_type = "simaster", // "simaster" or "pk"
       min_gaji,
       max_gaji,
+      is_blud,
+      luar_perangkat_daerah,
     } = req?.query;
 
     const currentOperator = await OperatorGajiPW.query()
@@ -70,6 +72,15 @@ export const getPengadaanParuhWaktu = async (req, res) => {
         if (max_gaji) {
           builder.where("gaji", "<=", Number(max_gaji));
         }
+        if (is_blud !== undefined) {
+          builder.where("is_blud", is_blud === "true" || is_blud === true);
+        }
+        if (luar_perangkat_daerah !== undefined) {
+          builder.where(
+            "luar_perangkat_daerah",
+            luar_perangkat_daerah === "true" || luar_perangkat_daerah === true
+          );
+        }
       })
       .withGraphFetched("[detail, status_usulan]")
       .orderBy("nama", "asc");
@@ -100,7 +111,7 @@ export const getPengadaanParuhWaktu = async (req, res) => {
 
         return {
           ...item,
-          gaji: hasAccess ? item.gaji : null, // Sensor gaji jika tidak ada akses
+          gaji: hasAccess ? item.gaji : "***", // Sensor gaji jika tidak ada akses
         };
       });
 
@@ -216,7 +227,7 @@ export const getPengadaanParuhWaktu = async (req, res) => {
 
       return {
         ...item,
-        gaji: hasAccess ? item.gaji : null, // Sensor gaji jika tidak ada akses
+        gaji: hasAccess ? item.gaji : "***", // Sensor gaji jika tidak ada akses
       };
     });
 

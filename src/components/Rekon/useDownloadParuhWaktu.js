@@ -3,7 +3,7 @@ import { message } from "antd";
 import dayjs from "dayjs";
 import { saveAs } from "file-saver";
 import { trim } from "lodash";
-import * as XLSX from "xlsx";
+import { utils, write } from "xlsx";
 import { getPengadaanParuhWaktu } from "@/services/siasn-services";
 
 const jenisJabatan = (data) => {
@@ -32,7 +32,8 @@ export const useDownloadParuhWaktu = (query) => {
           NIP: item?.nip || "-",
           "Nama Lengkap": item?.nama || "-",
           "Gelar Depan": item?.detail?.usulan_data?.data?.glr_depan || "-",
-          "Gelar Belakang": item?.detail?.usulan_data?.data?.glr_belakang || "-",
+          "Gelar Belakang":
+            item?.detail?.usulan_data?.data?.glr_belakang || "-",
           "Nama Lengkap (Gelar)": trim(
             `${item?.detail?.usulan_data?.data?.glr_depan || ""} ${
               item?.nama || ""
@@ -42,23 +43,31 @@ export const useDownloadParuhWaktu = (query) => {
             ? dayjs(item.detail.usulan_data.data.tgl_lahir).format("DD/MM/YYYY")
             : "-",
           "Tempat Lahir": item?.detail?.usulan_data?.data?.tempat_lahir || "-",
-          Upah: item?.gaji || item?.detail?.usulan_data?.data?.gaji_pokok || "0",
+          Upah:
+            item?.gaji || item?.detail?.usulan_data?.data?.gaji_pokok || "0",
           "Nomor Peserta":
-            item?.no_peserta || item?.detail?.usulan_data?.data?.no_peserta || "-",
+            item?.no_peserta ||
+            item?.detail?.usulan_data?.data?.no_peserta ||
+            "-",
           Periode: item?.detail?.periode || "-",
           "Jenis Formasi": item?.detail?.jenis_formasi_nama || "-",
-          Pendidikan: item?.detail?.usulan_data?.data?.pendidikan_pertama_nama || "-",
+          Pendidikan:
+            item?.detail?.usulan_data?.data?.pendidikan_pertama_nama || "-",
           "Tanggal Lulus": item?.detail?.usulan_data?.data?.tgl_tahun_lulus
             ? dayjs(item.detail.usulan_data.data.tgl_tahun_lulus).format(
                 "DD/MM/YYYY"
               )
             : "-",
           "TMT CPNS": item?.detail?.usulan_data?.data?.tmt_cpns || "-",
-          "Pangkat/Golongan": item?.detail?.usulan_data?.data?.golongan_nama || "-",
-          "Unit Kerja SIASN": item?.unor_siasn || "-",
+          "Pangkat/Golongan":
+            item?.detail?.usulan_data?.data?.golongan_nama || "-",
+          "Unit Kerja SIASN Text": item?.unor_siasn_text || "-",
           "Unit Kerja SIASN ID": item?.unor_id_siasn || "-",
-          "Unit Kerja SIMASTER": item?.unor_simaster || "-",
+          "Unit Kerja SIMASTER Text": item?.unor_simaster_text || "-",
           "Unit Kerja SIMASTER ID": item?.unor_id_simaster || "-",
+          "Unit Kerja Perjanjian Kerja": item?.unor_pk_text || "-",
+          "Luar Perangkat Daerah": item?.luar_perangkat_daerah ? "Ya" : "Tidak",
+          BLUD: item?.is_blud ? "Ya" : "Tidak",
           "Tgl. Usulan": item?.detail?.tgl_usulan
             ? dayjs(item.detail.tgl_usulan).format("DD/MM/YYYY")
             : "-",
@@ -72,25 +81,31 @@ export const useDownloadParuhWaktu = (query) => {
             ? dayjs(item.detail.tgl_pertek).format("DD/MM/YYYY")
             : "-",
           Jabatan: jenisJabatan(item?.detail?.usulan_data?.data),
-          "Status Usulan": item?.status_usulan?.nama || item?.detail?.status_usulan || "-",
-          "Kode Pendidikan": item?.detail?.usulan_data?.data?.tk_pendidikan_id || "-",
-          "Jenis Jabatan": item?.detail?.usulan_data?.data?.jenis_jabatan_nama || "-",
+          "Status Usulan":
+            item?.status_usulan?.nama || item?.detail?.status_usulan || "-",
+          "Kode Pendidikan":
+            item?.detail?.usulan_data?.data?.tk_pendidikan_id || "-",
+          "Jenis Jabatan":
+            item?.detail?.usulan_data?.data?.jenis_jabatan_nama || "-",
           "Alasan Tolak Tambahan": item?.detail?.alasan_tolak_tambahan || "-",
-          "Tgl. Kontrak Mulai": item?.detail?.usulan_data?.data?.tgl_kontrak_mulai || "-",
-          "Tgl. Kontrak Akhir": item?.detail?.usulan_data?.data?.tgl_kontrak_akhir || "-",
+          "Tgl. Kontrak Mulai":
+            item?.detail?.usulan_data?.data?.tgl_kontrak_mulai || "-",
+          "Tgl. Kontrak Akhir":
+            item?.detail?.usulan_data?.data?.tgl_kontrak_akhir || "-",
           "No. SK": item?.detail?.no_sk || "-",
           "Tgl. SK": item?.detail?.tgl_sk
             ? dayjs(item.detail.tgl_sk).format("DD/MM/YYYY")
             : "-",
           Instansi: item?.detail?.instansi_nama || "-",
-          "Satuan Kerja": item?.detail?.usulan_data?.data?.satuan_kerja_nama || "-",
+          "Satuan Kerja":
+            item?.detail?.usulan_data?.data?.satuan_kerja_nama || "-",
           Keterangan: item?.detail?.keterangan || "-",
           "Path Pertek": item?.detail?.path_ttd_pertek || "-",
           "Path SK": item?.detail?.path_ttd_sk || "-",
         })) || [];
 
-      const workbook = XLSX.utils.book_new();
-      const worksheet = XLSX.utils.json_to_sheet(excelData);
+      const workbook = utils.book_new();
+      const worksheet = utils.json_to_sheet(excelData);
 
       const columnWidths = [
         { wch: 5 }, // No
@@ -110,10 +125,13 @@ export const useDownloadParuhWaktu = (query) => {
         { wch: 15 }, // Tanggal Lulus
         { wch: 15 }, // TMT CPNS
         { wch: 20 }, // Pangkat/Golongan
-        { wch: 50 }, // Unit Kerja SIASN
+        { wch: 50 }, // Unit Kerja SIASN Text
         { wch: 40 }, // Unit Kerja SIASN ID
-        { wch: 50 }, // Unit Kerja SIMASTER
+        { wch: 50 }, // Unit Kerja SIMASTER Text
         { wch: 20 }, // Unit Kerja SIMASTER ID
+        { wch: 50 }, // Unit Kerja Perjanjian Kerja
+        { wch: 20 }, // Luar Perangkat Daerah
+        { wch: 10 }, // BLUD
         { wch: 15 }, // Tgl. Usulan
         { wch: 50 }, // Unor Pertek
         { wch: 25 }, // Nomer Pertek
@@ -135,12 +153,12 @@ export const useDownloadParuhWaktu = (query) => {
       ];
       worksheet["!cols"] = columnWidths;
 
-      XLSX.utils.book_append_sheet(workbook, worksheet, "Pegawai Paruh Waktu");
+      utils.book_append_sheet(workbook, worksheet, "Pegawai Paruh Waktu");
 
       const currentDate = dayjs().format("YYYY-MM-DD_HH-mm-ss");
       const filename = `Pegawai-Paruh-Waktu_${currentDate}.xlsx`;
 
-      const excelBuffer = XLSX.write(workbook, {
+      const excelBuffer = write(workbook, {
         bookType: "xlsx",
         type: "array",
       });
@@ -164,4 +182,3 @@ export const useDownloadParuhWaktu = (query) => {
 
   return { handleDownload, isMutating };
 };
-

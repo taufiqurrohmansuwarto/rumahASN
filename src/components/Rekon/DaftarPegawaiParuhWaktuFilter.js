@@ -1,5 +1,24 @@
-import { Text } from "@mantine/core";
-import { Button, Col, Input, Row, TreeSelect, InputNumber, Radio } from "antd";
+import { Text, Divider as MantineDivider } from "@mantine/core";
+import {
+  Button,
+  Col,
+  Input,
+  Row,
+  TreeSelect,
+  InputNumber,
+  Radio,
+  Select,
+} from "antd";
+import {
+  IconUser,
+  IconId,
+  IconFileText,
+  IconBuilding,
+  IconCash,
+  IconFilter,
+  IconBuildingHospital,
+  IconMapPin,
+} from "@tabler/icons-react";
 
 const { Search } = Input;
 
@@ -11,73 +30,135 @@ const DaftarPegawaiParuhWaktuFilter = ({
   min_gaji,
   max_gaji,
   unor_type,
+  is_blud,
+  luar_perangkat_daerah,
   unor,
   hasFilter,
   onSearch,
   onTreeSelectChange,
   onGajiChange,
   onUnorTypeChange,
+  onFilterChange,
   onClearFilter,
 }) => {
   return (
     <div
       style={{
-        padding: "20px 0 16px 0",
-        borderBottom: "1px solid #f0f0f0",
+        marginTop: "16px",
+        padding: "16px",
+        marginBottom: "16px",
+        background: "#fafafa",
+        border: "1px solid #e8e8e8",
+        borderRadius: "8px",
       }}
     >
-      <Row gutter={[12, 12]}>
-        <Col xs={24} md={8}>
-          <div style={{ marginBottom: 4 }}>
-            <Text fw={600} size="sm" c="dimmed">
-              Nama:
-            </Text>
-          </div>
+      {/* Header Filter */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "8px",
+          marginBottom: "12px",
+        }}
+      >
+        <IconFilter size={16} style={{ color: "#FF4500" }} />
+        <Text size="sm" fw={600} c="#FF4500">
+          Filter Pencarian
+        </Text>
+      </div>
+
+      <MantineDivider size="xs" style={{ marginBottom: "12px" }} />
+
+      <Row gutter={[8, 8]}>
+        <Col xs={24} sm={12} md={6}>
+          <Text
+            size="xs"
+            fw={500}
+            style={{ display: "block", marginBottom: 4 }}
+          >
+            Nama
+          </Text>
           <Search
+            size="small"
             placeholder="Cari nama"
             allowClear
             defaultValue={nama}
             onSearch={(value) => onSearch("nama", value)}
-            style={{ width: "100%" }}
+            prefix={<IconUser size={14} />}
           />
         </Col>
-        <Col xs={24} md={8}>
-          <div style={{ marginBottom: 4 }}>
-            <Text fw={600} size="sm" c="dimmed">
-              NIP:
-            </Text>
-          </div>
+        <Col xs={24} sm={12} md={6}>
+          <Text
+            size="xs"
+            fw={500}
+            style={{ display: "block", marginBottom: 4 }}
+          >
+            NIP
+          </Text>
           <Search
+            size="small"
             placeholder="Cari NIP"
             allowClear
             defaultValue={nip}
             onSearch={(value) => onSearch("nip", value)}
-            style={{ width: "100%" }}
+            prefix={<IconId size={14} />}
           />
         </Col>
-        <Col xs={24} md={8}>
-          <div style={{ marginBottom: 4 }}>
-            <Text fw={600} size="sm" c="dimmed">
-              No. Peserta:
-            </Text>
-          </div>
+        <Col xs={24} sm={12} md={6}>
+          <Text
+            size="xs"
+            fw={500}
+            style={{ display: "block", marginBottom: 4 }}
+          >
+            No. Peserta
+          </Text>
           <Search
+            size="small"
             placeholder="Cari no. peserta"
             allowClear
             defaultValue={no_peserta}
             onSearch={(value) => onSearch("no_peserta", value)}
-            style={{ width: "100%" }}
+            prefix={<IconFileText size={14} />}
           />
         </Col>
+        <Col xs={24} sm={12} md={6}>
+          <Text
+            size="xs"
+            fw={500}
+            style={{ display: "block", marginBottom: 4 }}
+          >
+            Tipe UNOR
+          </Text>
+          <Radio.Group
+            size="small"
+            value={unor_type || "simaster"}
+            onChange={(e) => onUnorTypeChange(e.target.value)}
+            style={{ width: "100%" }}
+          >
+            <Radio.Button value="simaster" style={{ width: "50%" }}>
+              <Text size="xs" span>
+                SIMASTER
+              </Text>
+            </Radio.Button>
+            <Radio.Button value="pk" style={{ width: "50%" }}>
+              <Text size="xs" span>
+                PK
+              </Text>
+            </Radio.Button>
+          </Radio.Group>
+        </Col>
       </Row>
-      <Row gutter={[12, 12]} style={{ marginTop: 12 }}>
-        <Col xs={24}>
-          <div style={{ marginBottom: 4 }}>
-            <Text fw={600} size="sm" c="dimmed">
-              Perangkat Daerah:
-            </Text>
-          </div>
+      <Row gutter={[8, 8]} style={{ marginTop: 8 }}>
+        <Col xs={24} md={9}>
+          <Text
+            size="xs"
+            fw={500}
+            style={{ display: "block", marginBottom: 4 }}
+          >
+            Perangkat Daerah
+          </Text>
           <TreeSelect
+            size="small"
             style={{ width: "100%" }}
             treeNodeFilterProp="label"
             showSearch
@@ -86,84 +167,124 @@ const DaftarPegawaiParuhWaktuFilter = ({
             allowClear
             value={opd_id}
             onChange={onTreeSelectChange}
+            suffixIcon={<IconBuilding size={14} />}
           />
         </Col>
-      </Row>
-      <Row gutter={[12, 12]} style={{ marginTop: 12 }}>
-        <Col xs={24} md={8}>
-          <div style={{ marginBottom: 4 }}>
-            <Text fw={600} size="sm" c="dimmed">
-              Gaji Min:
-            </Text>
-          </div>
+        <Col xs={12} md={5}>
+          <Text
+            size="xs"
+            fw={500}
+            style={{ display: "block", marginBottom: 4 }}
+          >
+            Upah Min
+          </Text>
           <InputNumber
+            size="small"
             style={{ width: "100%" }}
-            placeholder="Min: 100.000"
+            placeholder="100.000"
             min={100000}
             max={25000000}
             formatter={(value) =>
-              `Rp ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+              `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".")
             }
-            parser={(value) => value.replace(/Rp\s?|(\.*)/g, "")}
+            parser={(value) => value.replace(/\./g, "")}
             value={min_gaji ? Number(min_gaji) : undefined}
             onChange={(value) => onGajiChange("min_gaji", value)}
+            prefix={<IconCash size={14} />}
           />
         </Col>
-        <Col xs={24} md={8}>
-          <div style={{ marginBottom: 4 }}>
-            <Text fw={600} size="sm" c="dimmed">
-              Gaji Max:
-            </Text>
-          </div>
+        <Col xs={12} md={5}>
+          <Text
+            size="xs"
+            fw={500}
+            style={{ display: "block", marginBottom: 4 }}
+          >
+            Upah Max
+          </Text>
           <InputNumber
+            size="small"
             style={{ width: "100%" }}
-            placeholder="Max: 25.000.000"
+            placeholder="25.000.000"
             min={100000}
             max={25000000}
             formatter={(value) =>
-              `Rp ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+              `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".")
             }
-            parser={(value) => value.replace(/Rp\s?|(\.*)/g, "")}
+            parser={(value) => value.replace(/\./g, "")}
             value={max_gaji ? Number(max_gaji) : undefined}
             onChange={(value) => onGajiChange("max_gaji", value)}
+            prefix={<IconCash size={14} />}
           />
         </Col>
-        <Col xs={24} md={8}>
-          <div style={{ marginBottom: 4 }}>
-            <Text fw={600} size="sm" c="dimmed">
-              Tipe UNOR:
-            </Text>
-          </div>
-          <Radio.Group
-            value={unor_type || "simaster"}
-            onChange={(e) => onUnorTypeChange(e.target.value)}
-            style={{ width: "100%" }}
+        <Col xs={12} md={3}>
+          <Text
+            size="xs"
+            fw={500}
+            style={{ display: "block", marginBottom: 4 }}
           >
-            <Radio.Button value="simaster">SIMASTER</Radio.Button>
-            <Radio.Button value="pk">PK</Radio.Button>
-          </Radio.Group>
+            BLUD
+          </Text>
+          <Select
+            size="small"
+            style={{ width: "100%" }}
+            placeholder="Semua"
+            allowClear
+            value={is_blud}
+            onChange={(value) => onFilterChange("is_blud", value)}
+            suffixIcon={<IconBuildingHospital size={14} />}
+            options={[
+              { label: "Ya", value: "true" },
+              { label: "Tidak", value: "false" },
+            ]}
+          />
+        </Col>
+        <Col xs={12} md={3}>
+          <Text
+            size="xs"
+            fw={500}
+            style={{ display: "block", marginBottom: 4 }}
+          >
+            Luar PD
+          </Text>
+          <Select
+            size="small"
+            style={{ width: "100%" }}
+            placeholder="Semua"
+            allowClear
+            value={luar_perangkat_daerah}
+            onChange={(value) => onFilterChange("luar_perangkat_daerah", value)}
+            suffixIcon={<IconMapPin size={14} />}
+            options={[
+              { label: "Ya", value: "true" },
+              { label: "Tidak", value: "false" },
+            ]}
+          />
         </Col>
       </Row>
       {hasFilter && (
-        <Row style={{ marginTop: 12 }}>
-          <Col>
-            <Button
-              type="text"
-              onClick={onClearFilter}
-              style={{
-                color: "#FF4500",
-                fontWeight: 500,
-                padding: "4px 8px",
-              }}
-            >
-              Clear Filter
-            </Button>
-          </Col>
-        </Row>
+        <>
+          <MantineDivider size="xs" style={{ margin: "12px 0" }} />
+          <Row>
+            <Col>
+              <Button
+                type="link"
+                size="small"
+                onClick={onClearFilter}
+                style={{
+                  color: "#FF4500",
+                  padding: 0,
+                }}
+              >
+                <Text size="xs" fw={500}>
+                  Clear Filter
+                </Text>
+              </Button>
+            </Col>
+          </Row>
+        </>
       )}
     </div>
   );
 };
 
 export default DaftarPegawaiParuhWaktuFilter;
-

@@ -29,6 +29,8 @@ const DaftarPegawaiParuhWaktu = () => {
     min_gaji,
     max_gaji,
     unor_type = "simaster",
+    is_blud,
+    luar_perangkat_daerah,
   } = router.query;
 
   const [modalVisible, setModalVisible] = useState(false);
@@ -126,6 +128,17 @@ const DaftarPegawaiParuhWaktu = () => {
     });
   };
 
+  const handleFilterChange = (field, value) => {
+    router.push({
+      pathname: router.pathname,
+      query: {
+        ...router.query,
+        [field]: value || undefined,
+        page: 1,
+      },
+    });
+  };
+
   const clearFilter = () => {
     router.push({
       pathname: router.pathname,
@@ -134,7 +147,15 @@ const DaftarPegawaiParuhWaktu = () => {
   };
 
   const columns = createColumns(handleShowDetail, data?.has_action);
-  const hasFilter = nama || nip || no_peserta || opd_id || min_gaji || max_gaji;
+  const hasFilter =
+    nama ||
+    nip ||
+    no_peserta ||
+    opd_id ||
+    min_gaji ||
+    max_gaji ||
+    is_blud ||
+    luar_perangkat_daerah;
 
   return (
     <div>
@@ -175,12 +196,15 @@ const DaftarPegawaiParuhWaktu = () => {
             min_gaji={min_gaji}
             max_gaji={max_gaji}
             unor_type={unor_type}
+            is_blud={is_blud}
+            luar_perangkat_daerah={luar_perangkat_daerah}
             unor={unor}
             hasFilter={hasFilter}
             onSearch={handleSearch}
             onTreeSelectChange={handleTreeSelectChange}
             onGajiChange={handleGajiChange}
             onUnorTypeChange={handleUnorTypeChange}
+            onFilterChange={handleFilterChange}
             onClearFilter={clearFilter}
           />
 
@@ -267,7 +291,7 @@ const DaftarPegawaiParuhWaktu = () => {
               dataSource={data?.data}
               rowKey="id"
               loading={isLoading || isFetching}
-              scroll={{ x: 730 }}
+              scroll={{ x: 880 }}
               size="middle"
               style={{
                 borderRadius: "12px",

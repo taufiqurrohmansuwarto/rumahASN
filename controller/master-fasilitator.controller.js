@@ -651,7 +651,10 @@ const getOpdFull = async (req, res) => {
     });
 
     res.json(treeData);
-  } catch (error) {}
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
 };
 
 const getOpdAdmin = async (req, res) => {

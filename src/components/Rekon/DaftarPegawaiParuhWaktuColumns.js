@@ -1,6 +1,11 @@
 import { Badge, Text } from "@mantine/core";
-import { EyeOutlined, UserOutlined } from "@ant-design/icons";
-import { IconDownload, IconX } from "@tabler/icons-react";
+import { UserOutlined, SettingOutlined } from "@ant-design/icons";
+import {
+  IconDownload,
+  IconX,
+  IconBuildingHospital,
+  IconMapPin,
+} from "@tabler/icons-react";
 import { Avatar, Button, Space, Tooltip } from "antd";
 
 export const createColumns = (handleShowDetail, hasAction = false) => {
@@ -99,6 +104,16 @@ export const createColumns = (handleShowDetail, hasAction = false) => {
       render: (_, record) => {
         const upah =
           record?.gaji || record?.detail?.usulan_data?.data?.gaji_pokok || "0";
+
+        // Check if gaji is censored
+        if (record?.gaji === "***") {
+          return (
+            <Text size="10px" fw={600} c="gray" ff="monospace">
+              ***
+            </Text>
+          );
+        }
+
         return (
           <Text size="10px" fw={600} c="green" ff="monospace">
             Rp {parseInt(upah).toLocaleString("id-ID")}
@@ -205,6 +220,78 @@ export const createColumns = (handleShowDetail, hasAction = false) => {
         </Space>
       ),
     },
+    {
+      title: "BLUD",
+      key: "is_blud",
+      width: 70,
+      align: "center",
+      render: (_, record) => {
+        if (record?.is_blud) {
+          return (
+            <Tooltip title="BLUD">
+              <Badge
+                color="blue"
+                size="xs"
+                leftSection={
+                  <div style={{ display: "flex", alignItems: "center" }}>
+                    <IconBuildingHospital size={10} />
+                  </div>
+                }
+                styles={{
+                  section: { display: "flex", alignItems: "center" },
+                  label: { display: "flex", alignItems: "center" },
+                }}
+              >
+                <Text size="10px" span>
+                  BLUD
+                </Text>
+              </Badge>
+            </Tooltip>
+          );
+        }
+        return (
+          <Text size="10px" c="dimmed">
+            -
+          </Text>
+        );
+      },
+    },
+    {
+      title: "Luar PD",
+      key: "luar_perangkat_daerah",
+      width: 75,
+      align: "center",
+      render: (_, record) => {
+        if (record?.luar_perangkat_daerah) {
+          return (
+            <Tooltip title="Luar Perangkat Daerah">
+              <Badge
+                color="teal"
+                size="xs"
+                leftSection={
+                  <div style={{ display: "flex", alignItems: "center" }}>
+                    <IconMapPin size={10} />
+                  </div>
+                }
+                styles={{
+                  section: { display: "flex", alignItems: "center" },
+                  label: { display: "flex", alignItems: "center" },
+                }}
+              >
+                <Text size="10px" span>
+                  Luar
+                </Text>
+              </Badge>
+            </Tooltip>
+          );
+        }
+        return (
+          <Text size="10px" c="dimmed">
+            -
+          </Text>
+        );
+      },
+    },
   ];
 
   // Hanya tambahkan kolom Aksi jika hasAction true
@@ -220,7 +307,7 @@ export const createColumns = (handleShowDetail, hasAction = false) => {
           <Button
             type="link"
             size="small"
-            icon={<EyeOutlined />}
+            icon={<SettingOutlined />}
             onClick={() => handleShowDetail(record)}
             style={{
               color: "#FF4500",
@@ -229,7 +316,7 @@ export const createColumns = (handleShowDetail, hasAction = false) => {
             }}
           >
             <Text size="10px" span style={{ color: "#FF4500" }}>
-              Aksi
+              Kelola
             </Text>
           </Button>
         </Tooltip>
