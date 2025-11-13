@@ -507,7 +507,7 @@ export const updateGajiPengadaanParuhWaktu = async (req, res) => {
     const knex = P3KParuhWaktu.knex();
 
     const { id } = req?.query;
-    const { gaji, unor_pk, luar_perangkat_daerah } = req?.body;
+    const { gaji, unor_pk, luar_perangkat_daerah, is_blud } = req?.body;
     const { customId } = req?.user;
 
     const currentOperator = await OperatorGajiPW.query()
@@ -571,6 +571,7 @@ export const updateGajiPengadaanParuhWaktu = async (req, res) => {
       unor_pk,
       unor_pk_text: textPk?.rows[0]?.text_pk,
       luar_perangkat_daerah,
+      is_blud: is_blud || false,
       updated_at: new Date(),
       last_updated_by: customId,
     };
@@ -587,6 +588,7 @@ export const updateGajiPengadaanParuhWaktu = async (req, res) => {
       "unor_pk",
       "unor_pk_text",
       "luar_perangkat_daerah",
+      "is_blud",
       "updated_at",
       "last_updated_by",
     ];

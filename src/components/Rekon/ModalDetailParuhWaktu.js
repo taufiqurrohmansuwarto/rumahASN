@@ -17,6 +17,7 @@ import {
   IconSchool,
   IconChevronDown,
   IconChevronRight,
+  IconBuildingHospital,
 } from "@tabler/icons-react";
 import { Modal, Button, TreeSelect, Input, message } from "antd";
 import { useEffect, useState } from "react";
@@ -58,6 +59,7 @@ const ModalDetailParuhWaktu = ({
   isLoadingUnorFull,
 }) => {
   const [luarPerangkatDaerah, setLuarPerangkatDaerah] = useState(false);
+  const [isBLUD, setIsBLUD] = useState(false);
   const [upah, setUpah] = useState("0");
   const [unorId, setUnorId] = useState("");
   const [errors, setErrors] = useState({});
@@ -71,6 +73,7 @@ const ModalDetailParuhWaktu = ({
       setUpah(gajiValue.toString());
       setUnorId(data?.unor_pk || data?.unor_id_simaster || "");
       setLuarPerangkatDaerah(data?.luar_perangkat_daerah || false);
+      setIsBLUD(data?.is_blud || false);
       setErrors({});
       setUnorExpanded(false);
     }
@@ -95,8 +98,12 @@ const ModalDetailParuhWaktu = ({
       if (!unorId) {
         newErrors.unorId = "Unit organisasi wajib dipilih";
       }
-      if (!upah || parseInt(upah) <= 0) {
-        newErrors.upah = "Upah wajib diisi";
+      
+      // Validasi upah: jika bukan BLUD, upah wajib diisi dan lebih dari 0
+      if (!isBLUD) {
+        if (!upah || parseInt(upah) <= 0) {
+          newErrors.upah = "Upah wajib diisi (atau aktifkan BLUD jika upah 0)";
+        }
       }
 
       if (Object.keys(newErrors).length > 0) {
@@ -106,15 +113,15 @@ const ModalDetailParuhWaktu = ({
 
       const payload = {
         data: {
-          gaji: parseInt(upah),
+          gaji: parseInt(upah) || 0,
           unor_pk: unorId,
           luar_perangkat_daerah: !!luarPerangkatDaerah,
+          is_blud: !!isBLUD,
         },
         id: data?.id,
       };
 
       await update(payload);
-      // Di sini bisa tambahkan logic untuk save/update upah dan unor
       onClose();
     } catch (error) {
       console.log(error);
@@ -304,6 +311,32 @@ const ModalDetailParuhWaktu = ({
               </Group>
             </Paper>
 
+            {/* Toggle BLUD */}
+            <Paper p="sm" radius="md" withBorder>
+              <Group position="apart">
+                <Group spacing="xs">
+                  <IconBuildingHospital size={14} stroke={1.5} />
+                  <div>
+                    <Text size="xs" fw={500}>
+                      BLUD (Upah dapat Rp 0)
+                    </Text>
+                    <Text size="10px" c="dimmed" style={{ marginTop: 2 }}>
+                      Aktifkan jika pegawai BLUD dengan upah 0
+                    </Text>
+                  </div>
+                </Group>
+                <MantineSwitch
+                  size="sm"
+                  checked={isBLUD}
+                  onChange={(event) => {
+                    setIsBLUD(event.currentTarget.checked);
+                    setErrors({ ...errors, upah: null });
+                  }}
+                  color="#FF4500"
+                />
+              </Group>
+            </Paper>
+
             {/* Unit Organisasi */}
             <div>
               <Group spacing={4} mb={6}>
@@ -348,10 +381,19 @@ const ModalDetailParuhWaktu = ({
               <Input
                 value={upah ? `Rp ${formatRupiah(upah)}` : ""}
                 onChange={handleUpahChange}
-                placeholder="Masukkan upah pokok"
+                placeholder={
+                  isBLUD
+                    ? "BLUD aktif - Upah dapat Rp 0"
+                    : "Masukkan upah pokok"
+                }
                 status={errors.upah ? "error" : ""}
                 style={{ width: "100%" }}
               />
+              {isBLUD && !errors.upah && (
+                <Text size="xs" c="blue" mt={4}>
+                  ℹ️ Mode BLUD aktif - Upah dapat diisi Rp 0
+                </Text>
+              )}
               {errors.upah && (
                 <Text size="xs" c="red" mt={4}>
                   {errors.upah}
