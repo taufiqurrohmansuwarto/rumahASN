@@ -92,7 +92,7 @@ const checkOrganizationType = (organization_id) => {
 const checkSpecialUserTypes = (id, custom_id) => {
   return {
     isAdminHelpdesk: custom_id === "master-fasilitator|bkdhelpdesk",
-    isPrakom: id === "master|56543",
+    isPrakom: custom_id === "master|56543",
   };
 };
 
