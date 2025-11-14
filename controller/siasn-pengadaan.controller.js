@@ -277,7 +277,8 @@ const syncPengadaanProxy = async (req, res) => {
       res.json({ message: "Data tidak ditemukan" });
     }
   } catch (error) {
-    handleError(res, error);
+    console.log(error);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 };
 

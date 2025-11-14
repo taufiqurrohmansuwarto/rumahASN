@@ -316,7 +316,7 @@ export const getPengadaanParuhWaktu = async (req, res) => {
         });
     }
 
-    res.json({
+    const data = {
       success: true,
       page: pageNum,
       limit: lim,
@@ -324,7 +324,9 @@ export const getPengadaanParuhWaktu = async (req, res) => {
       total_gaji: totalGaji,
       has_action: hasAction || false,
       data: processedData,
-    });
+    };
+
+    res.json(data);
   } catch (error) {
     handleError(res, error);
   }
