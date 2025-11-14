@@ -2,7 +2,7 @@ import AvatarUser from "@/components/Users/AvatarUser";
 import UserText from "@/components/Users/UserText";
 import { Badge, Text } from "@mantine/core";
 import { Space, Tooltip } from "antd";
-import { IconWorld } from "@tabler/icons-react";
+import { IconWorld, IconBuildingHospital, IconMapPin } from "@tabler/icons-react";
 import dayjs from "dayjs";
 import "dayjs/locale/id";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -133,6 +133,100 @@ const AuditUpahParuhWaktuColumns = () => {
                   variant="light"
                   styles={{
                     root: { marginTop: "2px" },
+                  }}
+                >
+                  Berubah
+                </Badge>
+              </div>
+            )}
+          </div>
+        );
+      },
+    },
+    {
+      title: "BLUD",
+      key: "is_blud",
+      width: 100,
+      align: "center",
+      render: (_, record) => {
+        const oldBlud = record.old_data?.is_blud;
+        const newBlud = record.new_data?.is_blud;
+        const hasChange = oldBlud !== newBlud;
+
+        return (
+          <div style={{ lineHeight: "1.1" }}>
+            <div>
+              <Text size="xs" c="dimmed">
+                Dari: {oldBlud ? "Ya" : "Tidak"}
+              </Text>
+            </div>
+            <div style={{ marginTop: "4px" }}>
+              <Text size="xs" fw={600}>
+                Ke: {newBlud ? "Ya" : "Tidak"}
+              </Text>
+            </div>
+            {hasChange && (
+              <div style={{ marginTop: "4px" }}>
+                <Badge
+                  color="blue"
+                  size="sm"
+                  variant="light"
+                  leftSection={
+                    <div style={{ display: "flex", alignItems: "center" }}>
+                      <IconBuildingHospital size={10} />
+                    </div>
+                  }
+                  styles={{
+                    root: { marginTop: "2px" },
+                    section: { display: "flex", alignItems: "center" },
+                    label: { display: "flex", alignItems: "center" },
+                  }}
+                >
+                  Berubah
+                </Badge>
+              </div>
+            )}
+          </div>
+        );
+      },
+    },
+    {
+      title: "Luar PD",
+      key: "luar_perangkat_daerah",
+      width: 110,
+      align: "center",
+      render: (_, record) => {
+        const oldLuarPD = record.old_data?.luar_perangkat_daerah;
+        const newLuarPD = record.new_data?.luar_perangkat_daerah;
+        const hasChange = oldLuarPD !== newLuarPD;
+
+        return (
+          <div style={{ lineHeight: "1.1" }}>
+            <div>
+              <Text size="xs" c="dimmed">
+                Dari: {oldLuarPD ? "Ya" : "Tidak"}
+              </Text>
+            </div>
+            <div style={{ marginTop: "4px" }}>
+              <Text size="xs" fw={600}>
+                Ke: {newLuarPD ? "Ya" : "Tidak"}
+              </Text>
+            </div>
+            {hasChange && (
+              <div style={{ marginTop: "4px" }}>
+                <Badge
+                  color="teal"
+                  size="sm"
+                  variant="light"
+                  leftSection={
+                    <div style={{ display: "flex", alignItems: "center" }}>
+                      <IconMapPin size={10} />
+                    </div>
+                  }
+                  styles={{
+                    root: { marginTop: "2px" },
+                    section: { display: "flex", alignItems: "center" },
+                    label: { display: "flex", alignItems: "center" },
                   }}
                 >
                   Berubah

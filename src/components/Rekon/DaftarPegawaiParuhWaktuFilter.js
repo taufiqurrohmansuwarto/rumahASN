@@ -18,6 +18,7 @@ import {
   IconFilter,
   IconBuildingHospital,
   IconMapPin,
+  IconCircleCheck,
 } from "@tabler/icons-react";
 
 const { Search } = Input;
@@ -32,6 +33,7 @@ const DaftarPegawaiParuhWaktuFilter = ({
   unor_type,
   is_blud,
   luar_perangkat_daerah,
+  unor_match,
   unor,
   hasFilter,
   onSearch,
@@ -257,6 +259,30 @@ const DaftarPegawaiParuhWaktuFilter = ({
             options={[
               { label: "Ya", value: "true" },
               { label: "Tidak", value: "false" },
+            ]}
+          />
+        </Col>
+      </Row>
+      <Row gutter={[8, 8]} style={{ marginTop: 8 }}>
+        <Col xs={24} md={6}>
+          <Text
+            size="xs"
+            fw={500}
+            style={{ display: "block", marginBottom: 4 }}
+          >
+            Status UNOR
+          </Text>
+          <Select
+            size="small"
+            style={{ width: "100%" }}
+            placeholder="Semua"
+            allowClear
+            value={unor_match}
+            onChange={(value) => onFilterChange("unor_match", value)}
+            suffixIcon={<IconCircleCheck size={14} />}
+            options={[
+              { label: "UNOR PK = SIMASTER (Sama)", value: "same" },
+              { label: "UNOR PK ≠ SIMASTER (Beda)", value: "different" },
             ]}
           />
         </Col>

@@ -31,6 +31,7 @@ const DaftarPegawaiParuhWaktu = () => {
     unor_type = "simaster",
     is_blud,
     luar_perangkat_daerah,
+    unor_match,
   } = router.query;
 
   const [modalVisible, setModalVisible] = useState(false);
@@ -155,7 +156,8 @@ const DaftarPegawaiParuhWaktu = () => {
     min_gaji ||
     max_gaji ||
     is_blud ||
-    luar_perangkat_daerah;
+    luar_perangkat_daerah ||
+    unor_match;
 
   return (
     <div>
@@ -198,6 +200,7 @@ const DaftarPegawaiParuhWaktu = () => {
             unor_type={unor_type}
             is_blud={is_blud}
             luar_perangkat_daerah={luar_perangkat_daerah}
+            unor_match={unor_match}
             unor={unor}
             hasFilter={hasFilter}
             onSearch={handleSearch}
@@ -291,7 +294,7 @@ const DaftarPegawaiParuhWaktu = () => {
               dataSource={data?.data}
               rowKey="id"
               loading={isLoading || isFetching}
-              scroll={{ x: 880 }}
+              scroll={{ x: 970 }}
               size="middle"
               style={{
                 borderRadius: "12px",

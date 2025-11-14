@@ -3,7 +3,7 @@ import { useMutation } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { saveAs } from "file-saver";
 import { message } from "antd";
-import * as XLSX from "xlsx";
+import { utils, write } from "xlsx";
 
 const useDownloadAuditUpahParuhWaktu = () => {
   const { mutate: downloadLog, isLoading: isMutating } = useMutation({
@@ -29,6 +29,14 @@ const useDownloadAuditUpahParuhWaktu = () => {
           const newUnor = item.new_data?.unor_pk_text || "-";
           const unorChanged = oldUnor !== newUnor;
 
+          const oldBlud = item.old_data?.is_blud;
+          const newBlud = item.new_data?.is_blud;
+          const bludChanged = oldBlud !== newBlud;
+
+          const oldLuarPD = item.old_data?.luar_perangkat_daerah;
+          const newLuarPD = item.new_data?.luar_perangkat_daerah;
+          const luarPDChanged = oldLuarPD !== newLuarPD;
+
           return {
             No: index + 1,
             "ID Log": item.id,
@@ -42,10 +50,13 @@ const useDownloadAuditUpahParuhWaktu = () => {
             "Unit Kerja PK Lama": oldUnor,
             "Unit Kerja PK Baru": newUnor,
             "Status Perubahan Unit Kerja PK": unorChanged ? "Berubah" : "Tidak Berubah",
+            "BLUD Lama": oldBlud ? "Ya" : "Tidak",
+            "BLUD Baru": newBlud ? "Ya" : "Tidak",
+            "Status Perubahan BLUD": bludChanged ? "Berubah" : "Tidak Berubah",
+            "Luar PD Lama": oldLuarPD ? "Ya" : "Tidak",
+            "Luar PD Baru": newLuarPD ? "Ya" : "Tidak",
+            "Status Perubahan Luar PD": luarPDChanged ? "Berubah" : "Tidak Berubah",
             "IP Address": item.ip_address || "N/A",
-            "Luar Perangkat Daerah": item.new_data?.luar_perangkat_daerah
-              ? "Ya"
-              : "Tidak",
             Aksi: item.action === "update" ? "Update" : item.action,
             "Waktu Perubahan": dayjs(item.change_at).format(
               "DD MMMM YYYY, HH:mm:ss"
@@ -56,10 +67,10 @@ const useDownloadAuditUpahParuhWaktu = () => {
         }) || [];
 
       // Buat workbook baru
-      const workbook = XLSX.utils.book_new();
+      const workbook = utils.book_new();
 
       // Buat worksheet dari data
-      const worksheet = XLSX.utils.json_to_sheet(excelData);
+      const worksheet = utils.json_to_sheet(excelData);
 
       // Set column widths
       const columnWidths = [
@@ -75,8 +86,13 @@ const useDownloadAuditUpahParuhWaktu = () => {
         { wch: 50 }, // Unit Kerja PK Lama
         { wch: 50 }, // Unit Kerja PK Baru
         { wch: 25 }, // Status Perubahan Unit Kerja PK
+        { wch: 12 }, // BLUD Lama
+        { wch: 12 }, // BLUD Baru
+        { wch: 20 }, // Status Perubahan BLUD
+        { wch: 12 }, // Luar PD Lama
+        { wch: 12 }, // Luar PD Baru
+        { wch: 22 }, // Status Perubahan Luar PD
         { wch: 18 }, // IP Address
-        { wch: 20 }, // Luar Perangkat Daerah
         { wch: 10 }, // Aksi
         { wch: 30 }, // Waktu Perubahan
         { wch: 12 }, // Tanggal
@@ -85,9 +101,9 @@ const useDownloadAuditUpahParuhWaktu = () => {
       worksheet["!cols"] = columnWidths;
 
       // Set header styling
-      const headerRange = XLSX.utils.decode_range(worksheet["!ref"]);
+      const headerRange = utils.decode_range(worksheet["!ref"]);
       for (let col = headerRange.s.c; col <= headerRange.e.c; col++) {
-        const cellAddress = XLSX.utils.encode_cell({ r: 0, c: col });
+        const cellAddress = utils.encode_cell({ r: 0, c: col });
         if (!worksheet[cellAddress]) continue;
         worksheet[cellAddress].s = {
           font: {
@@ -115,10 +131,10 @@ const useDownloadAuditUpahParuhWaktu = () => {
       }
 
       // Set alternating row colors for better readability
-      const dataRange = XLSX.utils.decode_range(worksheet["!ref"]);
+      const dataRange = utils.decode_range(worksheet["!ref"]);
       for (let row = 1; row <= dataRange.e.r; row++) {
         for (let col = dataRange.s.c; col <= dataRange.e.c; col++) {
-          const cellAddress = XLSX.utils.encode_cell({ r: row, c: col });
+          const cellAddress = utils.encode_cell({ r: row, c: col });
           if (!worksheet[cellAddress]) continue;
 
           // Alternating row colors
@@ -136,7 +152,7 @@ const useDownloadAuditUpahParuhWaktu = () => {
             alignment: {
               horizontal: col === 0 ? "center" : "left",
               vertical: "center",
-              wrapText: col === 9 || col === 10, // Wrap text for Unit Kerja PK columns
+              wrapText: col === 9 || col === 10, // Wrap text for Unit Kerja PK Lama & Baru columns
             },
             border: {
               top: { style: "thin", color: { rgb: "E8E8E8" } },
@@ -165,7 +181,7 @@ const useDownloadAuditUpahParuhWaktu = () => {
       worksheet["!autofilter"] = { ref: worksheet["!ref"] };
 
       // Add worksheet to workbook
-      XLSX.utils.book_append_sheet(
+      utils.book_append_sheet(
         workbook,
         worksheet,
         "Audit Upah Paruh Waktu"
@@ -176,7 +192,7 @@ const useDownloadAuditUpahParuhWaktu = () => {
       const filename = `Audit-Upah-Paruh-Waktu_${currentDate}.xlsx`;
 
       // Write and download
-      const excelBuffer = XLSX.write(workbook, {
+      const excelBuffer = write(workbook, {
         bookType: "xlsx",
         type: "array",
       });

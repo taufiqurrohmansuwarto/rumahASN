@@ -5,6 +5,8 @@ import {
   IconX,
   IconBuildingHospital,
   IconMapPin,
+  IconCircleCheck,
+  IconAlertCircle,
 } from "@tabler/icons-react";
 import { Avatar, Button, Space, Tooltip } from "antd";
 
@@ -289,6 +291,67 @@ export const createColumns = (handleShowDetail, hasAction = false) => {
           <Text size="10px" c="dimmed">
             -
           </Text>
+        );
+      },
+    },
+    {
+      title: "Status UNOR",
+      key: "unor_is_match",
+      width: 90,
+      align: "center",
+      render: (_, record) => {
+        if (record?.unor_is_match === null) {
+          return (
+            <Text size="10px" c="dimmed">
+              -
+            </Text>
+          );
+        }
+
+        if (record?.unor_is_match === true) {
+          return (
+            <Tooltip title="UNOR PK = SIMASTER (Sama)">
+              <Badge
+                color="green"
+                size="xs"
+                leftSection={
+                  <div style={{ display: "flex", alignItems: "center" }}>
+                    <IconCircleCheck size={10} />
+                  </div>
+                }
+                styles={{
+                  section: { display: "flex", alignItems: "center" },
+                  label: { display: "flex", alignItems: "center" },
+                }}
+              >
+                <Text size="10px" span>
+                  Sama
+                </Text>
+              </Badge>
+            </Tooltip>
+          );
+        }
+
+        return (
+          <Tooltip title="UNOR PK ≠ SIMASTER (Berbeda)">
+            <Badge
+              color="orange"
+              size="xs"
+              leftSection={
+                <div style={{ display: "flex", alignItems: "center" }}>
+                  <IconAlertCircle size={10} />
+                </div>
+              }
+              styles={{
+                section: { display: "flex", alignItems: "center" },
+                label: { display: "flex", alignItems: "center" },
+              }}
+            >
+              <Text size="10px" span>
+                Beda
+              </Text>
+            </Badge>
+          </Tooltip>
         );
       },
     },

@@ -22,6 +22,7 @@ export const getPengadaanParuhWaktu = async (req, res) => {
       max_gaji,
       is_blud,
       luar_perangkat_daerah,
+      unor_match, // "same" or "different"
     } = req?.query;
 
     const currentOperator = await OperatorGajiPW.query()
@@ -81,6 +82,11 @@ export const getPengadaanParuhWaktu = async (req, res) => {
             luar_perangkat_daerah === "true" || luar_perangkat_daerah === true
           );
         }
+        if (unor_match === "same") {
+          builder.whereRaw("unor_pk = unor_id_simaster");
+        } else if (unor_match === "different") {
+          builder.whereRaw("unor_pk != unor_id_simaster OR unor_pk IS NULL");
+        }
       })
       .withGraphFetched("[detail, status_usulan]")
       .orderBy("nama", "asc");
@@ -91,10 +97,17 @@ export const getPengadaanParuhWaktu = async (req, res) => {
 
       // Process data: check if operator has access and sensor gaji
       const processedData = result.map((item) => {
+        // Check if unor_pk matches unor_id_simaster
+        const unorIsMatch =
+          item.unor_pk && item.unor_id_simaster
+            ? item.unor_pk === item.unor_id_simaster
+            : null;
+
         // Admin can see all gaji but has_action is false
         if (current_role === "admin") {
           return {
             ...item,
+            unor_is_match: unorIsMatch,
             // Gaji tetap ditampilkan untuk admin
           };
         }
@@ -111,6 +124,7 @@ export const getPengadaanParuhWaktu = async (req, res) => {
 
         return {
           ...item,
+          unor_is_match: unorIsMatch,
           gaji: hasAccess ? item.gaji : "***", // Sensor gaji jika tidak ada akses
         };
       });
@@ -207,10 +221,17 @@ export const getPengadaanParuhWaktu = async (req, res) => {
 
     // Process data: check if operator has access and sensor gaji
     const processedData = result.results.map((item) => {
+      // Check if unor_pk matches unor_id_simaster
+      const unorIsMatch =
+        item.unor_pk && item.unor_id_simaster
+          ? item.unor_pk === item.unor_id_simaster
+          : null;
+
       // Admin can see all gaji but has_action is false
       if (current_role === "admin") {
         return {
           ...item,
+          unor_is_match: unorIsMatch,
           // Gaji tetap ditampilkan untuk admin
         };
       }
@@ -227,6 +248,7 @@ export const getPengadaanParuhWaktu = async (req, res) => {
 
       return {
         ...item,
+        unor_is_match: unorIsMatch,
         gaji: hasAccess ? item.gaji : "***", // Sensor gaji jika tidak ada akses
       };
     });

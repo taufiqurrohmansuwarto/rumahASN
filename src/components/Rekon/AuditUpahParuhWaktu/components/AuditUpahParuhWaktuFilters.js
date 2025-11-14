@@ -1,6 +1,8 @@
 import { Text } from "@mantine/core";
 import { Button, Col, Input, Row, Grid } from "antd";
 import { ReloadOutlined, DownloadOutlined } from "@ant-design/icons";
+import { useCallback, useRef } from "react";
+import { debounce } from "lodash";
 
 const { useBreakpoint } = Grid;
 const { Search } = Input;
@@ -19,6 +21,21 @@ const AuditUpahParuhWaktuFilters = ({
 }) => {
   const screens = useBreakpoint();
   const isXs = !screens?.sm;
+
+  // Create debounced search function
+  const debouncedSearchRef = useRef(
+    debounce((field, value) => {
+      onSearch(field, value);
+    }, 500)
+  ).current;
+
+  // Handle search input change with debounce
+  const handleSearchChange = useCallback(
+    (field, value) => {
+      debouncedSearchRef(field, value);
+    },
+    [debouncedSearchRef]
+  );
 
   return (
     <div
@@ -43,8 +60,8 @@ const AuditUpahParuhWaktuFilters = ({
             <Search
               placeholder="Cari nama operator"
               allowClear
-              value={nama_operator}
-              onChange={(e) => onSearch("nama_operator", e.target.value)}
+              defaultValue={nama_operator}
+              onChange={(e) => handleSearchChange("nama_operator", e.target.value)}
               onSearch={(value) => onSearch("nama_operator", value)}
               style={{ width: isXs ? "100%" : 200 }}
               size="small"
@@ -66,8 +83,8 @@ const AuditUpahParuhWaktuFilters = ({
             <Search
               placeholder="Cari nama pegawai"
               allowClear
-              value={nama_pegawai}
-              onChange={(e) => onSearch("nama_pegawai", e.target.value)}
+              defaultValue={nama_pegawai}
+              onChange={(e) => handleSearchChange("nama_pegawai", e.target.value)}
               onSearch={(value) => onSearch("nama_pegawai", value)}
               style={{ width: isXs ? "100%" : 200 }}
               size="small"
