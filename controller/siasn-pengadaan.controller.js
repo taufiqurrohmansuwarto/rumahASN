@@ -39,7 +39,7 @@ const { createLogSIASN } = require("@/utils/logs");
 const { insightAIForParuhWaktu } = require("@/utils/helper/ai-insight.helper");
 const AIInsightParuhWaktu = require("@/models/ai-insight-paruh-waktu.model");
 const { nanoid } = require("nanoid");
-const { log } = require("@/utils/logger");
+const { log, logger } = require("@/utils/logger");
 
 const syncPengadaan = async (req, res) => {
   const knex = SiasnPengadaan.knex();
@@ -262,8 +262,82 @@ const syncPengadaanProxy = async (req, res) => {
     const { meta, page, data } = currentData;
 
     if (meta?.total > 0) {
+      // Transform data to match database columns
+      const transformedData = data.map((item) => ({
+        id: item?.id,
+        orang_id: item?.orang_id || null,
+        usulan_data: item?.usulan_data || null,
+        status_usulan: item?.status_usulan || null,
+        dokumen_usulan: item?.dokumen_usulan || null,
+        tgl_usulan: item?.tgl_usulan || null,
+        tgl_pengiriman_kelayanan: item?.tgl_pengiriman_kelayanan || null,
+        tgl_update_layanan: item?.tgl_update_layanan || null,
+        instansi_id: item?.instansi_id || null,
+        keterangan: item?.keterangan || null,
+        status_aktif: item?.status_aktif || null,
+        no_surat_usulan: item?.no_surat_usulan || null,
+        status_paraf_pertek: item?.status_paraf_pertek || null,
+        provinsi_nama: item?.provinsi_nama || null,
+        nip: item?.nip || null,
+        nama: item?.nama || null,
+        instansi_nama: item?.instansi_nama || null,
+        jenis_layanan_nama: item?.jenis_layanan_nama || null,
+        no_surat_keluar: item?.no_surat_keluar || null,
+        tgl_surat_keluar: item?.tgl_surat_keluar || null,
+        path_pertek: item?.path_pertek || null,
+        path_ttd_pertek: item?.path_ttd_pertek || null,
+        path_surat_usulan: item?.path_surat_usulan || null,
+        pejabat_paraf_id: item?.pejabat_paraf_id || null,
+        pejabat_ttd_id: item?.pejabat_ttd_id || null,
+        uraian_perbaikan: item?.uraian_perbaikan || null,
+        uraian_pembatalan: item?.uraian_pembatalan || null,
+        nama_tabel_riwayat: item?.nama_tabel_riwayat || null,
+        id_riwayat_update: item?.id_riwayat_update || null,
+        no_sk: item?.no_sk || null,
+        path_paraf_sk: item?.path_paraf_sk || null,
+        pejabat_paraf_sk: item?.pejabat_paraf_sk || null,
+        status_paraf_sk: item?.status_paraf_sk || null,
+        tgl_paraf_sk: item?.tgl_paraf_sk || null,
+        path_ttd_sk: item?.path_ttd_sk || null,
+        pejabat_ttd_sk: item?.pejabat_ttd_sk || null,
+        tgl_ttd_sk: item?.tgl_ttd_sk || null,
+        status_ttd_sk: item?.status_ttd_sk || null,
+        no_pertek: item?.no_pertek || null,
+        referensi_instansi: item?.referensi_instansi || null,
+        tgl_sk: item?.tgl_sk || null,
+        tgl_pertek: item?.tgl_pertek || null,
+        alasan_tolak_id: item?.alasan_tolak_id || null,
+        alasan_tolak_tambahan: item?.alasan_tolak_tambahan || null,
+        generated_nomor: item?.generated_nomor || null,
+        periode: item?.periode || null,
+        jenis_formasi_id: item?.jenis_formasi_id || null,
+        jenis_formasi_nama: item?.jenis_formasi_nama || null,
+        jenis_pegawai_id: item?.jenis_pegawai_id || null,
+        status_kerja_induk_id: item?.status_kerja_induk_id || null,
+        satuan_kerja_induk_nama: item?.satuan_kerja_induk_nama || null,
+        instansi_induk_id: item?.instansi_induk_id || null,
+        instansi_induk_nama: item?.instansi_induk_nama || null,
+        tgl_kontrak_mulai: item?.tgl_kontrak_mulai || null,
+        tgl_kontrak_akhir: item?.tgl_kontrak_akhir || null,
+        no_urut: item?.no_urut || null,
+        nip_approval: item?.nip_approval || null,
+        path_dokumen_pembatalan: item?.path_dokumen_pembatalan || null,
+        tahun_formasi: item?.tahun_formasi || null,
+        flag_otomatisasi: item?.flag_otomatisasi || null,
+        dokumen_baru: item?.dokumen_baru || null,
+        dokumen_lama: item?.dokumen_lama || null,
+        flag_perbaikan_dokumen: item?.flag_perbaikan_dokumen || null,
+        satuan_kerja_induk_id: item?.satuan_kerja_induk_id || null,
+        status_ttd_paraf_pertek: item?.status_ttd_paraf_pertek || null,
+        tgl_surat_usulan: item?.tgl_surat_usulan || null,
+        pendidikan_ijazah_nama:
+          item?.pendidikan_ijazah_nama ||
+          item?.usulan_data?.data?.pendidikan_ijazah_nama ||
+          null,
+      }));
+
       await knex.delete().from("siasn_pengadaan_proxy").where("periode", tahun);
-      await knex.batchInsert("siasn_pengadaan_proxy", data);
+      await knex.batchInsert("siasn_pengadaan_proxy", transformedData, 100);
       await setSinkronisasi({
         aplikasi: "siasn",
         layanan: "pengadaan",
@@ -272,13 +346,15 @@ const syncPengadaanProxy = async (req, res) => {
       });
       res.json({
         message: `Berhasil mengambil data dari proxy tahun ${tahun}`,
+        total: transformedData.length,
       });
     } else {
       res.json({ message: "Data tidak ditemukan" });
     }
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "Internal Server Error" });
+    res
+      .status(500)
+      .json({ message: "Internal Server Error", error: error.message });
   }
 };
 
