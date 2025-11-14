@@ -55,47 +55,15 @@ export const createColumns = (handleShowDetail, hasAction = false) => {
     {
       title: "Unit Organisasi",
       key: "unor",
-      width: 180,
+      width: 120,
       render: (_, record) => (
-        <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
-          <div>
-            <Text
-              size="10px"
-              c="purple"
-              fw={600}
-              style={{ display: "block", marginBottom: "3px" }}
-            >
-              SIMASTER
-            </Text>
-            <Text size="10px" ff="monospace" c="dimmed">
-              {record?.unor_simaster || "-"}
-            </Text>
-          </div>
-          <div>
-            <Text
-              size="10px"
-              c="cyan"
-              fw={600}
-              style={{ display: "block", marginBottom: "3px" }}
-            >
-              SIASN
-            </Text>
-            <Tooltip title={record?.unor_siasn || "-"}>
-              <Text
-                size="10px"
-                ff="monospace"
-                c="dimmed"
-                style={{
-                  display: "block",
-                  wordBreak: "break-all",
-                  lineHeight: "1.4",
-                  cursor: "help",
-                }}
-              >
-                {record?.unor_siasn || "-"}
-              </Text>
-            </Tooltip>
-          </div>
+        <div>
+          <Text size="10px" c="dimmed" style={{ fontStyle: "italic" }}>
+            Klik baris untuk detail
+          </Text>
+          <Text size="10px" fw={500} c="dark" mt={2} lineClamp={2}>
+            {record?.unor_simaster || record?.unor_siasn || "-"}
+          </Text>
         </div>
       ),
     },

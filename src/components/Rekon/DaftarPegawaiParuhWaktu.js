@@ -4,10 +4,10 @@ import {
 } from "@/services/master.services";
 import { getPengadaanParuhWaktu } from "@/services/siasn-services";
 import { DownloadOutlined, ReloadOutlined } from "@ant-design/icons";
-import { Text } from "@mantine/core";
-import { IconUsers } from "@tabler/icons-react";
+import { Text, Stack, Paper, Group, Divider } from "@mantine/core";
+import { IconUsers, IconBuilding, IconMapPin, IconFileText } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
-import { Button, Card, Space, Table, Typography } from "antd";
+import { Button, Card, Space, Table, Typography, Descriptions } from "antd";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { createColumns } from "./DaftarPegawaiParuhWaktuColumns";
@@ -159,6 +159,73 @@ const DaftarPegawaiParuhWaktu = () => {
     luar_perangkat_daerah ||
     unor_match;
 
+  // Expandable row untuk detail Unit Organisasi
+  const expandedRowRender = (record) => {
+    return (
+      <Paper p="md" radius="md" withBorder style={{ background: "#f8f9fa", marginLeft: "48px" }}>
+        <Text size="xs" fw={600} c="dimmed" mb="sm" style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+          <IconBuilding size={14} />
+          Detail Unit Organisasi
+        </Text>
+        <Stack spacing="sm">
+          {/* UNOR SIMASTER */}
+          <div>
+            <Group spacing={6} mb={4}>
+              <IconBuilding size={12} style={{ color: "#FF4500" }} />
+              <Text size="xs" fw={600} c="#FF4500">
+                SIMASTER
+              </Text>
+            </Group>
+            <Paper p="xs" radius="md" withBorder style={{ background: "white" }}>
+              <Text size="10px" ff="monospace" c="dimmed">
+                ID: {record?.unor_id_simaster || "-"}
+              </Text>
+              <Text size="10px" c="dark" mt={2}>
+                {record?.unor_simaster || "-"}
+              </Text>
+            </Paper>
+          </div>
+
+          {/* UNOR SIASN */}
+          <div>
+            <Group spacing={6} mb={4}>
+              <IconBuilding size={12} style={{ color: "#00BCD4" }} />
+              <Text size="xs" fw={600} c="#00BCD4">
+                SIASN
+              </Text>
+            </Group>
+            <Paper p="xs" radius="md" withBorder style={{ background: "white" }}>
+              <Text size="10px" ff="monospace" c="dimmed">
+                ID: {record?.unor_id_siasn || "-"}
+              </Text>
+              <Text size="10px" c="dark" mt={2}>
+                {record?.unor_siasn || "-"}
+              </Text>
+            </Paper>
+          </div>
+
+          {/* UNOR Perjanjian Kerja */}
+          <div>
+            <Group spacing={6} mb={4}>
+              <IconFileText size={12} style={{ color: "#4CAF50" }} />
+              <Text size="xs" fw={600} c="#4CAF50">
+                Perjanjian Kerja
+              </Text>
+            </Group>
+            <Paper p="xs" radius="md" withBorder style={{ background: "white" }}>
+              <Text size="10px" ff="monospace" c="dimmed">
+                ID: {record?.unor_pk || "-"}
+              </Text>
+              <Text size="10px" c="dark" mt={2}>
+                {record?.unor_pk_text || "-"}
+              </Text>
+            </Paper>
+          </div>
+        </Stack>
+      </Paper>
+    );
+  };
+
   return (
     <div>
       <div style={{ maxWidth: "100%" }}>
@@ -294,11 +361,15 @@ const DaftarPegawaiParuhWaktu = () => {
               dataSource={data?.data}
               rowKey="id"
               loading={isLoading || isFetching}
-              scroll={{ x: 970 }}
+              scroll={{ x: 910 }}
               size="middle"
               style={{
                 borderRadius: "12px",
                 overflow: "hidden",
+              }}
+              expandable={{
+                expandedRowRender,
+                rowExpandable: (record) => record?.unor_simaster || record?.unor_siasn || record?.unor_pk_text,
               }}
               pagination={{
                 position: ["bottomRight"],
