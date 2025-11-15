@@ -1,3 +1,0 @@
-1. create snapshot dari content
-   author_id, views_count, likes_count, comments_count, verified_by, summary, bookmarks_count, estimated_reading_time, reading_complexity
-2. create index untuk revision baik itu user maupun admin

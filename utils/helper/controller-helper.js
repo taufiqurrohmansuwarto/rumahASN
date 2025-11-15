@@ -15,12 +15,33 @@ module.exports.checkTotalPegawai = async (knex, opdId) => {
 };
 
 module.exports.handleError = (res, error) => {
-  const errorCode = error?.response?.data?.code || error?.code || 500;
-  log.error(error);
+  // Determine error code with priority: response code > error code > default 500
+  const statusCode = error?.response?.status || error?.statusCode || 500;
 
-  const message =
-    error?.response?.data?.message || error?.message || "Internal server error";
-  res.status(errorCode).json({
+  // Log the full error for debugging (SERVER SIDE ONLY)
+  log.error("Error occurred:", {
+    message: error?.message,
+    code: statusCode,
+    stack: error?.stack,
+    response: error?.response?.data,
+    url: error?.config?.url,
+    method: error?.config?.method,
+  });
+
+  // Extract safe error message
+  let message = "Terjadi kesalahan pada server";
+
+  // Only use API error message if it's a known/safe error
+  if (error?.response?.data?.message) {
+    message = error.response.data.message;
+  } else if (error?.message && !error?.stack?.includes("node_modules")) {
+    // Only use error message if it's not from node_modules (internal error)
+    message = error.message;
+  }
+
+  // Send SAFE structured error response (NO STACK, NO DETAILS)
+  res.status(statusCode).json({
+    success: false,
     message,
   });
 };

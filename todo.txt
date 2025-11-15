@@ -1,6 +1,0 @@
-1. aplikasi PKPH (konsultasi hukum)
-2. perbaikan webinar karena tte error 
-3. perbaikan perbaikan pendidikan siasn (untuk disparitas)
-4. penambahan fitur tambah spesimen untuk esign bkd
-5. penambahan endpoint tugas belajar
-6. penyederhanaan kppn
