@@ -3,10 +3,6 @@ const FormData = require("form-data");
 const uplaodDokRwSIASN = async (req, res) => {
   try {
     const { id_riwayat, id_ref_dokumen } = req?.body;
-    console.log({
-      id_riwayat,
-      id_ref_dokumen,
-    });
     const request = req?.siasnRequest;
     const file = req?.file;
 

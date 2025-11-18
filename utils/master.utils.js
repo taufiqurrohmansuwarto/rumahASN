@@ -229,6 +229,17 @@ module.exports.getRwJabGuru = async (fetcher, nip) => {
   }
 };
 
+module.exports.getFile = async (fetcher, nip) => {
+  try {
+    const result = await fetcher.get(
+      `/master-ws/operator/employees/${nip}/file`
+    );
+    return result;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 module.exports.referensiJenjang = [
   {
     label: "Sekolah Dasar",

@@ -157,8 +157,24 @@ const getProxySkk = async (req, res) => {
   }
 };
 
+// Queue handlers (reuse generic pattern)
+const {
+  handleSyncQueue,
+  handleGetStatus,
+} = require("@/utils/proxy-queue-helper");
+
+const syncProxySkkQueue = (req, res) => {
+  return handleSyncQueue("skk", req, res);
+};
+
+const getProxySyncStatus = (req, res) => {
+  return handleGetStatus(req, res);
+};
+
 module.exports = {
   syncProxySkk,
   getProxySkk,
+  syncProxySkkQueue,
+  getProxySyncStatus,
 };
 

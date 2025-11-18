@@ -1,3 +1,4 @@
+import TextSensor from "@/components/TextSensor";
 import { dataUtamaMasterByNip } from "@/services/master.services";
 import {
   dataRiwayatPengadaanPersonalByNip,
@@ -5,44 +6,32 @@ import {
 } from "@/services/siasn-services";
 import { compareText, komparasiGelar } from "@/utils/client-utils";
 import {
-  Stack,
-  Text,
-  Paper,
-  Group,
   Badge,
   Box,
   Container,
-  Skeleton as MantineSkeleton,
-  SimpleGrid,
   Divider,
-  Flex,
+  Group,
+  Skeleton as MantineSkeleton,
+  Paper,
+  Stack,
+  Text,
 } from "@mantine/core";
 import {
+  IconAlertTriangle,
+  IconCheck,
+  IconDatabase,
+  IconDownload,
   IconFileText,
   IconRefresh,
-  IconCheck,
-  IconX,
-  IconAlertTriangle,
-  IconDownload,
-  IconDatabase,
   IconServer,
+  IconX,
 } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
-import {
-  Anchor,
-  Button,
-  Card,
-  Col,
-  Grid,
-  Row,
-  Space,
-  Table as TableAntd,
-} from "antd";
-import InformationDetail from "../InformationDetail";
-import TextSensor from "@/components/TextSensor";
-import CreateCPNS from "./CreateCPNS";
-import RiwayatPengadaan from "../RiwayatPengadaan";
+import { Anchor, Button, Col, Grid, Row } from "antd";
 import CompareUbahDataByNip from "../CompareUbahDataByNip";
+import InformationDetail from "../InformationDetail";
+import RiwayatPengadaan from "../RiwayatPengadaan";
+import CreateCPNS from "./CreateCPNS";
 
 const FileSPMT = ({ data }) => {
   let path = {};
@@ -66,7 +55,11 @@ const FileSPMT = ({ data }) => {
   return (
     <>
       {path?.["888"]?.object && (
-        <Button type="link" icon={<IconDownload size={14} />} onClick={handleDownload}>
+        <Button
+          type="link"
+          icon={<IconDownload size={14} />}
+          onClick={handleDownload}
+        >
           Unduh File SPMT
         </Button>
       )}
@@ -96,7 +89,11 @@ const FileSK = ({ data }) => {
   return (
     <>
       {path?.["889"]?.object && (
-        <Button type="link" icon={<IconDownload size={14} />} onClick={handleDownload}>
+        <Button
+          type="link"
+          icon={<IconDownload size={14} />}
+          onClick={handleDownload}
+        >
           Unduh File SK
         </Button>
       )}
@@ -233,7 +230,7 @@ const TagResult = ({ record }) => {
         variant="outline"
         size="sm"
         leftSection={
-          <Box style={{ display: 'flex', alignItems: 'center' }}>
+          <Box style={{ display: "flex", alignItems: "center" }}>
             <IconAlertTriangle size={12} />
           </Box>
         }
@@ -249,7 +246,7 @@ const TagResult = ({ record }) => {
       variant="outline"
       size="sm"
       leftSection={
-        <Box style={{ display: 'flex', alignItems: 'center' }}>
+        <Box style={{ display: "flex", alignItems: "center" }}>
           {record?.result ? <IconCheck size={12} /> : <IconX size={12} />}
         </Box>
       }

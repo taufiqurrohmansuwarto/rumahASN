@@ -68,6 +68,7 @@ const fetchAllBatches = async (fetchFunction, options = {}) => {
     delayBetweenBatches = 500,
     maxRetries = 3,
     additionalParams = {},
+    onProgress = null, // Callback untuk progress update
   } = options;
 
   try {
@@ -93,12 +94,26 @@ const fetchAllBatches = async (fetchFunction, options = {}) => {
 
     // Fetch all batches
     let allResults = [];
+    let page = 1;
     log.info(
       `Starting to fetch data in batches (limit: ${batchSize}, delay: ${delayBetweenBatches}ms)`
     );
 
     for (let offset = 0; offset < total; offset += batchSize) {
-      log.info(`Fetching batch: offset ${offset}, limit ${batchSize}`);
+      log.info(
+        `Fetching batch: offset ${offset}, limit ${batchSize}, page ${page}`
+      );
+
+      // Call progress callback before fetching
+      if (onProgress) {
+        onProgress({
+          offset,
+          limit: batchSize,
+          page,
+          currentTotal: allResults.length,
+          expectedTotal: total,
+        });
+      }
 
       // Add delay between batches (except for the first one)
       if (offset > 0 && delayBetweenBatches > 0) {
@@ -120,8 +135,12 @@ const fetchAllBatches = async (fetchFunction, options = {}) => {
       allResults = allResults.concat(result);
 
       log.info(
-        `Batch fetched: ${result.length} records, total so far: ${allResults.length}`
+        `Batch fetched: ${result.length} records, total so far: ${
+          allResults.length
+        }, next offset: ${offset + batchSize}`
       );
+
+      page++;
     }
 
     log.info(`All batches fetched successfully: ${allResults.length} records`);

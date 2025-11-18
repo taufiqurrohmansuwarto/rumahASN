@@ -1095,3 +1095,17 @@ export const lockAllOperatorGajiPW = async (data = { is_locked: true }) => {
     .post(`/admin/pengadaan/paruh-waktu/operator-gaji-pw/lock`, data)
     .then((res) => res.data);
 };
+
+export const getDMSProfile = async (nip) => {
+  return api.get(`/admin/${nip}/profil-dms`).then((res) => res.data);
+};
+
+export const uploadDokumenSiasnBaru = async (data) => {
+  return api
+    .post(`/admin/upload-dok`, data, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    })
+    .then((res) => res.data);
+};

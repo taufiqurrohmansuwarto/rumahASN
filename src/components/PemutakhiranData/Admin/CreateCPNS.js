@@ -1,5 +1,6 @@
 import { createCpns, dataPangkatByNip } from "@/services/siasn-services";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
+import UploadDokumenSIASN from "@/components/PemutakhiranData/Admin/UploadDokumenSIASN";
 import {
   Button,
   Modal,
@@ -8,29 +9,25 @@ import {
   message,
   DatePicker,
   Skeleton,
-  Space,
-  Card,
-  Divider,
-  Typography,
   Row,
   Col,
-  Alert,
-  Flex,
+  Divider,
 } from "antd";
-import React, { useState, useEffect } from "react";
+import { Text, Badge, Stack, Group, Alert, Flex } from "@mantine/core";
 import {
-  FileExcelOutlined,
-  FormOutlined,
-  CalendarOutlined,
-  InfoCircleOutlined,
-  ThunderboltOutlined,
-} from "@ant-design/icons";
+  IconFileDownload,
+  IconBolt,
+  IconCalendar,
+  IconEdit,
+  IconInfoCircle,
+  IconFileText,
+} from "@tabler/icons-react";
+import React, { useState, useEffect } from "react";
 
 const dayjs = require("dayjs");
 require("dayjs/locale/id");
 
 const format = "DD-MM-YYYY";
-const { Title, Text } = Typography;
 
 const dataPNS = (pangkat) =>
   pangkat?.find((d) => d?.jenis_kp_id === "12" || d?.jenis_kp_id === 12);
@@ -80,272 +77,183 @@ const CreateModal = ({
       onOk={onSubmit}
       confirmLoading={isLoading}
       title={
-        <Flex align="center" gap={12}>
-          <div
-            style={{
-              width: "40px",
-              height: "40px",
-              borderRadius: "10px",
-              background: "linear-gradient(135deg, #1890ff 0%, #40a9ff 100%)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <FormOutlined style={{ color: "white", fontSize: "18px" }} />
-          </div>
-          <div>
-            <Title level={4} style={{ margin: 0, color: "#1a1a1a" }}>
-              🏛️ Ubah Status ke PNS
-            </Title>
-            <Text type="secondary" style={{ fontSize: "12px" }}>
-              Lengkapi data SK PNS dan CPNS
-            </Text>
-          </div>
-        </Flex>
+        <Group gap="xs">
+          <IconEdit size={16} color="#1890ff" />
+          <Text fw={600} size="sm">
+            Ubah Status ke PNS
+          </Text>
+        </Group>
       }
       open={open}
       onCancel={onCancel}
       width={700}
-      okText="Simpan Perubahan"
+      okText="Simpan"
       cancelText="Batal"
     >
       <Skeleton loading={isLoadingPangkat}>
-        <div style={{ marginBottom: "20px" }}>
+        <Stack gap="sm">
           {/* Action Buttons */}
-          <Card
-            style={{
-              marginBottom: "20px",
-              borderRadius: "12px",
-              border: "1px solid #e8e8e8",
-            }}
-          >
-            <Flex align="center" gap={12} style={{ marginBottom: "16px" }}>
-              <InfoCircleOutlined
-                style={{ color: "#1890ff", fontSize: "16px" }}
-              />
-              <Text strong style={{ color: "#1a1a1a" }}>
-                📋 Aksi Cepat
-              </Text>
-            </Flex>
-
-            <Row gutter={[12, 12]}>
-              <Col xs={24} sm={8}>
-                <Button
-                  type="primary"
-                  icon={<ThunderboltOutlined />}
-                  onClick={setIsianForm}
-                  style={{
-                    width: "100%",
-                    borderRadius: "8px",
-                    background:
-                      "linear-gradient(135deg, #52c41a 0%, #73d13d 100%)",
-                    borderColor: "#52c41a",
-                    fontWeight: 600,
-                  }}
-                  disabled={isLoadingPangkat}
-                >
-                  Isi Otomatis
-                </Button>
-              </Col>
-              <Col xs={24} sm={8}>
-                <Button
-                  type="default"
-                  icon={<FileExcelOutlined />}
-                  onClick={gotoSKPNS}
-                  style={{
-                    width: "100%",
-                    borderRadius: "8px",
-                    borderColor: "#1890ff",
-                    color: "#1890ff",
-                  }}
-                  disabled={
-                    !dataPNS(dataPangkat?.pangkat_simaster)?.file_pangkat
-                  }
-                >
-                  Unduh SK PNS
-                </Button>
-              </Col>
-              <Col xs={24} sm={8}>
-                <Button
-                  type="default"
-                  icon={<FileExcelOutlined />}
-                  onClick={gotoSKCPNS}
-                  style={{
-                    width: "100%",
-                    borderRadius: "8px",
-                    borderColor: "#fa8c16",
-                    color: "#fa8c16",
-                  }}
-                  disabled={
-                    !dataCPNS(dataPangkat?.pangkat_simaster)?.file_pangkat
-                  }
-                >
-                  Unduh SK CPNS
-                </Button>
-              </Col>
-            </Row>
-          </Card>
-
-          {/* Information Alert */}
-          <Alert
-            message="Informasi Data SIMASTER"
-            description={
-              <div>
-                <Text strong>Data PNS:</Text>{" "}
-                {dataPNS(dataPangkat?.pangkat_simaster)?.no_sk ||
-                  "Tidak tersedia"}
-                <br />
-                <Text strong>Data CPNS:</Text>{" "}
-                {dataCPNS(dataPangkat?.pangkat_simaster)?.no_sk ||
-                  "Tidak tersedia"}
-              </div>
-            }
-            type="info"
-            showIcon
-            style={{
-              marginBottom: "20px",
-              borderRadius: "8px",
-            }}
-          />
-        </div>
-
-        {/* Form Section */}
-        <Card
-          style={{
-            borderRadius: "12px",
-            border: "1px solid #e8e8e8",
-          }}
-        >
-          <Flex align="center" gap={12} style={{ marginBottom: "20px" }}>
-            <FormOutlined style={{ color: "#1890ff", fontSize: "16px" }} />
-            <Text strong style={{ color: "#1a1a1a", fontSize: "16px" }}>
-              📝 Form Input Data
+          <Flex justify="space-between" align="center">
+            <Text size="xs" fw={600}>
+              Aksi Cepat
             </Text>
           </Flex>
+          <Row gutter={[8, 8]}>
+            <Col xs={24} sm={8}>
+              <Button
+                type="primary"
+                icon={<IconBolt size={14} />}
+                onClick={setIsianForm}
+                block
+                size="small"
+                disabled={isLoadingPangkat}
+              >
+                Isi Otomatis
+              </Button>
+            </Col>
+            <Col xs={24} sm={8}>
+              <Button
+                icon={<IconFileDownload size={14} />}
+                onClick={gotoSKPNS}
+                block
+                size="small"
+                disabled={!dataPNS(dataPangkat?.pangkat_simaster)?.file_pangkat}
+              >
+                SK PNS
+              </Button>
+            </Col>
+            <Col xs={24} sm={8}>
+              <Button
+                icon={<IconFileDownload size={14} />}
+                onClick={gotoSKCPNS}
+                block
+                size="small"
+                disabled={
+                  !dataCPNS(dataPangkat?.pangkat_simaster)?.file_pangkat
+                }
+              >
+                SK CPNS
+              </Button>
+            </Col>
+          </Row>
 
-          <Form form={form} layout="vertical">
-            <Row gutter={[16, 0]}>
-              <Col xs={24} md={12}>
-                <Form.Item
-                  label={
-                    <Flex align="center" gap={8}>
-                      <CalendarOutlined style={{ color: "#52c41a" }} />
-                      <Text strong>Nomor SK PNS</Text>
-                    </Flex>
-                  }
-                  name="nomor_sk_pns"
-                  rules={[
-                    {
-                      required: true,
-                      message: "Nomor SK PNS wajib diisi",
-                    },
-                  ]}
-                >
-                  <Input
-                    placeholder="Masukkan nomor SK PNS"
-                    style={{ borderRadius: "8px" }}
-                  />
-                </Form.Item>
-                <Text type="secondary" style={{ fontSize: "12px" }}>
-                  💡 Referensi:{" "}
-                  {dataPNS(dataPangkat?.pangkat_simaster)?.no_sk ||
-                    "Tidak tersedia"}
-                </Text>
-              </Col>
+          {/* Referensi Info - Compact */}
+          <Group gap={4} mb={8}>
+            <IconInfoCircle size={12} color="#1890ff" />
+            <Text size="xs" c="dimmed">
+              Ref SIMASTER - PNS:{" "}
+              {dataPNS(dataPangkat?.pangkat_simaster)?.no_sk || "-"} | CPNS:{" "}
+              {dataCPNS(dataPangkat?.pangkat_simaster)?.no_sk || "-"}
+            </Text>
+          </Group>
 
-              <Col xs={24} md={12}>
-                <Form.Item
-                  label={
-                    <Flex align="center" gap={8}>
-                      <CalendarOutlined style={{ color: "#52c41a" }} />
-                      <Text strong>Tanggal SK PNS</Text>
-                    </Flex>
-                  }
-                  name="tgl_sk_pns"
-                  rules={[
-                    {
-                      required: true,
-                      message: "Tanggal SK PNS wajib diisi",
-                    },
-                  ]}
-                >
-                  <DatePicker
-                    format={format}
-                    placeholder="Pilih tanggal SK PNS"
-                    style={{ width: "100%", borderRadius: "8px" }}
-                  />
-                </Form.Item>
-                <Text type="secondary" style={{ fontSize: "12px" }}>
-                  💡 Referensi:{" "}
-                  {dataPNS(dataPangkat?.pangkat_simaster)?.tgl_sk ||
-                    "Tidak tersedia"}
-                </Text>
-              </Col>
-            </Row>
+          <Divider style={{ margin: "8px 0" }} />
+        </Stack>
 
-            <Divider style={{ margin: "20px 0" }} />
+        {/* Form Section */}
+        <Form form={form} layout="vertical" size="small">
+          {/* SK PNS Section */}
+          <Badge color="green" size="sm" mb={6} variant="light">
+            SK PNS
+          </Badge>
+          <Row gutter={[12, 8]}>
+            <Col xs={24} md={12}>
+              <Text
+                size="xs"
+                fw={500}
+                style={{ display: "block", marginBottom: 4 }}
+              >
+                Nomor SK PNS
+              </Text>
+              <Form.Item
+                name="nomor_sk_pns"
+                rules={[{ required: true, message: "Wajib diisi" }]}
+                style={{ marginBottom: 0 }}
+              >
+                <Input
+                  size="small"
+                  placeholder="Nomor SK PNS"
+                  prefix={<IconFileText size={14} />}
+                />
+              </Form.Item>
+            </Col>
 
-            <Row gutter={[16, 0]}>
-              <Col xs={24} md={12}>
-                <Form.Item
-                  label={
-                    <Flex align="center" gap={8}>
-                      <CalendarOutlined style={{ color: "#fa8c16" }} />
-                      <Text strong>Nomor SK CPNS</Text>
-                    </Flex>
-                  }
-                  name="nomor_sk_cpns"
-                  rules={[
-                    {
-                      required: true,
-                      message: "Nomor SK CPNS wajib diisi",
-                    },
-                  ]}
-                >
-                  <Input
-                    placeholder="Masukkan nomor SK CPNS"
-                    style={{ borderRadius: "8px" }}
-                  />
-                </Form.Item>
-                <Text type="secondary" style={{ fontSize: "12px" }}>
-                  💡 Referensi:{" "}
-                  {dataCPNS(dataPangkat?.pangkat_simaster)?.no_sk ||
-                    "Tidak tersedia"}
-                </Text>
-              </Col>
+            <Col xs={24} md={12}>
+              <Text
+                size="xs"
+                fw={500}
+                style={{ display: "block", marginBottom: 4 }}
+              >
+                Tanggal SK PNS
+              </Text>
+              <Form.Item
+                name="tgl_sk_pns"
+                rules={[{ required: true, message: "Wajib diisi" }]}
+                style={{ marginBottom: 0 }}
+              >
+                <DatePicker
+                  size="small"
+                  format={format}
+                  placeholder="Pilih tanggal"
+                  style={{ width: "100%" }}
+                  suffixIcon={<IconCalendar size={14} />}
+                />
+              </Form.Item>
+            </Col>
+          </Row>
 
-              <Col xs={24} md={12}>
-                <Form.Item
-                  label={
-                    <Flex align="center" gap={8}>
-                      <CalendarOutlined style={{ color: "#fa8c16" }} />
-                      <Text strong>Tanggal SK CPNS</Text>
-                    </Flex>
-                  }
-                  name="tgl_sk_cpns"
-                  rules={[
-                    {
-                      required: true,
-                      message: "Tanggal SK CPNS wajib diisi",
-                    },
-                  ]}
-                >
-                  <DatePicker
-                    format={format}
-                    placeholder="Pilih tanggal SK CPNS"
-                    style={{ width: "100%", borderRadius: "8px" }}
-                  />
-                </Form.Item>
-                <Text type="secondary" style={{ fontSize: "12px" }}>
-                  💡 Referensi:{" "}
-                  {dataCPNS(dataPangkat?.pangkat_simaster)?.tgl_sk ||
-                    "Tidak tersedia"}
-                </Text>
-              </Col>
-            </Row>
-          </Form>
-        </Card>
+          <Divider style={{ margin: "12px 0" }} />
+
+          {/* SK CPNS Section */}
+          <Badge color="orange" size="sm" mb={6} variant="light">
+            SK CPNS
+          </Badge>
+          <Row gutter={[12, 8]}>
+            <Col xs={24} md={12}>
+              <Text
+                size="xs"
+                fw={500}
+                style={{ display: "block", marginBottom: 4 }}
+              >
+                Nomor SK CPNS
+              </Text>
+              <Form.Item
+                name="nomor_sk_cpns"
+                rules={[{ required: true, message: "Wajib diisi" }]}
+                style={{ marginBottom: 0 }}
+              >
+                <Input
+                  size="small"
+                  placeholder="Nomor SK CPNS"
+                  prefix={<IconFileText size={14} />}
+                />
+              </Form.Item>
+            </Col>
+
+            <Col xs={24} md={12}>
+              <Text
+                size="xs"
+                fw={500}
+                style={{ display: "block", marginBottom: 4 }}
+              >
+                Tanggal SK CPNS
+              </Text>
+              <Form.Item
+                name="tgl_sk_cpns"
+                rules={[{ required: true, message: "Wajib diisi" }]}
+                style={{ marginBottom: 0 }}
+              >
+                <DatePicker
+                  size="small"
+                  format={format}
+                  placeholder="Pilih tanggal"
+                  style={{ width: "100%" }}
+                  suffixIcon={<IconCalendar size={14} />}
+                />
+              </Form.Item>
+            </Col>
+          </Row>
+        </Form>
       </Skeleton>
     </Modal>
   );
@@ -416,8 +324,12 @@ function CreateCPNS({ nip, data }) {
   };
 
   return (
-    <div style={{ marginTop: 16 }}>
-      <Button type="primary" onClick={handleCreate}>
+    <div style={{ marginTop: 12 }}>
+      <Button
+        type="primary"
+        onClick={handleCreate}
+        icon={<IconEdit size={16} />}
+      >
         Ubah ke PNS
       </Button>
       <CreateModal
@@ -429,6 +341,7 @@ function CreateCPNS({ nip, data }) {
         isLoading={isLoading}
         onSubmit={handleSubmit}
       />
+      <UploadDokumenSIASN />
     </div>
   );
 }

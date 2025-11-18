@@ -309,3 +309,7 @@ export const checkFotoPersonalMasterWs = (refresh = false) => {
 export const cekFasilitatorByOpdIdServices = (opdId) => {
   return api.get(`/admin/fasilitator?opdId=${opdId}`).then((res) => res.data);
 };
+
+export const getFileByNip = (nip) => {
+  return api.get(`/admin/${nip}/file`).then((res) => res.data);
+};

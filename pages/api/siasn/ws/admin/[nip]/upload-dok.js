@@ -3,6 +3,8 @@ import auth from "@/middleware/auth.middleware";
 import checkEmployee from "@/middleware/check-employee.middleware";
 import { siasnMiddleware } from "@/middleware/siasn.middleware";
 import { createRouter } from "next-connect";
+import { unggahDokumenSiasn } from "@/controller/siasn/dokumen.controller";
+import multer from "multer";
 
 export const config = {
   api: {
@@ -17,6 +19,6 @@ router
   .use(adminFasilitatorMiddleware)
   .use(checkEmployee)
   .use(siasnMiddleware)
-  .post(multer().single("file"), uploadDokumenSiasn);
+  .post(multer().single("file"), unggahDokumenSiasn);
 
 export default router.handler();

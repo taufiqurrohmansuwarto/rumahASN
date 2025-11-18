@@ -5,6 +5,21 @@ const { defaultJobOptions, redis } = require("./config");
 const sealQueue = new Queue("seal", { redis }, defaultJobOptions);
 const siasnQueue = new Queue("siasn", { redis }, defaultJobOptions);
 
+// Proxy sync queue (separate logic untuk proxy operations)
+const proxyQueue = new Queue(
+  "proxy-sync",
+  { redis },
+  {
+    ...defaultJobOptions,
+    attempts: 3,
+    timeout: 1800000, // 30 minutes untuk sync yang lama
+    backoff: {
+      type: "exponential",
+      delay: 5000,
+    },
+  }
+);
+
 function addLogging(queue, name) {
   const listeners = {
     error: (error) => {
@@ -13,20 +28,23 @@ function addLogging(queue, name) {
     waiting: (jobId) => {
       console.log(`⏳ [${name.toUpperCase()}] Job waiting: ${jobId}`);
     },
-    completed: (jobId, result) => {
-      console.log(
-        `✅ [${name.toUpperCase()}] Job completed: ${jobId}`,
-        result?.status ? `- ${result.status}` : ""
-      );
+    completed: (job, result) => {
+      const jobId = typeof job === 'object' ? job.id : job;
+      const resultStr = result && typeof result === 'object' 
+        ? `| ${JSON.stringify(result).substring(0, 100)}` 
+        : result ? `| ${result}` : '';
+      console.log(`✅ [${name.toUpperCase()}] Job completed: ${jobId} ${resultStr}`);
     },
     failed: (jobId, error) => {
       console.error(
         `❌ [${name.toUpperCase()}] Job failed: ${jobId} - ${error.message}`
       );
     },
-    progress: (jobId, progress) => {
+    progress: (job, progress) => {
+      const jobId = typeof job === 'object' ? job.id : job;
+      const progressNum = typeof progress === 'number' ? progress : progress?.progress || 0;
       console.log(
-        `🔄 [${name.toUpperCase()}] Job progress: ${jobId} - ${progress}%`
+        `🔄 [${name.toUpperCase()}] Job progress: ${jobId} - ${progressNum}%`
       );
     },
     paused: () => {
@@ -55,42 +73,85 @@ function addLogging(queue, name) {
 
 addLogging(sealQueue, "seal");
 addLogging(siasnQueue, "siasn");
+addLogging(proxyQueue, "proxy");
+
+// Auto-resume queues on initialization
+proxyQueue.resume().then(() => {
+  console.log("▶️  [PROXY] Queue auto-resumed on initialization");
+}).catch(err => {
+  console.warn("⚠️  [PROXY] Failed to auto-resume queue:", err.message);
+});
+
+// Shutdown flag to prevent multiple shutdowns
+let isShuttingDown = false;
+
+// Helper to safely close a queue
+const safeCloseQueue = async (queue, name) => {
+  try {
+    // Check if Redis client exists and is connected
+    if (queue.client && queue.client.status === "ready") {
+      await queue.close();
+      console.log(`✅ [${name}] Queue closed`);
+    } else {
+      console.log(`⚠️  [${name}] Queue already disconnected, skipping close`);
+    }
+  } catch (error) {
+    // Ignore "already connecting/connected" errors
+    if (!error.message.includes("already connecting") && !error.message.includes("already connected")) {
+      console.error(`❌ [${name}] Error closing queue:`, error.message);
+    }
+  }
+};
 
 // Graceful shutdown function
 const shutdown = async () => {
+  if (isShuttingDown) {
+    console.log("⚠️  Shutdown already in progress, ignoring...");
+    return;
+  }
+  
+  isShuttingDown = true;
   console.log("🔄 Starting graceful shutdown of Bull queues...");
   
   try {
-    // Clean up event listeners
-    if (sealQueue._loggerCleanup) {
-      sealQueue._loggerCleanup();
-    }
-    if (siasnQueue._loggerCleanup) {
-      siasnQueue._loggerCleanup();
-    }
+    // Clean up event listeners first
+    if (sealQueue._loggerCleanup) sealQueue._loggerCleanup();
+    if (siasnQueue._loggerCleanup) siasnQueue._loggerCleanup();
+    if (proxyQueue._loggerCleanup) proxyQueue._loggerCleanup();
+    console.log("🧹 Event listeners cleaned up");
     
     // Pause queues to stop accepting new jobs
-    await Promise.all([
-      sealQueue.pause(),
-      siasnQueue.pause()
-    ]);
-    console.log("⏸️  All queues paused");
+    try {
+      await Promise.all([
+        sealQueue.pause().catch(() => {}),
+        siasnQueue.pause().catch(() => {}),
+        proxyQueue.pause().catch(() => {}),
+      ]);
+      console.log("⏸️  All queues paused");
+    } catch (error) {
+      console.log("⚠️  Some queues failed to pause:", error.message);
+    }
     
     // Wait for active jobs to complete (with timeout)
-    await Promise.race([
-      Promise.all([
-        sealQueue.whenCurrentJobsFinished(),
-        siasnQueue.whenCurrentJobsFinished()
-      ]),
-      new Promise((resolve) => setTimeout(resolve, 30000)) // 30s timeout
-    ]);
-    console.log("✅ All active jobs completed");
+    try {
+      await Promise.race([
+        Promise.all([
+          sealQueue.whenCurrentJobsFinished().catch(() => {}),
+          siasnQueue.whenCurrentJobsFinished().catch(() => {}),
+          proxyQueue.whenCurrentJobsFinished().catch(() => {}),
+        ]),
+        new Promise((resolve) => setTimeout(resolve, 5000)) // 5s timeout (reduced)
+      ]);
+      console.log("✅ Active jobs completed or timed out");
+    } catch (error) {
+      console.log("⚠️  Error waiting for jobs:", error.message);
+    }
     
-    // Close queue connections
-    await Promise.all([
-      sealQueue.close(),
-      siasnQueue.close()
-    ]);
+    // Close queue connections individually
+    await safeCloseQueue(sealQueue, "SEAL");
+    await safeCloseQueue(siasnQueue, "SIASN");
+    await safeCloseQueue(proxyQueue, "PROXY");
+    
     console.log("🔌 All queue connections closed");
     
   } catch (error) {
@@ -127,5 +188,6 @@ process.on("unhandledRejection", async (reason, promise) => {
 module.exports = {
   sealQueue,
   siasnQueue,
+  proxyQueue,
   shutdown,
 };

@@ -35,61 +35,94 @@ const {
 } = require("@/utils/siasn-proxy/query-builders/pensiun-relation-builder");
 const { getOpdIdFromUser } = require("@/utils/siasn-proxy/helpers");
 
-const syncProxyPensiun = async (req, res) => {
+const syncProxyPensiun = async (req, res, job = null) => {
+  const startTime = Date.now();
   try {
     const { token } = req;
     const knex = PensiunProxy.knex();
     const tableName = `${PROXY_SCHEMA}.${TABLES.PENSIUN}`;
 
-    log.info("Starting proxy pensiun synchronization");
+    log.info("[PROXY PENSIUN] Starting synchronization");
+    if (job) await job.progress(5);
 
     // Clear existing data
+    log.info("[PROXY PENSIUN] Clearing existing data...");
     await clearTable(knex, tableName);
+    log.info("[PROXY PENSIUN] Table cleared successfully");
+    if (job) await job.progress(10);
 
-    // Fetch all data in batches
-    // Note: Using smaller batch size and longer delay for pemberhentian API
-    // due to socket hang up issues
+    // Fetch all data in batches with progress
+    log.info("[PROXY PENSIUN] Starting data fetch...");
     const allResults = await fetchAllBatches(
       (params) => getPemberhentianProxy(token, params),
       {
-        batchSize: 100, // Smaller batch size to avoid socket hang up
+        batchSize: 100,
         initialLimit: INITIAL_FETCH_LIMIT,
-        delayBetweenBatches: 1000, // 1 second delay between batches
-        maxRetries: 5, // More retries for unstable API
+        delayBetweenBatches: 1000,
+        maxRetries: 5,
       }
     );
+    log.info(
+      `[PROXY PENSIUN] Fetch completed! Total: ${allResults.length} records`
+    );
+    if (job) await job.progress(60);
 
     // Transform data
+    log.info(`[PROXY PENSIUN] Transforming ${allResults.length} records...`);
     const transformedData = transformPensiunData(allResults);
+    log.info(
+      `[PROXY PENSIUN] Transform completed! ${transformedData.length} records processed`
+    );
+    if (job) await job.progress(70);
 
     // Remove duplicates
+    log.info(
+      `[PROXY PENSIUN] Checking for duplicates in ${transformedData.length} records...`
+    );
     const { uniqueData, stats } = removeDuplicates(transformedData);
     log.info(
-      `Total transformed: ${stats.total}, Unique: ${stats.unique}, Duplicates removed: ${stats.duplicates}`
+      `[PROXY PENSIUN] Deduplication completed! Unique: ${stats.unique}, Duplicates: ${stats.duplicates}`
     );
+    if (job) await job.progress(80);
 
     // Batch insert
+    log.info(
+      `[PROXY PENSIUN] Starting batch insert: ${uniqueData.length} records...`
+    );
     const insertStats = await batchInsert(knex, tableName, uniqueData, {
       batchSize: BATCH_INSERT_SIZE,
     });
-
     log.info(
-      `Proxy pensiun synchronization completed. Inserted: ${insertStats.inserted}`
+      `[PROXY PENSIUN] Insert completed! ${insertStats.inserted} records inserted`
     );
+    if (job) await job.progress(95);
 
-    res.json({
+    const totalDuration = Math.round((Date.now() - startTime) / 1000);
+    log.info("[PROXY PENSIUN] ========================================");
+    log.info("[PROXY PENSIUN] ✅ Sync Completed Successfully!");
+    log.info(`[PROXY PENSIUN] Total inserted: ${insertStats.inserted} records`);
+    log.info(`[PROXY PENSIUN] Total duration: ${totalDuration}s`);
+    log.info("[PROXY PENSIUN] ========================================");
+
+    const result = {
       success: true,
       message: "Data berhasil disinkronisasi",
       total: allResults.length,
       inserted: insertStats.inserted,
       duplicates_removed: stats.duplicates,
-    });
+    };
+
+    if (job) await job.progress(100, result);
+    return result;
   } catch (error) {
-    log.error("Error during proxy pensiun synchronization", error);
-    res.status(500).json({
-      message: "Internal Server Error",
-      error: error.message,
-    });
+    log.error("[PROXY PENSIUN] ❌ Error syncing data", error);
+    if (job)
+      await job.progress(100, {
+        success: false,
+        message: "Gagal sinkronisasi",
+        error: error.message,
+      });
+    throw error;
   }
 };
 
@@ -161,7 +194,23 @@ const getProxyPensiun = async (req, res) => {
   }
 };
 
+// Queue handlers (reuse generic pattern)
+const {
+  handleSyncQueue,
+  handleGetStatus,
+} = require("@/utils/proxy-queue-helper");
+
+const syncProxyPensiunQueue = (req, res) => {
+  return handleSyncQueue("pensiun", req, res);
+};
+
+const getProxySyncStatus = (req, res) => {
+  return handleGetStatus(req, res);
+};
+
 module.exports = {
   syncProxyPensiun,
   getProxyPensiun,
+  syncProxyPensiunQueue,
+  getProxySyncStatus,
 };

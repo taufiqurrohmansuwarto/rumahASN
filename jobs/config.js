@@ -10,23 +10,23 @@ const redisConfig = {
   maxRetriesPerRequest: 3,
   retryDelayOnFailover: 100,
   enableOfflineQueue: true,
-  lazyConnect: true,
+  lazyConnect: false, // Changed to false - connect immediately
   keepAlive: 30000,
   connectTimeout: 10000,
-  commandTimeout: 5000,
+  // commandTimeout: 5000, // Disabled - causing timeout errors for long operations
   family: 4,
 };
 
 const queueOptions = {
   removeOnComplete: 50, // Increased from 20 to prevent queue bloat
-  removeOnFail: 100,    // Increased from 50 for better debugging
+  removeOnFail: 100, // Increased from 50 for better debugging
   attempts: 3,
   backoff: "exponential",
   // Enhanced job options
-  delay: 1000,          // 1 second delay between retries
-  timeout: 60000,       // 60 second timeout per job
+  delay: 1000, // 1 second delay between retries
+  timeout: 60000, // 60 second timeout per job
   removeOnComplete: true, // Auto-remove completed jobs
-  removeOnFail: false,    // Keep failed jobs for debugging
+  removeOnFail: false, // Keep failed jobs for debugging
 };
 
 module.exports = {

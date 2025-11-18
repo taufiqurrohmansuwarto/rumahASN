@@ -162,8 +162,24 @@ const getProxyPgAkademik = async (req, res) => {
   }
 };
 
+// Queue handlers (reuse generic pattern)
+const {
+  handleSyncQueue,
+  handleGetStatus,
+} = require("@/utils/proxy-queue-helper");
+
+const syncProxyPgAkademikQueue = (req, res) => {
+  return handleSyncQueue("pg_akademik", req, res);
+};
+
+const getProxySyncStatus = (req, res) => {
+  return handleGetStatus(req, res);
+};
+
 module.exports = {
   syncProxyPgAkademik,
   getProxyPgAkademik,
+  syncProxyPgAkademikQueue,
+  getProxySyncStatus,
 };
 

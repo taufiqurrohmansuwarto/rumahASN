@@ -240,7 +240,7 @@ module.exports.verifyUserWithNik = async ({ nik }) => {
 };
 
 // get data profile with version 1 using nik
-export const getDataProfileWithNik = async ({ nik }) => {
+module.exports.getDataProfileWithNik = async ({ nik }) => {
   return new Promise((resolve, reject) => {
     esignFetcher
       .get(`/api/user/profile/${nik}`)
@@ -259,7 +259,7 @@ export const getDataProfileWithNik = async ({ nik }) => {
   });
 };
 
-export const signWithCoordinate = async ({
+module.exports.signWithCoordinate = async ({
   nik,
   passphrase,
   file,

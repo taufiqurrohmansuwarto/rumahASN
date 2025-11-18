@@ -2,6 +2,7 @@ import { handleError } from "@/utils/helper/controller-helper";
 import {
   departmentDetail,
   employeeTodayBirthdayDetail,
+  getFile,
   getHukdis,
   getKelengkapanDokumen,
   getRwAnak,
@@ -400,6 +401,18 @@ export const rwAnakMasterByNip = async (req, res) => {
   }
 };
 
+const getFileByNip = async (req, res) => {
+  try {
+    const { fetcher } = req;
+    const { nip } = req.query;
+    const result = await getFile(fetcher, nip);
+    res.json(result?.data);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ code: 500, message: "Internal Server Error" });
+  }
+};
+
 export const rwAnakMaster = async (req, res) => {
   try {
     const { fetcher } = req;
@@ -631,4 +644,5 @@ module.exports = {
   getRwSatyaLencanaByNip,
   rwPasanganMaster,
   rwAnakMaster,
+  getFileByNip,
 };

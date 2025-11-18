@@ -2,12 +2,14 @@ import useScrollRestoration from "@/hooks/useScrollRestoration";
 import { Text, Title } from "@mantine/core";
 import {
   IconBeach,
+  IconPlug,
   IconShield,
   IconTrendingUp,
   IconUsers,
 } from "@tabler/icons-react";
 import { Card, Grid, Tabs } from "antd";
 import { useState } from "react";
+import MenuProxy from "./Proxy/MenuProxy";
 import RekonIPASN from "./RekonIPASN";
 import RekonLayananPangkat from "./RekonLayananPangkat";
 import RekonLayananPensiun from "./RekonLayananPensiun";
@@ -20,13 +22,35 @@ const RekonDashboardDetail = () => {
   const screens = useBreakpoint();
   const isMobile = !screens.md;
 
-  const [activeTab, setActiveTab] = useState("mfa");
+  const [activeTab, setActiveTab] = useState("menu");
 
   const handleTabChange = (key) => {
     setActiveTab(key);
   };
 
   const tabItems = [
+    {
+      key: "menu",
+      label: (
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <IconPlug
+            size={isMobile ? 14 : 16}
+            style={{ color: activeTab === "menu" ? "#FF4500" : "#666" }}
+          />
+          <Text
+            size={isMobile ? "xs" : "sm"}
+            fw={500}
+            style={{
+              color: activeTab === "menu" ? "#FF4500" : "#666",
+              transition: "all 0.3s ease",
+            }}
+          >
+            Menu Integrasi
+          </Text>
+        </div>
+      ),
+      children: <MenuProxy />,
+    },
     {
       key: "mfa",
       label: (

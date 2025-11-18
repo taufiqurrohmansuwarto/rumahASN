@@ -1,11 +1,38 @@
 const FormData = require("form-data");
+const { getDataProfileDMS } = require("@/utils/dms-utils");
+const { logger } = require("@/utils/logger");
 const { uploadDokumenSiasn } = require("@/utils/siasn-utils");
 const SiasnEmployee = require("@/models/siasn-employees.model");
+const { handleError } = require("@/utils/helper/controller-helper");
 
 const kodeDokumen = {
   887: "SK PNS",
   888: "SK CPNS",
   889: "SPMT CPNS",
+};
+
+export const unggahDokumenSiasn = async (req, res) => {
+  try {
+    const file = req?.file;
+    const request = req?.siasnRequest;
+    const { id_ref_dokumen, id_riwayat } = req?.body;
+    logger.info(req?.file);
+    logger.info(`Upload dokumen SIASN: ${id_ref_dokumen} ${id_riwayat}`);
+
+    const result = await uploadDokumenSiasn(
+      request,
+      file,
+      id_ref_dokumen,
+      id_riwayat
+    );
+    logger.info("success upload dokumen", result);
+    res.json({
+      message: "Berhasil upload dokumen",
+      data: result,
+    });
+  } catch (error) {
+    handleError(res, error);
+  }
 };
 
 export const uploadDokumenSiasnController = async (req, res) => {
@@ -55,5 +82,20 @@ export const uploadDokumenSiasnController = async (req, res) => {
     res
       .status(500)
       .json({ message: error?.message || "Internal Server Error" });
+  }
+};
+
+// untuk dms
+export const getDMSProfileController = async (req, res) => {
+  try {
+    const { nip } = req?.query;
+    const token = req?.token;
+    const data = await getDataProfileDMS(token, nip);
+    res.json({
+      message: "Berhasil get data profile DMS",
+      data: data,
+    });
+  } catch (error) {
+    handleError(res, error);
   }
 };

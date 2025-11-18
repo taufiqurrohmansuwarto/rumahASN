@@ -1,5 +1,6 @@
 import AdministrasiByNip from "@/components/Berkas/AdministrasiByNip";
 import AdministrasiPerbaikanByNip from "@/components/Berkas/AdministrasiPerbaikanByNip";
+import DokumenPendukungNip from "./DataPendukungNip";
 import BerkasJabatanPelaksanaBaruByNip from "@/components/Berkas/BerkasJabatanPelaksanaBaruByNip";
 import CompareDataPasanganByNip from "@/components/PemutakhiranData/CompareDataPasanganByNip";
 import { ActiveTabProvider, useActiveTab } from "@/context/TabContext";
@@ -53,6 +54,11 @@ function SiasnTab({ nip }) {
             <BerkasJabatanPelaksanaBaruByNip />
           </Stack>
         ),
+      },
+      {
+        key: "file",
+        tab: "Dokumen Pendukung",
+        content: <DokumenPendukungNip nip={nip} />,
       },
       {
         key: "jab-pend-pangkat",

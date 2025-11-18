@@ -59,6 +59,7 @@ import TrackingPencantumanGelarByNip from "./Usulan/TrackingPencantumanGelarByNi
 import TrackingPenyesuaianMasaKerjaByNip from "./Usulan/TrackingPenyesuaianMasaKerjaByNip";
 import TrackingPerbaikanNamaByNip from "./Usulan/TrackingPerbaikanNamaByNip";
 import TrackingUsulanLainnyaByNip from "./Usulan/TrackingUsulanLainnyaByNip";
+import ProfilDMS from "./ProfilDMS";
 
 // import { patchAnomali2023 } from "@/services/anomali.services";
 
@@ -109,11 +110,14 @@ const EmployeeDescriptionMaster = ({ data, loading, dataSiasn }) => {
       <Stack spacing="lg">
         {/* Data Lokal - Tanpa Collapse */}
         <Paper p="md" radius="md" withBorder>
-          <Group spacing="xs" mb="md">
-            <IconFileText size={16} color="blue" />
-            <Text size="sm" fw={500}>
-              Data Lokal (SIMASTER)
-            </Text>
+          <Group position="apart" mb="md">
+            <Group spacing="xs">
+              <IconFileText size={16} color="blue" />
+              <Text size="sm" fw={500}>
+                Data Lokal (SIMASTER)
+              </Text>
+            </Group>
+            <ProfilDMS />
           </Group>
           <Row gutter={[12, 12]}>
             <Col xs={24} sm={8}>

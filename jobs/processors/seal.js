@@ -1,8 +1,8 @@
 const { loadEnv } = require("../utils/load-env");
 loadEnv();
 
-const { refreshSealActivationTotp } = require("../../utils/esign-utils");
-const AppBsreSeal = require("../../models/app_bsre_seal.model");
+const { refreshSealActivationTotp } = require("@/utils/esign-utils");
+const AppBsreSeal = require("@/models/app_bsre_seal.model");
 
 async function refreshTotp() {
   console.log("🔄 Refreshing TOTP...");

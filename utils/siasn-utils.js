@@ -534,14 +534,14 @@ module.exports.cekPencantumanGelar = async (fetcher, nip) => {
         `/partition/list-pg-instansi?nip=${nip}`
       );
 
-      const data = result?.data?.data;
+      const data = result?.data?.data || [];
       const empty = "Data tidak ditemukan";
 
       if (!data || data === empty) {
         resolve([]);
       } else {
         const statusUsul = await StatusUsul.query();
-        const dataResult = data.map((item) => {
+        const dataResult = data?.map((item) => {
           const statusUsulan = statusUsul.find(
             (status) => String(status.id) === String(item.status_usulan)
           );
@@ -566,12 +566,12 @@ module.exports.cekPencantumanGelarProfesi = async (fetcher, nip) => {
         `/partition/profesi-instansi?nip=${nip}`
       );
 
-      const data = result?.data?.data;
+      const data = result?.data?.data || [];
       if (!data) {
         resolve([]);
       } else {
         const statusUsul = await StatusUsul.query();
-        const dataResult = data.map((item) => {
+        const dataResult = data?.map((item) => {
           const statusUsulan = statusUsul.find(
             (status) => String(status.id) === String(item.status_usulan)
           );
@@ -587,15 +587,26 @@ module.exports.cekPencantumanGelarProfesi = async (fetcher, nip) => {
       if (data === "record not found") {
         resolve([]);
       } else {
-        reject(error);
+        reject([]);
       }
     }
   });
 };
 
-module.exports.uploadDokumenSiasn = async (fetcher, formData) => {
+module.exports.uploadDokumenSiasn = async (
+  fetcher,
+  file,
+  id_ref_dokumen,
+  id_riwayat
+) => {
+  const formData = new FormData();
+
+  formData.append("id_riwayat", id_riwayat);
+  formData.append("file", file.buffer, file.originalname);
+  formData.append("id_ref_dokumen", id_ref_dokumen);
+
   return fetcher
-    .post(`/upload-dok`, formData, {
+    .post(`/upload-dok-rw`, formData, {
       headers: {
         ...formData.getHeaders(),
       },

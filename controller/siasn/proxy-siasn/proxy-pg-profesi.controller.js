@@ -162,8 +162,24 @@ const getProxyPgProfesi = async (req, res) => {
   }
 };
 
+// Queue handlers (reuse generic pattern)
+const {
+  handleSyncQueue,
+  handleGetStatus,
+} = require("@/utils/proxy-queue-helper");
+
+const syncProxyPgProfesiQueue = (req, res) => {
+  return handleSyncQueue("pg_profesi", req, res);
+};
+
+const getProxySyncStatus = (req, res) => {
+  return handleGetStatus(req, res);
+};
+
 module.exports = {
   syncProxyPgProfesi,
   getProxyPgProfesi,
+  syncProxyPgProfesiQueue,
+  getProxySyncStatus,
 };
 
