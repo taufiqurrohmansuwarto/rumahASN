@@ -32,7 +32,7 @@ const {
 } = require("@/utils/siasn-proxy/query-builders");
 const {
   applyProxyPensiunFilters,
-} = require("@/utils/siasn-proxy/query-builders/pensiun-relation-builder");
+} = require("@/utils/siasn-proxy/query-builders/proxy-relation-builder");
 const { getOpdIdFromUser } = require("@/utils/siasn-proxy/helpers");
 
 const syncProxyPensiun = async (req, res, job = null) => {

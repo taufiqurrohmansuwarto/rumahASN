@@ -164,7 +164,21 @@ const applyProxyPangkatFilters = (
   options = {}
 ) => {
   const { includeChildren = true } = options;
+  const { raw } = require("objection");
   let query = queryBuilder;
+
+  // Manual join untuk status_usulan_nama dengan casting
+  // status_usulan (INTEGER) = status_usul.id (VARCHAR)
+  query = query.leftJoin(
+    "ref_siasn.status_usul as status_usulan_nama",
+    function () {
+      this.on(
+        raw("??", ["siasn_proxy.proxy_pangkat.status_usulan"]),
+        "=",
+        raw("CAST(?? AS INTEGER)", ["status_usulan_nama.id"])
+      );
+    }
+  );
 
   // Apply pegawai relation dengan filter skpd_id (authorization)
   if (opdId && opdId !== "1") {
@@ -192,6 +206,13 @@ const applyProxyPangkatFilters = (
       });
   }
 
+  // Select setelah semua join selesai untuk menghindari override
+  query = query.select(
+    "siasn_proxy.proxy_pangkat.*",
+    "status_usulan_nama.id as status_usulan_id",
+    "status_usulan_nama.nama as status_usulan_nama"
+  );
+
   // Apply text filters
   if (filters.nip) {
     query = query.where(
@@ -215,7 +236,11 @@ const applyProxyPangkatFilters = (
   }
 
   // Apply other filters
-  if (filters.status_usulan !== undefined && filters.status_usulan !== null) {
+  if (
+    filters.status_usulan !== undefined &&
+    filters.status_usulan !== null &&
+    filters.status_usulan !== ""
+  ) {
     query = query.where(
       "siasn_proxy.proxy_pangkat.status_usulan",
       filters.status_usulan
@@ -233,9 +258,482 @@ const applyProxyPangkatFilters = (
   return query;
 };
 
+/**
+ * Apply TMT Pensiun filter
+ * @param {Object} queryBuilder - Objection.js query builder
+ * @param {String} tmtPensiun - TMT Pensiun filter (YYYY-MM format)
+ * @returns {Object} Modified query builder
+ */
+const applyTmtPensiunFilter = (queryBuilder, tmtPensiun) => {
+  if (!tmtPensiun) {
+    return queryBuilder;
+  }
+
+  const parsedTmt = parsePeriodeFilter(tmtPensiun);
+  if (!parsedTmt) {
+    return queryBuilder;
+  }
+
+  // Filter by tmt_pensiun di usulan_data.data.tmt_pensiun
+  // Menggunakan JSON path untuk akses nested data
+  return queryBuilder.whereRaw("usulan_data->'data'->>'tmt_pensiun' ILIKE ?", [
+    `${parsedTmt.substring(0, 7)}%`,
+  ]);
+};
+
+/**
+ * Apply filter untuk proxy pensiun dengan relasi
+ * @param {Object} queryBuilder - Objection.js query builder
+ * @param {Object} filters - Filter object { nip, nama, skpd_id, tmt_pensiun, status_usulan }
+ * @param {String} opdId - OPD ID dari user (for authorization)
+ * @param {Object} options - Options { includeChildren: true }
+ * @returns {Object} Modified query builder
+ */
+const applyProxyPensiunFilters = (
+  queryBuilder,
+  filters = {},
+  opdId = null,
+  options = {}
+) => {
+  const { includeChildren = true } = options;
+  const { raw } = require("objection");
+  let query = queryBuilder;
+
+  // Manual join untuk status_usulan_nama dengan casting
+  // status_usulan (INTEGER) = status_usul.id (VARCHAR)
+  query = query.leftJoin(
+    "ref_siasn.status_usul as status_usulan_nama",
+    function () {
+      this.on(
+        raw("??", ["siasn_proxy.proxy_pensiun.status_usulan"]),
+        "=",
+        raw("CAST(?? AS INTEGER)", ["status_usulan_nama.id"])
+      );
+    }
+  );
+
+  // Apply pegawai relation dengan filter skpd_id (authorization)
+  if (opdId && opdId !== "1") {
+    // Non-admin: filter by opdId dengan hierarchical access (123%)
+    query = applyPegawaiRelation(query, opdId, includeChildren);
+  } else if (filters.skpd_id) {
+    // Jika ada filter skpd_id spesifik dari query params
+    // Untuk admin yang ingin filter by skpd_id tertentu
+    query = applyPegawaiRelation(query, filters.skpd_id, includeChildren);
+  } else if (opdId === "1") {
+    // Admin tanpa filter skpd_id, tetap join tapi tidak filter
+    query = query
+      .withGraphJoined("pegawai")
+      .modifyGraph("pegawai", (builder) => {
+        builder.select(
+          "id",
+          "foto",
+          "nip_master",
+          "nama_master",
+          "skpd_id",
+          "opd_master",
+          "jabatan_master",
+          "status_master"
+        );
+      });
+  }
+
+  // Select setelah semua join selesai untuk menghindari override
+  query = query.select(
+    "siasn_proxy.proxy_pensiun.*",
+    "status_usulan_nama.id as status_usulan_id",
+    "status_usulan_nama.nama as status_usulan_nama"
+  );
+
+  // Apply text filters
+  if (filters.nip) {
+    query = query.where(
+      "siasn_proxy.proxy_pensiun.nip",
+      "ilike",
+      `%${filters.nip}%`
+    );
+  }
+
+  if (filters.nama) {
+    query = query.where(
+      "siasn_proxy.proxy_pensiun.nama",
+      "ilike",
+      `%${filters.nama}%`
+    );
+  }
+
+  // Apply TMT Pensiun filter
+  if (filters.tmt_pensiun) {
+    query = applyTmtPensiunFilter(query, filters.tmt_pensiun);
+  }
+
+  // Apply status_usulan filter
+  if (
+    filters.status_usulan !== undefined &&
+    filters.status_usulan !== null &&
+    filters.status_usulan !== ""
+  ) {
+    query = query.where(
+      "siasn_proxy.proxy_pensiun.status_usulan",
+      filters.status_usulan
+    );
+  }
+
+  if (filters.jenis_layanan_nama) {
+    query = query.where(
+      "siasn_proxy.proxy_pensiun.jenis_layanan_nama",
+      "ilike",
+      `%${filters.jenis_layanan_nama}%`
+    );
+  }
+
+  return query;
+};
+
+/**
+ * Apply filter untuk proxy PG Akademik dengan relasi
+ * @param {Object} queryBuilder - Objection.js query builder
+ * @param {Object} filters - Filter object { nip, nama, skpd_id, periode_id, status_usulan }
+ * @param {String} opdId - OPD ID dari user (for authorization)
+ * @param {Object} options - Options { includeChildren: true }
+ * @returns {Object} Modified query builder
+ */
+const applyProxyPgAkademikFilters = (
+  queryBuilder,
+  filters = {},
+  opdId = null,
+  options = {}
+) => {
+  const { includeChildren = true } = options;
+  const { raw } = require("objection");
+  let query = queryBuilder;
+
+  // Manual join untuk status_usulan_nama dengan casting
+  // status_usulan (INTEGER) = status_usul.id (VARCHAR)
+  query = query.leftJoin(
+    "ref_siasn.status_usul as status_usulan_nama",
+    function () {
+      this.on(
+        raw("??", ["siasn_proxy.proxy_pg_akademik.status_usulan"]),
+        "=",
+        raw("CAST(?? AS INTEGER)", ["status_usulan_nama.id"])
+      );
+    }
+  );
+
+  // Apply pegawai relation dengan filter skpd_id (authorization)
+  if (opdId && opdId !== "1") {
+    // Non-admin: filter by opdId dengan hierarchical access (123%)
+    query = applyPegawaiRelation(query, opdId, includeChildren);
+  } else if (filters.skpd_id) {
+    // Jika ada filter skpd_id spesifik dari query params
+    // Untuk admin yang ingin filter by skpd_id tertentu
+    query = applyPegawaiRelation(query, filters.skpd_id, includeChildren);
+  } else if (opdId === "1") {
+    // Admin tanpa filter skpd_id, tetap join tapi tidak filter
+    query = query
+      .withGraphJoined("pegawai")
+      .modifyGraph("pegawai", (builder) => {
+        builder.select(
+          "id",
+          "foto",
+          "nip_master",
+          "nama_master",
+          "skpd_id",
+          "opd_master",
+          "jabatan_master",
+          "status_master"
+        );
+      });
+  }
+
+  // Select setelah semua join selesai untuk menghindari override
+  query = query.select(
+    "siasn_proxy.proxy_pg_akademik.*",
+    "status_usulan_nama.id as status_usulan_id",
+    "status_usulan_nama.nama as status_usulan_nama"
+  );
+
+  // Apply text filters
+  if (filters.nip) {
+    query = query.where(
+      "siasn_proxy.proxy_pg_akademik.nip",
+      "ilike",
+      `%${filters.nip}%`
+    );
+  }
+
+  if (filters.nama) {
+    query = query.where(
+      "siasn_proxy.proxy_pg_akademik.nama",
+      "ilike",
+      `%${filters.nama}%`
+    );
+  }
+
+  // Apply periode_id filter (YYYY-MM format, using ILIKE for partial match)
+  if (filters.periode_id) {
+    const parsedPeriode = parsePeriodeFilter(filters.periode_id);
+    if (parsedPeriode) {
+      query = query.where(
+        "siasn_proxy.proxy_pg_akademik.periode_id",
+        "ilike",
+        `${parsedPeriode.substring(0, 7)}%`
+      );
+    }
+  }
+
+  // Apply status_usulan filter
+  if (
+    filters.status_usulan !== undefined &&
+    filters.status_usulan !== null &&
+    filters.status_usulan !== ""
+  ) {
+    query = query.where(
+      "siasn_proxy.proxy_pg_akademik.status_usulan",
+      filters.status_usulan
+    );
+  }
+
+  if (filters.jenis_layanan_nama) {
+    query = query.where(
+      "siasn_proxy.proxy_pg_akademik.jenis_layanan_nama",
+      "ilike",
+      `%${filters.jenis_layanan_nama}%`
+    );
+  }
+
+  return query;
+};
+
+/**
+ * Apply filter untuk proxy PG Profesi dengan relasi
+ * @param {Object} queryBuilder - Objection.js query builder
+ * @param {Object} filters - Filter object { nip, nama, skpd_id, periode_id, status_usulan }
+ * @param {String} opdId - OPD ID dari user (for authorization)
+ * @param {Object} options - Options { includeChildren: true }
+ * @returns {Object} Modified query builder
+ */
+const applyProxyPgProfesiFilters = (
+  queryBuilder,
+  filters = {},
+  opdId = null,
+  options = {}
+) => {
+  const { includeChildren = true } = options;
+  const { raw } = require("objection");
+  let query = queryBuilder;
+
+  // Manual join untuk status_usulan_nama dengan casting
+  // status_usulan (INTEGER) = status_usul.id (VARCHAR)
+  query = query.leftJoin(
+    "ref_siasn.status_usul as status_usulan_nama",
+    function () {
+      this.on(
+        raw("??", ["siasn_proxy.proxy_pg_profesi.status_usulan"]),
+        "=",
+        raw("CAST(?? AS INTEGER)", ["status_usulan_nama.id"])
+      );
+    }
+  );
+
+  // Apply pegawai relation dengan filter skpd_id (authorization)
+  if (opdId && opdId !== "1") {
+    // Non-admin: filter by opdId dengan hierarchical access (123%)
+    query = applyPegawaiRelation(query, opdId, includeChildren);
+  } else if (filters.skpd_id) {
+    // Jika ada filter skpd_id spesifik dari query params
+    // Untuk admin yang ingin filter by skpd_id tertentu
+    query = applyPegawaiRelation(query, filters.skpd_id, includeChildren);
+  } else if (opdId === "1") {
+    // Admin tanpa filter skpd_id, tetap join tapi tidak filter
+    query = query
+      .withGraphJoined("pegawai")
+      .modifyGraph("pegawai", (builder) => {
+        builder.select(
+          "id",
+          "foto",
+          "nip_master",
+          "nama_master",
+          "skpd_id",
+          "opd_master",
+          "jabatan_master",
+          "status_master"
+        );
+      });
+  }
+
+  // Select setelah semua join selesai untuk menghindari override
+  query = query.select(
+    "siasn_proxy.proxy_pg_profesi.*",
+    "status_usulan_nama.id as status_usulan_id",
+    "status_usulan_nama.nama as status_usulan_nama"
+  );
+
+  // Apply text filters
+  if (filters.nip) {
+    query = query.where(
+      "siasn_proxy.proxy_pg_profesi.nip",
+      "ilike",
+      `%${filters.nip}%`
+    );
+  }
+
+  if (filters.nama) {
+    query = query.where(
+      "siasn_proxy.proxy_pg_profesi.nama",
+      "ilike",
+      `%${filters.nama}%`
+    );
+  }
+
+  // Apply periode_id filter (YYYY-MM format, using ILIKE for partial match)
+  if (filters.periode_id) {
+    const parsedPeriode = parsePeriodeFilter(filters.periode_id);
+    if (parsedPeriode) {
+      query = query.where(
+        "siasn_proxy.proxy_pg_profesi.periode_id",
+        "ilike",
+        `${parsedPeriode.substring(0, 7)}%`
+      );
+    }
+  }
+
+  // Apply status_usulan filter
+  if (
+    filters.status_usulan !== undefined &&
+    filters.status_usulan !== null &&
+    filters.status_usulan !== ""
+  ) {
+    query = query.where(
+      "siasn_proxy.proxy_pg_profesi.status_usulan",
+      filters.status_usulan
+    );
+  }
+
+  if (filters.jenis_layanan_nama) {
+    query = query.where(
+      "siasn_proxy.proxy_pg_profesi.jenis_layanan_nama",
+      "ilike",
+      `%${filters.jenis_layanan_nama}%`
+    );
+  }
+
+  return query;
+};
+
+/**
+ * Apply filter untuk proxy SKK dengan relasi
+ * @param {Object} queryBuilder - Objection.js query builder
+ * @param {Object} filters - Filter object { nip, nama, skpd_id, status_usulan }
+ * @param {String} opdId - OPD ID dari user (for authorization)
+ * @param {Object} options - Options { includeChildren: true }
+ * @returns {Object} Modified query builder
+ */
+const applyProxySkkFilters = (
+  queryBuilder,
+  filters = {},
+  opdId = null,
+  options = {}
+) => {
+  const { includeChildren = true } = options;
+  const { raw } = require("objection");
+  let query = queryBuilder;
+
+  // Manual join untuk status_usulan_nama dengan casting
+  // status_usulan (INTEGER) = status_usul.id (VARCHAR)
+  query = query.leftJoin(
+    "ref_siasn.status_usul as status_usulan_nama",
+    function () {
+      this.on(
+        raw("??", ["siasn_proxy.proxy_skk.status_usulan"]),
+        "=",
+        raw("CAST(?? AS INTEGER)", ["status_usulan_nama.id"])
+      );
+    }
+  );
+
+  // Apply pegawai relation dengan filter skpd_id (authorization)
+  if (opdId && opdId !== "1") {
+    // Non-admin: filter by opdId dengan hierarchical access (123%)
+    query = applyPegawaiRelation(query, opdId, includeChildren);
+  } else if (filters.skpd_id) {
+    // Jika ada filter skpd_id spesifik dari query params
+    // Untuk admin yang ingin filter by skpd_id tertentu
+    query = applyPegawaiRelation(query, filters.skpd_id, includeChildren);
+  } else if (opdId === "1") {
+    // Admin tanpa filter skpd_id, tetap join tapi tidak filter
+    query = query
+      .withGraphJoined("pegawai")
+      .modifyGraph("pegawai", (builder) => {
+        builder.select(
+          "id",
+          "foto",
+          "nip_master",
+          "nama_master",
+          "skpd_id",
+          "opd_master",
+          "jabatan_master",
+          "status_master"
+        );
+      });
+  }
+
+  // Select setelah semua join selesai untuk menghindari override
+  query = query.select(
+    "siasn_proxy.proxy_skk.*",
+    "status_usulan_nama.id as status_usulan_id",
+    "status_usulan_nama.nama as status_usulan_nama"
+  );
+
+  // Apply text filters
+  if (filters.nip) {
+    query = query.where(
+      "siasn_proxy.proxy_skk.nip",
+      "ilike",
+      `%${filters.nip}%`
+    );
+  }
+
+  if (filters.nama) {
+    query = query.where(
+      "siasn_proxy.proxy_skk.nama",
+      "ilike",
+      `%${filters.nama}%`
+    );
+  }
+
+  // Apply status_usulan filter
+  if (
+    filters.status_usulan !== undefined &&
+    filters.status_usulan !== null &&
+    filters.status_usulan !== ""
+  ) {
+    query = query.where(
+      "siasn_proxy.proxy_skk.status_usulan",
+      filters.status_usulan
+    );
+  }
+
+  if (filters.jenis_layanan_nama) {
+    query = query.where(
+      "siasn_proxy.proxy_skk.jenis_layanan_nama",
+      "ilike",
+      `%${filters.jenis_layanan_nama}%`
+    );
+  }
+
+  return query;
+};
+
 module.exports = {
   applyPegawaiRelation,
   parsePeriodeFilter,
   applyPeriodeFilter,
+  applyTmtPensiunFilter,
   applyProxyPangkatFilters,
+  applyProxyPensiunFilters,
+  applyProxyPgAkademikFilters,
+  applyProxyPgProfesiFilters,
+  applyProxySkkFilters,
 };

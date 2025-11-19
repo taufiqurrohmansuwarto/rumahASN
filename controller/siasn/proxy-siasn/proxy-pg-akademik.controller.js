@@ -30,7 +30,7 @@ const {
 } = require("@/utils/siasn-proxy/query-builders");
 const {
   applyProxyPgAkademikFilters,
-} = require("@/utils/siasn-proxy/query-builders/pg-akademik-relation-builder");
+} = require("@/utils/siasn-proxy/query-builders/proxy-relation-builder");
 const { getOpdIdFromUser } = require("@/utils/siasn-proxy/helpers");
 
 const syncProxyPgAkademik = async (req, res) => {

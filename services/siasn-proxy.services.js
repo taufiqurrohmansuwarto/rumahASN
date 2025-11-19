@@ -79,8 +79,23 @@ export const getProxySyncStatus = async (jobId) => {
  * @returns {Promise} All jobs info with summary
  */
 export const debugProxyQueue = async () => {
-  const { data } = await api.get("/debug");
-  return data;
+  try {
+    const { data } = await api.get("/debug");
+    // Ensure jobs is always an array
+    return {
+      ...data,
+      jobs: Array.isArray(data.jobs) ? data.jobs : [],
+      summary: data.summary || { total: 0, byStatus: {} },
+    };
+  } catch (error) {
+    console.error("Debug queue error:", error);
+    return {
+      success: false,
+      jobs: [],
+      summary: { total: 0, byStatus: { active: 0, waiting: 0, completed: 0, failed: 0 } },
+      byType: {},
+    };
+  }
 };
 
 /**

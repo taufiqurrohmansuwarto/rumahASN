@@ -23,6 +23,7 @@ import {
   IconFileText,
   IconLayoutDashboard,
   IconUsers,
+  IconRefresh,
 } from "@tabler/icons-react";
 import { Dropdown, Input, Space } from "antd";
 import { trim } from "lodash";
@@ -143,9 +144,15 @@ const menuItems = [
   },
 
   {
-    key: "update-data",
+    key: "/update-data",
     icon: <IconEdit size={16} />,
     label: "Update Data",
+    role: ["admin"],
+  },
+  {
+    key: "/proxy-sinkronisasi",
+    icon: <IconRefresh size={16} />,
+    label: "Proxy Sinkronisasi",
     role: ["admin"],
   },
 ];

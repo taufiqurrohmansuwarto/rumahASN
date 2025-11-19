@@ -4,10 +4,10 @@ import {
 } from "@/services/master.services";
 import { getPengadaanParuhWaktu } from "@/services/siasn-services";
 import { DownloadOutlined, ReloadOutlined } from "@ant-design/icons";
-import { Text, Stack, Paper, Group, Divider } from "@mantine/core";
-import { IconUsers, IconBuilding, IconMapPin, IconFileText } from "@tabler/icons-react";
+import { Group, Paper, Stack, Text } from "@mantine/core";
+import { IconBuilding, IconFileText, IconUsers } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
-import { Button, Card, Space, Table, Typography, Descriptions } from "antd";
+import { Button, Card, Space, Table, Typography } from "antd";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { createColumns } from "./DaftarPegawaiParuhWaktuColumns";
@@ -162,8 +162,19 @@ const DaftarPegawaiParuhWaktu = () => {
   // Expandable row untuk detail Unit Organisasi
   const expandedRowRender = (record) => {
     return (
-      <Paper p="md" radius="md" withBorder style={{ background: "#f8f9fa", marginLeft: "48px" }}>
-        <Text size="xs" fw={600} c="dimmed" mb="sm" style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+      <Paper
+        p="md"
+        radius="md"
+        withBorder
+        style={{ background: "#f8f9fa", marginLeft: "48px" }}
+      >
+        <Text
+          size="xs"
+          fw={600}
+          c="dimmed"
+          mb="sm"
+          style={{ display: "flex", alignItems: "center", gap: "6px" }}
+        >
           <IconBuilding size={14} />
           Detail Unit Organisasi
         </Text>
@@ -176,7 +187,12 @@ const DaftarPegawaiParuhWaktu = () => {
                 SIMASTER
               </Text>
             </Group>
-            <Paper p="xs" radius="md" withBorder style={{ background: "white" }}>
+            <Paper
+              p="xs"
+              radius="md"
+              withBorder
+              style={{ background: "white" }}
+            >
               <Text size="10px" ff="monospace" c="dimmed">
                 ID: {record?.unor_id_simaster || "-"}
               </Text>
@@ -194,7 +210,12 @@ const DaftarPegawaiParuhWaktu = () => {
                 SIASN
               </Text>
             </Group>
-            <Paper p="xs" radius="md" withBorder style={{ background: "white" }}>
+            <Paper
+              p="xs"
+              radius="md"
+              withBorder
+              style={{ background: "white" }}
+            >
               <Text size="10px" ff="monospace" c="dimmed">
                 ID: {record?.unor_id_siasn || "-"}
               </Text>
@@ -212,7 +233,12 @@ const DaftarPegawaiParuhWaktu = () => {
                 Perjanjian Kerja
               </Text>
             </Group>
-            <Paper p="xs" radius="md" withBorder style={{ background: "white" }}>
+            <Paper
+              p="xs"
+              radius="md"
+              withBorder
+              style={{ background: "white" }}
+            >
               <Text size="10px" ff="monospace" c="dimmed">
                 ID: {record?.unor_pk || "-"}
               </Text>
@@ -369,7 +395,10 @@ const DaftarPegawaiParuhWaktu = () => {
               }}
               expandable={{
                 expandedRowRender,
-                rowExpandable: (record) => record?.unor_simaster || record?.unor_siasn || record?.unor_pk_text,
+                rowExpandable: (record) =>
+                  record?.unor_simaster ||
+                  record?.unor_siasn ||
+                  record?.unor_pk_text,
               }}
               pagination={{
                 position: ["bottomRight"],

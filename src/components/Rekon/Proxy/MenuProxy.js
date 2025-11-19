@@ -1,65 +1,49 @@
 import { Text } from "@mantine/core";
 import {
-  IconFingerprint,
-  IconUsers,
   IconCash,
-  IconSchool,
   IconCertificate,
+  IconSchool,
   IconShieldCheck,
-  IconClipboardCheck,
+  IconUsers,
 } from "@tabler/icons-react";
 import { Card, Col, Grid, Row } from "antd";
 import { useRouter } from "next/router";
 
 const menuItems = [
   {
-    title: "Integrasi MFA",
-    description: "Multifactor Authentication",
-    icon: IconFingerprint,
-    path: "/siasn/proxy/mfa",
-    color: "#FF4500",
-  },
-  {
     title: "Integrasi KP",
     description: "Kenaikan Pangkat",
     icon: IconUsers,
-    path: "/siasn/proxy/kp",
+    path: "/siasn/proxy-kp",
     color: "#1890FF",
   },
   {
     title: "Integrasi Pensiun",
     description: "Data Pensiun",
     icon: IconCash,
-    path: "/siasn/proxy/pensiun",
+    path: "/siasn/proxy-pensiun",
     color: "#52C41A",
   },
   {
     title: "Integrasi PG Akademik",
     description: "Pencantuman Gelar Akademik",
     icon: IconSchool,
-    path: "/siasn/proxy/pg-akademik",
+    path: "/siasn/proxy-pg-akademik",
     color: "#722ED1",
   },
   {
     title: "Integrasi PG Profesi",
     description: "Pencantuman Gelar Profesi",
     icon: IconCertificate,
-    path: "/siasn/proxy/pg-profesi",
+    path: "/siasn/proxy-pg-profesi",
     color: "#FA8C16",
   },
   {
     title: "Integrasi SKK",
     description: "Status Kedudukan Kepegawaian",
     icon: IconShieldCheck,
-    path: "/siasn/proxy/skk",
+    path: "/siasn/proxy-skk",
     color: "#13C2C2",
-  },
-  {
-    title: "Integrasi IP ASN",
-    description: "Indeks Prestasi ASN",
-    icon: IconClipboardCheck,
-    path: "/siasn/proxy/ip-asn",
-    color: "#EB2F96",
   },
 ];
 
@@ -140,7 +124,7 @@ const MenuProxy = () => {
   const isMobile = !screens.md;
 
   const handleClick = (path) => {
-    router.push(path);
+    router.push(`/rekon/${path}`);
   };
 
   return (

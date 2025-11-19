@@ -28,40 +28,56 @@ const debugProxyQueue = async (req, res) => {
       byType[type][job.state]++;
     });
 
+    // Format jobs as flat array with state
+    const jobsArray = [
+      ...allJobs.active.map((j) => ({
+        id: j.id,
+        type: j.data?.type,
+        state: "active",
+        progress: j.progress || 0,
+        requestedBy: j.data?.requestedBy?.username || j.data?.requestedBy || "System",
+        createdAt: j.timestamp,
+      })),
+      ...allJobs.waiting.map((j) => ({
+        id: j.id,
+        type: j.data?.type,
+        state: "waiting",
+        progress: 0,
+        requestedBy: j.data?.requestedBy?.username || j.data?.requestedBy || "System",
+        createdAt: j.timestamp,
+      })),
+      ...allJobs.completed.map((j) => ({
+        id: j.id,
+        type: j.data?.type,
+        state: "completed",
+        progress: 100,
+        requestedBy: j.data?.requestedBy?.username || j.data?.requestedBy || "System",
+        finishedAt: j.finishedOn,
+      })),
+      ...allJobs.failed.map((j) => ({
+        id: j.id,
+        type: j.data?.type,
+        state: "failed",
+        progress: j.progress || 0,
+        requestedBy: j.data?.requestedBy?.username || j.data?.requestedBy || "System",
+        finishedAt: j.finishedOn,
+        error: j.failedReason,
+      })),
+    ];
+
     res.json({
       success: true,
       summary: {
         total: allJobsList.length,
-        active: allJobs.active.length,
-        waiting: allJobs.waiting.length,
-        completed: allJobs.completed.length,
-        failed: allJobs.failed.length,
+        byStatus: {
+          active: allJobs.active.length,
+          waiting: allJobs.waiting.length,
+          completed: allJobs.completed.length,
+          failed: allJobs.failed.length,
+        },
       },
       byType,
-      jobs: {
-        active: allJobs.active.map((j) => ({
-          id: j.id,
-          type: j.data?.type,
-          progress: j.progress,
-          createdAt: j.timestamp,
-        })),
-        waiting: allJobs.waiting.map((j) => ({
-          id: j.id,
-          type: j.data?.type,
-          createdAt: j.timestamp,
-        })),
-        completed: allJobs.completed.map((j) => ({
-          id: j.id,
-          type: j.data?.type,
-          finishedAt: j.finishedOn,
-        })),
-        failed: allJobs.failed.map((j) => ({
-          id: j.id,
-          type: j.data?.type,
-          finishedAt: j.finishedOn,
-          error: j.failedReason,
-        })),
-      },
+      jobs: jobsArray,
     });
   } catch (error) {
     res.status(500).json({

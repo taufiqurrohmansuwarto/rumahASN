@@ -32,7 +32,7 @@ const {
 } = require("@/utils/siasn-proxy/query-builders");
 const {
   applyProxySkkFilters,
-} = require("@/utils/siasn-proxy/query-builders/skk-relation-builder");
+} = require("@/utils/siasn-proxy/query-builders/proxy-relation-builder");
 const { getOpdIdFromUser } = require("@/utils/siasn-proxy/helpers");
 
 const syncProxySkk = async (req, res) => {

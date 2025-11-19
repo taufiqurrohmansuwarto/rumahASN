@@ -30,7 +30,7 @@ const {
 } = require("@/utils/siasn-proxy/query-builders");
 const {
   applyProxyPgProfesiFilters,
-} = require("@/utils/siasn-proxy/query-builders/pg-profesi-relation-builder");
+} = require("@/utils/siasn-proxy/query-builders/proxy-relation-builder");
 const { getOpdIdFromUser } = require("@/utils/siasn-proxy/helpers");
 
 const syncProxyPgProfesi = async (req, res) => {
