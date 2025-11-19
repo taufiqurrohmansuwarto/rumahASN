@@ -5,7 +5,6 @@ const { log } = require("@/utils/logger");
 
 // Import SIASN Proxy Utilities
 const {
-  INITIAL_FETCH_LIMIT,
   BATCH_FETCH_LIMIT,
   BATCH_INSERT_SIZE,
   TABLES,
@@ -18,7 +17,7 @@ const {
   removeDuplicates,
 } = require("@/utils/siasn-proxy/validators/duplicate-validator");
 const {
-  fetchAllBatches,
+  fetchAllBatchesUntilEmpty,
 } = require("@/utils/siasn-proxy/sync-helpers/batch-fetcher");
 const {
   clearTable,
@@ -61,44 +60,22 @@ const syncProxyPangkat = async (req, res, job = null) => {
     // Update progress: 10% - Table cleared
     if (job) await job.progress(10);
 
-    // Fetch all data in batches with progress callback
-    const progressCallback = (batchInfo) => {
-      const percentage =
-        batchInfo.expectedTotal > 0
-          ? Math.round((batchInfo.currentTotal / batchInfo.expectedTotal) * 100)
-          : 0;
-
-      const message = `Batch ${batchInfo.page}: offset=${batchInfo.offset}, fetched=${batchInfo.currentTotal}/${batchInfo.expectedTotal} (${percentage}%)`;
-      log.info(`[PROXY PANGKAT] ${message}`);
-
-      // Update progress: 10% - 60% during fetching
-      if (job) {
-        const fetchProgress =
-          10 +
-          Math.floor(
-            (batchInfo.currentTotal /
-              (batchInfo.expectedTotal || batchInfo.currentTotal)) *
-              50
-          );
-        job.progress(Math.min(fetchProgress, 60), {
-          stage: "fetching",
-          message,
-          offset: batchInfo.offset,
-          currentTotal: batchInfo.currentTotal,
-          expectedTotal: batchInfo.expectedTotal,
-        });
-      }
-    };
-
+    // Fetch all data in batches until empty
+    // Note: API SIASN Kenaikan Pangkat memiliki issue dengan offset-based pagination
+    // Terkadang data overlap/duplicate di offset berbeda
+    // Solusi: fetch until empty array untuk menghindari masalah offset
+    const testBatchSize = 600; // Testing: batch kecil untuk monitoring detail
     log.info(
-      `[PROXY PANGKAT] Starting data fetch (batch size: ${BATCH_FETCH_LIMIT})...`
+      `[PROXY PANGKAT] Starting data fetch (batch size: ${testBatchSize}, fetch until empty)...`
     );
-    const allResults = await fetchAllBatches(
+    const allResults = await fetchAllBatchesUntilEmpty(
       (params) => getKenaikanPangkatProxy(token, params),
       {
-        batchSize: BATCH_FETCH_LIMIT,
-        initialLimit: INITIAL_FETCH_LIMIT,
-        onProgress: progressCallback,
+        batchSize: testBatchSize,
+        delayBetweenBatches: 500,
+        maxRetries: 3,
+        dataKey: "data", // Response key for data array
+        incrementalOffset: false, // Offset by batchSize: 0, 10, 20, 30...
       }
     );
     log.info(
@@ -126,13 +103,13 @@ const syncProxyPangkat = async (req, res, job = null) => {
         message: "Removing duplicates...",
       });
 
-    // Remove duplicates
+    // Process duplicates - Generate nanoid untuk duplicate IDs
     log.info(
-      `[PROXY PANGKAT] Checking for duplicates in ${transformedData.length} records...`
+      `[PROXY PANGKAT] Processing duplicates in ${transformedData.length} records...`
     );
     const { uniqueData, stats } = removeDuplicates(transformedData);
     log.info(
-      `[PROXY PANGKAT] Deduplication completed! Unique: ${stats.unique}, Duplicates: ${stats.duplicates}`
+      `[PROXY PANGKAT] Processing completed! Total records: ${stats.unique}, Duplicates replaced: ${stats.duplicates}, Null IDs replaced: ${stats.nullIds}`
     );
 
     // Update progress: 80% - Deduplication completed
@@ -196,7 +173,8 @@ const syncProxyPangkat = async (req, res, job = null) => {
       message: "Data berhasil disinkronisasi",
       total: allResults.length,
       inserted: insertStats.inserted,
-      duplicates_removed: stats.duplicates,
+      duplicates_replaced: stats.duplicates,
+      null_ids_replaced: stats.nullIds,
     };
 
     // Update progress: 100% - Completed

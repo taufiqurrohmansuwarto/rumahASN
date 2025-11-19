@@ -2,14 +2,24 @@
  * Transform data kenaikan pangkat dari API SIASN Proxy ke database schema
  */
 
+const { log } = require("@/utils/logger");
+
 /**
  * Transform single item
  * @param {Object} item - Raw data from API
  * @returns {Object} Transformed data matching DB schema
  */
-const transformPangkatItem = (item) => ({
-  // Primary Key
-  id: item?.id || null,
+const transformPangkatItem = (item) => {
+  // Warn jika ID null
+  if (!item?.id) {
+    log.warn(
+      `[TRANSFORM] Record tanpa ID ditemukan: NIP=${item?.nip}, Nama=${item?.nama}`
+    );
+  }
+
+  return {
+    // Primary Key
+    id: item?.id || null,
 
   // Layanan Info
   jenis_layanan: item?.jenis_layanan || null,
@@ -112,9 +122,10 @@ const transformPangkatItem = (item) => ({
   pns_id_pengusul: item?.pns_id_pengusul || null,
   kanreg_id_pengusul: item?.kanreg_id_pengusul || null,
 
-  // Additional Status
-  StatusData: item?.StatusData || null,
-});
+    // Additional Status
+    StatusData: item?.StatusData || null,
+  };
+};
 
 /**
  * Transform array of items
