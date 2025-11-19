@@ -428,22 +428,19 @@ const ProxyKPComponent = () => {
       render: (_, record) => {
         const nip = record.pegawai?.nip_master || record.nip;
         return (
-          <Link href={`/rekon/pegawai/${nip}/detail`} passHref legacyBehavior>
-            <a target="_blank" rel="noreferrer">
-              <Button
-                type="primary"
-                size="small"
-                icon={<IconEye size={14} />}
-                style={{
-                  fontSize: "11px",
-                  height: "24px",
-                  padding: "0 8px",
-                }}
-              >
-                Detail
-              </Button>
-            </a>
-          </Link>
+          <Button
+            type="primary"
+            size="small"
+            icon={<IconEye size={14} />}
+            style={{
+              fontSize: "11px",
+              height: "24px",
+              padding: "0 8px",
+            }}
+            onClick={() => router.push(`/rekon/pegawai/${nip}/detail`)}
+          >
+            Detail
+          </Button>
         );
       },
     },

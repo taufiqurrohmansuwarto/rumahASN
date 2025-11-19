@@ -1,38 +1,35 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { useRouter } from "next/router";
+import { useDownloadProxyExcel } from "@/components/Rekon/Proxy/hooks/useDownloadProxyExcel";
+import { getOpdFasilitator } from "@/services/master.services";
+import { getProxySkkList } from "@/services/siasn-proxy.services";
+import { refStatusUsul } from "@/services/siasn-services";
+import { Badge, Text } from "@mantine/core";
 import {
+  IconDownload,
+  IconEye,
+  IconRefresh,
+  IconSearch,
+  IconShieldCheck,
+  IconUser,
+  IconUserOff,
+} from "@tabler/icons-react";
+import { useQuery } from "@tanstack/react-query";
+import {
+  Avatar,
   Button,
   Card,
   Col,
   Input,
   Row,
-  Table,
-  Space,
-  Tooltip,
-  Avatar,
-  TreeSelect,
   Select,
+  Space,
+  Table,
+  Tooltip,
+  TreeSelect,
 } from "antd";
-import { Text, Badge } from "@mantine/core";
-import {
-  IconRefresh,
-  IconDownload,
-  IconSearch,
-  IconShieldCheck,
-  IconUser,
-  IconBuilding,
-  IconCalendar,
-  IconAlertCircle,
-  IconEye,
-  IconUserOff,
-} from "@tabler/icons-react";
-import { getProxySkkList } from "@/services/siasn-proxy.services";
-import { getOpdFasilitator } from "@/services/master.services";
-import { refStatusUsul } from "@/services/siasn-services";
-import { useDownloadProxyExcel } from "@/components/Rekon/Proxy/hooks/useDownloadProxyExcel";
 import dayjs from "dayjs";
 import "dayjs/locale/id";
+import { useRouter } from "next/router";
+import { useState } from "react";
 
 const ProxySkkComponent = () => {
   const router = useRouter();
