@@ -14,7 +14,7 @@ const ProxyPGAkademik = () => {
         <title>Rumah ASN - Rekon - Proxy Sinkronisasi</title>
       </Head>
       <PageContainer
-        onBack={() => router.back()}
+        onBack={() => router.push("/rekon/dashboard")}
         title="Rekon"
         content="Proxy Kenaikan Pangkat"
         header={{
