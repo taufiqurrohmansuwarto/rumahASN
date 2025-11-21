@@ -4,6 +4,7 @@ const ssoToken = require("../sso_token.json");
 const a = require("../utils/siasn-fetcher");
 const { createRedisInstance } = require("../utils/redis");
 const { default: Redlock } = require("redlock");
+const { log } = require("@/utils/logger");
 
 const dotenv = require("dotenv");
 dotenv.config();
@@ -19,27 +20,37 @@ let httpsAgent;
 // Cleanup function untuk mencegah memory leak
 const cleanup = async () => {
   try {
+    log.info("[SIASN Middleware] Memulai cleanup resources");
+
     // Clear axios interceptors
     if (siasnWsAxios && siasnWsAxios.interceptors) {
       siasnWsAxios.interceptors.request.clear();
       siasnWsAxios.interceptors.response.clear();
+      log.debug("[SIASN Middleware] Axios interceptors dibersihkan");
     }
 
     if (redlock) {
       await redlock.quit();
       redlock = null;
+      log.debug("[SIASN Middleware] Redlock connection ditutup");
     }
     if (redisClient) {
       await redisClient.quit();
       redisClient = null;
+      log.debug("[SIASN Middleware] Redis connection ditutup");
     }
     if (httpsAgent) {
       httpsAgent.destroy();
       httpsAgent = null;
+      log.debug("[SIASN Middleware] HTTPS agent dihancurkan");
     }
-    console.log("SIASN middleware cleanup completed");
+
+    log.info("[SIASN Middleware] Cleanup berhasil diselesaikan");
   } catch (error) {
-    console.error("Error during SIASN middleware cleanup:", error);
+    log.error("[SIASN Middleware] Gagal melakukan cleanup:", {
+      error: error.message,
+      stack: error.stack,
+    });
   }
 };
 
@@ -51,26 +62,42 @@ process.on("beforeExit", cleanup);
 const initRedis = async () => {
   if (!redisClient) {
     try {
+      log.debug("[SIASN Middleware] Menginisialisasi Redis client");
       redisClient = await createRedisInstance();
       if (!redisClient) {
-        throw new Error("Failed to create Redis instance");
+        throw new Error("Gagal membuat Redis instance");
       }
+      log.info("[SIASN Middleware] Redis client berhasil diinisialisasi");
     } catch (error) {
-      console.error("Error initializing Redis client:", error);
+      log.error("[SIASN Middleware] Gagal menginisialisasi Redis client:", {
+        error: error.message,
+        stack: error.stack,
+      });
       throw error;
     }
   }
   if (!redlock) {
     try {
+      log.debug("[SIASN Middleware] Menginisialisasi Redlock");
       redlock = new Redlock([redisClient], {
         driftFactor: 0.01,
         retryCount: 3,
         retryDelay: 200,
         retryJitter: 200,
       });
-      console.log("Redis dan Redlock telah diinisialisasi");
+      log.info("[SIASN Middleware] Redis dan Redlock berhasil diinisialisasi", {
+        config: {
+          driftFactor: 0.01,
+          retryCount: 3,
+          retryDelay: 200,
+          retryJitter: 200,
+        },
+      });
     } catch (error) {
-      console.error("Error initializing Redlock:", error);
+      log.error("[SIASN Middleware] Gagal menginisialisasi Redlock:", {
+        error: error.message,
+        stack: error.stack,
+      });
       throw error;
     }
   }
@@ -107,28 +134,47 @@ const getOrCreateToken = async () => {
   // Cek token dulu sebelum acquire lock
   let tokenData = await redisClient.get(TOKEN_KEY);
   if (tokenData) {
+    log.debug("[SIASN Token] Token ditemukan di cache Redis");
     return JSON.parse(tokenData);
   }
+
+  log.debug(
+    "[SIASN Token] Token tidak ditemukan di cache, mencoba acquire lock"
+  );
 
   // Gunakan distributed lock untuk mencegah race condition
   let lock;
   try {
     // Acquire lock dengan TTL 10 detik
     lock = await redlock.acquire([LOCK_KEY], 10000);
+    log.debug("[SIASN Token] Lock berhasil di-acquire", {
+      lockKey: LOCK_KEY,
+      ttl: 10000,
+    });
 
     // Double-check token setelah acquire lock
     tokenData = await redisClient.get(TOKEN_KEY);
     if (tokenData) {
+      log.debug(
+        "[SIASN Token] Token ditemukan setelah acquire lock (dibuat oleh proses lain)"
+      );
       return JSON.parse(tokenData);
     }
 
     // Generate token baru
+    log.info("[SIASN Token] Membuat token baru");
     const token = await getoken();
     await redisClient.set(TOKEN_KEY, JSON.stringify(token), "EX", 3600); // TTL 1 hour
-    console.log("Token baru dibuat dan disimpan di Redis");
+    log.info("[SIASN Token] Token baru berhasil dibuat dan disimpan di Redis", {
+      ttl: 3600,
+      tokenKey: TOKEN_KEY,
+    });
     return token;
   } catch (err) {
-    // console.error("Gagal membuat token:", err);
+    log.warn("[SIASN Token] Gagal acquire lock, mencoba fallback strategy", {
+      error: err.message,
+      lockKey: LOCK_KEY,
+    });
 
     // Fallback: coba tunggu token dari process lain dengan timeout
     const maxRetries = 5;
@@ -139,30 +185,59 @@ const getOrCreateToken = async () => {
     for (let i = 0; i < maxRetries; i++) {
       // Check if total timeout exceeded
       if (Date.now() - startTime > totalTimeout) {
+        log.error(
+          "[SIASN Token] Timeout exceeded saat mencoba mendapatkan token",
+          {
+            totalTimeout,
+            elapsedTime: Date.now() - startTime,
+            retries: i + 1,
+          }
+        );
         throw new Error("Token retry timeout exceeded");
       }
+
+      log.debug(`[SIASN Token] Retry ke-${i + 1} dari ${maxRetries}`, {
+        retryTimeout,
+        elapsedTime: Date.now() - startTime,
+      });
 
       await new Promise((resolve) => setTimeout(resolve, retryTimeout));
 
       // Check if Redis client is still available
       if (!redisClient) {
+        log.error("[SIASN Token] Redis client tidak tersedia saat retry");
         throw new Error("Redis client unavailable during token retry");
       }
 
       tokenData = await redisClient.get(TOKEN_KEY);
       if (tokenData) {
-        console.log(`Token retrieved on retry attempt ${i + 1}`);
+        log.info(
+          `[SIASN Token] Token berhasil didapatkan pada retry ke-${i + 1}`,
+          {
+            totalRetries: i + 1,
+            elapsedTime: Date.now() - startTime,
+          }
+        );
         return JSON.parse(tokenData);
       }
     }
 
+    log.error("[SIASN Token] Gagal mendapatkan token setelah retry", {
+      maxRetries,
+      totalTimeout,
+      elapsedTime: Date.now() - startTime,
+    });
     throw new Error("Gagal mendapatkan token setelah retry");
   } finally {
     if (lock) {
       try {
         await lock.release();
+        log.debug("[SIASN Token] Lock berhasil di-release");
       } catch (err) {
-        console.error("Gagal release lock:", err);
+        log.error("[SIASN Token] Gagal release lock:", {
+          error: err.message,
+          lockKey: LOCK_KEY,
+        });
       }
     }
   }
@@ -170,13 +245,26 @@ const getOrCreateToken = async () => {
 
 const requestHandler = async (request) => {
   try {
+    log.debug("[SIASN Request] Memproses request", {
+      method: request.method,
+      url: request.url,
+      baseURL: request.baseURL,
+    });
+
     const token = await getOrCreateToken();
     const { sso_token, wso_token } = token;
     request.headers.Authorization = `Bearer ${wso_token}`;
     request.headers.Auth = `bearer ${sso_token}`;
+
+    log.debug("[SIASN Request] Token berhasil ditambahkan ke header");
     return request;
   } catch (error) {
-    console.error("Error pada requestHandler:", error);
+    log.error("[SIASN Request] Gagal memproses request:", {
+      error: error.message,
+      method: request.method,
+      url: request.url,
+      stack: error.stack,
+    });
     throw error;
   }
 };
@@ -184,10 +272,19 @@ const requestHandler = async (request) => {
 const responseHandler = async (response) => response;
 
 const errorHandler = async (error) => {
-  console.log("error", error);
   const errorData = error?.response?.data || {};
-  // typeo errorData is buffer
   const isBuffer = Buffer.isBuffer(errorData);
+  const statusCode = error?.response?.status;
+  const requestUrl = error?.config?.url;
+
+  log.error("[SIASN Error] Error terdeteksi pada request", {
+    error: error.message,
+    code: error.code,
+    url: requestUrl,
+    status: statusCode,
+    isBuffer,
+    errorData: isBuffer ? "[Buffer data]" : errorData,
+  });
 
   const ECONRESET = error?.code === "ECONNRESET";
   const invalidJwt = errorData.message === "invalid or expired jwt";
@@ -207,16 +304,37 @@ const errorHandler = async (error) => {
     isBuffer;
 
   if (notValid) {
+    log.warn(
+      "[SIASN Error] Token tidak valid atau expired, menghapus dari cache",
+      {
+        reason: {
+          invalidJwt,
+          runtimeError,
+          tokenError,
+          invalidCredentials,
+          ECONRESET,
+          isBuffer,
+        },
+        url: requestUrl,
+      }
+    );
+
     if (redisClient) {
       try {
         await redisClient.del(TOKEN_KEY);
-        console.log("Token dihapus dari Redis karena error:", errorData);
+        log.info("[SIASN Error] Token berhasil dihapus dari Redis cache");
       } catch (delError) {
-        console.error("Gagal menghapus token dari Redis:", delError);
+        log.error("[SIASN Error] Gagal menghapus token dari Redis:", {
+          error: delError.message,
+          stack: delError.stack,
+        });
       }
     }
     return Promise.reject(errorData);
   } else {
+    log.debug(
+      "[SIASN Error] Error tidak terkait dengan token, meneruskan error"
+    );
     return Promise.reject(errorData);
   }
 };
@@ -226,10 +344,21 @@ siasnWsAxios.interceptors.response.use(responseHandler, errorHandler);
 
 const siasnMiddleware = async (req, res, next) => {
   try {
+    log.debug("[SIASN Middleware] Request masuk", {
+      method: req.method,
+      path: req.path,
+      ip: req.ip,
+    });
+
     req.siasnRequest = siasnWsAxios;
     next();
   } catch (error) {
-    console.error("Error in siasnMiddleware:", error);
+    log.error("[SIASN Middleware] Gagal memproses middleware:", {
+      error: error.message,
+      method: req.method,
+      path: req.path,
+      stack: error.stack,
+    });
     res.status(500).json({ message: "Internal Server Error" });
   }
 };

@@ -59,7 +59,6 @@ import TrackingPencantumanGelarByNip from "./Usulan/TrackingPencantumanGelarByNi
 import TrackingPenyesuaianMasaKerjaByNip from "./Usulan/TrackingPenyesuaianMasaKerjaByNip";
 import TrackingPerbaikanNamaByNip from "./Usulan/TrackingPerbaikanNamaByNip";
 import TrackingUsulanLainnyaByNip from "./Usulan/TrackingUsulanLainnyaByNip";
-import ProfilDMS from "./ProfilDMS";
 
 // import { patchAnomali2023 } from "@/services/anomali.services";
 
@@ -117,7 +116,6 @@ const EmployeeDescriptionMaster = ({ data, loading, dataSiasn }) => {
                 Data Lokal (SIMASTER)
               </Text>
             </Group>
-            <ProfilDMS />
           </Group>
           <Row gutter={[12, 12]}>
             <Col xs={24} sm={8}>
