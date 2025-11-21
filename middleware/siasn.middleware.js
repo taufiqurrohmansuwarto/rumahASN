@@ -296,12 +296,8 @@ const errorHandler = async (error) => {
     !(errorData.description && errorData.description.includes("SUSPENDED"));
 
   const notValid =
-    invalidJwt ||
-    runtimeError ||
-    tokenError ||
-    invalidCredentials ||
-    ECONRESET ||
-    isBuffer;
+    invalidJwt || runtimeError || tokenError || invalidCredentials || ECONRESET;
+  // || isBuffer;
 
   if (notValid) {
     log.warn(
