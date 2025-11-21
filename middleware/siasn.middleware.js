@@ -273,7 +273,7 @@ const responseHandler = async (response) => response;
 
 const errorHandler = async (error) => {
   const errorData = error?.response?.data || {};
-  const isBuffer = Buffer.isBuffer(errorData);
+  // const isBuffer = Buffer.isBuffer(errorData);
   const statusCode = error?.response?.status;
   const requestUrl = error?.config?.url;
 
@@ -282,8 +282,8 @@ const errorHandler = async (error) => {
     code: error.code,
     url: requestUrl,
     status: statusCode,
-    isBuffer,
-    errorData: isBuffer ? "[Buffer data]" : errorData,
+    // isBuffer,
+    // errorData: isBuffer ? "[Buffer data]" : errorData,
   });
 
   const ECONRESET = error?.code === "ECONNRESET";
@@ -313,7 +313,7 @@ const errorHandler = async (error) => {
           tokenError,
           invalidCredentials,
           ECONRESET,
-          isBuffer,
+          // isBuffer,
         },
         url: requestUrl,
       }
