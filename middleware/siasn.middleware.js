@@ -94,7 +94,7 @@ const createHttpsAgent = () => {
 
 const siasnWsAxios = axios.create({
   baseURL: baseUrl,
-  // httpsAgent: createHttpsAgent(),
+  httpsAgent: createHttpsAgent(),
 });
 
 const getoken = async () => {
@@ -128,7 +128,6 @@ const getOrCreateToken = async () => {
     log.info("[SIASN] Creating new token");
     const token = await getoken();
     await redisClient.set(TOKEN_KEY, JSON.stringify(token), "EX", 3600); // TTL 1 hour
-    log.info("[SIASN] Token created", { token });
     return token;
   } catch (err) {
     log.warn("[SIASN] Lock acquisition failed, trying fallback", {
