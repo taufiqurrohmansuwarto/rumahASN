@@ -8,12 +8,10 @@ import {
   Alert,
   Badge,
   Box,
-  Container,
   Flex,
   Grid,
   Group,
   Avatar as MantineAvatar,
-  Skeleton as MantineSkeleton,
   Paper,
   Stack,
   Text,
@@ -28,7 +26,7 @@ import {
   IconX,
 } from "@tabler/icons-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Checkbox, Form, Input, Modal, Tooltip, message } from "antd";
+import { Checkbox, Form, Input, Modal, Skeleton, Tooltip, message } from "antd";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 
@@ -249,7 +247,7 @@ const EmployeeBio = ({
 
       {/* Informasi ASN */}
       <Box mt="md">
-        <MantineSkeleton visible={isLoadingDataPns}>
+        <Skeleton loading={isLoadingDataPns} active>
           <Alert
             icon={<IconInfoCircle size={16} />}
             title="Informasi ASN"
@@ -266,7 +264,7 @@ const EmployeeBio = ({
               </Text>
             </Stack>
           </Alert>
-        </MantineSkeleton>
+        </Skeleton>
       </Box>
 
       {/* Komponen IP ASN */}
@@ -293,27 +291,25 @@ const RekonPegawaiDetail = () => {
   });
 
   return (
-    <Container size="xl" p={0}>
-      <MantineSkeleton visible={isLoadingDataSimaster}>
-        {dataSimaster ? (
-          <Stack spacing="md">
-            <EmployeeDetail nip={nip} />
-            <Paper p="md" radius="md" withBorder>
-              <SiasnTab nip={nip} />
-            </Paper>
-          </Stack>
-        ) : (
-          <Paper p="xl" radius="md" withBorder>
-            <Flex direction="column" align="center" justify="center" h={200}>
-              <IconFileText size={48} color="gray" />
-              <Text size="lg" c="dimmed" mt="md">
-                Data tidak ditemukan
-              </Text>
-            </Flex>
+    <Skeleton loading={isLoadingDataSimaster} active>
+      {dataSimaster ? (
+        <Stack spacing="md">
+          <EmployeeDetail nip={nip} />
+          <Paper p="md" radius="md" withBorder>
+            <SiasnTab nip={nip} />
           </Paper>
-        )}
-      </MantineSkeleton>
-    </Container>
+        </Stack>
+      ) : (
+        <Paper p="xl" radius="md" withBorder>
+          <Flex direction="column" align="center" justify="center" h={200}>
+            <IconFileText size={48} color="gray" />
+            <Text size="lg" c="dimmed" mt="md">
+              Data tidak ditemukan
+            </Text>
+          </Flex>
+        </Paper>
+      )}
+    </Skeleton>
   );
 };
 
