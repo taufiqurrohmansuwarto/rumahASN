@@ -94,7 +94,7 @@ const createHttpsAgent = () => {
 
 const siasnWsAxios = axios.create({
   baseURL: baseUrl,
-  httpsAgent: createHttpsAgent(),
+  // httpsAgent: createHttpsAgent(),
 });
 
 const getoken = async () => {
@@ -128,6 +128,7 @@ const getOrCreateToken = async () => {
     log.info("[SIASN] Creating new token");
     const token = await getoken();
     await redisClient.set(TOKEN_KEY, JSON.stringify(token), "EX", 3600); // TTL 1 hour
+    log.info("[SIASN] Token created", { token });
     return token;
   } catch (err) {
     log.warn("[SIASN] Lock acquisition failed, trying fallback", {
@@ -202,19 +203,13 @@ const errorHandler = async (error) => {
   const invalidJwt = errorData.message === "invalid or expired jwt";
   const tokenError = errorData.data === "Token SSO mismatch";
   const invalidCredentials = errorData.message === "Invalid Credentials";
-  const notFound = errorData.message === "Not Found";
 
   const runtimeError =
     errorData.message === "Runtime Error" &&
     !(errorData.description && errorData.description.includes("SUSPENDED"));
 
   const isTokenError =
-    invalidJwt ||
-    runtimeError ||
-    tokenError ||
-    invalidCredentials ||
-    ECONRESET ||
-    notFound;
+    invalidJwt || runtimeError || tokenError || invalidCredentials || ECONRESET;
 
   if (isTokenError) {
     log.warn("[SIASN] Token invalid/expired, invalidating cache", {

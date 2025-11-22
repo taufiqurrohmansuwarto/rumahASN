@@ -294,3 +294,59 @@
 {"level":"info","message":"[SIASN] Redis initialized","timestamp":"2025-11-22T04:46:26.517Z"}
 {"level":"info","message":"[SIASN] Redis initialized","timestamp":"2025-11-22T04:48:07.089Z"}
 {"level":"info","message":"[SIASN] Redis initialized","timestamp":"2025-11-22T04:48:07.871Z"}
+{"level":"info","message":"[SIASN] Redis initialized","timestamp":"2025-11-22T05:05:14.359Z"}
+{"level":"warn","message":"[SIASN] Token invalid/expired, invalidating cache {\n  \"url\": \"/pns/nilaiipasn/199103052019031008\",\n  \"status\": 404\n}","timestamp":"2025-11-22T05:05:18.922Z"}
+{"level":"warn","message":"[SIASN] Token invalid/expired, invalidating cache {\n  \"url\": \"/pns/data-utama/199103052019031008\",\n  \"status\": 404\n}","timestamp":"2025-11-22T05:05:20.065Z"}
+{"level":"info","message":"[SIASN] Creating new token","timestamp":"2025-11-22T05:05:22.780Z"}
+{"level":"warn","message":"[SIASN] Lock acquisition failed, trying fallback {\n  \"error\": \"The operation was unable to achieve a quorum during its retry window.\"\n}","timestamp":"2025-11-22T05:05:22.945Z"}
+{"level":"warn","message":"[SIASN] Token invalid/expired, invalidating cache {\n  \"url\": \"/pns/data-utama/199103052019031008\",\n  \"status\": 404\n}","timestamp":"2025-11-22T05:05:23.399Z"}
+{"level":"info","message":"[SIASN] Creating new token","timestamp":"2025-11-22T05:05:23.429Z"}
+{"level":"info","message":"[SIASN] Token acquired on retry 1","timestamp":"2025-11-22T05:05:23.951Z"}
+{"level":"warn","message":"[SIASN] Token invalid/expired, invalidating cache {\n  \"url\": \"/pns/nilaiipasn/199103052019031008\",\n  \"status\": 404\n}","timestamp":"2025-11-22T05:05:24.930Z"}
+{"level":"info","message":"[SIASN] Creating new token","timestamp":"2025-11-22T05:05:25.432Z"}
+{"level":"warn","message":"[SIASN] Token invalid/expired, invalidating cache {\n  \"url\": \"/pns/data-utama/199103052019031008\",\n  \"status\": 404\n}","timestamp":"2025-11-22T05:05:26.074Z"}
+{"level":"info","message":"[SIASN] Creating new token","timestamp":"2025-11-22T05:05:26.298Z"}
+{"level":"warn","message":"[SIASN] Token invalid/expired, invalidating cache {\n  \"url\": \"/pns/nilaiipasn/199103052019031008\",\n  \"status\": 404\n}","timestamp":"2025-11-22T05:05:35.218Z"}
+{"level":"warn","message":"[SIASN] Token invalid/expired, invalidating cache {\n  \"url\": \"/pns/data-utama/199103052019031008\",\n  \"status\": 404\n}","timestamp":"2025-11-22T05:05:35.224Z"}
+{"level":"warn","message":"[SIASN] Token invalid/expired, invalidating cache {\n  \"url\": \"/pns/nilaiipasn/199103052019031008\",\n  \"status\": 404\n}","timestamp":"2025-11-22T05:05:35.568Z"}
+{"level":"info","message":"[SIASN] Creating new token","timestamp":"2025-11-22T05:05:38.466Z"}
+{"level":"warn","message":"[SIASN] Token invalid/expired, invalidating cache {\n  \"url\": \"/pns/nilaiipasn/199103052019031008\",\n  \"status\": 404\n}","timestamp":"2025-11-22T05:05:39.166Z"}
+{"level":"info","message":"[SIASN] Redis initialized","timestamp":"2025-11-22T05:05:54.970Z"}
+{"level":"info","message":"[SIASN] Creating new token","timestamp":"2025-11-22T05:05:55.008Z"}
+{"level":"info","message":"[SIASN] Redis initialized","timestamp":"2025-11-22T05:06:30.011Z"}
+{"level":"info","message":"[SIASN] Redis initialized","timestamp":"2025-11-22T05:06:34.545Z"}
+{"level":"info","message":"[SIASN] Redis initialized","timestamp":"2025-11-22T05:08:10.713Z"}
+{"level":"info","message":"[SIASN] Creating new token","timestamp":"2025-11-22T05:08:10.725Z"}
+{"level":"info","message":"[SIASN] Redis initialized","timestamp":"2025-11-22T05:09:04.329Z"}
+{"level":"info","message":"[SIASN] Redis initialized","timestamp":"2025-11-22T05:09:20.967Z"}
+{"level":"info","message":"[SIASN] Redis initialized","timestamp":"2025-11-22T05:09:21.008Z"}
+{"level":"info","message":"[SIASN] Redis initialized","timestamp":"2025-11-22T05:09:21.013Z"}
+{"level":"info","message":"[SIASN] Redis initialized","timestamp":"2025-11-22T05:09:21.023Z"}
+{"level":"info","message":"[SIASN] Redis initialized","timestamp":"2025-11-22T05:09:21.023Z"}
+{"level":"info","message":"[SIASN] Redis initialized","timestamp":"2025-11-22T05:09:37.052Z"}
+{"level":"info","message":"[SIASN] Redis initialized","timestamp":"2025-11-22T05:09:37.053Z"}
+{"level":"info","message":"[SIASN] Redis initialized","timestamp":"2025-11-22T05:09:37.746Z"}
+{"level":"info","message":"[SIASN] Redis initialized","timestamp":"2025-11-22T05:09:37.758Z"}
+{"level":"info","message":"[SIASN] Redis initialized","timestamp":"2025-11-22T05:09:56.438Z"}
+{"level":"warn","message":"[SIASN] Token invalid/expired, invalidating cache {\n  \"url\": \"/pns/nilaiipasn/199103052019031008\"\n}","timestamp":"2025-11-22T05:10:06.619Z"}
+{"level":"info","message":"[SIASN] Creating new token","timestamp":"2025-11-22T05:10:17.002Z"}
+{"level":"info","message":"[SIASN] Redis initialized","timestamp":"2025-11-22T05:11:01.379Z"}
+{"level":"info","message":"[SIASN] Redis initialized","timestamp":"2025-11-22T05:11:02.289Z"}
+{"level":"info","message":"[SIASN] Redis initialized","timestamp":"2025-11-22T05:11:53.411Z"}
+{"level":"info","message":"[SIASN] Redis initialized","timestamp":"2025-11-22T05:12:10.932Z"}
+{"level":"info","message":"[SIASN] Redis initialized","timestamp":"2025-11-22T05:12:33.332Z"}
+{"level":"info","message":"[SIASN] Creating new token","timestamp":"2025-11-22T05:12:33.351Z"}
+{"level":"info","message":"[SIASN] Redis initialized","timestamp":"2025-11-22T05:12:37.126Z"}
+{"level":"warn","message":"[SIASN] Token invalid/expired, invalidating cache {\n  \"url\": \"/partition/list-pg-instansi?nip=199103052019031008\"\n}","timestamp":"2025-11-22T05:12:44.341Z"}
+{"level":"info","message":"[SIASN] Redis initialized","timestamp":"2025-11-22T05:12:59.102Z"}
+{"level":"info","message":"[SIASN] Creating new token","timestamp":"2025-11-22T05:12:59.232Z"}
+{"level":"info","message":"[SIASN] Redis initialized","timestamp":"2025-11-22T05:14:20.808Z"}
+{"level":"info","message":"[SIASN] Redis initialized","timestamp":"2025-11-22T05:14:26.220Z"}
+{"level":"info","message":"[SIASN] Redis initialized","timestamp":"2025-11-22T05:14:38.350Z"}
+{"level":"info","message":"[SIASN] Redis initialized","timestamp":"2025-11-22T05:14:38.350Z"}
+{"level":"info","message":"[SIASN] Creating new token","timestamp":"2025-11-22T05:14:38.373Z"}
+{"level":"info","message":"[SIASN] Token created {\n  \"token\": {\n    \"sso_token\": \"eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJBUWNPM0V3MVBmQV9MQ0FtY2J6YnRLUEhtcWhLS1dRbnZ1VDl0RUs3akc4In0.eyJleHAiOjE3MzE5NTUyNjksImlhdCI6MTczMTkxMjA2OSwianRpIjoiZjhmNzY3MTMtYWI0YS00NzY0LThhZDctZTYwNzg5ODJlNGIzIiwiaXNzIjoiaHR0cHM6Ly9zc28tc2lhc24uYmtuLmdvLmlkL2F1dGgvcmVhbG1zL3B1YmxpYy1zaWFzbiIsImF1ZCI6ImFjY291bnQiLCJzdWIiOiI3MDQ1OWRkOC1mMDEyLTRlZWUtOTk3Yi01MTdlM2JlYzcyNTIiLCJ0eXAiOiJCZWFyZXIiLCJhenAiOiJwcm92amF0aW13cyIsInNlc3Npb25fc3RhdGUiOiI3NGU1NzNhZS0wYWM0LTRiMWUtOGQ0ZS1lMTM3ZDY1ZjY3MWIiLCJhY3IiOiIxIiwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbInJvbGU6c2lhc24taW5zdGFuc2k6cGVyZW1hamFhbjpvcGVyYXRvciIsInJvbGU6c2lhc24taW5zdGFuc2k6cGVyZW5jYW5hYW46aW5zdGFuc2ktb3BlcmF0b3ItaW5mb2phYiIsInJvbGU6c2lhc24taW5zdGFuc2k6cGk6b3BlcmF0b3IiLCJyb2xlOnNpYXNuLWluc3RhbnNpOnBlcmVtYWphYW46dW5vcjpvcGVyYXRvciIsInJvbGU6c2lhc24taW5zdGFuc2k6cGVyZW5jYW5hYW46aW5zdGFuc2ktbW9uaXRvci1wZXJlbmNhbmFhbi1rZXBlZ2F3YWlhbiIsInJvbGU6c2lhc24taW5zdGFuc2k6cGVuZ2FkYWFuOmFwcHJvdmFsIiwicm9sZTpzaWFzbi1pbnN0YW5zaTpwZW5nYWRhYW46VFRFIiwicm9sZTpzaWFzbi1pbnN0YW5zaTpwZXJlbWFqYWFuOnVub3I6YXBwcm92YWwiLCJyb2xlOnNpYXNuLWluc3RhbnNpOmtwOm9wZXJhdG9yIiwicm9sZTpkYXNoYm9hcmQta2ViaWpha2FuOmluc3RhbnNpIiwicm9sZTptYW5hamVtZW4td3M6ZGV2ZWxvcGVyIiwib2ZmbGluZV9hY2Nlc3MiLCJyb2xlOnNpYXNuLWluc3RhbnNpOnBlcmVuY2FuYWFuOmluc3RhbnNpLW9wZXJhdG9yLXBlbWVudWhhbi1rZWItcGVnYXdhaSIsInVtYV9hdXRob3JpemF0aW9uIiwicm9sZTpzaWFzbi1pbnN0YW5zaTpza2s6YXBwcm92YWwiLCJyb2xlOnNpYXNuLWluc3RhbnNpOnBlcmVuY2FuYWFuOmluc3RhbnNpLW9wZXJhdG9yLWV2YWphYiIsInJvbGU6c2lhc24taW5zdGFuc2k6c2trOm9wZXJhdG9yIiwicm9sZTpzaWFzbi1pbnN0YW5zaTpwZXJlbWFqYWFuOmFwcHJvdmFsIiwicm9sZTpzaWFzbi1pbnN0YW5zaTpwZXJlbmNhbmFhbjppbnN0YW5zaS1vcGVyYXRvci1zb3RrIiwicm9sZTpzaWFzbi1pbnN0YW5zaTpwZW1iZXJoZW50aWFuOmFwcHJvdmFsX2l6aW5fcHBwayIsInJvbGU6ZGFzaGJvYXJkLW9wZXJhc2lvbmFsOmluc3RhbnNpIiwicm9sZTpzaWFzbi1pbnN0YW5zaTpwZW1iZXJoZW50aWFuOm9wZXJhdG9yX2l6aW5fcHBwayIsInJvbGU6c2lhc24taW5zdGFuc2k6cGVuZ2FkYWFuOm9wZXJhdG9yIiwicm9sZTpzaWFzbi1pbnN0YW5zaTpwZW1iZXJoZW50aWFuOm9wZXJhdG9yIiwicm9sZTpzaWFzbi1pbnN0YW5zaTpwZXJlbmNhbmFhbjppbnN0YW5zaS1wZW1iaW5hLXBwayIsInJvbGU6c2lhc24taW5zdGFuc2k6aXBhc246bW9uaXRvcmluZyIsInJvbGU6c2lhc24taW5zdGFuc2k6dG0taW5zdGFuc2kiLCJyb2xlOnNpYXNuLWluc3RhbnNpOnBlcmVuY2FuYWFuOmluc3RhbnNpLW9wZXJhdG9yLXN0YW5kYXIta29tcC1qYWIiLCJyb2xlOnNpYXNuLWluc3RhbnNpOnBlbWJlcmhlbnRpYW46YXBwcm92YWwiLCJyb2xlOnNpYXNuLWluc3RhbnNpOnBlcmVuY2FuYWFuOmluc3RhbnNpLXBlbmV0YXBhbi1zb3RrIiwicm9sZTpzaWFzbi1pbnN0YW5zaTpwcm9maWxhc246dmlld3Byb2ZpbCIsInJvbGU6ZGFzaGJvYXJkLW9wZXJhc2lvbmFsOmluc3RhbnNpLXBpbXBpbmFuIiwicm9sZTpzaWFzbi1pbnN0YW5zaTphZG1pbjphZG1pbiIsInJvbGU6c2lhc24taW5zdGFuc2k6cGVyZW5jYW5hYW46aW5zdGFuc2ktdmFsaWRhdG9yLXN0YW5kYXIta29tcC1qYWIiXX0sInJlc291cmNlX2FjY2VzcyI6eyJhY2NvdW50Ijp7InJvbGVzIjpbIm1hbmFnZS1hY2NvdW50IiwibWFuYWdlLWFjY291bnQtbGlua3MiLCJ2aWV3LXByb2ZpbGUiXX19LCJzY29wZSI6ImVtYWlsIHByb2ZpbGUiLCJlbWFpbF92ZXJpZmllZCI6ZmFsc2UsIm5hbWUiOiJJUFVUIFRBVUZJUVVSUk9ITUFOIFNVV0FSVE8iLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiIxOTkxMDMwNTIwMTkwMzEwMDgiLCJnaXZlbl9uYW1lIjoiSVBVVCIsImZhbWlseV9uYW1lIjoiVEFVRklRVVJST0hNQU4gU1VXQVJUTyIsImVtYWlsIjoidGF1ZmlxdXJyb2htYW4uc3V3YXJ0b0BnbWFpbC5jb20ifQ.N3zih1pPudjJmJPmS0v8gz2FTYZzTEQZgcj2qbSkwIbizSfd1RvJ9sSwZZgP3C1AyHQtcQHmPAUFhD7JjoEyAm3L3bHVnyAD1To8I4hEofpUaU9EQNaLxbdaQaRGea85HF7z67FNQgVwraSu6EhwemZX2Zwr0la5cG3bhew_Yt2tLgnCu5EnMuea9i_keQ0p7tY-_qSmZWMtyj-zPGbALPmbHpbBzECnJfK6F7XJ3rKw4U7CXYgCKDmyMpl4-UXSbRDPb_DvIUo-2OvdOySXfvD50ZBqL9ioXCRuT0UuLUoZ6D3wQtIowsWJNQSLuEg3g5YHQZ2iI-DONAeMgS_Aaw\",\n    \"wso_token\": \"eyJ4NXQiOiJNell4TW1Ga09HWXdNV0kwWldObU5EY3hOR1l3WW1NNFpUQTNNV0kyTkRBelpHUXpOR00wWkdSbE5qSmtPREZrWkRSaU9URmtNV0ZoTXpVMlpHVmxOZyIsImtpZCI6Ik16WXhNbUZrT0dZd01XSTBaV05tTkRjeE5HWXdZbU00WlRBM01XSTJOREF6WkdRek5HTTBaR1JsTmpKa09ERmtaRFJpT1RGa01XRmhNelUyWkdWbE5nX1JTMjU2IiwiYWxnIjoiUlMyNTYifQ.eyJzdWIiOiIxOTkxMDMwNTIwMTkwMzEwMDgiLCJhdXQiOiJBUFBMSUNBVElPTiIsImF1ZCI6ImpwOWxVeHVDbmhXU0M1cGNadl8wV29DMVExTWEiLCJuYmYiOjE3NjM3ODg0ODQsImF6cCI6ImpwOWxVeHVDbmhXU0M1cGNadl8wV29DMVExTWEiLCJzY29wZSI6ImRlZmF1bHQiLCJpc3MiOiJodHRwczpcL1wvbG9jYWxob3N0Ojk0NDNcL29hdXRoMlwvdG9rZW4iLCJleHAiOjE3NjM3OTIwODQsImlhdCI6MTc2Mzc4ODQ4NCwianRpIjoiNDZmYzRlN2QtZjFmOC00NWQzLThjNjYtNTQ0ZGQ1YmUzMDk3In0.MLIFMzFTAEmoKvvo0U989Ka0-iiEEnX2u5RhNNe6PFTmkYq2-bM6nhB5TEp4_NFcwHBmht0vhspmMmRtbRcyEm46ZX_fgZE0lByNS4ZPgXDYDwgVi2h4k3cIY3yRBGdc632kags3m62BLf1OrXS_QZErlByR63v8mPyyv1et16ZBvaSp_NSU01O5aRsg3tj3hnJtjqxcAt83m2U5hpm4im_-WVl78-1bMktYPeDza_cIJlk6HXd_UCFnueMNCSsLKTFal-8JXd_7XUdi-ClS3ATrbNmriUNHynDQgS00bfuF48us0Nwq4f8d0QjQtkuMTZhxtbrh8mzWQCvjetYydQ\"\n  }\n}","timestamp":"2025-11-22T05:14:38.626Z"}
+{"level":"info","message":"[SIASN] Redis initialized","timestamp":"2025-11-22T05:14:50.869Z"}
+{"level":"info","message":"[SIASN] Redis initialized","timestamp":"2025-11-22T05:20:35.870Z"}
+{"level":"info","message":"[SIASN] Redis initialized","timestamp":"2025-11-22T05:20:35.870Z"}
+{"level":"info","message":"[SIASN] Redis initialized","timestamp":"2025-11-22T05:20:36.236Z"}
