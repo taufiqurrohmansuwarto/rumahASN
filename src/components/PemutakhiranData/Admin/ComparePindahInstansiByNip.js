@@ -1,11 +1,16 @@
 import { rwPindahByNip } from "@/services/master.services";
 import { getRwPindahInstansiByNip } from "@/services/siasn-services";
-import { Stack } from "@mantine/core";
+import {
+  Badge as MantineBadge,
+  Stack,
+  Text as MantineText,
+} from "@mantine/core";
+import { IconBuilding, IconFileText, IconRefresh } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
-import { Card, Table } from "antd";
+import { Button, Card, Divider, Flex, Space, Table, Typography } from "antd";
 
 function ComparePindahInstansiByNip({ nip }) {
-  const { data, isLoading } = useQuery(
+  const { data, isLoading, refetch, isFetching } = useQuery(
     ["rw-pindah-instansi", nip],
     () => getRwPindahInstansiByNip(nip),
     {
@@ -29,115 +34,259 @@ function ComparePindahInstansiByNip({ nip }) {
 
   const columns = [
     {
-      title: "Nomer BKN",
-      dataIndex: "skBknNomor",
+      title: "Jenis",
+      dataIndex: "jenisPi",
+      width: 120,
+      render: (jenisPi) => (
+        <MantineBadge size="sm" color="blue" tt="none">
+          {jenisPi}
+        </MantineBadge>
+      ),
     },
     {
-      title: "Tanggal SK BKN",
-      dataIndex: "skBknTanggal",
+      title: "SK BKN",
+      key: "sk_bkn",
+      width: 200,
+      render: (_, record) => (
+        <div>
+          <MantineText size="sm" fw={500}>
+            {record?.skBknNomor}
+          </MantineText>
+          <MantineText size="xs" c="dimmed">
+            {record?.skBknTanggal}
+          </MantineText>
+        </div>
+      ),
     },
     {
-      title: "TMT Pindah Instansi",
+      title: "SK Asal",
+      key: "sk_asal",
+      width: 200,
+      render: (_, record) => (
+        <div>
+          <MantineText size="sm" fw={500}>
+            {record?.skAsalNomor}
+          </MantineText>
+          <MantineText size="xs" c="dimmed">
+            {record?.skAsalTanggal}
+          </MantineText>
+        </div>
+      ),
+    },
+    {
+      title: "SK Tujuan",
+      key: "sk_tujuan",
+      width: 200,
+      render: (_, record) => (
+        <div>
+          <MantineText size="sm" fw={500}>
+            {record?.skTujuanNomor}
+          </MantineText>
+          <MantineText size="xs" c="dimmed">
+            {record?.skTujuanTanggal}
+          </MantineText>
+        </div>
+      ),
+    },
+    {
+      title: "TMT Pindah",
       dataIndex: "tmtPi",
+      width: 120,
+      align: "center",
+      render: (tmtPi) => (
+        <MantineBadge size="sm" color="green">
+          {tmtPi}
+        </MantineBadge>
+      ),
     },
-    {
-      title: "Nomer SK Asal",
-      dataIndex: "skAsalNomor",
-    },
-    {
-      title: "Nomer Tanggal SK Asal",
-      dataIndex: "skAsalTanggal",
-    },
-    {
-      title: "Nomer SK Tujuan",
-      dataIndex: "skTujuanNomor",
-    },
-    {
-      title: "Tanggal SK Tujuan",
-      dataIndex: "skTujuanTanggal",
-    },
-    { title: "Jenis", dataIndex: "jenisPi" },
   ];
 
   const masterColumn = [
     {
-      title: "Pindah",
-      key: "file_pindah",
+      title: "Jenis & Dokumen",
+      key: "jenis_dokumen",
+      width: 150,
       render: (_, record) => (
-        <a href={record?.file_pindah} target="_blank" rel="noreferrer">
-          File
-        </a>
+        <div>
+          <MantineBadge
+            size="sm"
+            color="blue"
+            tt="none"
+            style={{ marginBottom: 8 }}
+          >
+            {record?.jenis_pindah?.jenis_pindah}
+          </MantineBadge>
+          {record?.file_pindah && (
+            <div style={{ marginBottom: 4 }}>
+              <a href={record.file_pindah} target="_blank" rel="noreferrer">
+                <Button size="small" icon={<IconFileText size={14} />}>
+                  Pindah
+                </Button>
+              </a>
+            </div>
+          )}
+          {record?.file_spmt && (
+            <div>
+              <a href={record.file_spmt} target="_blank" rel="noreferrer">
+                <Button size="small" icon={<IconFileText size={14} />}>
+                  SPMT
+                </Button>
+              </a>
+            </div>
+          )}
+        </div>
       ),
     },
     {
-      title: "SPMT",
-      key: "file_spmt",
+      title: "Asal",
+      key: "asal",
+      width: 250,
       render: (_, record) => (
-        <a href={record?.file_spmt} target="_blank" rel="noreferrer">
-          File
-        </a>
+        <div>
+          <MantineText size="sm" fw={500}>
+            {record?.instansi_asal}
+          </MantineText>
+          <MantineText size="xs" c="dimmed">
+            {record?.induk_asal}
+          </MantineText>
+        </div>
       ),
     },
     {
-      title: "Jenis Pindah",
-      key: "jenis_pindah",
-      render: (_, record) => <div>{record?.jenis_pindah?.jenis_pindah}</div>,
+      title: "Tujuan",
+      key: "tujuan",
+      width: 250,
+      render: (_, record) => (
+        <div>
+          <MantineText size="sm" fw={500}>
+            {record?.instansi_tujuan}
+          </MantineText>
+          <MantineText size="xs" c="dimmed">
+            {record?.induk_tujuan}
+          </MantineText>
+        </div>
+      ),
     },
     {
-      title: "Nomer SK",
+      title: "No. SK",
       dataIndex: "no_sk",
-    },
-    {
-      title: "Tanggal SK",
-      dataIndex: "tgl_sk",
+      width: 180,
+      render: (no_sk, record) => (
+        <div>
+          <MantineText size="sm" fw={500}>
+            {no_sk}
+          </MantineText>
+          <MantineText size="xs" c="dimmed">
+            {record?.tgl_sk}
+          </MantineText>
+        </div>
+      ),
     },
     {
       title: "TMT Pindah",
       dataIndex: "tmt_pindah",
+      width: 120,
+      align: "center",
+      render: (tmt_pindah) => (
+        <MantineBadge size="sm" color="green">
+          {tmt_pindah}
+        </MantineBadge>
+      ),
     },
     {
-      title: "Induk Asal",
-      dataIndex: "induk_asal",
-    },
-    {
-      title: "Instansi Asal",
-      dataIndex: "instansi_asal",
-    },
-    {
-      title: "Induk Tujuan",
-      dataIndex: "induk_tujuan",
-    },
-    {
-      title: "Instansi Tujuan",
-      dataIndex: "instansi_tujuan",
-    },
-    {
-      title: "Aktif",
+      title: "Status",
       dataIndex: "aktif",
+      width: 80,
+      align: "center",
+      render: (aktif) => (
+        <MantineBadge
+          size="sm"
+          color={aktif === "Y" ? "green" : "gray"}
+          tt="none"
+        >
+          {aktif === "Y" ? "Aktif" : "Tidak"}
+        </MantineBadge>
+      ),
     },
   ];
 
   return (
-    <Card title="Riwayat Pindah Instansi">
-      <Stack>
-        <Table
-          title={() => "SIASN"}
-          columns={columns}
-          pagination={false}
-          dataSource={data}
-          loading={isLoading}
-          rowKey={(row) => row?.id}
-        />
-        <Table
-          title={() => "SIMASTER"}
-          columns={masterColumn}
-          pagination={false}
-          dataSource={pindahSimaster}
-          loading={isLoadingPindahSimaster}
-          rowKey={(row) => row?.pindah_id}
-        />
-      </Stack>
-    </Card>
+    <div>
+      <Card
+        title={
+          <Space>
+            <IconBuilding size={20} color="#722ed1" />
+            <Typography.Title level={4} style={{ margin: 0 }}>
+              Komparasi Pindah Instansi
+            </Typography.Title>
+          </Space>
+        }
+      >
+        <Stack>
+          <Flex
+            justify="space-between"
+            align="center"
+            style={{ marginBottom: 16 }}
+          >
+            <Space>
+              <MantineText fw={600} size="sm">
+                SIASN
+              </MantineText>
+              <MantineBadge size="sm" variant="light" color="blue">
+                {data?.length || 0}
+              </MantineBadge>
+            </Space>
+            <Button
+              size="small"
+              onClick={() => refetch()}
+              icon={<IconRefresh size={16} />}
+              loading={isFetching}
+            >
+              Refresh
+            </Button>
+          </Flex>
+
+          <Table
+            title={null}
+            columns={columns}
+            pagination={false}
+            dataSource={data}
+            loading={isLoading || isFetching}
+            rowKey={(row) => row?.id}
+            size="middle"
+            scroll={{ x: 800 }}
+            rowClassName={(record, index) =>
+              index % 2 === 0 ? "table-row-light" : "table-row-dark"
+            }
+          />
+
+          <Divider />
+
+          <Space style={{ marginBottom: 16 }}>
+            <MantineText fw={600} size="sm">
+              SIMASTER
+            </MantineText>
+            <MantineBadge size="sm" variant="light" color="orange">
+              {pindahSimaster?.length || 0}
+            </MantineBadge>
+          </Space>
+
+          <Table
+            title={null}
+            columns={masterColumn}
+            pagination={false}
+            dataSource={pindahSimaster}
+            loading={isLoadingPindahSimaster}
+            rowKey={(row) => row?.pindah_id}
+            size="middle"
+            scroll={{ x: 800 }}
+            rowClassName={(record, index) =>
+              index % 2 === 0 ? "table-row-light" : "table-row-dark"
+            }
+          />
+        </Stack>
+      </Card>
+    </div>
   );
 }
 

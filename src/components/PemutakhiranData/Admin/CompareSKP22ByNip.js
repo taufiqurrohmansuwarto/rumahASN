@@ -5,21 +5,32 @@ import {
   uploadDokRiwayat,
 } from "@/services/siasn-services";
 import useFileStore from "@/store/useFileStore";
-import { PlusOutlined, SendOutlined } from "@ant-design/icons";
-import { Stack } from "@mantine/core";
+import {
+  Badge as MantineBadge,
+  Stack,
+  Text as MantineText,
+} from "@mantine/core";
+import {
+  IconChartBar,
+  IconFileText,
+  IconPlus,
+  IconSend,
+} from "@tabler/icons-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Alert,
   Button,
   Card,
+  Divider,
   Flex,
   Form,
   Modal,
   Select,
+  Space,
   Table,
+  Tooltip,
   Typography,
   message,
-  Tooltip,
 } from "antd";
 import { useState } from "react";
 import FileUploadSIASN from "../FileUploadSIASN";
@@ -221,68 +232,99 @@ function CompareSKP22ByNip({ nip }) {
 
   const columns = [
     {
-      title: "File",
-      key: "file",
-      render: (_, record) => {
-        return (
-          <>
-            {record?.path?.[890] && (
-              <a
-                href={`/helpdesk/api/siasn/ws/download?filePath=${record?.path?.[890]?.dok_uri}`}
-                target="_blank"
-                rel="noreferrer"
-              >
-                File
-              </a>
-            )}
-          </>
-        );
-      },
+      title: "Tahun",
+      dataIndex: "tahun",
+      width: 80,
+      align: "center",
+      render: (tahun) => (
+        <MantineBadge size="sm" color="violet">
+          {tahun}
+        </MantineBadge>
+      ),
     },
     {
       title: "Hasil Kinerja",
-      dataIndex: "hasilKinerja",
-    },
-    {
-      title: "Hasil Kinerja Nilai",
-      dataIndex: "hasilKinerjaNilai",
-    },
-    {
-      title: "Kuadran Kinerja",
-      dataIndex: "kuadranKinerja",
-    },
-    {
-      title: "Nama Penilai",
-      dataIndex: "namaPenilai",
-    },
-    {
-      title: "NIP Penilai",
-      dataIndex: "nipNrpPenilai",
-      responsive: ["sm"],
-    },
-    {
-      title: "Unor Penilai",
-      dataIndex: "penilaiUnorNm",
+      key: "hasil_kinerja",
+      width: 150,
+      render: (_, record) => (
+        <div>
+          <MantineText size="sm" fw={500}>
+            {record?.hasilKinerja}
+          </MantineText>
+          <MantineBadge size="xs" color="blue">
+            Nilai: {record?.hasilKinerjaNilai}
+          </MantineBadge>
+        </div>
+      ),
     },
     {
       title: "Perilaku Kerja",
-      dataIndex: "perilakuKerja",
+      key: "perilaku_kerja",
+      width: 150,
+      render: (_, record) => (
+        <div>
+          <MantineText size="sm" fw={500}>
+            {record?.perilakuKerja}
+          </MantineText>
+          <MantineBadge size="xs" color="green">
+            Nilai: {record?.PerilakuKerjaNilai}
+          </MantineBadge>
+        </div>
+      ),
     },
     {
-      title: "Perilaku Kerja Nilai",
-      dataIndex: "PerilakuKerjaNilai",
+      title: "Kuadran",
+      dataIndex: "kuadranKinerja",
+      width: 120,
+      render: (kuadranKinerja) => (
+        <MantineBadge size="sm" color="orange" tt="none">
+          {kuadranKinerja}
+        </MantineBadge>
+      ),
     },
     {
-      title: "Status Penilai",
-      dataIndex: "statusPenilai",
+      title: "Penilai",
+      key: "penilai",
+      width: 220,
+      render: (_, record) => (
+        <div>
+          <MantineText size="sm" fw={500}>
+            {record?.namaPenilai}
+          </MantineText>
+          <MantineText size="xs" c="dimmed">
+            {record?.nipNrpPenilai} - {record?.statusPenilai}
+          </MantineText>
+          <MantineText size="xs" c="dimmed">
+            {record?.penilaiUnorNm}
+          </MantineText>
+        </div>
+      ),
     },
     {
-      title: "Tahun",
-      dataIndex: "tahun",
+      title: "Dokumen",
+      key: "file",
+      width: 100,
+      render: (_, record) => (
+        <>
+          {record?.path?.[890] && (
+            <a
+              href={`/helpdesk/api/siasn/ws/download?filePath=${record?.path?.[890]?.dok_uri}`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              <Button size="small" icon={<IconFileText size={14} />}>
+                SKP
+              </Button>
+            </a>
+          )}
+        </>
+      ),
     },
     {
       title: "Aksi",
       key: "aksi",
+      width: 80,
+      align: "center",
       render: (_, row) => {
         return (
           <UploadDokumen
@@ -298,30 +340,57 @@ function CompareSKP22ByNip({ nip }) {
 
   const columnMaster = [
     {
-      title: "File",
-      key: "file_skp",
-      render: (_, record) => (
-        <a href={record?.file_skp} target="_blank" rel="noreferrer">
-          File
-        </a>
-      ),
-      width: 100,
-    },
-    {
       title: "Tahun",
       dataIndex: "tahun",
+      width: 80,
+      align: "center",
+      render: (tahun) => (
+        <MantineBadge size="sm" color="violet">
+          {tahun}
+        </MantineBadge>
+      ),
     },
     {
       title: "Hasil Kerja",
       dataIndex: "hasil_kerja",
+      width: 150,
+      render: (hasil_kerja) => (
+        <MantineText size="sm" fw={500}>
+          {hasil_kerja}
+        </MantineText>
+      ),
     },
     {
       title: "Perilaku Kerja",
       dataIndex: "perilaku",
+      width: 150,
+      render: (perilaku) => (
+        <MantineText size="sm" fw={500}>
+          {perilaku}
+        </MantineText>
+      ),
+    },
+    {
+      title: "Dokumen",
+      key: "file_skp",
+      width: 100,
+      render: (_, record) => (
+        <>
+          {record?.file_skp && (
+            <a href={record.file_skp} target="_blank" rel="noreferrer">
+              <Button size="small" icon={<IconFileText size={14} />}>
+                SKP
+              </Button>
+            </a>
+          )}
+        </>
+      ),
     },
     {
       title: "Aksi",
       key: "aksi",
+      width: 80,
+      align: "center",
       render: (_, row) => {
         const tahun = row?.tahun;
         const tahunTransfer =
@@ -330,9 +399,14 @@ function CompareSKP22ByNip({ nip }) {
         if (tahunTransfer) {
           return (
             <Tooltip title="Transfer">
-              <a onClick={() => handleOpenTransfer(row)}>
-                <SendOutlined />
-              </a>
+              <Button
+                size="small"
+                type="primary"
+                icon={<IconSend size={14} />}
+                onClick={() => handleOpenTransfer(row)}
+                loading={loadingFile && currentData?.skp_id === row?.skp_id}
+                style={{ backgroundColor: "#52c41a", borderColor: "#52c41a" }}
+              />
             </Tooltip>
           );
         } else {
@@ -343,68 +417,99 @@ function CompareSKP22ByNip({ nip }) {
   ];
 
   return (
-    <Card title="Komparasi Kinerja" id="kinerja">
-      <ModalTransferSKP22
-        nip={nip}
-        open={openTransfer}
-        data={currentData}
-        onCancel={handleCloseTransfer}
-        file={file}
-        loadingFile={loadingFile}
-        // onOk={handleTransfer}
-      />
-      <Stack>
-        <FormSKP22 visible={visible} onCancel={handleCancel} nip={nip} />
-        <div id="kinerja-siasn">
-          <Alert
-            showIcon
-            type="info"
-            description="Jika terjadi kesalahan pada data SKP SIASN, gunakan tahun yang sama dengan data yang baru. Data yang lama akan direplace dengan data yang baru."
-            style={{ marginBottom: 12 }}
-          />
-          <Flex justify="space-between">
-            <div>
-              <Typography.Title level={5} strong>
-                SKP (KINERJA) SIASN{" "}
-              </Typography.Title>
-            </div>
-            <Button
-              icon={<PlusOutlined />}
-              type="primary"
-              onClick={handleVisible}
+    <div>
+      <Card
+        id="kinerja"
+        title={
+          <Space>
+            <IconChartBar size={20} color="#722ed1" />
+            <Typography.Title level={4} style={{ margin: 0 }}>
+              Komparasi Kinerja (SKP)
+            </Typography.Title>
+          </Space>
+        }
+      >
+        <ModalTransferSKP22
+          nip={nip}
+          open={openTransfer}
+          data={currentData}
+          onCancel={handleCloseTransfer}
+          file={file}
+          loadingFile={loadingFile}
+        />
+        <Stack>
+          <FormSKP22 visible={visible} onCancel={handleCancel} nip={nip} />
+          <div id="kinerja-siasn">
+            <Alert
+              showIcon
+              type="info"
+              description="Jika terjadi kesalahan pada data SKP SIASN, gunakan tahun yang sama dengan data yang baru. Data yang lama akan direplace dengan data yang baru."
+              style={{ marginBottom: 16 }}
+            />
+            <Flex
+              justify="space-between"
+              align="center"
+              style={{ marginBottom: 16 }}
             >
-              Tambah
-            </Button>
-          </Flex>
-          <Table
-            style={{
-              marginTop: 20,
-            }}
-            pagination={false}
-            columns={columns}
-            loading={isLoading}
-            rowKey={(row) => row?.id}
-            dataSource={data}
-          />
-        </div>
-        <div id="kinerja-simaster">
-          <Flex justify="start">
-            <div>
-              <Typography.Title level={5} strong>
-                SKP SIMASTER
-              </Typography.Title>
-            </div>
-          </Flex>
-          <Table
-            pagination={false}
-            columns={columnMaster}
-            loading={isLoadingMaster}
-            rowKey={(row) => row?.skp_id}
-            dataSource={dataMaster}
-          />
-        </div>
-      </Stack>
-    </Card>
+              <Space>
+                <MantineText fw={600} size="sm">
+                  SIASN
+                </MantineText>
+                <MantineBadge size="sm" variant="light" color="blue">
+                  {data?.length || 0}
+                </MantineBadge>
+              </Space>
+              <Button
+                icon={<IconPlus size={16} />}
+                type="primary"
+                onClick={handleVisible}
+              >
+                Tambah
+              </Button>
+            </Flex>
+            <Table
+              title={null}
+              pagination={false}
+              columns={columns}
+              loading={isLoading}
+              rowKey={(row) => row?.id}
+              dataSource={data}
+              size="middle"
+              scroll={{ x: 900 }}
+              rowClassName={(record, index) =>
+                index % 2 === 0 ? "table-row-light" : "table-row-dark"
+              }
+            />
+          </div>
+
+          <Divider />
+
+          <div id="kinerja-simaster">
+            <Space style={{ marginBottom: 16 }}>
+              <MantineText fw={600} size="sm">
+                SIMASTER
+              </MantineText>
+              <MantineBadge size="sm" variant="light" color="orange">
+                {dataMaster?.length || 0}
+              </MantineBadge>
+            </Space>
+            <Table
+              title={null}
+              pagination={false}
+              columns={columnMaster}
+              loading={isLoadingMaster}
+              rowKey={(row) => row?.skp_id}
+              dataSource={dataMaster}
+              size="middle"
+              scroll={{ x: 600 }}
+              rowClassName={(record, index) =>
+                index % 2 === 0 ? "table-row-light" : "table-row-dark"
+              }
+            />
+          </div>
+        </Stack>
+      </Card>
+    </div>
   );
 }
 

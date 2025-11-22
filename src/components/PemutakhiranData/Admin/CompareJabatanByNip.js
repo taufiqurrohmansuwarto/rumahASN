@@ -11,9 +11,19 @@ import {
   getNamaJabatan,
   setJenisJabatanColor,
 } from "@/utils/client-utils";
-import { FileAddOutlined, SyncOutlined } from "@ant-design/icons";
-import { Alert, Stack, Text } from "@mantine/core";
-import { IconAlertCircle } from "@tabler/icons";
+import {
+  Alert,
+  Badge as MantineBadge,
+  Stack,
+  Text as MantineText,
+} from "@mantine/core";
+import {
+  IconAlertCircle,
+  IconBriefcase,
+  IconFileText,
+  IconFileUpload,
+  IconRefresh,
+} from "@tabler/icons-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Anchor,
@@ -31,7 +41,6 @@ import {
   Select,
   Space,
   Table,
-  Tag,
   Typography,
   Upload,
   message,
@@ -204,7 +213,7 @@ const FormEntriKosong = ({ visible, onCancel, nip }) => {
           onChange={handleChange}
           fileList={fileList}
         >
-          <Button icon={<FileAddOutlined />}>Upload</Button>
+          <Button icon={<IconFileUpload size={16} />}>Upload</Button>
         </Upload>
         <FormUnitOrganisasi name="unor_id" />
         <Form.Item
@@ -431,7 +440,7 @@ const FormEntri = ({ visible, onCancel, nip, data }) => {
           onChange={handleChange}
           fileList={fileList}
         >
-          <Button icon={<FileAddOutlined />}>Upload</Button>
+          <Button icon={<IconFileUpload size={16} />}>Upload</Button>
         </Upload>
         <FormUnitOrganisasi name="unor_id" />
         <Form.Item
@@ -613,105 +622,98 @@ function CompareJabatanByNip({ nip }) {
 
   const columnsMaster = [
     {
-      title: "Data",
-      key: "data",
-      responsive: ["xs"],
-      render: (_, record) => {
-        return (
-          <Stack>
+      title: "Jenis & Dokumen",
+      key: "jenis_dokumen",
+      width: 140,
+      render: (row) => (
+        <div>
+          <MantineBadge
+            size="sm"
+            color={setJenisJabatanColor(row?.jenis_jabatan)}
+            tt="none"
+            style={{ marginBottom: 8 }}
+          >
+            {row?.jenis_jabatan}
+          </MantineBadge>
+          {row?.file && (
             <div>
-              <a href={record?.file} target="_blank" rel="noreferrer">
-                File
+              <a href={row.file} target="_blank" rel="noreferrer">
+                <Button size="small" icon={<IconFileText size={14} />}>
+                  SK
+                </Button>
               </a>
             </div>
-            <Tag color={setJenisJabatanColor(record?.jenis_jabatan)}>
-              {record?.jenis_jabatan}
-            </Tag>
-            <Text
-              underline={record?.aktif === "Y"}
-              strong={record?.aktif === "Y"}
-            >
-              {record?.jabatan}
-            </Text>
-            <Text>
-              {record?.unor} - {record?.nomor_sk}
-            </Text>
-            <Text>
-              TMT Jabatan {record?.tmt_jabatan} - Tgl. SK {record?.tgl_sk}
-            </Text>
-            <Text>{record?.aktif === "Y" ? "Aktif" : "Tidak Aktif"}</Text>
-          </Stack>
-        );
-      },
-    },
-    {
-      title: "File",
-      dataIndex: "file",
-      render: (_, record) => {
-        return (
-          <div>
-            <a href={record?.file} target="_blank" rel="noreferrer">
-              File
-            </a>
-          </div>
-        );
-      },
-      responsive: ["sm"],
-    },
-    {
-      title: "Jenis",
-      key: "jenis_jabatan",
-      render: (row) => (
-        <Tag color={setJenisJabatanColor(row?.jenis_jabatan)}>
-          {row?.jenis_jabatan}
-        </Tag>
+          )}
+        </div>
       ),
-      responsive: ["sm"],
     },
     {
       title: "Jabatan",
       key: "jabatan",
+      width: 250,
       render: (row) => {
         return (
-          <Typography.Text
-            underline={row?.aktif === "Y"}
-            strong={row?.aktif === "Y"}
-          >
-            {row?.jabatan}
-          </Typography.Text>
+          <div>
+            <MantineText
+              size="sm"
+              fw={row?.aktif === "Y" ? 600 : 500}
+              td={row?.aktif === "Y" ? "underline" : "none"}
+            >
+              {row?.jabatan}
+            </MantineText>
+            <MantineText size="xs" c="dimmed">
+              {row?.unor}
+            </MantineText>
+          </div>
         );
       },
-      responsive: ["sm"],
-    },
-    {
-      title: "Unor",
-      key: "unor",
-      dataIndex: "unor",
-      responsive: ["sm"],
     },
     {
       title: "No. SK",
       dataIndex: "nomor_sk",
       key: "nomor_sk",
-      responsive: ["sm"],
+      width: 180,
+      render: (nomor_sk) => <MantineText size="sm">{nomor_sk}</MantineText>,
     },
     {
-      title: "TMT. Jab",
+      title: "TMT Jabatan",
       dataIndex: "tmt_jabatan",
       key: "tmt_jabatan",
-      responsive: ["sm"],
+      width: 120,
+      align: "center",
+      render: (tmt_jabatan, record) => (
+        <div style={{ textAlign: "center" }}>
+          <MantineBadge size="sm" color="green">
+            {tmt_jabatan}
+          </MantineBadge>
+          {record?.tgl_sk && (
+            <MantineText size="xs" c="dimmed" style={{ marginTop: 4 }}>
+              SK: {record.tgl_sk}
+            </MantineText>
+          )}
+        </div>
+      ),
     },
     {
-      title: "Tgl. SK",
-      dataIndex: "tgl_sk",
-      key: "tgl_sk",
-      responsive: ["sm"],
+      title: "Status",
+      key: "aktif",
+      width: 80,
+      align: "center",
+      render: (row) => (
+        <MantineBadge
+          size="sm"
+          color={row?.aktif === "Y" ? "green" : "gray"}
+          tt="none"
+        >
+          {row?.aktif === "Y" ? "Aktif" : "Tidak"}
+        </MantineBadge>
+      ),
     },
-    // { title: "Aktif", dataIndex: "aktif", key: "aktif" },
     {
       title: "Aksi",
       key: "aksi",
-      responsive: ["sm"],
+      width: 100,
+      align: "center",
       render: (_, row) => {
         const payload = {
           unor: row?.unor,
@@ -729,13 +731,11 @@ function CompareJabatanByNip({ nip }) {
         };
 
         return (
-          <Space>
-            <FormUnorJabatanTransfer
-              dataSiasn={data}
-              data={payload}
-              kata="Pakai"
-            />
-          </Space>
+          <FormUnorJabatanTransfer
+            dataSiasn={data}
+            data={payload}
+            kata="Pakai"
+          />
         );
       },
     },
@@ -743,149 +743,113 @@ function CompareJabatanByNip({ nip }) {
 
   const columns = [
     {
-      title: "Data",
-      key: "data",
-      responsive: ["xs"],
-      render: (row, record) => {
-        const jenisJabatan = checkJenisJabatan(row);
-        return (
-          <Stack>
-            <div>
-              {record?.path?.[872] && (
-                <a
-                  href={`/helpdesk/api/siasn/ws/download?filePath=${record?.path?.[872]?.dok_uri}`}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  File
-                </a>
-              )}
-            </div>
-            <Text>
-              <Tag color={setJenisJabatanColor(jenisJabatan)}>
-                {jenisJabatan}
-              </Tag>
-            </Text>
-            <Text>
-              {namaJabatan(row)} - {row?.unorNama}
-            </Text>
-            <Text>No. SK {row?.nomorSk}</Text>
-            <Text>Tgl. SK {row?.tanggalSk}</Text>
-            <Text>TMT Jabatan {row?.tmtJabatan}</Text>
-          </Stack>
-        );
-      },
-    },
-    {
-      title: "File",
-      key: "file",
-      render: (_, row) => {
-        return (
-          <>
-            {row?.path?.[872] && (
-              <a
-                href={`/helpdesk/api/siasn/ws/download?filePath=${row?.path?.[872]?.dok_uri}`}
-                target="_blank"
-                rel="noreferrer"
-              >
-                File
-              </a>
-            )}
-          </>
-        );
-      },
-      responsive: ["sm"],
-    },
-    {
-      title: "Jenis",
-      key: "jenis_jabatan",
+      title: "Jenis & Dokumen",
+      key: "jenis_dokumen",
+      width: 140,
       render: (row) => {
         const jenisJabatan = checkJenisJabatan(row);
         return (
-          <Tag color={setJenisJabatanColor(jenisJabatan)}>{jenisJabatan}</Tag>
+          <div>
+            <MantineBadge
+              size="sm"
+              color={setJenisJabatanColor(jenisJabatan)}
+              tt="none"
+              style={{ marginBottom: 8 }}
+            >
+              {jenisJabatan}
+            </MantineBadge>
+            {row?.path?.[872] && (
+              <div style={{ marginBottom: 4 }}>
+                <a
+                  href={`/helpdesk/api/siasn/ws/download?filePath=${row?.path?.[872]?.dok_uri}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <Button size="small" icon={<IconFileText size={14} />}>
+                    SK
+                  </Button>
+                </a>
+              </div>
+            )}
+            {row?.path?.[873] && (
+              <div>
+                <a
+                  href={`/helpdesk/api/siasn/ws/download?filePath=${row?.path?.[873]?.dok_uri}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <Button size="small" icon={<IconFileText size={14} />}>
+                    Lantik
+                  </Button>
+                </a>
+              </div>
+            )}
+          </div>
         );
       },
-      responsive: ["sm"],
     },
     {
       title: "Jabatan",
       key: "nama_jabatan",
-      responsive: ["sm"],
+      width: 250,
       render: (row) => (
         <div>
-          <Space>
+          <MantineText size="sm" fw={500}>
             {namaJabatan(row)}
-            {row?.subJabatanDetail?.nama}
-          </Space>
+            {row?.subJabatanDetail?.nama && ` - ${row?.subJabatanDetail?.nama}`}
+          </MantineText>
+          <MantineText size="xs" c="dimmed">
+            {row?.unorNama}
+          </MantineText>
         </div>
       ),
-    },
-
-    {
-      title: "Unor",
-      dataIndex: "unorNama",
-      responsive: ["sm"],
     },
     {
       title: "No. SK",
       dataIndex: "nomorSk",
       key: "nomorSk",
-      responsive: ["sm"],
+      width: 180,
+      render: (nomorSk) => <MantineText size="sm">{nomorSk}</MantineText>,
     },
     {
-      title: "TMT Jab",
+      title: "TMT Jabatan",
       dataIndex: "tmtJabatan",
       key: "tmtJabatan",
-      responsive: ["sm"],
-    },
-    {
-      title: "Tgl SK",
-      dataIndex: "tanggalSk",
-      key: "tanggalSk",
-      responsive: ["sm"],
+      width: 120,
+      align: "center",
+      render: (tmtJabatan, record) => (
+        <div style={{ textAlign: "center" }}>
+          <MantineBadge size="sm" color="green">
+            {tmtJabatan}
+          </MantineBadge>
+          {record?.tanggalSk && (
+            <MantineText size="xs" c="dimmed" style={{ marginTop: 4 }}>
+              SK: {record.tanggalSk}
+            </MantineText>
+          )}
+        </div>
+      ),
     },
     {
       title: "Aksi",
       key: "edit",
-      responsive: ["sm"],
+      width: 120,
+      align: "center",
       render: (records, row, index) => {
-        const payload = {
-          ...row,
-          jenis_jabatan: getNamaJabatan(row?.jenisJabatan),
-          tmtJabatan: row?.tmtJabatan
-            ? dayjs(row?.tmtJabatan, "DD-MM-YYYY")
-            : null,
-          tmtMutasi: row?.tmtMutasi
-            ? dayjs(row?.tmtMutasi, "DD-MM-YYYY")
-            : null,
-          tmtPelantikan: row?.tmtPelantikan
-            ? dayjs(row?.tmtPelantikan, "DD-MM-YYYY")
-            : null,
-          tanggalSk: row?.tanggalSk
-            ? dayjs(row?.tanggalSk, "DD-MM-YYYY")
-            : null,
-          fungsional_umum_id: row?.jabatanFungsionalUmumId,
-          fungsional_id: row?.jabatanFungsionalId,
-          eselon_id: row?.eselonId,
-        };
-
         const lastId = data?.[data?.length - 1]?.id;
 
         if (lastId === row?.id) {
           return null;
         } else {
           return (
-            <Space>
-              <Divider type="vertical" />
+            <Space size="small">
               <HapusJabatan id={row?.id} />
-              <Divider type="vertical" />
               <UploadDokumen
                 id={row?.id}
                 idRefDokumen={872}
                 nama="SK"
                 invalidateQueries={["data-rw-jabatan-master-by-nip"]}
               />
-              <Divider type="vertical" />
               <UploadDokumen
                 id={row?.id}
                 idRefDokumen={873}
@@ -904,7 +868,17 @@ function CompareJabatanByNip({ nip }) {
       <Col md={20}>
         <Row gutter={[16, 8]}>
           <Col md={24}>
-            <Card id="komparasi-jabatan" title="Komparasi Jabatan">
+            <Card
+              id="komparasi-jabatan"
+              title={
+                <Space>
+                  <IconBriefcase size={20} color="#1890ff" />
+                  <Typography.Title level={4} style={{ margin: 0 }}>
+                    Komparasi Jabatan
+                  </Typography.Title>
+                </Space>
+              }
+            >
               {dataSiasn?.kedudukanPnsNama === "PPPK Aktif" && (
                 <Alert
                   color="red"
@@ -938,33 +912,62 @@ function CompareJabatanByNip({ nip }) {
                   onCancel={handleClose}
                   visible={visible}
                 />
+                <Flex
+                  justify="space-between"
+                  align="center"
+                  style={{ marginBottom: 16 }}
+                >
+                  <Space>
+                    <MantineText fw={600} size="sm">
+                      SIASN
+                    </MantineText>
+                    <MantineBadge size="sm" variant="light" color="blue">
+                      {data?.length || 0}
+                    </MantineBadge>
+                  </Space>
+                  <Button
+                    size="small"
+                    onClick={() => refetch()}
+                    icon={<IconRefresh size={16} />}
+                    loading={isFetching}
+                  >
+                    Refresh
+                  </Button>
+                </Flex>
                 <Table
-                  title={() => (
-                    <Flex justify="space-between">
-                      <Text fw="bold">SIASN</Text>
-                      <Button
-                        onClick={() => refetch()}
-                        type="link"
-                        icon={<SyncOutlined />}
-                        loading={isFetching}
-                      >
-                        Refresh
-                      </Button>
-                    </Flex>
-                  )}
+                  title={null}
                   columns={columns}
                   dataSource={data}
                   loading={isLoading || isFetching}
                   rowKey={(row) => row?.id}
                   pagination={false}
+                  size="middle"
+                  scroll={{ x: 800 }}
+                  rowClassName={(record, index) =>
+                    index % 2 === 0 ? "table-row-light" : "table-row-dark"
+                  }
                 />
+                <Divider />
+                <Space style={{ marginBottom: 16 }}>
+                  <MantineText fw={600} size="sm">
+                    SIMASTER
+                  </MantineText>
+                  <MantineBadge size="sm" variant="light" color="orange">
+                    {dataMaster?.length || 0}
+                  </MantineBadge>
+                </Space>
                 <Table
-                  title={() => <Text fw="bold">SIMASTER</Text>}
+                  title={null}
                   columns={columnsMaster}
                   dataSource={dataMaster}
                   loading={loadingMasterJabatan}
                   rowKey={(row) => row?.id}
                   pagination={false}
+                  size="middle"
+                  scroll={{ x: 800 }}
+                  rowClassName={(record, index) =>
+                    index % 2 === 0 ? "table-row-light" : "table-row-dark"
+                  }
                 />
               </Stack>
             </Card>

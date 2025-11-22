@@ -1,8 +1,8 @@
 import { uploadDokRiwayat } from "@/services/siasn-services";
-import { CloudUploadOutlined } from "@ant-design/icons";
 import { Alert, Stack } from "@mantine/core";
+import { IconUpload } from "@tabler/icons-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Button, Modal, Tooltip, Typography, Upload, message } from "antd";
+import { Button, Modal, Tooltip, Upload, message } from "antd";
 import { useState } from "react";
 
 const ModalUploadDokumen = ({
@@ -107,14 +107,15 @@ function UploadDokumen({ id, nama, idRefDokumen, invalidateQueries }) {
   const handleClose = () => setOpen(false);
 
   return (
-    <div>
-      <Typography.Link onClick={handleOpen}>
-        <Tooltip title={`Unggah Dokumen ${nama}`}>
-          <a>
-            <CloudUploadOutlined />
-          </a>
-        </Tooltip>
-      </Typography.Link>
+    <>
+      <Tooltip title={`Unggah Dokumen ${nama}`}>
+        <Button
+          size="small"
+          type="primary"
+          icon={<IconUpload size={14} />}
+          onClick={handleOpen}
+        />
+      </Tooltip>
       <ModalUploadDokumen
         invalidateQueries={invalidateQueries}
         nama={nama}
@@ -123,7 +124,7 @@ function UploadDokumen({ id, nama, idRefDokumen, invalidateQueries }) {
         open={open}
         onCancel={handleClose}
       />
-    </div>
+    </>
   );
 }
 

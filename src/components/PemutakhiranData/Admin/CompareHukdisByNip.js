@@ -4,6 +4,18 @@ import {
   dataHukumanDisiplin,
   ppHukumanDisiplin,
 } from "@/utils/client-data";
+import {
+  Badge as MantineBadge,
+  Stack,
+  Text as MantineText,
+} from "@mantine/core";
+import {
+  IconAlertTriangle,
+  IconFileText,
+  IconPlus,
+  IconRefresh,
+  IconSend,
+} from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
 import {
   Button,
@@ -17,12 +29,13 @@ import {
   Radio,
   Row,
   Select,
+  Space,
   Table,
+  Tooltip,
 } from "antd";
 import { useState } from "react";
 import dayjs from "dayjs";
 import { getRwHukdisByNip } from "@/services/master.services";
-import { Stack } from "@mantine/core";
 
 const FormModalHukdis = ({ open, onClose, create }) => {
   const [form] = Form.useForm();
@@ -169,25 +182,28 @@ const FormModalHukdis = ({ open, onClose, create }) => {
 
 const CompareHukdisByNip = ({ nip }) => {
   const [open, setOpen] = useState(false);
-  const { data, isLoading } = useQuery(
-    ["hukdis", nip],
-    () => getHukdisByNip(nip),
-    {
-      refetchOnWindowFocus: false,
-      keepPreviousData: true,
-      staleTime: 500000,
-    }
-  );
 
-  const { data: hukdisMaster, isLoading: isLoadingMaster } = useQuery(
-    ["hukdis-master", nip],
-    () => getRwHukdisByNip(nip),
-    {
-      refetchOnWindowFocus: false,
-      keepPreviousData: true,
-      staleTime: 500000,
-    }
-  );
+  const {
+    data,
+    isLoading,
+    refetch: refetchSiasn,
+    isFetching: isFetchingSiasn,
+  } = useQuery(["hukdis", nip], () => getHukdisByNip(nip), {
+    refetchOnWindowFocus: false,
+    keepPreviousData: true,
+    enabled: !!nip,
+  });
+
+  const {
+    data: hukdisMaster,
+    isLoading: isLoadingMaster,
+    refetch: refetchMaster,
+    isFetching: isFetchingMaster,
+  } = useQuery(["hukdis-master", nip], () => getRwHukdisByNip(nip), {
+    refetchOnWindowFocus: false,
+    keepPreviousData: true,
+    enabled: !!nip,
+  });
 
   const handleOpen = () => {
     setOpen(true);
@@ -199,8 +215,10 @@ const CompareHukdisByNip = ({ nip }) => {
 
   const columns = [
     {
-      title: "File",
+      title: "Dok",
       key: "file",
+      width: 60,
+      align: "center",
       render: (_, row) => {
         return (
           <>
@@ -210,7 +228,7 @@ const CompareHukdisByNip = ({ nip }) => {
                 target="_blank"
                 rel="noreferrer"
               >
-                File
+                <Button size="small" icon={<IconFileText size={14} />} />
               </a>
             )}
           </>
@@ -218,105 +236,251 @@ const CompareHukdisByNip = ({ nip }) => {
       },
     },
     {
-      title: "Nomor SK",
-      dataIndex: "skNomor",
+      title: "Nomor & Tanggal SK",
+      key: "nomor_tgl_sk",
+      render: (_, row) => (
+        <Tooltip
+          title={`Nomor: ${row?.skNomor || "-"} | Tanggal: ${row?.skTanggal || "-"}`}
+        >
+          <div>
+            <MantineText size="sm" fw={500} lineClamp={1}>
+              {row?.skNomor || "-"}
+            </MantineText>
+            <MantineText size="xs" c="dimmed">
+              {row?.skTanggal || "-"}
+            </MantineText>
+          </div>
+        </Tooltip>
+      ),
     },
     {
-      title: "Tgl. SK",
-      dataIndex: "skTanggal",
+      title: "Jenis & Alasan",
+      key: "jenis_alasan",
+      render: (_, row) => (
+        <Tooltip
+          title={`Jenis: ${row?.jenisHukumanNama || "-"} | Alasan: ${row?.alasanHukumanDisiplinNama || "-"}`}
+        >
+          <div>
+            <MantineBadge
+              size="xs"
+              color="red"
+              tt="none"
+              style={{ marginBottom: 4 }}
+            >
+              {row?.jenisHukumanNama || "-"}
+            </MantineBadge>
+            <MantineText size="xs" lineClamp={2}>
+              {row?.alasanHukumanDisiplinNama || "-"}
+            </MantineText>
+          </div>
+        </Tooltip>
+      ),
     },
     {
-      title: "Tgl. Hukuman",
-      dataIndex: "hukumanTanggal",
-    },
-    {
-      title: "Masa Tahun",
-      dataIndex: "masaTahun",
-    },
-    {
-      title: "Alasan Hukuman Disiplin",
-      dataIndex: "alasanHukumanDisiplinNama",
-    },
-    {
-      title: "Jenis Hukuman Disiplin",
-      dataIndex: "jenisHukumanNama",
+      title: "TMT & Masa",
+      key: "tmt_masa",
+      render: (_, row) => (
+        <Tooltip
+          title={`TMT: ${row?.hukumanTanggal || "-"} | Masa: ${row?.masaTahun || 0} tahun`}
+        >
+          <div>
+            <MantineText size="xs">
+              {row?.hukumanTanggal || "-"}
+            </MantineText>
+            <MantineBadge size="xs" color="orange">
+              {row?.masaTahun || 0} tahun
+            </MantineBadge>
+          </div>
+        </Tooltip>
+      ),
     },
     {
       title: "Keterangan",
       dataIndex: "keterangan",
+      render: (ket) => (
+        <MantineText size="xs" lineClamp={2}>
+          {ket || "-"}
+        </MantineText>
+      ),
     },
   ];
 
   const columnsMaster = [
     {
-      title: "File",
+      title: "Dok",
       key: "file",
+      width: 60,
+      align: "center",
       render: (_, row) => {
         return (
-          <a href={row?.file_disiplin} target="_blank" rel="noreferrer">
-            File
-          </a>
+          <>
+            {row?.file_disiplin && (
+              <a href={row?.file_disiplin} target="_blank" rel="noreferrer">
+                <Button size="small" icon={<IconFileText size={14} />} />
+              </a>
+            )}
+          </>
         );
       },
     },
     {
-      title: "Jenis",
+      title: "Jenis Hukuman",
       key: "jenis",
-      render: (_, row) => {
-        return row?.hukdis?.name;
-      },
-    },
-
-    {
-      title: "Nomor SK",
-      dataIndex: "no_sk",
+      render: (_, row) => (
+        <MantineBadge size="sm" color="red" tt="none">
+          {row?.hukdis?.name || "-"}
+        </MantineBadge>
+      ),
     },
     {
-      title: "Tgl. SK",
-      dataIndex: "tgl_sk",
+      title: "Nomor & Tanggal SK",
+      key: "nomor_tgl",
+      render: (_, row) => (
+        <Tooltip
+          title={`Nomor: ${row?.no_sk || "-"} | Tanggal: ${row?.tgl_sk || "-"}`}
+        >
+          <div>
+            <MantineText size="sm" fw={500} lineClamp={1}>
+              {row?.no_sk || "-"}
+            </MantineText>
+            <MantineText size="xs" c="dimmed">
+              {row?.tgl_sk || "-"}
+            </MantineText>
+          </div>
+        </Tooltip>
+      ),
     },
     {
-      title: "TMT Awal",
-      dataIndex: "tmt_awal",
-    },
-    {
-      title: "TMT Akhir",
-      dataIndex: "tmt_akhir",
+      title: "Periode TMT",
+      key: "periode",
+      render: (_, row) => (
+        <Tooltip
+          title={`Awal: ${row?.tmt_awal || "-"} | Akhir: ${row?.tmt_akhir || "-"}`}
+        >
+          <div>
+            <MantineText size="xs">{row?.tmt_awal || "-"}</MantineText>
+            <MantineText size="xs" c="dimmed">
+              s/d {row?.tmt_akhir || "-"}
+            </MantineText>
+          </div>
+        </Tooltip>
+      ),
     },
     {
       title: "Keterangan",
       dataIndex: "keterangan",
+      render: (ket) => (
+        <MantineText size="xs" lineClamp={2}>
+          {ket || "-"}
+        </MantineText>
+      ),
+    },
+    {
+      title: "Aksi",
+      key: "aksi",
+      width: 60,
+      align: "center",
+      render: (_, row) => (
+        <Tooltip title="Transfer ke SIASN">
+          <Button
+            size="small"
+            type="primary"
+            icon={<IconSend size={14} />}
+          />
+        </Tooltip>
+      ),
     },
   ];
 
   return (
-    <Card title="Hukuman Disiplin">
+    <Card
+      title={
+        <Space>
+          <IconAlertTriangle size={20} />
+          <span>Hukuman Disiplin</span>
+          <MantineBadge size="sm" color="blue">
+            SIMASTER: {hukdisMaster?.length || 0}
+          </MantineBadge>
+          <MantineBadge size="sm" color="green">
+            SIASN: {data?.length || 0}
+          </MantineBadge>
+        </Space>
+      }
+      extra={
+        <Button
+          onClick={handleOpen}
+          type="primary"
+          icon={<IconPlus size={14} />}
+          size="small"
+        >
+          Tambah
+        </Button>
+      }
+      style={{ marginTop: 16 }}
+    >
       <FormModalHukdis open={open} onClose={handleClose} />
-      <Button
-        style={{
-          marginBottom: 10,
-        }}
-        onClick={handleOpen}
-        type="primary"
-      >
-        Tambah
-      </Button>
       <Stack>
         <Table
-          title={() => "SIASN"}
-          columns={columns}
-          isLoading={isLoading}
-          dataSource={data}
-          rowKey={(row) => row?.id}
-          pagination={false}
-        />
-        <Table
-          title={() => "SIMASTER"}
+          title={() => (
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <MantineText fw="bold">SIMASTER</MantineText>
+              <Tooltip title="Refresh data SIMASTER">
+                <Button
+                  size="small"
+                  icon={<IconRefresh size={14} />}
+                  onClick={() => refetchMaster()}
+                  loading={isFetchingMaster}
+                />
+              </Tooltip>
+            </div>
+          )}
           columns={columnsMaster}
-          isLoading={isLoadingMaster}
+          loading={isLoadingMaster || isFetchingMaster}
           dataSource={hukdisMaster}
           rowKey={(row) => row?.disiplin_id}
           pagination={false}
+          rowClassName={(_, index) =>
+            index % 2 === 0 ? "table-row-light" : "table-row-dark"
+          }
+          size="small"
+          scroll={{ x: "max-content" }}
+        />
+        <Table
+          title={() => (
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <MantineText fw="bold">SIASN</MantineText>
+              <Tooltip title="Refresh data SIASN">
+                <Button
+                  size="small"
+                  icon={<IconRefresh size={14} />}
+                  onClick={() => refetchSiasn()}
+                  loading={isFetchingSiasn}
+                />
+              </Tooltip>
+            </div>
+          )}
+          columns={columns}
+          loading={isLoading || isFetchingSiasn}
+          dataSource={data}
+          rowKey={(row) => row?.id}
+          pagination={false}
+          rowClassName={(_, index) =>
+            index % 2 === 0 ? "table-row-light" : "table-row-dark"
+          }
+          size="small"
+          scroll={{ x: "max-content" }}
         />
       </Stack>
     </Card>

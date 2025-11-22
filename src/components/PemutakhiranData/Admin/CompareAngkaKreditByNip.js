@@ -5,11 +5,18 @@ import {
   getRwAngkakreditByNip,
 } from "@/services/siasn-services";
 import {
-  DeleteOutlined,
-  FileAddOutlined,
-  FilePdfOutlined,
-} from "@ant-design/icons";
-import { Stack, Text } from "@mantine/core";
+  Badge as MantineBadge,
+  Stack,
+  Text as MantineText,
+} from "@mantine/core";
+import {
+  IconAward,
+  IconFileText,
+  IconPlus,
+  IconRefresh,
+  IconSend,
+  IconTrash,
+} from "@tabler/icons-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import dayjs from "dayjs";
@@ -144,26 +151,26 @@ function CompareAngkaKreditByNip({ nip }) {
             <Descriptions.Item label="File">
               <Space>
                 {record?.path?.[880] && (
-                  <Tooltip title="SK PAK">
-                    <a
-                      href={`/helpdesk/api/siasn/ws/download?filePath=${record?.path?.[880]?.dok_uri}`}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      <FilePdfOutlined />
-                    </a>
-                  </Tooltip>
+                  <a
+                    href={`/helpdesk/api/siasn/ws/download?filePath=${record?.path?.[880]?.dok_uri}`}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    <Button size="small" icon={<IconFileText size={14} />}>
+                      SK PAK
+                    </Button>
+                  </a>
                 )}
                 {record?.path?.[879] && (
-                  <Tooltip title="Dok PAK">
-                    <a
-                      href={`/helpdesk/api/siasn/ws/download?filePath=${record?.path?.[879]?.dok_uri}`}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      <FilePdfOutlined />
-                    </a>
-                  </Tooltip>
+                  <a
+                    href={`/helpdesk/api/siasn/ws/download?filePath=${record?.path?.[879]?.dok_uri}`}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    <Button size="small" icon={<IconFileText size={14} />}>
+                      Dok PAK
+                    </Button>
+                  </a>
                 )}
               </Space>
             </Descriptions.Item>
@@ -174,19 +181,19 @@ function CompareAngkaKreditByNip({ nip }) {
                   onConfirm={async () => await handleHapus(record)}
                 >
                   <Tooltip title="Hapus">
-                    <a>
-                      <DeleteOutlined />
-                    </a>
+                    <Button
+                      size="small"
+                      danger
+                      icon={<IconTrash size={14} />}
+                    />
                   </Tooltip>
                 </Popconfirm>
-                <Divider type="vertical" />
                 <UploadDokumen
                   id={record?.id}
                   invalidateQueries={["angka-kredit", nip]}
                   idRefDokumen="879"
                   nama="PAK"
                 />
-                <Divider type="vertical" />
                 <UploadDokumen
                   id={record?.id}
                   invalidateQueries={["angka-kredit", nip]}
@@ -200,123 +207,162 @@ function CompareAngkaKreditByNip({ nip }) {
       },
     },
     {
-      title: "File",
+      title: "Dok",
       key: "path",
+      width: 100,
+      align: "center",
       render: (_, record) => {
         return (
-          <Space>
-            <Tooltip title="SK PAK">
-              {record?.path?.[880] && (
+          <Space size="small">
+            {record?.path?.[880] && (
+              <Tooltip title="SK PAK">
                 <a
                   href={`/helpdesk/api/siasn/ws/download?filePath=${record?.path?.[880]?.dok_uri}`}
                   target="_blank"
                   rel="noreferrer"
                 >
-                  <FilePdfOutlined />
+                  <Button
+                    size="small"
+                    type="link"
+                    icon={<IconFileText size={14} />}
+                  />
                 </a>
-              )}
-            </Tooltip>
-            <Tooltip title="Dok PAK">
-              {record?.path?.[879] && (
+              </Tooltip>
+            )}
+            {record?.path?.[879] && (
+              <Tooltip title="Dok PAK">
                 <a
                   href={`/helpdesk/api/siasn/ws/download?filePath=${record?.path?.[879]?.dok_uri}`}
                   target="_blank"
                   rel="noreferrer"
                 >
-                  <FilePdfOutlined />
+                  <Button
+                    size="small"
+                    type="link"
+                    icon={<IconFileText size={14} />}
+                  />
                 </a>
-              )}
-            </Tooltip>
+              </Tooltip>
+            )}
           </Space>
         );
       },
       responsive: ["sm"],
     },
     {
-      title: "Nomor SK",
-      dataIndex: "nomorSk",
+      title: "SK & Jabatan",
+      key: "sk_jabatan",
+      width: 180,
+      render: (_, record) => (
+        <Tooltip title={record?.nomorSk}>
+          <div>
+            <MantineText size="xs" fw={500} lineClamp={1}>
+              {record?.nomorSk}
+            </MantineText>
+            {record?.namaJabatan && (
+              <MantineText size="xs" c="dimmed" lineClamp={1}>
+                {record?.namaJabatan}
+              </MantineText>
+            )}
+          </div>
+        </Tooltip>
+      ),
       responsive: ["sm"],
     },
     {
-      title: "Bulan Mulai Penilaian",
-      dataIndex: "bulanMulaiPenailan",
+      title: "Periode",
+      key: "periode",
+      width: 100,
+      render: (_, record) => (
+        <div>
+          <MantineText size="xs">
+            {record?.bulanMulaiPenailan}/{record?.tahunMulaiPenailan}
+          </MantineText>
+          <MantineText size="xs" c="dimmed">
+            {record?.bulanSelesaiPenilaian}/{record?.tahunSelesaiPenilaian}
+          </MantineText>
+        </div>
+      ),
       responsive: ["sm"],
     },
     {
-      title: "Tahun Mulai Penilaian",
-      dataIndex: "tahunMulaiPenailan",
+      title: "AK",
+      key: "kredit",
+      width: 100,
+      render: (_, record) => (
+        <Tooltip
+          title={`Utama: ${record?.kreditUtamaBaru} | Penunjang: ${record?.kreditPenunjangBaru} | Total: ${record?.kreditBaruTotal}`}
+        >
+          <div>
+            <MantineText size="xs">
+              U: <strong>{record?.kreditUtamaBaru}</strong>
+            </MantineText>
+            <MantineText size="xs">
+              P: <strong>{record?.kreditPenunjangBaru}</strong>
+            </MantineText>
+            <MantineText size="xs" fw={600}>
+              Σ: {record?.kreditBaruTotal}
+            </MantineText>
+          </div>
+        </Tooltip>
+      ),
       responsive: ["sm"],
     },
     {
-      title: "Bulan Selesai Penilaian",
-      dataIndex: "bulanSelesaiPenailan",
+      title: "Jenis & Sumber",
+      key: "jenis_sumber",
+      width: 150,
+      render: (_, row) => (
+        <Tooltip
+          title={`${checkKonversiIntegrasiPertama(row)} - ${row?.Sumber}`}
+        >
+          <div>
+            <MantineBadge
+              size="xs"
+              color="blue"
+              tt="none"
+              style={{ marginBottom: 4 }}
+            >
+              {checkKonversiIntegrasiPertama(row)}
+            </MantineBadge>
+            <MantineText size="xs" c="dimmed" lineClamp={1}>
+              {row?.Sumber}
+            </MantineText>
+          </div>
+        </Tooltip>
+      ),
       responsive: ["sm"],
     },
     {
-      title: "Tahun Selesai Penilaian",
-      dataIndex: "tahunSelesaiPenailan",
-      responsive: ["sm"],
-    },
-    {
-      title: "Kredit Utama Baru",
-      dataIndex: "kreditUtamaBaru",
-      responsive: ["sm"],
-    },
-    {
-      title: "Kredit Penunjang Baru",
-      dataIndex: "kreditPenunjangBaru",
-      responsive: ["sm"],
-    },
-    {
-      title: "Kredit Baru Total",
-      dataIndex: "kreditBaruTotal",
-      responsive: ["sm"],
-    },
-    {
-      title: "Jenis AK",
-      key: "jenis_ak",
-      render: (_, row) => {
-        return <>{checkKonversiIntegrasiPertama(row)}</>;
-      },
-      responsive: ["sm"],
-    },
-    {
-      title: "Sumber",
-      dataIndex: "Sumber",
-      responsive: ["sm"],
-    },
-    {
-      title: "Nama Jabatan",
-      dataIndex: "namaJabatan",
-      responsive: ["sm"],
-    },
-    {
-      title: "Hapus",
-      key: "hapus",
+      title: "Aksi",
+      key: "aksi",
+      width: 120,
+      align: "center",
       render: (_, row) => {
         return (
-          <Space direction="horizontal">
+          <Space size="small">
             {row?.Sumber !== "Pencantuman Gelar PAK" && (
               <Popconfirm
-                title="Apakah kamu ingin menghapus data riwayat angka kredit?"
+                title="Hapus riwayat angka kredit?"
                 onConfirm={async () => await handleHapus(row)}
                 disabled={row?.sumber === "Pencantuman Gelar PAK"}
               >
                 <Tooltip title="Hapus">
-                  <a>
-                    <DeleteOutlined />
-                  </a>
+                  <Button
+                    size="small"
+                    danger
+                    icon={<IconTrash size={14} />}
+                    loading={isLoadingRemoveAk}
+                  />
                 </Tooltip>
               </Popconfirm>
             )}
-            <Divider type="vertical" />
             <UploadDokumen
               id={row?.id}
               invalidateQueries={["angka-kredit", nip]}
               idRefDokumen="879"
               nama="PAK"
             />
-            <Divider type="vertical" />
             <UploadDokumen
               id={row?.id}
               invalidateQueries={["angka-kredit", nip]}
@@ -333,13 +379,14 @@ function CompareAngkaKreditByNip({ nip }) {
   const [visibleTransfer, setVisibleTransfer] = useState(false);
   const [dataTransfer, setDataTransfer] = useState(null);
   const [file, setFile] = useState(null);
-  const [loadingFile, setLoadingFile] = useState(false);
+  const [loadingPakId, setLoadingPakId] = useState(null);
 
-  const handleVisibleTransfer = async (record) => {
-    setLoadingFile(true);
-
-    try {
-      const currentFile = record?.file_pak;
+  const { mutate: loadPdfFile, isLoading: loadingFile } = useMutation({
+    mutationFn: (record) => {
+      setLoadingPakId(record?.pak_id);
+      return urlToPdf({ url: record?.file_pak });
+    },
+    onSuccess: (data, record) => {
       const jenisPak = record?.jenis_pak_id;
       const isKonversi = jenisPak === 4 || jenisPak === "4";
 
@@ -352,18 +399,35 @@ function CompareAngkaKreditByNip({ nip }) {
       setVisibleTransfer(true);
       setDataTransfer(preparedRecord);
 
-      // Handle file jika ada
-      if (currentFile) {
-        const response = await urlToPdf({ url: currentFile });
-        const pdfFile = new File([response], "file.pdf", {
-          type: "application/pdf",
-        });
-        setFile(pdfFile);
-      }
-    } catch (error) {
-      console.error("Error handling transfer:", error);
-    } finally {
-      setLoadingFile(false);
+      // Set file
+      const pdfFile = new File([data], "file.pdf", {
+        type: "application/pdf",
+      });
+      setFile(pdfFile);
+      setLoadingPakId(null);
+    },
+    onError: (error) => {
+      console.error("Error loading PDF:", error);
+      message.error("Gagal memuat file PDF");
+      setLoadingPakId(null);
+    },
+  });
+
+  const handleVisibleTransfer = (record) => {
+    const currentFile = record?.file_pak;
+    const jenisPak = record?.jenis_pak_id;
+    const isKonversi = jenisPak === 4 || jenisPak === "4";
+
+    if (currentFile) {
+      loadPdfFile(record);
+    } else {
+      // Jika tidak ada file, langsung buka modal
+      const preparedRecord = isKonversi
+        ? { ...record, nilai_pak: null }
+        : record;
+
+      setVisibleTransfer(true);
+      setDataTransfer(preparedRecord);
     }
   };
 
@@ -371,6 +435,15 @@ function CompareAngkaKreditByNip({ nip }) {
     setVisibleTransfer(false);
     setDataTransfer(null);
     setFile(null);
+    setLoadingPakId(null);
+  };
+
+  const handleRefreshSiasn = () => {
+    queryClient.invalidateQueries(["angka-kredit", nip]);
+  };
+
+  const handleRefreshMaster = () => {
+    queryClient.invalidateQueries(["angkat-kredit-master-by-nip", nip]);
   };
 
   const columnsMaster = [
@@ -382,9 +455,13 @@ function CompareAngkaKreditByNip({ nip }) {
         return (
           <Descriptions column={1} size="small" layout="vertical">
             <Descriptions.Item label="File">
-              <a href={record?.file_pak} target="_blank" rel="noreferrer">
-                File
-              </a>
+              {record?.file_pak && (
+                <a href={record?.file_pak} target="_blank" rel="noreferrer">
+                  <Button size="small" icon={<IconFileText size={14} />}>
+                    SK PAK
+                  </Button>
+                </a>
+              )}
             </Descriptions.Item>
             <Descriptions.Item label="Nomor SK">
               {record?.no_sk}
@@ -406,7 +483,15 @@ function CompareAngkaKreditByNip({ nip }) {
             </Descriptions.Item>
             <Descriptions.Item label="Aksi">
               {record?.jenis_pak_id === 3 || record?.jenis_pak_id === 4 ? (
-                <a onClick={() => handleVisibleTransfer(record)}>Tranfer</a>
+                <Tooltip title="Transfer">
+                  <Button
+                    size="small"
+                    type="primary"
+                    icon={<IconSend size={14} />}
+                    onClick={() => handleVisibleTransfer(record)}
+                    loading={loadingFile && loadingPakId === record?.pak_id}
+                  />
+                </Tooltip>
               ) : null}
             </Descriptions.Item>
           </Descriptions>
@@ -414,65 +499,112 @@ function CompareAngkaKreditByNip({ nip }) {
       },
     },
     {
-      title: "File",
+      title: "Dok",
       key: "file",
-      render: (_, record) => {
-        return (
-          <a href={record?.file_pak} target="_blank" rel="noreferrer">
-            File
-          </a>
-        );
-      },
-      responsive: ["sm"],
-    },
-    {
-      title: "Nomor SK",
-      dataIndex: "no_sk",
-      responsive: ["sm"],
-    },
-    {
-      title: "Jenis AK",
-      dataIndex: "jenis_ak",
-      render: (_, record) => {
-        return <>{record?.jenisPak?.jenis_pak}</>;
-      },
-      responsive: ["sm"],
-    },
-    {
-      title: "Kredit Utama Baru",
-      dataIndex: "nilai_unsur_utama_baru",
-      responsive: ["sm"],
-    },
-    {
-      title: "Kredit Baru Total",
-      dataIndex: "nilai_pak",
-      responsive: ["sm"],
-    },
-    {
-      title: "Tgl SK",
-      dataIndex: "tgl_sk",
-      responsive: ["sm"],
-    },
-    {
-      title: "Periode Awal / Akhir",
-      key: "periode",
+      width: 80,
+      align: "center",
       render: (_, record) => {
         return (
           <>
-            {record?.periode_awal} / {record?.periode_akhir}
+            {record?.file_pak && (
+              <Tooltip title="SK PAK">
+                <a href={record?.file_pak} target="_blank" rel="noreferrer">
+                  <Button
+                    size="small"
+                    type="link"
+                    icon={<IconFileText size={14} />}
+                  />
+                </a>
+              </Tooltip>
+            )}
           </>
         );
       },
       responsive: ["sm"],
     },
     {
+      title: "SK & Tanggal",
+      key: "sk_tgl",
+      width: 160,
+      render: (_, record) => (
+        <Tooltip title={record?.no_sk}>
+          <div>
+            <MantineText size="xs" fw={500} lineClamp={1}>
+              {record?.no_sk}
+            </MantineText>
+            <MantineText size="xs" c="dimmed">
+              {record?.tgl_sk}
+            </MantineText>
+          </div>
+        </Tooltip>
+      ),
+      responsive: ["sm"],
+    },
+    {
+      title: "Jenis AK",
+      key: "jenis_ak",
+      width: 130,
+      render: (_, record) => (
+        <Tooltip title={record?.jenisPak?.jenis_pak}>
+          <MantineBadge size="xs" color="blue" tt="none">
+            {record?.jenisPak?.jenis_pak}
+          </MantineBadge>
+        </Tooltip>
+      ),
+      responsive: ["sm"],
+    },
+    {
+      title: "AK",
+      key: "kredit",
+      width: 90,
+      render: (_, record) => (
+        <Tooltip
+          title={`Utama: ${record?.nilai_unsur_utama_baru} | Total: ${record?.nilai_pak}`}
+        >
+          <div>
+            <MantineText size="xs">
+              U: <strong>{record?.nilai_unsur_utama_baru}</strong>
+            </MantineText>
+            <MantineText size="xs" fw={600}>
+              Σ: {record?.nilai_pak}
+            </MantineText>
+          </div>
+        </Tooltip>
+      ),
+      responsive: ["sm"],
+    },
+    {
+      title: "Periode",
+      key: "periode",
+      width: 100,
+      render: (_, record) => (
+        <div>
+          <MantineText size="xs">{record?.periode_awal}</MantineText>
+          <MantineText size="xs" c="dimmed">
+            {record?.periode_akhir}
+          </MantineText>
+        </div>
+      ),
+      responsive: ["sm"],
+    },
+    {
       title: "Aksi",
       key: "transfer",
+      width: 80,
+      align: "center",
       render: (_, record) => {
         return (
           <>
             {record?.jenis_pak_id === 3 || record?.jenis_pak_id === 4 ? (
-              <a onClick={() => handleVisibleTransfer(record)}>Tranfer</a>
+              <Tooltip title="Transfer">
+                <Button
+                  size="small"
+                  type="primary"
+                  icon={<IconSend size={14} />}
+                  onClick={() => handleVisibleTransfer(record)}
+                  loading={loadingFile && loadingPakId === record?.pak_id}
+                />
+              </Tooltip>
             ) : null}
           </>
         );
@@ -482,7 +614,20 @@ function CompareAngkaKreditByNip({ nip }) {
   ];
 
   return (
-    <Card title="Komparasi Angka Kredit">
+    <Card
+      title={
+        <Space>
+          <IconAward size={20} />
+          <span>Komparasi Angka Kredit</span>
+          <MantineBadge size="sm" color="blue">
+            SIASN: {data?.length || 0}
+          </MantineBadge>
+          <MantineBadge size="sm" color="green">
+            SIMASTER: {dataRwAngkakredit?.length || 0}
+          </MantineBadge>
+        </Space>
+      }
+    >
       <BasicFormTransferAngkaKredit
         data={dataTransfer}
         file={file}
@@ -503,7 +648,7 @@ function CompareAngkaKreditByNip({ nip }) {
               nip={nip}
             />
             <Button
-              icon={<FileAddOutlined />}
+              icon={<IconPlus size={16} />}
               style={{
                 marginBottom: 10,
               }}
@@ -514,20 +659,66 @@ function CompareAngkaKreditByNip({ nip }) {
             </Button>
             <Stack>
               <Table
-                title={() => <Text fw="bold">SIASN</Text>}
+                title={() => (
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    }}
+                  >
+                    <MantineText fw="bold">SIASN</MantineText>
+                    <Tooltip title="Refresh data SIASN">
+                      <Button
+                        size="small"
+                        icon={<IconRefresh size={14} />}
+                        onClick={handleRefreshSiasn}
+                        loading={isLoading}
+                      />
+                    </Tooltip>
+                  </div>
+                )}
                 columns={columns}
                 rowKey={(record) => record.id}
                 pagination={false}
                 loading={isLoading}
                 dataSource={data}
+                rowClassName={(_, index) =>
+                  index % 2 === 0 ? "table-row-light" : "table-row-dark"
+                }
+                scroll={{ x: 800 }}
+                size="small"
               />
               <Table
-                title={() => <Text fw="bold">SIMASTER</Text>}
+                title={() => (
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    }}
+                  >
+                    <MantineText fw="bold">SIMASTER</MantineText>
+                    <Tooltip title="Refresh data SIMASTER">
+                      <Button
+                        size="small"
+                        icon={<IconRefresh size={14} />}
+                        onClick={handleRefreshMaster}
+                        loading={isLoadingAngkaKredit}
+                      />
+                    </Tooltip>
+                  </div>
+                )}
                 columns={columnsMaster}
                 rowKey={(record) => record.pak_id}
                 pagination={false}
                 loading={isLoadingAngkaKredit}
                 dataSource={dataRwAngkakredit}
+                rowClassName={(_, index) =>
+                  index % 2 === 0 ? "table-row-light" : "table-row-dark"
+                }
+                scroll={{ x: 700 }}
+                size="small"
               />
             </Stack>
           </>

@@ -4,9 +4,10 @@ import {
   postRiwayatKursusByNip,
   uploadDokRiwayat,
 } from "@/services/siasn-services";
-import { SendOutlined } from "@ant-design/icons";
+import { Badge as MantineBadge, Text as MantineText } from "@mantine/core";
+import { IconFileText, IconRefresh, IconSend } from "@tabler/icons-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button, Flex, Form, Modal, Spin, Table, Tooltip, message } from "antd";
+import { Button, Form, Modal, Table, Tooltip, message } from "antd";
 import { useEffect, useState } from "react";
 
 import dayjs from "dayjs";
@@ -115,18 +116,6 @@ const TransferModal = ({ open, handleClose, data, nip, file }) => {
   );
 };
 
-const data2024 = (data) => {
-  return data?.filter(
-    (item) =>
-      item?.tahun === 2024 &&
-      item?.diklat?.kode_jenis_bkn !== null &&
-      item?.diklat?.kode_jenis_bkn !== 1 &&
-      item?.diklat?.kode_pim_bkn === null &&
-      item?.jml !== 0 &&
-      !!item?.no_sertifikat
-  );
-};
-
 function CompareDataDiklatMasterByNip({ nip }) {
   const queryClient = useQueryClient();
   const { data, isLoading } = useQuery(
@@ -139,31 +128,37 @@ function CompareDataDiklatMasterByNip({ nip }) {
 
   const [open, setOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
-
-  const [loading, setLoading] = useState(false);
   const [file, setFile] = useState(null);
-  const [isLoadingTransfer, setIsLoadingTransfer] = useState(false);
-  const lastYear = new Date().getFullYear() - 1;
+  const [loadingDiklatId, setLoadingDiklatId] = useState(null);
 
-  const handleOpenModal = async (data) => {
-    setLoading(true);
-    try {
-      if (data?.file_diklat) {
-        const response = await urlToPdf({ url: data?.file_diklat });
-        const currentFile = new File([response], data?.file_diklat, {
-          type: "application/pdf",
-        });
-        setFile(currentFile);
-      } else {
-        setFile(null);
-      }
+  const { mutate: loadPdfFile, isLoading: loadingFile } = useMutation({
+    mutationFn: (record) => {
+      setLoadingDiklatId(record?.diklat_id);
+      return urlToPdf({ url: record?.file_diklat });
+    },
+    onSuccess: (data, record) => {
+      const pdfFile = new File([data], "file.pdf", {
+        type: "application/pdf",
+      });
+      setFile(pdfFile);
       setOpen(true);
-      setSelectedRow(data);
-    } catch (error) {
-      console.error("Error processing file:", error);
+      setSelectedRow(record);
+      setLoadingDiklatId(null);
+    },
+    onError: (error) => {
+      console.error("Error loading PDF:", error);
+      message.error("Gagal memuat file PDF");
+      setLoadingDiklatId(null);
+    },
+  });
+
+  const handleOpenModal = (record) => {
+    if (record?.file_diklat) {
+      loadPdfFile(record);
+    } else {
+      setOpen(true);
+      setSelectedRow(record);
       setFile(null);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -171,148 +166,155 @@ function CompareDataDiklatMasterByNip({ nip }) {
     setOpen(false);
     setSelectedRow(null);
     setFile(null);
+    setLoadingDiklatId(null);
+  };
+
+  const handleRefresh = () => {
+    queryClient.invalidateQueries(["rw-diklat-master", nip]);
   };
 
   const columns = [
     {
-      title: "File",
+      title: "Dok",
       key: "file",
+      width: 80,
+      align: "center",
       render: (_, row) => {
         return (
-          <div>
-            <a href={row?.file_diklat} target="_blank" rel="noreferrer">
-              File
-            </a>
-          </div>
+          <>
+            {row?.file_diklat && (
+              <Tooltip title="File Diklat">
+                <a href={row?.file_diklat} target="_blank" rel="noreferrer">
+                  <Button
+                    size="small"
+                    type="link"
+                    icon={<IconFileText size={14} />}
+                  />
+                </a>
+              </Tooltip>
+            )}
+          </>
         );
       },
     },
     {
-      title: "Nama",
-      dataIndex: "nama_diklat",
+      title: "Nama Diklat & Jenis",
+      key: "nama_jenis",
+      width: 250,
+      render: (_, row) => (
+        <Tooltip title={row?.nama_diklat}>
+          <div>
+            <MantineText size="sm" fw={500} lineClamp={2}>
+              {row?.nama_diklat}
+            </MantineText>
+            <MantineBadge size="xs" color="green" tt="none">
+              {row?.diklat?.name}
+            </MantineBadge>
+          </div>
+        </Tooltip>
+      ),
     },
     {
-      title: "No. Sertifikat",
-      dataIndex: "no_sertifikat",
+      title: "No. Sertifikat & Tahun",
+      key: "sertifikat",
+      width: 150,
+      render: (_, record) => (
+        <div>
+          <MantineText size="xs" fw={500} lineClamp={1}>
+            {record?.no_sertifikat}
+          </MantineText>
+          <MantineBadge size="xs" color="blue">
+            {record?.tahun}
+          </MantineBadge>
+        </div>
+      ),
     },
     {
-      title: "Tahun",
-      dataIndex: "tahun",
-    },
-    {
-      title: "Institusi Penyelenggara",
+      title: "Penyelenggara",
       dataIndex: "penyelenggara",
+      width: 200,
+      render: (text) => (
+        <Tooltip title={text}>
+          <MantineText size="xs" lineClamp={2}>
+            {text}
+          </MantineText>
+        </Tooltip>
+      ),
     },
     {
-      title: "Tanggal Mulai",
+      title: "Tgl Mulai",
       dataIndex: "tanggal_mulai",
+      width: 100,
+      render: (tgl) => (
+        <MantineText size="xs" c="dimmed">
+          {tgl}
+        </MantineText>
+      ),
     },
-
     {
-      title: "Jenis",
-      key: "jenis",
-      render: (_, row) => <>{row?.diklat?.name}</>,
-    },
-    {
-      title: "Jumlah Jam",
+      title: "Jam",
       dataIndex: "jml",
+      width: 70,
+      align: "center",
+      render: (jam) => (
+        <MantineBadge size="sm" color="orange">
+          {jam}
+        </MantineBadge>
+      ),
     },
     {
       title: "Aksi",
       key: "aksi",
+      width: 80,
+      align: "center",
       render: (_, row) => {
         return (
           <Tooltip title="Transfer Diklat">
-            <a onClick={async () => await handleOpenModal(row)}>
-              <SendOutlined />
-            </a>
+            <Button
+              size="small"
+              type="primary"
+              icon={<IconSend size={14} />}
+              onClick={() => handleOpenModal(row)}
+              loading={loadingFile && loadingDiklatId === row?.diklat_id}
+            />
           </Tooltip>
         );
       },
     },
   ];
 
-  const delay = (ms) => {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-  };
-
-  const handleTransfer = async () => {
-    setIsLoadingTransfer(true);
-    const dataLastYear = data2024(data);
-
-    // console.log(dataLastYear);
-
-    const payload = dataLastYear.map((item) => {
-      return {
-        type: "kursus",
-        jenisDiklatId: item?.diklat?.kode_jenis_bkn,
-        namaKursus: item?.nama_diklat,
-        institusiPenyelenggara: item?.penyelenggara,
-        nomorSertipikat: item?.no_sertifikat,
-        tahunKursus: item?.tahun,
-        jumlahJam: item?.jml,
-        tanggalKursus: item?.tgl_sertifikat,
-        tanggalSelesaiKursus: item?.tgl_sertifikat,
-        fileDiklat: item?.file_diklat,
-      };
-    });
-
-    const id_ref_dokumen = "881";
-    try {
-      for (const item of payload) {
-        const requestBody = { nip, data: item };
-        const result = await postRiwayatKursusByNip(requestBody);
-        await delay(2000);
-
-        if (item.fileDiklat) {
-          const response = await urlToPdf({ url: item.fileDiklat });
-          const file = new File([response], "file.pdf", {
-            type: "application/pdf",
-          });
-
-          const formData = new FormData();
-          formData.append("id_riwayat", result?.id);
-          formData.append("id_ref_dokumen", id_ref_dokumen);
-          formData.append("file", file);
-          await uploadDokRiwayat(formData);
-        }
-      }
-      message.success("Data berhasil disimpan");
-      queryClient.invalidateQueries(["riwayat-diklat-by-nip", nip]);
-    } catch (error) {
-      console.log(error);
-      const messageError =
-        error?.response?.data?.message || "Gagal mengirim data";
-      message.error(messageError);
-    } finally {
-      setIsLoadingTransfer(false);
-    }
-  };
-
   return (
     <div>
-      <Spin spinning={loading} fullscreen />
-      {/* <>
-        {data && data2024(data)?.length && (
-          <Flex justify="flex-end">
-            <Button
-              style={{ marginBottom: 8 }}
-              type="primary"
-              onClick={handleTransfer}
-              loading={isLoadingTransfer}
-              disabled={isLoadingTransfer}
-            >
-              Transfer Diklat 2024
-            </Button>
-          </Flex>
-        )}
-      </> */}
       <Table
+        title={() => (
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <MantineText fw="bold">Data Diklat SIMASTER</MantineText>
+            <Tooltip title="Refresh data SIMASTER">
+              <Button
+                size="small"
+                icon={<IconRefresh size={14} />}
+                onClick={handleRefresh}
+                loading={isLoading}
+              />
+            </Tooltip>
+          </div>
+        )}
         pagination={false}
         dataSource={data}
         rowKey={(row) => row?.diklat_id}
         columns={columns}
         loading={isLoading}
+        rowClassName={(_, index) =>
+          index % 2 === 0 ? "table-row-light" : "table-row-dark"
+        }
+        size="small"
+        scroll={{ x: 1000 }}
       />
       <TransferModal
         nip={nip}

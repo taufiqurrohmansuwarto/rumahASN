@@ -1,7 +1,7 @@
 import { removeJabatan } from "@/services/siasn-services";
-import { DeleteOutlined } from "@ant-design/icons";
+import { IconTrash } from "@tabler/icons-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Popconfirm, Tooltip, message } from "antd";
+import { Button, Popconfirm, Tooltip, message } from "antd";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/dist/client/router";
 
@@ -28,18 +28,19 @@ function HapusJabatan({ id }) {
   );
 
   return (
-    <>
-      <Popconfirm
-        title="Are you sure you want to delete this item?"
-        onConfirm={async () => await hapus()}
-      >
-        <Tooltip title="Hapus">
-          <a>
-            <DeleteOutlined />
-          </a>
-        </Tooltip>
-      </Popconfirm>
-    </>
+    <Popconfirm
+      title="Are you sure you want to delete this item?"
+      onConfirm={async () => await hapus()}
+    >
+      <Tooltip title="Hapus">
+        <Button
+          size="small"
+          danger
+          icon={<IconTrash size={14} />}
+          loading={isLoading}
+        />
+      </Tooltip>
+    </Popconfirm>
   );
 }
 

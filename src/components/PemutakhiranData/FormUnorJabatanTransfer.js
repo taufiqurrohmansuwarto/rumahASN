@@ -3,10 +3,11 @@ import {
   uploadDokRiwayat,
 } from "@/services/siasn-services";
 import { getJenisJabatanId } from "@/utils/client-utils";
-import { SendOutlined } from "@ant-design/icons";
 import { Alert, Text } from "@mantine/core";
+import { IconSend } from "@tabler/icons-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
+  Button,
   Col,
   DatePicker,
   Form,
@@ -308,9 +309,13 @@ const FormUnorJabatanTransfer = ({ data, kata = "Edit", dataSiasn = [] }) => {
     <>
       <Spin spinning={loading} fullscreen />
       <Tooltip title="Transfer">
-        <a onClick={handleOpen}>
-          <SendOutlined />
-        </a>
+        <Button
+          size="small"
+          type="primary"
+          icon={<IconSend size={14} />}
+          onClick={handleOpen}
+          style={{ backgroundColor: "#52c41a", borderColor: "#52c41a" }}
+        />
       </Tooltip>
       <ModalFormJabatanUnor
         siasn={dataSiasn}

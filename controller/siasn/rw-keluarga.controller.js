@@ -1,4 +1,5 @@
 import { handleError } from "@/utils/helper/controller-helper";
+import { logger } from "@/utils/logger";
 import { createLogSIASN } from "@/utils/logs";
 import { isEmpty } from "lodash";
 const {
@@ -141,6 +142,7 @@ export const postPasanganByNip = async (req, res) => {
       }
 
       const result = await tambahPasangan(siasnRequest, payload);
+      console.log(result);
       const response = result?.data;
       const success =
         response?.success === true || response?.success === "true";

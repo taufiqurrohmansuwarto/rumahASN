@@ -202,13 +202,19 @@ const errorHandler = async (error) => {
   const invalidJwt = errorData.message === "invalid or expired jwt";
   const tokenError = errorData.data === "Token SSO mismatch";
   const invalidCredentials = errorData.message === "Invalid Credentials";
+  const notFound = errorData.message === "Not Found";
 
   const runtimeError =
     errorData.message === "Runtime Error" &&
     !(errorData.description && errorData.description.includes("SUSPENDED"));
 
   const isTokenError =
-    invalidJwt || runtimeError || tokenError || invalidCredentials || ECONRESET;
+    invalidJwt ||
+    runtimeError ||
+    tokenError ||
+    invalidCredentials ||
+    ECONRESET ||
+    notFound;
 
   if (isTokenError) {
     log.warn("[SIASN] Token invalid/expired, invalidating cache", {

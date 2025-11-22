@@ -4,35 +4,21 @@ import { createUsulanPeremajaanPendidikan } from "@/services/admin.services";
 import { rwPendidikanMasterByNip } from "@/services/master.services";
 import { dataPendidikanByNip } from "@/services/siasn-services";
 import {
-  BankOutlined,
-  BookOutlined,
-  CalendarOutlined,
-  CheckCircleOutlined,
-  DownloadOutlined,
-  EditOutlined,
-  FileTextOutlined,
-  GlobalOutlined,
-  IdcardOutlined,
-  ReloadOutlined,
-  TrophyOutlined,
-  UserOutlined,
-} from "@ant-design/icons";
-import { Badge as MantineBadge, Text as MantineText } from "@mantine/core";
-import { Stack } from "@mantine/core";
+  Badge as MantineBadge,
+  Text as MantineText,
+  Stack,
+} from "@mantine/core";
+import { IconBook, IconRefresh } from "@tabler/icons-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
-  Avatar,
-  Badge,
   Button,
   Card,
-  Descriptions,
   Divider,
   Flex,
   Grid,
   message,
   Space,
   Table,
-  Tag,
   Tooltip,
   Typography,
 } from "antd";
@@ -83,15 +69,10 @@ const CompareDataPendidikanSIMASTER = ({ nip }) => {
       dataIndex: "jenjang",
       key: "jenjang",
       width: isMobile ? 100 : 150,
-      render: (jenjang, record) => (
-        <div>
-          <MantineText size="sm" fw={500}>
-            {jenjang}
-          </MantineText>
-          <MantineText size="xs" c="dimmed">
-            {record?.kode_jenjang}
-          </MantineText>
-        </div>
+      render: (jenjang) => (
+        <MantineText size="sm" fw={500}>
+          {jenjang}
+        </MantineText>
       ),
     },
     {
@@ -207,137 +188,6 @@ const CompareDataPendidikanSIMASTER = ({ nip }) => {
       : []),
   ];
 
-  const expandedRowRender = (record) => {
-    return (
-      <Descriptions size="small" column={{ xs: 1, sm: 2, md: 3 }} bordered>
-        <Descriptions.Item
-          label={
-            <Space>
-              <BookOutlined /> Jenjang
-            </Space>
-          }
-        >
-          <Tag color="blue">
-            {record?.jenjang} (Kode: {record?.kode_jenjang})
-          </Tag>
-        </Descriptions.Item>
-        <Descriptions.Item
-          label={
-            <Space>
-              <BankOutlined /> Nama Sekolah
-            </Space>
-          }
-        >
-          <Text strong>{record?.nama_sekolah}</Text>
-        </Descriptions.Item>
-        <Descriptions.Item
-          label={
-            <Space>
-              <BookOutlined /> Program Studi
-            </Space>
-          }
-        >
-          <Text>{record?.prodi}</Text>
-        </Descriptions.Item>
-        <Descriptions.Item
-          label={
-            <Space>
-              <BankOutlined /> Fakultas
-            </Space>
-          }
-        >
-          <Text>{record?.fakultas}</Text>
-        </Descriptions.Item>
-        <Descriptions.Item
-          label={
-            <Space>
-              <TrophyOutlined /> Akreditasi
-            </Space>
-          }
-        >
-          <Tag color={getAkreditasiColor(record?.akreditasi)}>
-            {record?.akreditasi}
-          </Tag>
-        </Descriptions.Item>
-        <Descriptions.Item
-          label={
-            <Space>
-              <TrophyOutlined /> IPK
-            </Space>
-          }
-        >
-          <Tag color={getIPKColor(record?.ipk)}>{record?.ipk}</Tag>
-        </Descriptions.Item>
-        <Descriptions.Item
-          label={
-            <Space>
-              <CalendarOutlined /> Tahun Lulus
-            </Space>
-          }
-        >
-          <Tag color="green">{record?.tahun_lulus}</Tag>
-        </Descriptions.Item>
-        <Descriptions.Item
-          label={
-            <Space>
-              <CalendarOutlined /> Tanggal Ijazah
-            </Space>
-          }
-        >
-          <Text>
-            {record?.tgl_ijazah
-              ? dayjs(record.tgl_ijazah).format("DD MMMM YYYY")
-              : "-"}
-          </Text>
-        </Descriptions.Item>
-        <Descriptions.Item
-          label={
-            <Space>
-              <IdcardOutlined /> No. Ijazah
-            </Space>
-          }
-        >
-          <Text code>{record?.no_ijazah}</Text>
-        </Descriptions.Item>
-        <Descriptions.Item
-          label={
-            <Space>
-              <CheckCircleOutlined /> Status
-            </Space>
-          }
-        >
-          <Badge
-            status={record?.aktif === "Y" ? "success" : "error"}
-            text={record?.aktif === "Y" ? "Aktif" : "Tidak Aktif"}
-          />
-        </Descriptions.Item>
-        <Descriptions.Item
-          label={
-            <Space>
-              <CalendarOutlined /> Terakhir Edit
-            </Space>
-          }
-        >
-          <Text type="secondary">
-            {record?.tgl_edit
-              ? dayjs(record.tgl_edit).format("DD MMMM YYYY")
-              : "-"}
-            {record?.jam_edit && ` ${record.jam_edit}`}
-          </Text>
-        </Descriptions.Item>
-        <Descriptions.Item
-          label={
-            <Space>
-              <GlobalOutlined /> ID
-            </Space>
-          }
-        >
-          <Text code>#{record?.id}</Text>
-        </Descriptions.Item>
-      </Descriptions>
-    );
-  };
-
   return (
     <Table
       title={null}
@@ -350,10 +200,6 @@ const CompareDataPendidikanSIMASTER = ({ nip }) => {
       rowClassName={(record, index) =>
         index % 2 === 0 ? "table-row-light" : "table-row-dark"
       }
-      expandable={{
-        expandedRowRender,
-        rowExpandable: () => true,
-      }}
     />
   );
 };
@@ -426,12 +272,12 @@ const ComparePendidikanByNip = ({ nip }) => {
           </Tooltip>
           <Space size="small">
             {record?.gelarDepan && (
-              <MantineBadge size="sm" color="orange">
+              <MantineBadge size="sm" color="orange" tt="none">
                 {record.gelarDepan}
               </MantineBadge>
             )}
             {record?.gelarBelakang && (
-              <MantineBadge size="sm" color="orange">
+              <MantineBadge size="sm" color="orange" tt="none">
                 {record.gelarBelakang}
               </MantineBadge>
             )}
@@ -550,189 +396,13 @@ const ComparePendidikanByNip = ({ nip }) => {
     },
   ];
 
-  const expandedRowRender = (record) => {
-    return (
-      <Descriptions size="small" column={{ xs: 1, sm: 2, md: 3 }} bordered>
-        <Descriptions.Item
-          label={
-            <Space>
-              <UserOutlined /> NIP Baru
-            </Space>
-          }
-        >
-          <Text code copyable>
-            {record?.nipBaru}
-          </Text>
-        </Descriptions.Item>
-        <Descriptions.Item
-          label={
-            <Space>
-              <UserOutlined /> NIP Lama
-            </Space>
-          }
-        >
-          <Text code>{record?.nipLama || "-"}</Text>
-        </Descriptions.Item>
-        <Descriptions.Item
-          label={
-            <Space>
-              <BookOutlined /> Tingkat Pendidikan
-            </Space>
-          }
-        >
-          <Tag color="blue">
-            {record?.tkPendidikanNama} ({record?.tkPendidikanId})
-          </Tag>
-        </Descriptions.Item>
-        <Descriptions.Item
-          label={
-            <Space>
-              <BookOutlined /> Nama Pendidikan
-            </Space>
-          }
-        >
-          <Text strong>{record?.pendidikanNama}</Text>
-        </Descriptions.Item>
-        <Descriptions.Item
-          label={
-            <Space>
-              <BankOutlined /> Nama Sekolah
-            </Space>
-          }
-        >
-          <Text strong>{record?.namaSekolah}</Text>
-        </Descriptions.Item>
-        <Descriptions.Item
-          label={
-            <Space>
-              <IdcardOutlined /> Nomor Ijazah
-            </Space>
-          }
-        >
-          <Text code copyable>
-            {record?.nomorIjasah}
-          </Text>
-        </Descriptions.Item>
-        <Descriptions.Item
-          label={
-            <Space>
-              <CalendarOutlined /> Tahun Lulus
-            </Space>
-          }
-        >
-          <Tag color="green">{record?.tahunLulus}</Tag>
-        </Descriptions.Item>
-        <Descriptions.Item
-          label={
-            <Space>
-              <CalendarOutlined /> Tanggal Lulus
-            </Space>
-          }
-        >
-          <Text>{record?.tglLulus}</Text>
-        </Descriptions.Item>
-        <Descriptions.Item
-          label={
-            <Space>
-              <CheckCircleOutlined /> Status Pendidikan
-            </Space>
-          }
-        >
-          <Badge
-            status={record?.isPendidikanPertama === "1" ? "success" : "default"}
-            text={
-              record?.isPendidikanPertama === "1"
-                ? "Pendidikan Pertama"
-                : "Pendidikan Lanjutan"
-            }
-          />
-        </Descriptions.Item>
-        <Descriptions.Item
-          label={
-            <Space>
-              <TrophyOutlined /> Gelar Depan
-            </Space>
-          }
-        >
-          <Text>{record?.gelarDepan || ""}</Text>
-        </Descriptions.Item>
-        <Descriptions.Item
-          label={
-            <Space>
-              <TrophyOutlined /> Gelar Belakang
-            </Space>
-          }
-        >
-          <Text strong>{record?.gelarBelakang || "-"}</Text>
-        </Descriptions.Item>
-        <Descriptions.Item
-          label={
-            <Space>
-              <TrophyOutlined /> Gelar Lengkap
-            </Space>
-          }
-        >
-          <Text strong>
-            {record?.gelarDepan ? `${record.gelarDepan} ` : ""}
-            {record?.gelarBelakang ? record.gelarBelakang : ""}
-          </Text>
-        </Descriptions.Item>
-        <Descriptions.Item
-          label={
-            <Space>
-              <GlobalOutlined /> ID Pendidikan
-            </Space>
-          }
-        >
-          <Text code>{record?.pendidikanId}</Text>
-        </Descriptions.Item>
-        <Descriptions.Item
-          label={
-            <Space>
-              <GlobalOutlined /> ID PNS
-            </Space>
-          }
-        >
-          <Text code>{record?.idPns}</Text>
-        </Descriptions.Item>
-        <Descriptions.Item
-          label={
-            <Space>
-              <GlobalOutlined /> ID Record
-            </Space>
-          }
-        >
-          <Text code>{record?.id}</Text>
-        </Descriptions.Item>
-        <Descriptions.Item
-          label={
-            <Space>
-              <CalendarOutlined /> Created At
-            </Space>
-          }
-        >
-          <Text type="secondary">{record?.createdAt || ""}</Text>
-        </Descriptions.Item>
-        <Descriptions.Item
-          label={
-            <Space>
-              <CalendarOutlined /> Updated At
-            </Space>
-          }
-        >
-          <Text type="secondary">{record?.updatedAt || ""}</Text>
-        </Descriptions.Item>
-      </Descriptions>
-    );
-  };
-
   return (
     <div>
       <Card>
         {/* Header Section */}
         <div style={{ marginBottom: 16 }}>
           <Space>
-            <BookOutlined style={{ fontSize: 20, color: "#FF4500" }} />
+            <IconBook size={20} color="#FF4500" />
             <Title level={4} style={{ margin: 0 }}>
               Komparasi Pendidikan
             </Title>
@@ -756,7 +426,7 @@ const ComparePendidikanByNip = ({ nip }) => {
               </Space>
               <Button
                 size="small"
-                icon={<ReloadOutlined />}
+                icon={<IconRefresh size={16} />}
                 onClick={() => refetch()}
                 loading={isLoading || isFetching}
               >
@@ -776,10 +446,6 @@ const ComparePendidikanByNip = ({ nip }) => {
               rowClassName={(record, index) =>
                 index % 2 === 0 ? "table-row-light" : "table-row-dark"
               }
-              expandable={{
-                expandedRowRender,
-                rowExpandable: () => true,
-              }}
             />
 
             <Divider />
@@ -797,16 +463,6 @@ const ComparePendidikanByNip = ({ nip }) => {
           </Stack>
         </div>
       </Card>
-
-      <style jsx global>{`
-        .table-row-light {
-          background-color: #ffffff !important;
-        }
-
-        .table-row-dark {
-          background-color: #fafafa !important;
-        }
-      `}</style>
     </div>
   );
 };

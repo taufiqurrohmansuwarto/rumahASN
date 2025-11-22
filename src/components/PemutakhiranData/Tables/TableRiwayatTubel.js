@@ -1,9 +1,11 @@
-import { Button, Flex, Space, Table, Tooltip } from "antd";
+import { Badge as MantineBadge, Text as MantineText } from "@mantine/core";
 import {
-  ReloadOutlined,
-  FilePdfOutlined,
-  PlusOutlined,
-} from "@ant-design/icons";
+  IconFileText,
+  IconPlus,
+  IconRefresh,
+  IconSchool,
+} from "@tabler/icons-react";
+import { Button, Card, Space, Table, Tooltip } from "antd";
 import FormTugasBelajar from "@/components/PemutakhiranData/Forms/FormTugasBelajar";
 import { useState } from "react";
 
@@ -24,119 +26,181 @@ const TableRiwayatTubel = ({
     setOpen(false);
   };
 
-  // Konfigurasi file dokumen untuk tooltip dan download
-  const fileConfigs = {
-    1619: "Surat Keterangan Universitas",
-    1620: "Surat Keterangan Akreditasi Program Studi",
-    1621: "Surat Rekomendasi Jurusan",
-  };
-
-  // Render komponen file dengan tooltip
-  const renderFileLink = (record, fileId, title) => {
-    const filePath = record?.path?.[fileId];
-    if (!filePath) return null;
-
-    return (
-      <div>
-        <Tooltip title={title}>
-          <a
-            href={`/helpdesk/api/siasn/ws/download?filePath=${filePath.dok_uri}`}
-            target="_blank"
-            rel="noreferrer"
-          >
-            <FilePdfOutlined style={{ color: "#d32f2f", fontSize: "16px" }} />
-          </a>
-        </Tooltip>
-      </div>
-    );
-  };
-
-  // Konfigurasi kolom tabel
   const columns = [
     {
-      title: "File",
+      title: "Dok",
       key: "file",
+      width: 100,
+      align: "center",
       render: (_, record) => (
-        <Space>
-          {Object.entries(fileConfigs).map(([fileId, title]) =>
-            renderFileLink(record, fileId, title)
+        <Space direction="vertical" size={2}>
+          {record?.path?.[1619] && (
+            <Tooltip title="Surat Keterangan Universitas">
+              <a
+                href={`/helpdesk/api/siasn/ws/download?filePath=${record?.path?.[1619]?.dok_uri}`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                <Button size="small" icon={<IconFileText size={14} />}>
+                  Univ
+                </Button>
+              </a>
+            </Tooltip>
+          )}
+          {record?.path?.[1620] && (
+            <Tooltip title="Surat Keterangan Akreditasi Program Studi">
+              <a
+                href={`/helpdesk/api/siasn/ws/download?filePath=${record?.path?.[1620]?.dok_uri}`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                <Button size="small" icon={<IconFileText size={14} />}>
+                  Akred
+                </Button>
+              </a>
+            </Tooltip>
+          )}
+          {record?.path?.[1621] && (
+            <Tooltip title="Surat Rekomendasi Jurusan">
+              <a
+                href={`/helpdesk/api/siasn/ws/download?filePath=${record?.path?.[1621]?.dok_uri}`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                <Button size="small" icon={<IconFileText size={14} />}>
+                  Rekom
+                </Button>
+              </a>
+            </Tooltip>
           )}
         </Space>
       ),
     },
     {
-      title: "Sekolah",
-      dataIndex: "namaSekolah",
-      key: "namaSekolah",
+      title: "Sekolah & Gelar",
+      key: "sekolah_gelar",
+      render: (_, record) => (
+        <Tooltip
+          title={`Sekolah: ${record?.namaSekolah || "-"} | Gelar: ${record?.gelarDepan || ""} ${record?.gelarBelakang || ""}`}
+        >
+          <div>
+            <MantineText size="sm" fw={500} lineClamp={2}>
+              {record?.namaSekolah || "-"}
+            </MantineText>
+            <Space size={4} style={{ marginTop: 4 }}>
+              {record?.gelarDepan && (
+                <MantineBadge size="xs" color="cyan" tt="none">
+                  {record?.gelarDepan}
+                </MantineBadge>
+              )}
+              {record?.gelarBelakang && (
+                <MantineBadge size="xs" color="grape" tt="none">
+                  {record?.gelarBelakang}
+                </MantineBadge>
+              )}
+            </Space>
+          </div>
+        </Tooltip>
+      ),
     },
     {
-      title: "Mulai",
-      dataIndex: "tglMulai",
-      key: "tglMulai",
-    },
-    {
-      title: "Selesai",
-      dataIndex: "tglSelesai",
-      key: "tglSelesai",
-    },
-    {
-      title: "Gelar Depan",
-      dataIndex: "gelarDepan",
-      key: "gelarDepan",
-    },
-    {
-      title: "Gelar Belakang",
-      dataIndex: "gelarBelakang",
-      key: "gelarBelakang",
+      title: "Periode",
+      key: "periode",
+      render: (_, record) => (
+        <Tooltip
+          title={`Mulai: ${record?.tglMulai || "-"} | Selesai: ${record?.tglSelesai || "-"}`}
+        >
+          <div>
+            <MantineText size="xs">{record?.tglMulai || "-"}</MantineText>
+            <MantineText size="xs" c="dimmed">
+              s/d {record?.tglSelesai || "-"}
+            </MantineText>
+          </div>
+        </Tooltip>
+      ),
     },
     {
       title: "Akreditasi",
-      dataIndex: "predikatAkreditasiJurusan",
-      key: "predikatAkreditasiJurusan",
-    },
-    {
-      title: "No. Akreditasi",
-      dataIndex: "noAkreditasiJurusan",
-      key: "noAkreditasiJurusan",
+      key: "akreditasi",
+      render: (_, record) => (
+        <Tooltip
+          title={`Predikat: ${record?.predikatAkreditasiJurusan || "-"} | Nomor: ${record?.noAkreditasiJurusan || "-"}`}
+        >
+          <div>
+            <MantineBadge size="sm" color="green" tt="none">
+              {record?.predikatAkreditasiJurusan || "-"}
+            </MantineBadge>
+            <MantineText size="xs" style={{ marginTop: 4 }}>
+              {record?.noAkreditasiJurusan || "-"}
+            </MantineText>
+          </div>
+        </Tooltip>
+      ),
     },
     {
       title: "Dibuat",
       dataIndex: "createdAt",
-      key: "createdAt",
+      render: (date) => (
+        <MantineText size="xs" c="dimmed">
+          {date || "-"}
+        </MantineText>
+      ),
     },
   ];
 
   return (
-    <>
+    <Card
+      title={
+        <Space>
+          <IconSchool size={20} />
+          <span>Riwayat Tugas Belajar</span>
+          <MantineBadge size="sm" color="blue">
+            {data?.length || 0} Data
+          </MantineBadge>
+        </Space>
+      }
+      extra={
+        <Space>
+          {enableCreate && (
+            <Button
+              type="primary"
+              onClick={handleOpen}
+              icon={<IconPlus size={14} />}
+              size="small"
+            >
+              Tambah
+            </Button>
+          )}
+          <Tooltip title="Refresh data Tugas Belajar">
+            <Button
+              size="small"
+              icon={<IconRefresh size={14} />}
+              onClick={refetch}
+              loading={loading}
+            />
+          </Tooltip>
+        </Space>
+      }
+      style={{ marginTop: 16 }}
+    >
       <FormTugasBelajar
         open={open}
         onCancel={handleCancel}
         onFinish={onFinishCreate}
       />
-      <Flex justify="space-between" align="center" style={{ marginBottom: 16 }}>
-        {enableCreate && (
-          <Button type="primary" onClick={handleOpen} icon={<PlusOutlined />}>
-            Tugas Belajar
-          </Button>
-        )}
-        <Button
-          loading={loading}
-          disabled={loading}
-          type="text"
-          onClick={refetch}
-          icon={<ReloadOutlined />}
-        >
-          Refresh
-        </Button>
-      </Flex>
       <Table
         pagination={false}
         loading={loading}
         rowKey={(record) => record?.id}
         columns={columns}
         dataSource={data}
+        rowClassName={(_, index) =>
+          index % 2 === 0 ? "table-row-light" : "table-row-dark"
+        }
+        size="small"
+        scroll={{ x: "max-content" }}
       />
-    </>
+    </Card>
   );
 };
 

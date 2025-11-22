@@ -2,41 +2,57 @@ import {
   getRwDiklatByNip,
   removeDiklatKursusById,
 } from "@/services/siasn-services";
-import { DeleteOutlined } from "@ant-design/icons";
-import { Stack } from "@mantine/core";
+import {
+  Badge as MantineBadge,
+  Stack,
+  Text as MantineText,
+} from "@mantine/core";
+import {
+  IconBook,
+  IconFileText,
+  IconRefresh,
+  IconTrash,
+} from "@tabler/icons-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  Button,
   Card,
-  Divider,
   Popconfirm,
   Skeleton,
   Space,
   Table,
   Tabs,
   Tooltip,
-  Typography,
   message,
 } from "antd";
 import { useRouter } from "next/router";
 import CompareDataDiklatMasterByNip from "./CompareDataDiklatMasterByNip";
 import UploadDokumen from "./UploadDokumen";
 
-const TableDiklat = ({ data }) => {
+const TableDiklat = ({ data, isLoading, onRefresh }) => {
   const columns = [
     {
-      title: "File",
+      title: "Dok",
       key: "file",
+      width: 80,
+      align: "center",
       render: (_, row) => {
         return (
           <>
             {row?.path?.[874] && (
-              <a
-                href={`/helpdesk/api/siasn/ws/download?filePath=${row?.path?.[874]?.dok_uri}`}
-                target="_blank"
-                rel="noreferrer"
-              >
-                File
-              </a>
+              <Tooltip title="Sertifikat Diklat">
+                <a
+                  href={`/helpdesk/api/siasn/ws/download?filePath=${row?.path?.[874]?.dok_uri}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <Button
+                    size="small"
+                    type="link"
+                    icon={<IconFileText size={14} />}
+                  />
+                </a>
+              </Tooltip>
             )}
           </>
         );
@@ -46,36 +62,89 @@ const TableDiklat = ({ data }) => {
     {
       title: "Nama Diklat",
       dataIndex: "latihanStrukturalNama",
+      width: 250,
+      render: (text) => (
+        <Tooltip title={text}>
+          <MantineText size="sm" fw={500} lineClamp={2}>
+            {text}
+          </MantineText>
+        </Tooltip>
+      ),
     },
     {
-      title: "Nomor",
-      dataIndex: "nomor",
+      title: "Nomor & Tanggal",
+      key: "nomor_tanggal",
+      width: 180,
+      render: (_, record) => (
+        <div>
+          <MantineText size="xs" fw={500} lineClamp={1}>
+            {record?.nomor}
+          </MantineText>
+          <MantineText size="xs" c="dimmed">
+            {record?.tanggalSelesai}
+          </MantineText>
+        </div>
+      ),
     },
     {
       title: "Penyelenggara",
       dataIndex: "institusiPenyelenggara",
+      width: 200,
+      render: (text) => (
+        <Tooltip title={text}>
+          <MantineText size="xs" lineClamp={2}>
+            {text}
+          </MantineText>
+        </Tooltip>
+      ),
     },
     {
-      title: "Tgl. Selesai",
-      dataIndex: "tanggalSelesai",
-    },
-    {
-      title: "Jumlah Jam",
+      title: "Jam",
       dataIndex: "jumlahJam",
+      width: 80,
+      align: "center",
+      render: (jam) => (
+        <MantineBadge size="sm" color="blue">
+          {jam}
+        </MantineBadge>
+      ),
     },
   ];
   return (
     <Table
-      title={() => <Typography.Text strong>Data Diklat</Typography.Text>}
+      title={() => (
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <MantineText fw="bold">Data Diklat</MantineText>
+          <Tooltip title="Refresh data Diklat">
+            <Button
+              size="small"
+              icon={<IconRefresh size={14} />}
+              onClick={onRefresh}
+              loading={isLoading}
+            />
+          </Tooltip>
+        </div>
+      )}
       columns={columns}
       pagination={false}
       rowKey={(row) => row?.id}
       dataSource={data}
+      rowClassName={(_, index) =>
+        index % 2 === 0 ? "table-row-light" : "table-row-dark"
+      }
+      size="small"
+      scroll={{ x: 800 }}
     />
   );
 };
 
-const TableKursus = ({ data }) => {
+const TableKursus = ({ data, isLoading, onRefresh }) => {
   const router = useRouter();
   const nip = router.query?.nip;
 
@@ -106,19 +175,27 @@ const TableKursus = ({ data }) => {
 
   const columns = [
     {
-      title: "File",
+      title: "Dok",
       key: "file",
+      width: 80,
+      align: "center",
       render: (_, row) => {
         return (
           <>
             {row?.path?.[881] && (
-              <a
-                href={`/helpdesk/api/siasn/ws/download?filePath=${row?.path?.[881]?.dok_uri}`}
-                target="_blank"
-                rel="noreferrer"
-              >
-                File
-              </a>
+              <Tooltip title="Sertifikat Kursus">
+                <a
+                  href={`/helpdesk/api/siasn/ws/download?filePath=${row?.path?.[881]?.dok_uri}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <Button
+                    size="small"
+                    type="link"
+                    icon={<IconFileText size={14} />}
+                  />
+                </a>
+              </Tooltip>
             )}
           </>
         );
@@ -132,67 +209,108 @@ const TableKursus = ({ data }) => {
       render: (text) => {
         return (
           <Stack>
-            <div>{text?.namaKursus}</div>
-            <div>{text?.jenisKursusSertifikat}</div>
-            <div>{text?.institusiPenyelenggara}</div>
+            <MantineText size="sm" fw={500}>
+              {text?.namaKursus}
+            </MantineText>
+            <MantineBadge size="xs">{text?.jenisKursusSertifikat}</MantineBadge>
+            <MantineText size="xs" c="dimmed">
+              {text?.institusiPenyelenggara}
+            </MantineText>
           </Stack>
         );
       },
     },
     {
-      title: "Nama Kursus",
-      dataIndex: "namaKursus",
+      title: "Nama Kursus & Jenis",
+      key: "nama_jenis",
+      width: 220,
+      render: (_, record) => (
+        <Tooltip title={record?.namaKursus}>
+          <div>
+            <MantineText size="sm" fw={500} lineClamp={2}>
+              {record?.namaKursus}
+            </MantineText>
+            <MantineBadge size="xs" color="green" tt="none">
+              {record?.jenisKursusSertifikat}
+            </MantineBadge>
+          </div>
+        </Tooltip>
+      ),
       responsive: ["sm"],
     },
     {
-      title: "Tahun",
-      dataIndex: "tahunKursus",
-    },
-    {
-      title: "Nomer Sertifikat",
-      dataIndex: "noSertipikat",
-    },
-    {
-      title: "Tanggal",
-      key: "tgl",
-      render: (_, row) => (
-        <>
-          {row?.tanggalKursus} s/d {row?.tanggalSelesaiKursus}
-        </>
+      title: "No. Sertifikat & Tahun",
+      key: "sertifikat",
+      width: 150,
+      render: (_, record) => (
+        <div>
+          <MantineText size="xs" fw={500}>
+            {record?.noSertipikat}
+          </MantineText>
+          <MantineBadge size="xs" color="blue">
+            {record?.tahunKursus}
+          </MantineBadge>
+        </div>
       ),
     },
-
     {
-      title: "Jenis",
-      dataIndex: "jenisKursusSertifikat",
-      responsive: ["sm"],
+      title: "Periode",
+      key: "tgl",
+      width: 140,
+      render: (_, row) => (
+        <div>
+          <MantineText size="xs">{row?.tanggalKursus}</MantineText>
+          <MantineText size="xs" c="dimmed">
+            {row?.tanggalSelesaiKursus}
+          </MantineText>
+        </div>
+      ),
     },
     {
       title: "Penyelenggara",
       dataIndex: "institusiPenyelenggara",
+      width: 180,
+      render: (text) => (
+        <Tooltip title={text}>
+          <MantineText size="xs" lineClamp={2}>
+            {text}
+          </MantineText>
+        </Tooltip>
+      ),
       responsive: ["sm"],
     },
     {
-      title: "Jumlah Jam",
+      title: "Jam",
       dataIndex: "jumlahJam",
+      width: 70,
+      align: "center",
+      render: (jam) => (
+        <MantineBadge size="sm" color="orange">
+          {jam}
+        </MantineBadge>
+      ),
     },
     {
       title: "Aksi",
       key: "aksi",
+      width: 110,
+      align: "center",
       render: (_, row) => {
         return (
-          <Space direction="horizontal">
-            <Tooltip title="Hapus">
-              <Popconfirm
-                title="Apakah anda yakin ingin menghapus data ini?"
-                onConfirm={() => handleHapus(row)}
-              >
-                <a>
-                  <DeleteOutlined />
-                </a>
-              </Popconfirm>
-            </Tooltip>
-            <Divider type="vertical" />
+          <Space size="small">
+            <Popconfirm
+              title="Hapus data kursus?"
+              onConfirm={() => handleHapus(row)}
+            >
+              <Tooltip title="Hapus">
+                <Button
+                  size="small"
+                  danger
+                  icon={<IconTrash size={14} />}
+                  loading={isLoadingHapus}
+                />
+              </Tooltip>
+            </Popconfirm>
             <UploadDokumen
               id={row?.id}
               invalidateQueries={["riwayat-diklat-by-nip"]}
@@ -206,16 +324,41 @@ const TableKursus = ({ data }) => {
   ];
   return (
     <Table
-      title={() => <Typography.Text strong>Data Kursus</Typography.Text>}
+      title={() => (
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <MantineText fw="bold">Data Kursus</MantineText>
+          <Tooltip title="Refresh data Kursus">
+            <Button
+              size="small"
+              icon={<IconRefresh size={14} />}
+              onClick={onRefresh}
+              loading={isLoading}
+            />
+          </Tooltip>
+        </div>
+      )}
       pagination={false}
       columns={columns}
       dataSource={data}
       rowKey={(row) => row?.id}
+      rowClassName={(_, index) =>
+        index % 2 === 0 ? "table-row-light" : "table-row-dark"
+      }
+      size="small"
+      scroll={{ x: 1000 }}
     />
   );
 };
 
 function CompareDataDiklatByNip({ nip }) {
+  const queryClient = useQueryClient();
+
   const { data, isLoading } = useQuery(
     ["riwayat-diklat-by-nip", nip],
     () => getRwDiklatByNip(nip),
@@ -226,8 +369,25 @@ function CompareDataDiklatByNip({ nip }) {
     }
   );
 
+  const handleRefresh = () => {
+    queryClient.invalidateQueries(["riwayat-diklat-by-nip", nip]);
+  };
+
   return (
-    <Card title="Data Riwayat Diklat dan Kursus SIASN">
+    <Card
+      title={
+        <Space>
+          <IconBook size={20} />
+          <span>Data Riwayat Diklat dan Kursus</span>
+          <MantineBadge size="sm" color="blue">
+            Kursus: {data?.kursus?.length || 0}
+          </MantineBadge>
+          <MantineBadge size="sm" color="green">
+            Diklat: {data?.diklat?.length || 0}
+          </MantineBadge>
+        </Space>
+      }
+    >
       <Tabs
         type="card"
         style={{
@@ -240,8 +400,16 @@ function CompareDataDiklatByNip({ nip }) {
         <Tabs.TabPane key="diklat-siasn" tab="SIASN">
           <Stack>
             <Skeleton loading={isLoading}>
-              <TableKursus data={data?.kursus} />
-              <TableDiklat data={data?.diklat} />
+              <TableKursus
+                data={data?.kursus}
+                isLoading={isLoading}
+                onRefresh={handleRefresh}
+              />
+              <TableDiklat
+                data={data?.diklat}
+                isLoading={isLoading}
+                onRefresh={handleRefresh}
+              />
             </Skeleton>
           </Stack>
         </Tabs.TabPane>
