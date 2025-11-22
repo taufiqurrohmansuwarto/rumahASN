@@ -26,8 +26,9 @@ const clientSecret = process.env.CLIENT_SECRET_CC;
 const TOKEN_KEY = "client_credentials_token";
 const LOCK_KEY = "client_credentials_lock";
 
-let redisClient;
-let redlock;
+// Use global to persist across hot reloads in development
+let redisClient = global.__ccRedisClient;
+let redlock = global.__ccRedlock;
 
 // Cleanup function untuk mencegah memory leak
 const cleanup = async () => {
@@ -54,11 +55,21 @@ process.on("SIGINT", cleanup);
 const initRedis = async () => {
   if (!redisClient) {
     try {
-      redisClient = await createRedisInstance();
+      const isFirstInit = !global.__ccRedisClient;
+      
+      redisClient = global.__ccRedisClient || await createRedisInstance();
+      
       if (!redisClient) {
         throw new Error("Failed to create Redis instance");
       }
-      logger.debug("[Client Credentials] Redis initialized");
+      
+      global.__ccRedisClient = redisClient;
+      
+      if (isFirstInit) {
+        logger.info("[Client Credentials] Redis initialized");
+      } else {
+        logger.debug("[Client Credentials] Redis restored from global (hot reload)");
+      }
     } catch (error) {
       logger.error("[Client Credentials] Redis initialization failed:", error);
       throw error;
@@ -66,12 +77,13 @@ const initRedis = async () => {
   }
   if (!redlock) {
     try {
-      redlock = new Redlock([redisClient], {
+      redlock = global.__ccRedlock || new Redlock([redisClient], {
         driftFactor: 0.01,
         retryCount: 3,
         retryDelay: 200,
         retryJitter: 200,
       });
+      global.__ccRedlock = redlock;
     } catch (error) {
       logger.error(
         "[Client Credentials] Redlock initialization failed:",

@@ -149,7 +149,6 @@ module.exports.fotoByNip = async (req, res) => {
 
     res.json(payload);
   } catch (error) {
-    console.log(error);
     res.status(500).json(error);
   }
 };

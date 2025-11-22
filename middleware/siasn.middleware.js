@@ -13,9 +13,10 @@ const baseUrl = process.env.API_SIASN;
 const TOKEN_KEY = "siasn_token";
 const LOCK_KEY = "token_lock";
 
-let redisClient;
-let redlock;
-let httpsAgent;
+// Use global to persist across hot reloads in development
+let redisClient = global.__siasnRedisClient;
+let redlock = global.__siasnRedlock;
+let httpsAgent = global.__siasnHttpsAgent;
 
 // Cleanup function untuk mencegah memory leak
 const cleanup = async () => {
@@ -53,11 +54,21 @@ process.on("beforeExit", cleanup);
 const initRedis = async () => {
   if (!redisClient) {
     try {
-      redisClient = await createRedisInstance();
+      const isFirstInit = !global.__siasnRedisClient;
+
+      redisClient = global.__siasnRedisClient || (await createRedisInstance());
+
       if (!redisClient) {
         throw new Error("Failed to create Redis instance");
       }
-      logger.info("[SIASN] Redis initialized");
+
+      global.__siasnRedisClient = redisClient;
+
+      if (isFirstInit) {
+        logger.info("[SIASN] Redis initialized");
+      } else {
+        logger.debug("[SIASN] Redis restored from global (hot reload)");
+      }
     } catch (error) {
       logger.error("[SIASN] Redis initialization failed:", error);
       throw error;
@@ -65,12 +76,15 @@ const initRedis = async () => {
   }
   if (!redlock) {
     try {
-      redlock = new Redlock([redisClient], {
-        driftFactor: 0.01,
-        retryCount: 3,
-        retryDelay: 200,
-        retryJitter: 200,
-      });
+      redlock =
+        global.__siasnRedlock ||
+        new Redlock([redisClient], {
+          driftFactor: 0.01,
+          retryCount: 3,
+          retryDelay: 200,
+          retryJitter: 200,
+        });
+      global.__siasnRedlock = redlock;
     } catch (error) {
       logger.error("[SIASN] Redlock initialization failed:", error);
       throw error;
@@ -81,13 +95,16 @@ const initRedis = async () => {
 // Create HTTPS agent with proper cleanup
 const createHttpsAgent = () => {
   if (!httpsAgent) {
-    httpsAgent = new https.Agent({
-      keepAlive: true,
-      keepAliveMsecs: 60000,
-      maxSockets: 150,
-      maxFreeSockets: 20,
-      timeout: 60000,
-    });
+    httpsAgent =
+      global.__siasnHttpsAgent ||
+      new https.Agent({
+        keepAlive: true,
+        keepAliveMsecs: 60000,
+        maxSockets: 150,
+        maxFreeSockets: 20,
+        timeout: 60000,
+      });
+    global.__siasnHttpsAgent = httpsAgent;
   }
   return httpsAgent;
 };
@@ -197,6 +214,7 @@ const errorHandler = async (error) => {
   const errorData = error?.response?.data || {};
   const statusCode = error?.response?.status;
   const requestUrl = error?.config?.url;
+  logger.error("[SIASN] Error data:", errorData);
 
   const ECONRESET = error?.code === "ECONNRESET";
   const invalidJwt = errorData.message === "invalid or expired jwt";
