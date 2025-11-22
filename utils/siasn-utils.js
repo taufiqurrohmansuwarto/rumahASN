@@ -583,12 +583,7 @@ module.exports.cekPencantumanGelarProfesi = async (fetcher, nip) => {
         resolve(dataResult);
       }
     } catch (error) {
-      const data = error?.data;
-      if (data === "record not found") {
-        resolve([]);
-      } else {
-        reject([]);
-      }
+      resolve([]);
     }
   });
 };

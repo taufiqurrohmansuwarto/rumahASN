@@ -1,0 +1,72 @@
+{"level":"debug","message":"[SIASN Middleware] Request masuk {\n  \"method\": \"GET\",\n  \"ip\": \"::ffff:127.0.0.1\"\n}","timestamp":"2025-11-22T01:40:49.293Z"}
+{"level":"debug","message":"[SIASN Middleware] Request masuk {\n  \"method\": \"GET\",\n  \"ip\": \"::ffff:127.0.0.1\"\n}","timestamp":"2025-11-22T01:40:49.297Z"}
+{"level":"debug","message":"[SIASN Middleware] Request masuk {\n  \"method\": \"GET\",\n  \"ip\": \"::ffff:127.0.0.1\"\n}","timestamp":"2025-11-22T01:40:49.298Z"}
+{"level":"debug","message":"[SIASN Request] Memproses request {\n  \"method\": \"get\",\n  \"url\": \"/partition/list-pg-instansi?nip=197112141998031011\",\n  \"baseURL\": \"https://apimws.bkn.go.id:8243/apisiasn/1.0\"\n}","timestamp":"2025-11-22T01:40:49.299Z"}
+{"level":"debug","message":"[SIASN Middleware] Menginisialisasi Redis client","timestamp":"2025-11-22T01:40:49.300Z"}
+{"level":"info","message":"[SIASN Middleware] Redis client berhasil diinisialisasi","timestamp":"2025-11-22T01:40:49.300Z"}
+{"level":"debug","message":"[SIASN Middleware] Menginisialisasi Redlock","timestamp":"2025-11-22T01:40:49.300Z"}
+{"level":"info","message":"[SIASN Middleware] Redis dan Redlock berhasil diinisialisasi {\n  \"config\": {\n    \"driftFactor\": 0.01,\n    \"retryCount\": 3,\n    \"retryDelay\": 200,\n    \"retryJitter\": 200\n  }\n}","timestamp":"2025-11-22T01:40:49.300Z"}
+{"level":"debug","message":"[SIASN Request] Memproses request {\n  \"method\": \"get\",\n  \"url\": \"/partition/profesi-instansi?nip=197112141998031011\",\n  \"baseURL\": \"https://apimws.bkn.go.id:8243/apisiasn/1.0\"\n}","timestamp":"2025-11-22T01:40:49.301Z"}
+{"level":"debug","message":"[SIASN Token] Token ditemukan di cache Redis","timestamp":"2025-11-22T01:40:49.303Z"}
+{"level":"debug","message":"[SIASN Request] Token berhasil ditambahkan ke header","timestamp":"2025-11-22T01:40:49.303Z"}
+{"level":"debug","message":"[SIASN Token] Token ditemukan di cache Redis","timestamp":"2025-11-22T01:40:49.308Z"}
+{"level":"debug","message":"[SIASN Request] Token berhasil ditambahkan ke header","timestamp":"2025-11-22T01:40:49.308Z"}
+{"level":"debug","message":"[SIASN Middleware] Request masuk {\n  \"method\": \"GET\",\n  \"ip\": \"::ffff:127.0.0.1\"\n}","timestamp":"2025-11-22T01:40:49.417Z"}
+{"level":"debug","message":"[SIASN Middleware] Request masuk {\n  \"method\": \"GET\",\n  \"ip\": \"::ffff:127.0.0.1\"\n}","timestamp":"2025-11-22T01:40:49.448Z"}
+{"level":"debug","message":"[SIASN Middleware] Request masuk {\n  \"method\": \"GET\",\n  \"ip\": \"::ffff:127.0.0.1\"\n}","timestamp":"2025-11-22T01:40:49.865Z"}
+{"level":"debug","message":"[SIASN Request] Memproses request {\n  \"method\": \"get\",\n  \"url\": \"/pns/data-utama/197112141998031011\",\n  \"baseURL\": \"https://apimws.bkn.go.id:8243/apisiasn/1.0\"\n}","timestamp":"2025-11-22T01:40:49.866Z"}
+{"level":"debug","message":"[SIASN Middleware] Menginisialisasi Redis client","timestamp":"2025-11-22T01:40:49.866Z"}
+{"level":"info","message":"[SIASN Middleware] Redis client berhasil diinisialisasi","timestamp":"2025-11-22T01:40:49.867Z"}
+{"level":"debug","message":"[SIASN Middleware] Menginisialisasi Redlock","timestamp":"2025-11-22T01:40:49.867Z"}
+{"level":"info","message":"[SIASN Middleware] Redis dan Redlock berhasil diinisialisasi {\n  \"config\": {\n    \"driftFactor\": 0.01,\n    \"retryCount\": 3,\n    \"retryDelay\": 200,\n    \"retryJitter\": 200\n  }\n}","timestamp":"2025-11-22T01:40:49.867Z"}
+{"level":"debug","message":"[SIASN Token] Token ditemukan di cache Redis","timestamp":"2025-11-22T01:40:49.869Z"}
+{"level":"debug","message":"[SIASN Request] Token berhasil ditambahkan ke header","timestamp":"2025-11-22T01:40:49.869Z"}
+{"level":"debug","message":"[SIASN Request] Memproses request {\n  \"method\": \"get\",\n  \"url\": \"/pns/photo/A5EB041E87DCF6A0E040640A040252AD\",\n  \"baseURL\": \"https://apimws.bkn.go.id:8243/apisiasn/1.0\"\n}","timestamp":"2025-11-22T01:40:49.965Z"}
+{"level":"debug","message":"[SIASN Middleware] Menginisialisasi Redis client","timestamp":"2025-11-22T01:40:49.966Z"}
+{"level":"info","message":"[SIASN Middleware] Redis client berhasil diinisialisasi","timestamp":"2025-11-22T01:40:49.966Z"}
+{"level":"debug","message":"[SIASN Middleware] Menginisialisasi Redlock","timestamp":"2025-11-22T01:40:49.967Z"}
+{"level":"info","message":"[SIASN Middleware] Redis dan Redlock berhasil diinisialisasi {\n  \"config\": {\n    \"driftFactor\": 0.01,\n    \"retryCount\": 3,\n    \"retryDelay\": 200,\n    \"retryJitter\": 200\n  }\n}","timestamp":"2025-11-22T01:40:49.967Z"}
+{"level":"debug","message":"[SIASN Token] Token ditemukan di cache Redis","timestamp":"2025-11-22T01:40:49.972Z"}
+{"level":"debug","message":"[SIASN Request] Token berhasil ditambahkan ke header","timestamp":"2025-11-22T01:40:49.972Z"}
+{"level":"debug","message":"[SIASN Request] Memproses request {\n  \"method\": \"get\",\n  \"url\": \"/pns/nilaiipasn/197112141998031011\",\n  \"baseURL\": \"https://apimws.bkn.go.id:8243/apisiasn/1.0\"\n}","timestamp":"2025-11-22T01:40:50.279Z"}
+{"level":"debug","message":"[SIASN Middleware] Menginisialisasi Redis client","timestamp":"2025-11-22T01:40:50.281Z"}
+{"level":"info","message":"[SIASN Middleware] Redis client berhasil diinisialisasi","timestamp":"2025-11-22T01:40:50.282Z"}
+{"level":"debug","message":"[SIASN Middleware] Menginisialisasi Redlock","timestamp":"2025-11-22T01:40:50.282Z"}
+{"level":"info","message":"[SIASN Middleware] Redis dan Redlock berhasil diinisialisasi {\n  \"config\": {\n    \"driftFactor\": 0.01,\n    \"retryCount\": 3,\n    \"retryDelay\": 200,\n    \"retryJitter\": 200\n  }\n}","timestamp":"2025-11-22T01:40:50.284Z"}
+{"level":"debug","message":"[SIASN Token] Token ditemukan di cache Redis","timestamp":"2025-11-22T01:40:50.345Z"}
+{"level":"debug","message":"[SIASN Request] Token berhasil ditambahkan ke header","timestamp":"2025-11-22T01:40:50.349Z"}
+{"level":"debug","message":"[SIASN Middleware] Request masuk {\n  \"method\": \"GET\",\n  \"ip\": \"::ffff:127.0.0.1\"\n}","timestamp":"2025-11-22T01:40:50.859Z"}
+{"level":"debug","message":"[SIASN Request] Memproses request {\n  \"method\": \"get\",\n  \"url\": \"/pns/rw-golongan/197112141998031011\",\n  \"baseURL\": \"https://apimws.bkn.go.id:8243/apisiasn/1.0\"\n}","timestamp":"2025-11-22T01:40:50.860Z"}
+{"level":"debug","message":"[SIASN Middleware] Menginisialisasi Redis client","timestamp":"2025-11-22T01:40:50.860Z"}
+{"level":"info","message":"[SIASN Middleware] Redis client berhasil diinisialisasi","timestamp":"2025-11-22T01:40:50.860Z"}
+{"level":"debug","message":"[SIASN Middleware] Menginisialisasi Redlock","timestamp":"2025-11-22T01:40:50.860Z"}
+{"level":"info","message":"[SIASN Middleware] Redis dan Redlock berhasil diinisialisasi {\n  \"config\": {\n    \"driftFactor\": 0.01,\n    \"retryCount\": 3,\n    \"retryDelay\": 200,\n    \"retryJitter\": 200\n  }\n}","timestamp":"2025-11-22T01:40:50.860Z"}
+{"level":"debug","message":"[SIASN Token] Token ditemukan di cache Redis","timestamp":"2025-11-22T01:40:50.862Z"}
+{"level":"debug","message":"[SIASN Request] Token berhasil ditambahkan ke header","timestamp":"2025-11-22T01:40:50.862Z"}
+{"level":"debug","message":"[SIASN Middleware] Request masuk {\n  \"method\": \"GET\",\n  \"ip\": \"::ffff:127.0.0.1\"\n}","timestamp":"2025-11-22T01:40:51.671Z"}
+{"level":"error","message":"[SIASN Error] Error terdeteksi pada request {\n  \"error\": \"Request failed with status code 403\",\n  \"code\": \"ERR_BAD_REQUEST\",\n  \"url\": \"/pns/photo/A5EB041E87DCF6A0E040640A040252AD\",\n  \"status\": 403\n}","timestamp":"2025-11-22T01:40:53.658Z"}
+{"level":"debug","message":"[SIASN Error] Error tidak terkait dengan token, meneruskan error","timestamp":"2025-11-22T01:40:53.659Z"}
+{"level":"debug","message":"[SIASN Middleware] Request masuk {\n  \"method\": \"GET\",\n  \"ip\": \"::ffff:127.0.0.1\"\n}","timestamp":"2025-11-22T01:41:08.503Z"}
+{"level":"debug","message":"[SIASN Request] Memproses request {\n  \"method\": \"get\",\n  \"url\": \"/pns/photo/A5EB041E87DCF6A0E040640A040252AD\",\n  \"baseURL\": \"https://apimws.bkn.go.id:8243/apisiasn/1.0\"\n}","timestamp":"2025-11-22T01:41:08.566Z"}
+{"level":"debug","message":"[SIASN Middleware] Menginisialisasi Redis client","timestamp":"2025-11-22T01:41:08.567Z"}
+{"level":"info","message":"[SIASN Middleware] Redis client berhasil diinisialisasi","timestamp":"2025-11-22T01:41:08.568Z"}
+{"level":"debug","message":"[SIASN Middleware] Menginisialisasi Redlock","timestamp":"2025-11-22T01:41:08.569Z"}
+{"level":"info","message":"[SIASN Middleware] Redis dan Redlock berhasil diinisialisasi {\n  \"config\": {\n    \"driftFactor\": 0.01,\n    \"retryCount\": 3,\n    \"retryDelay\": 200,\n    \"retryJitter\": 200\n  }\n}","timestamp":"2025-11-22T01:41:08.570Z"}
+{"level":"debug","message":"[SIASN Token] Token ditemukan di cache Redis","timestamp":"2025-11-22T01:41:08.572Z"}
+{"level":"debug","message":"[SIASN Request] Token berhasil ditambahkan ke header","timestamp":"2025-11-22T01:41:08.572Z"}
+{"level":"debug","message":"[SIASN Middleware] Request masuk {\n  \"method\": \"GET\",\n  \"ip\": \"::ffff:127.0.0.1\"\n}","timestamp":"2025-11-22T01:42:07.160Z"}
+{"level":"debug","message":"[SIASN Request] Memproses request {\n  \"method\": \"get\",\n  \"url\": \"/pns/rw-skp22/197112141998031011\",\n  \"baseURL\": \"https://apimws.bkn.go.id:8243/apisiasn/1.0\"\n}","timestamp":"2025-11-22T01:42:07.161Z"}
+{"level":"debug","message":"[SIASN Middleware] Menginisialisasi Redis client","timestamp":"2025-11-22T01:42:07.161Z"}
+{"level":"info","message":"[SIASN Middleware] Redis client berhasil diinisialisasi","timestamp":"2025-11-22T01:42:07.161Z"}
+{"level":"debug","message":"[SIASN Middleware] Menginisialisasi Redlock","timestamp":"2025-11-22T01:42:07.161Z"}
+{"level":"info","message":"[SIASN Middleware] Redis dan Redlock berhasil diinisialisasi {\n  \"config\": {\n    \"driftFactor\": 0.01,\n    \"retryCount\": 3,\n    \"retryDelay\": 200,\n    \"retryJitter\": 200\n  }\n}","timestamp":"2025-11-22T01:42:07.161Z"}
+{"level":"debug","message":"[SIASN Token] Token ditemukan di cache Redis","timestamp":"2025-11-22T01:42:07.163Z"}
+{"level":"debug","message":"[SIASN Request] Token berhasil ditambahkan ke header","timestamp":"2025-11-22T01:42:07.163Z"}
+{"level":"info","message":"[SIASN] Redis initialized","timestamp":"2025-11-22T01:47:08.842Z"}
+{"level":"info","message":"[SIASN] Redis initialized","timestamp":"2025-11-22T01:47:09.363Z"}
+{"level":"info","message":"[SIASN] Redis initialized","timestamp":"2025-11-22T01:47:09.938Z"}
+{"level":"info","message":"[SIASN] Redis initialized","timestamp":"2025-11-22T01:47:09.956Z"}
+{"level":"info","message":"[SIASN] Redis initialized","timestamp":"2025-11-22T01:47:22.577Z"}
+{"level":"info","message":"[SIASN] Redis initialized","timestamp":"2025-11-22T01:47:41.221Z"}
+{"level":"error","message":"Error occurred: {\n  \"code\": 500\n}","timestamp":"2025-11-22T01:47:46.018Z"}
+{"level":"info","message":"[SIASN] Redis initialized","timestamp":"2025-11-22T01:48:04.861Z"}

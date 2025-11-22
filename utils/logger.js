@@ -1,103 +1,118 @@
 /**
- * Logger Service using Winston
- * Only logs when NODE_ENV !== "production"
+ * Enhanced Logger Service using Winston & Chalk
+ * Beautiful console output for development
+ * Structured logging for production
  * CommonJS version for compatibility
  */
 
 const winston = require("winston");
+const chalk = require("chalk");
 
-const { combine, timestamp, json, printf, colorize, errors } = winston.format;
-
-// ANSI Color codes for better console output
-const colors = {
-  reset: "\x1b[0m",
-  bright: "\x1b[1m",
-  dim: "\x1b[2m",
-
-  // Text colors
-  black: "\x1b[30m",
-  red: "\x1b[31m",
-  green: "\x1b[32m",
-  yellow: "\x1b[33m",
-  blue: "\x1b[34m",
-  magenta: "\x1b[35m",
-  cyan: "\x1b[36m",
-  white: "\x1b[37m",
-
-  // Background colors
-  bgRed: "\x1b[41m",
-  bgGreen: "\x1b[42m",
-  bgYellow: "\x1b[43m",
-  bgBlue: "\x1b[44m",
-};
+const { combine, timestamp, json, printf, errors } = winston.format;
 
 // Check if running in production
 const isProduction = process.env.NODE_ENV === "production";
 
-// Custom format for better readability with colors
-const customFormat = printf(({ level, message, timestamp, stack, ...meta }) => {
-  // Colorize timestamp
-  const coloredTimestamp = `${colors.dim}${timestamp}${colors.reset}`;
+// Emoji per level for better visual recognition
+const levelEmojis = {
+  error: "❌",
+  warn: "⚠️ ",
+  info: "ℹ️ ",
+  debug: "🔍",
+  verbose: "💬",
+  silly: "🎭",
+};
 
-  // Colorize level based on type
-  let coloredLevel;
-  const upperLevel = level.toUpperCase();
+// Custom format with Chalk - pretty and colorful!
+const prettyFormat = printf(({ level, message, timestamp, stack, ...meta }) => {
+  // Decorative border
+  const border = chalk.gray("│");
 
-  if (upperLevel.includes("ERROR")) {
-    coloredLevel = `${colors.bright}${colors.red}[${upperLevel}]${colors.reset}`;
-  } else if (upperLevel.includes("WARN")) {
-    coloredLevel = `${colors.bright}${colors.yellow}[${upperLevel}]${colors.reset}`;
-  } else if (upperLevel.includes("INFO")) {
-    coloredLevel = `${colors.bright}${colors.cyan}[${upperLevel}]${colors.reset}`;
-  } else if (upperLevel.includes("DEBUG")) {
-    coloredLevel = `${colors.bright}${colors.magenta}[${upperLevel}]${colors.reset}`;
-  } else {
-    coloredLevel = `[${upperLevel}]`;
+  // Timestamp with elegant styling
+  const time = chalk.dim(`[${timestamp}]`);
+
+  // Level with emoji and colors
+  let levelDisplay;
+  const emoji = levelEmojis[level] || "📝";
+
+  switch (level) {
+    case "error":
+      levelDisplay = chalk.bold.red(`${emoji} ERROR  `);
+      break;
+    case "warn":
+      levelDisplay = chalk.bold.yellow(`${emoji} WARN   `);
+      break;
+    case "info":
+      levelDisplay = chalk.bold.cyan(`${emoji} INFO   `);
+      break;
+    case "debug":
+      levelDisplay = chalk.bold.magenta(`${emoji} DEBUG  `);
+      break;
+    case "verbose":
+      levelDisplay = chalk.bold.blue(`${emoji} VERBOSE`);
+      break;
+    default:
+      levelDisplay = chalk.white(`${emoji} ${level.toUpperCase()}`);
   }
 
-  // Colorize message
-  const coloredMessage = `${colors.white}${message}${colors.reset}`;
+  // Message with bold styling
+  const styledMessage = chalk.white.bold(message);
 
-  let msg = `${coloredTimestamp} ${coloredLevel}: ${coloredMessage}`;
+  // Build the log line
+  let output = `${time} ${levelDisplay} ${border} ${styledMessage}`;
 
-  // Add metadata if exists
+  // Add metadata with pretty print and indentation
   const metaKeys = Object.keys(meta).filter(
-    (key) => key !== "level" && key !== "message" && key !== "timestamp"
+    (key) => !["level", "message", "timestamp", "stack"].includes(key)
   );
+
   if (metaKeys.length > 0) {
     const metaObj = {};
     metaKeys.forEach((key) => (metaObj[key] = meta[key]));
-    msg += ` ${colors.dim}${JSON.stringify(metaObj)}${colors.reset}`;
+    const metaStr = JSON.stringify(metaObj, null, 2);
+    output +=
+      "\n" +
+      chalk.dim(
+        metaStr
+          .split("\n")
+          .map((line) => `       ${line}`)
+          .join("\n")
+      );
   }
 
-  // Add stack trace for errors
+  // Stack trace with styling
   if (stack) {
-    msg += `\n${colors.dim}${stack}${colors.reset}`;
+    const stackLines = stack.split("\n");
+    output += "\n" + chalk.red.bold("  Stack Trace:");
+    output +=
+      "\n" + stackLines.map((line) => chalk.dim(`    ${line}`)).join("\n");
   }
 
-  return msg;
+  return output;
 });
 
 // Configure transports based on environment
 const transports = [];
 
 if (!isProduction) {
-  // Console transport for development
+  // Development: Pretty console output with colors
   transports.push(
     new winston.transports.Console({
       format: combine(
         timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
-        customFormat
+        prettyFormat
       ),
     })
   );
 
-  // Optional: File transport for development debugging
+  // File transport for development debugging
   transports.push(
     new winston.transports.File({
       filename: "logs/error.log",
       level: "error",
       format: combine(timestamp(), json()),
+      maxsize: 5242880, // 5MB
+      maxFiles: 5,
     })
   );
 
@@ -105,14 +120,37 @@ if (!isProduction) {
     new winston.transports.File({
       filename: "logs/combined.log",
       format: combine(timestamp(), json()),
+      maxsize: 5242880, // 5MB
+      maxFiles: 5,
+    })
+  );
+} else {
+  // Production: Structured JSON logging to files only
+  transports.push(
+    new winston.transports.File({
+      filename: "logs/error.log",
+      level: "error",
+      format: combine(timestamp(), json()),
+      maxsize: 10485760, // 10MB
+      maxFiles: 10,
+    })
+  );
+
+  transports.push(
+    new winston.transports.File({
+      filename: "logs/app.log",
+      level: "warn",
+      format: combine(timestamp(), json()),
+      maxsize: 10485760, // 10MB
+      maxFiles: 10,
     })
   );
 }
 
 // Create logger instance
 const logger = winston.createLogger({
-  level: process.env.LOG_LEVEL || "info",
-  silent: isProduction, // Silent in production - NO LOGS AT ALL
+  level: process.env.LOG_LEVEL || (isProduction ? "warn" : "debug"),
+  silent: false, // Jangan silent!
   format: combine(errors({ stack: true }), timestamp(), json()),
   transports,
   exitOnError: false,
@@ -122,16 +160,17 @@ const logger = winston.createLogger({
 const formatArgs = (...args) => {
   return args
     .map((arg) => {
-      // Handle Error objects specially with red color
+      // Handle Error objects specially
       if (arg instanceof Error) {
-        return `${colors.red}${arg.name}: ${arg.message}${colors.reset}\n${colors.dim}Stack: ${arg.stack}${colors.reset}`;
+        return `${arg.name}: ${arg.message}${
+          arg.stack ? "\nStack: " + arg.stack : ""
+        }`;
       }
 
       if (typeof arg === "object" && arg !== null) {
         try {
-          // Colorize JSON output
-          const jsonStr = JSON.stringify(arg, null, 2);
-          return `${colors.green}${jsonStr}${colors.reset}`;
+          // Return JSON string
+          return JSON.stringify(arg, null, 2);
         } catch (e) {
           return String(arg);
         }
@@ -141,27 +180,64 @@ const formatArgs = (...args) => {
     .join(" ");
 };
 
-// Helper methods for easier usage (silent in production)
+// Helper methods for easier usage
 const log = {
   info: (...args) => {
-    if (!isProduction) logger.info(formatArgs(...args));
+    logger.info(formatArgs(...args));
   },
 
   error: (...args) => {
-    if (!isProduction) logger.error(formatArgs(...args));
+    logger.error(formatArgs(...args));
   },
 
   warn: (...args) => {
-    if (!isProduction) logger.warn(formatArgs(...args));
+    logger.warn(formatArgs(...args));
   },
 
   debug: (...args) => {
-    if (!isProduction) logger.debug(formatArgs(...args));
+    logger.debug(formatArgs(...args));
+  },
+
+  verbose: (...args) => {
+    logger.verbose(formatArgs(...args));
   },
 
   // Alias
   log: (...args) => {
-    if (!isProduction) logger.info(formatArgs(...args));
+    logger.info(formatArgs(...args));
+  },
+
+  // Special pretty logs (only in development)
+  success: (message, meta) => {
+    const msg = !isProduction ? `✅ ${message}` : message;
+    logger.info(msg, meta || {});
+  },
+
+  loading: (message) => {
+    const msg = !isProduction ? `⏳ ${message}...` : `${message}...`;
+    logger.info(msg);
+  },
+
+  banner: (title, subtitle) => {
+    if (!isProduction) {
+      console.log("\n" + chalk.bold.cyan("═".repeat(80)));
+      console.log(chalk.bold.yellow(`  🚀 ${title}`));
+      if (subtitle) {
+        console.log(chalk.dim(`     ${subtitle}`));
+      }
+      console.log(chalk.bold.cyan("═".repeat(80)) + "\n");
+    } else {
+      logger.info(`${title}${subtitle ? " - " + subtitle : ""}`);
+    }
+  },
+
+  section: (title) => {
+    if (!isProduction) {
+      console.log("\n" + chalk.bold.cyan(`▶ ${title}`));
+      console.log(chalk.gray("─".repeat(80)));
+    } else {
+      logger.info(`[Section] ${title}`);
+    }
   },
 };
 
