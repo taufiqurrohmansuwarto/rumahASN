@@ -288,6 +288,9 @@ const RekonPegawaiDetail = () => {
     queryKey: ["data-utama-simaster-by-nip", nip],
     queryFn: () => dataUtamaMasterByNip(nip),
     enabled: !!nip,
+    staleTime: 60000,
+    keepPreviousData: true,
+    refetchOnWindowFocus: false,
   });
 
   return (

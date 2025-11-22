@@ -650,3 +650,107 @@
 {"level":"debug","message":"[SIASN] Client error:","status":404,"timestamp":"2025-11-22T13:14:44.958Z","url":"/pns/photo/ff8080817a83e6b8017a84df8ced19d2"}
 {"code":"404","description":"The requested resource is not available.","level":"debug","message":"[SIASN] Client error: Not Found","status":404,"timestamp":"2025-11-22T13:14:44.999Z","url":"/pns/data-utama/197812112022212001"}
 {"code":"404","description":"The requested resource is not available.","level":"debug","message":"[SIASN] Client error: Not Found","status":404,"timestamp":"2025-11-22T13:15:06.787Z","url":"/pns/nilaiipasn/197812112022212001"}
+{"level":"debug","message":"[Client Credentials] Memulai autentikasi...","timestamp":"2025-11-22T13:43:09.623Z"}
+{"level":"debug","message":"[Client Credentials] Redis initialized","timestamp":"2025-11-22T13:43:09.626Z"}
+{"level":"debug","message":"[Client Credentials] Memulai autentikasi...","timestamp":"2025-11-22T13:43:09.628Z"}
+{"level":"info","message":"[Client Credentials] Creating new token","timestamp":"2025-11-22T13:43:09.697Z"}
+{"level":"debug","message":"[Client Credentials] Token berhasil didapatkan","timestamp":"2025-11-22T13:43:10.414Z"}
+{"level":"debug","message":"[Client Credentials] Token found after lock acquired","timestamp":"2025-11-22T13:43:10.433Z"}
+{"level":"debug","message":"[Client Credentials] Token berhasil didapatkan","timestamp":"2025-11-22T13:43:10.434Z"}
+{"level":"debug","message":"[Client Credentials] Memulai autentikasi...","timestamp":"2025-11-22T13:43:18.818Z"}
+{"level":"debug","message":"[Client Credentials] Using cached token","timestamp":"2025-11-22T13:43:18.826Z"}
+{"level":"debug","message":"[Client Credentials] Token berhasil didapatkan","timestamp":"2025-11-22T13:43:18.826Z"}
+{"level":"debug","message":"[Client Credentials] Memulai autentikasi...","timestamp":"2025-11-22T13:43:23.552Z"}
+{"level":"debug","message":"[Client Credentials] Using cached token","timestamp":"2025-11-22T13:43:23.559Z"}
+{"level":"debug","message":"[Client Credentials] Token berhasil didapatkan","timestamp":"2025-11-22T13:43:23.559Z"}
+{"level":"debug","message":"[Client Credentials] Memulai autentikasi...","timestamp":"2025-11-22T13:43:39.172Z"}
+{"level":"debug","message":"[Client Credentials] Redis initialized","timestamp":"2025-11-22T13:43:39.176Z"}
+{"level":"debug","message":"[Client Credentials] Using cached token","timestamp":"2025-11-22T13:43:39.184Z"}
+{"level":"debug","message":"[Client Credentials] Token berhasil didapatkan","timestamp":"2025-11-22T13:43:39.184Z"}
+{"level":"debug","message":"[Client Credentials] Memulai autentikasi...","timestamp":"2025-11-22T13:43:39.256Z"}
+{"level":"debug","message":"[Client Credentials] Using cached token","timestamp":"2025-11-22T13:43:39.257Z"}
+{"level":"debug","message":"[Client Credentials] Token berhasil didapatkan","timestamp":"2025-11-22T13:43:39.257Z"}
+{"level":"debug","message":"[Client Credentials] Memulai autentikasi...","timestamp":"2025-11-22T13:43:46.096Z"}
+{"level":"debug","message":"[Client Credentials] Redis initialized","timestamp":"2025-11-22T13:43:46.096Z"}
+{"level":"info","message":"[SIASN] Redis initialized","timestamp":"2025-11-22T13:43:46.101Z"}
+{"level":"debug","message":"[Client Credentials] Using cached token","timestamp":"2025-11-22T13:43:46.105Z"}
+{"level":"debug","message":"[Client Credentials] Token berhasil didapatkan","timestamp":"2025-11-22T13:43:46.106Z"}
+{"level":"info","message":"[SIASN] Redis initialized","timestamp":"2025-11-22T13:43:47.813Z"}
+{"level":"debug","message":"[SIASN] Client error:","status":404,"timestamp":"2025-11-22T13:43:49.013Z","url":"/pns/photo/ff8080817aa40256017aa4e33acb6151"}
+{"code":"404","description":"The requested resource is not available.","level":"debug","message":"[SIASN] Client error: Not Found","status":404,"timestamp":"2025-11-22T13:43:49.016Z","url":"/partition/profesi-instansi?nip=196705122022212003"}
+{"code":"404","description":"The requested resource is not available.","level":"debug","message":"[SIASN] Client error: Not Found","status":404,"timestamp":"2025-11-22T13:43:49.016Z","url":"/partition/list-pg-instansi?nip=196705122022212003"}
+{"level":"info","message":"[SIASN] Redis initialized","timestamp":"2025-11-22T13:43:51.083Z"}
+{"code":"404","description":"The requested resource is not available.","level":"debug","message":"[SIASN] Client error: Not Found","status":404,"timestamp":"2025-11-22T13:43:53.587Z","url":"/pns/rw-golongan/196705122022212003"}
+{"code":"404","description":"The requested resource is not available.","level":"debug","message":"[SIASN] Client error: Not Found","status":404,"timestamp":"2025-11-22T13:43:53.600Z","url":"/pns/data-utama/196705122022212003"}
+{"level":"debug","message":"[SIASN] Client error:","status":404,"timestamp":"2025-11-22T13:43:54.520Z","url":"/pns/photo/ff8080817aa40256017aa4e33acb6151"}
+{"code":"404","description":"The requested resource is not available.","level":"debug","message":"[SIASN] Client error: Not Found","status":404,"timestamp":"2025-11-22T13:43:56.737Z","url":"/pns/data-utama/196705122022212003"}
+{"level":"debug","message":"[SIASN] Client error:","status":404,"timestamp":"2025-11-22T13:44:00.364Z","url":"/pns/photo/ff8080817aa40256017aa4e33acb6151"}
+{"code":"404","description":"The requested resource is not available.","level":"debug","message":"[SIASN] Client error: Not Found","status":404,"timestamp":"2025-11-22T13:44:03.915Z","url":"/pns/nilaiipasn/196705122022212003"}
+{"level":"debug","message":"[Client Credentials] Memulai autentikasi...","timestamp":"2025-11-22T13:44:11.997Z"}
+{"level":"debug","message":"[Client Credentials] Redis initialized","timestamp":"2025-11-22T13:44:11.998Z"}
+{"level":"debug","message":"[Client Credentials] Using cached token","timestamp":"2025-11-22T13:44:12.003Z"}
+{"level":"debug","message":"[Client Credentials] Token berhasil didapatkan","timestamp":"2025-11-22T13:44:12.003Z"}
+{"level":"debug","message":"[Client Credentials] Memulai autentikasi...","timestamp":"2025-11-22T13:44:14.671Z"}
+{"level":"debug","message":"[Client Credentials] Using cached token","timestamp":"2025-11-22T13:44:14.672Z"}
+{"level":"debug","message":"[Client Credentials] Token berhasil didapatkan","timestamp":"2025-11-22T13:44:14.672Z"}
+{"level":"debug","message":"[Client Credentials] Memulai autentikasi...","timestamp":"2025-11-22T13:44:14.678Z"}
+{"level":"debug","message":"[Client Credentials] Using cached token","timestamp":"2025-11-22T13:44:14.680Z"}
+{"level":"debug","message":"[Client Credentials] Token berhasil didapatkan","timestamp":"2025-11-22T13:44:14.680Z"}
+{"code":"404","description":"The requested resource is not available.","level":"debug","message":"[SIASN] Client error: Not Found","status":404,"timestamp":"2025-11-22T13:44:15.392Z","url":"/pns/data-utama/196705122022212003"}
+{"level":"debug","message":"[Client Credentials] Memulai autentikasi...","timestamp":"2025-11-22T13:44:16.908Z"}
+{"level":"debug","message":"[Client Credentials] Using cached token","timestamp":"2025-11-22T13:44:16.909Z"}
+{"level":"debug","message":"[Client Credentials] Token berhasil didapatkan","timestamp":"2025-11-22T13:44:16.909Z"}
+{"level":"debug","message":"[Client Credentials] Memulai autentikasi...","timestamp":"2025-11-22T13:44:20.562Z"}
+{"level":"debug","message":"[Client Credentials] Using cached token","timestamp":"2025-11-22T13:44:20.564Z"}
+{"level":"debug","message":"[Client Credentials] Token berhasil didapatkan","timestamp":"2025-11-22T13:44:20.564Z"}
+{"code":"404","description":"The requested resource is not available.","level":"debug","message":"[SIASN] Client error: Not Found","status":404,"timestamp":"2025-11-22T13:44:20.993Z","url":"/partition/profesi-instansi?nip=196801062008011006"}
+{"level":"debug","message":"[SIASN] Client error:","status":404,"timestamp":"2025-11-22T13:44:21.793Z","url":"/pns/photo/ff8080817aa40256017aa4e33acb6151"}
+{"code":"404","description":"The requested resource is not available.","level":"debug","message":"[SIASN] Client error: Not Found","status":404,"timestamp":"2025-11-22T13:44:26.493Z","url":"/partition/list-pg-instansi?nip=196801062008011006"}
+{"level":"debug","message":"[SIASN] Client error:","status":404,"timestamp":"2025-11-22T13:44:26.502Z","url":"/pns/photo/A5EB0427ABDCF6A0E040640A040252AD"}
+{"level":"debug","message":"[Client Credentials] Memulai autentikasi...","timestamp":"2025-11-22T13:44:26.651Z"}
+{"level":"debug","message":"[Client Credentials] Using cached token","timestamp":"2025-11-22T13:44:26.652Z"}
+{"level":"debug","message":"[Client Credentials] Token berhasil didapatkan","timestamp":"2025-11-22T13:44:26.652Z"}
+{"level":"debug","message":"[Client Credentials] Memulai autentikasi...","timestamp":"2025-11-22T13:44:26.796Z"}
+{"level":"debug","message":"[Client Credentials] Using cached token","timestamp":"2025-11-22T13:44:26.796Z"}
+{"level":"debug","message":"[Client Credentials] Token berhasil didapatkan","timestamp":"2025-11-22T13:44:26.796Z"}
+{"code":"404","description":"The requested resource is not available.","level":"debug","message":"[SIASN] Client error: Not Found","status":404,"timestamp":"2025-11-22T13:44:27.277Z","url":"/pns/nilaiipasn/196801062008011006"}
+{"code":"404","description":"The requested resource is not available.","level":"debug","message":"[SIASN] Client error: Not Found","status":404,"timestamp":"2025-11-22T13:44:28.492Z","url":"/pns/data-utama/196801062008011006"}
+{"level":"debug","message":"[Client Credentials] Memulai autentikasi...","timestamp":"2025-11-22T13:44:29.051Z"}
+{"level":"debug","message":"[Client Credentials] Using cached token","timestamp":"2025-11-22T13:44:29.053Z"}
+{"level":"debug","message":"[Client Credentials] Token berhasil didapatkan","timestamp":"2025-11-22T13:44:29.053Z"}
+{"code":"404","description":"The requested resource is not available.","level":"debug","message":"[SIASN] Client error: Not Found","status":404,"timestamp":"2025-11-22T13:44:30.363Z","url":"/pns/rw-golongan/196801062008011006"}
+{"level":"debug","message":"[Client Credentials] Memulai autentikasi...","timestamp":"2025-11-22T13:44:32.449Z"}
+{"level":"debug","message":"[Client Credentials] Using cached token","timestamp":"2025-11-22T13:44:32.450Z"}
+{"level":"debug","message":"[Client Credentials] Token berhasil didapatkan","timestamp":"2025-11-22T13:44:32.450Z"}
+{"level":"debug","message":"[Client Credentials] Memulai autentikasi...","timestamp":"2025-11-22T13:44:34.010Z"}
+{"level":"debug","message":"[Client Credentials] Using cached token","timestamp":"2025-11-22T13:44:34.011Z"}
+{"level":"debug","message":"[Client Credentials] Token berhasil didapatkan","timestamp":"2025-11-22T13:44:34.011Z"}
+{"level":"debug","message":"[Client Credentials] Memulai autentikasi...","timestamp":"2025-11-22T13:46:04.372Z"}
+{"level":"debug","message":"[Client Credentials] Redis initialized","timestamp":"2025-11-22T13:46:04.372Z"}
+{"level":"debug","message":"[Client Credentials] Using cached token","timestamp":"2025-11-22T13:46:04.379Z"}
+{"level":"debug","message":"[Client Credentials] Token berhasil didapatkan","timestamp":"2025-11-22T13:46:04.379Z"}
+{"level":"info","message":"[SIASN] Redis initialized","timestamp":"2025-11-22T13:46:04.427Z"}
+{"level":"info","message":"[SIASN] Redis initialized","timestamp":"2025-11-22T13:46:04.427Z"}
+{"level":"info","message":"[SIASN] Redis initialized","timestamp":"2025-11-22T13:46:05.791Z"}
+{"level":"debug","message":"[SIASN] Client error:","status":404,"timestamp":"2025-11-22T13:46:07.245Z","url":"/pns/photo/ff8080817aa9c36b017aaf8c79382a60"}
+{"code":"404","description":"The requested resource is not available.","level":"debug","message":"[SIASN] Client error: Not Found","status":404,"timestamp":"2025-11-22T13:46:07.249Z","url":"/partition/profesi-instansi?nip=198408032022212003"}
+{"level":"info","message":"[SIASN] Redis initialized","timestamp":"2025-11-22T13:46:07.757Z"}
+{"code":"404","description":"The requested resource is not available.","level":"debug","message":"[SIASN] Client error: Not Found","status":404,"timestamp":"2025-11-22T13:46:08.890Z","url":"/pns/data-utama/198408032022212003"}
+{"code":"404","description":"The requested resource is not available.","level":"debug","message":"[SIASN] Client error: Not Found","status":404,"timestamp":"2025-11-22T13:46:09.292Z","url":"/pns/rw-golongan/198408032022212003"}
+{"code":"404","description":"The requested resource is not available.","level":"debug","message":"[SIASN] Client error: Not Found","status":404,"timestamp":"2025-11-22T13:46:11.133Z","url":"/pns/nilaiipasn/198408032022212003"}
+{"level":"warn","message":"[SIASN] Token invalid/expired, invalidating cache","timestamp":"2025-11-22T13:46:15.133Z","url":"/partition/list-pg-instansi?nip=198408032022212003"}
+{"level":"info","message":"[SIASN] Redis initialized","timestamp":"2025-11-22T13:47:12.891Z"}
+{"level":"debug","message":"[Client Credentials] Memulai autentikasi...","timestamp":"2025-11-22T13:47:12.892Z"}
+{"level":"debug","message":"[Client Credentials] Redis initialized","timestamp":"2025-11-22T13:47:12.892Z"}
+{"level":"debug","message":"[Client Credentials] Using cached token","timestamp":"2025-11-22T13:47:12.895Z"}
+{"level":"debug","message":"[Client Credentials] Token berhasil didapatkan","timestamp":"2025-11-22T13:47:12.895Z"}
+{"level":"info","message":"[SIASN] Creating new token","timestamp":"2025-11-22T13:47:12.912Z"}
+{"expiresIn":3600,"level":"info","message":"[WSO2] Token fetched successfully","timestamp":"2025-11-22T13:47:13.097Z"}
+{"code":"404","description":"The requested resource is not available.","level":"debug","message":"[SIASN] Client error: Not Found","status":404,"timestamp":"2025-11-22T13:47:15.909Z","url":"/pns/data-utama/198408032022212003"}
+{"level":"debug","message":"[SIASN] Client error:","status":404,"timestamp":"2025-11-22T13:47:18.951Z","url":"/pns/photo/ff8080817aa9c36b017aaf8c79382a60"}
+{"code":"404","description":"The requested resource is not available.","level":"debug","message":"[SIASN] Client error: Not Found","status":404,"timestamp":"2025-11-22T13:47:18.962Z","url":"/pns/nilaiipasn/198408032022212003"}
+{"level":"debug","message":"[Client Credentials] Memulai autentikasi...","timestamp":"2025-11-22T13:48:30.680Z"}
+{"level":"debug","message":"[Client Credentials] Redis initialized","timestamp":"2025-11-22T13:48:30.687Z"}
+{"level":"debug","message":"[Client Credentials] Using cached token","timestamp":"2025-11-22T13:48:30.708Z"}
+{"level":"debug","message":"[Client Credentials] Token berhasil didapatkan","timestamp":"2025-11-22T13:48:30.708Z"}
+{"level":"info","message":"[SIASN] Redis initialized","timestamp":"2025-11-22T13:48:30.722Z"}

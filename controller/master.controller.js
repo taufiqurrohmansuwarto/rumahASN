@@ -189,10 +189,9 @@ export const dataUtamaMaster = async (req, res) => {
       `/master-ws/operator/employees/${nip}/data-utama-master`
     );
 
-    const anomali = await Anomali23.query().where({ nip_baru: nip });
     const data = {
       ...result?.data,
-      anomali,
+      anomali: null,
     };
 
     res.json(data);
@@ -239,12 +238,9 @@ export const dataUtamaMasterByNip = async (req, res) => {
         res.json(data);
       }
     } else if (admin) {
-      const anomali = await Anomali23.query()
-        .where({ nip_baru: nip })
-        .withGraphFetched("user(simpleSelect)");
       const data = {
         ...result?.data,
-        anomali,
+        anomali: null,
       };
 
       res.json(data);

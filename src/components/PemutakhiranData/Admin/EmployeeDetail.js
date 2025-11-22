@@ -757,7 +757,8 @@ function EmployeeDetail({ nip }) {
     {
       refetchOnWindowFocus: false,
       keepPreviousData: true,
-      staleTime: 500000,
+      staleTime: 60000,
+      keepPreviousData: true,
     }
   );
 
