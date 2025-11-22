@@ -395,7 +395,7 @@ const SignIn = ({ providers }) => {
                     size={breakPoint.xs ? 8 : 10}
                     style={{ width: "100%" }}
                   >
-                    {Object?.values(providers).map((provider) => (
+                    {providers && Object.values(providers).map((provider) => (
                       <div key={provider.id}>
                         {provider?.id !== "google" && (
                           <Button
@@ -480,13 +480,23 @@ const SignIn = ({ providers }) => {
 };
 
 export async function getServerSideProps() {
-  const providers = await getProviders();
+  try {
+    const providers = await getProviders();
 
-  return {
-    props: {
-      providers,
-    },
-  };
+    return {
+      props: {
+        providers: providers || {},
+      },
+    };
+  } catch (error) {
+    console.error("[SignIn] Failed to get providers:", error);
+
+    return {
+      props: {
+        providers: {},
+      },
+    };
+  }
 }
 
 export default SignIn;

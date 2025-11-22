@@ -527,6 +527,7 @@ const getAllEmployeesMasterPaging = async (req, res) => {
       });
 
       const data = employeeData?.data;
+      await redis.set(redisKey, JSON.stringify(data), "EX", 20);
 
       // const nips = employeeData?.data?.results?.map((item) => item?.nip_master);
       // const detailedEmployeeData = await fetchDetailedEmployeeData(
@@ -576,20 +577,7 @@ const getAllEmployeesMasterPagingAdmin = async (req, res) => {
       });
 
       const data = employeeData?.data;
-
-      // const nips = employeeData?.data?.results?.map((item) => item?.nip_master);
-      // const detailedEmployeeData = await fetchDetailedEmployeeData(
-      //   siasnFetcher,
-      //   nips
-      // );
-
-      // const responsePayload = constructResponsePayload(
-      //   employeeData,
-      //   detailedEmployeeData
-      // );
-
-      // // 45 seconds
-      // await redis.set(redisKey, JSON.stringify(responsePayload), "EX", 30);
+      await redis.set(redisKey, JSON.stringify(data), "EX", 20);
 
       res.json(data);
     }
