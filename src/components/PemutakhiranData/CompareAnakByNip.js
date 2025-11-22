@@ -149,7 +149,7 @@ function CompareAnakByNip() {
       }
       style={{ marginTop: 16 }}
     >
-      <Stack>
+    <Stack>
         <Table
           title={() => (
             <div
@@ -211,7 +211,7 @@ function CompareAnakByNip() {
           scroll={{ x: "max-content" }}
         />
       </Stack>
-    </Card>
+      </Card>
   );
 }
 

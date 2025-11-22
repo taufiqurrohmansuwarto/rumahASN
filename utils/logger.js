@@ -68,7 +68,18 @@ const prettyFormat = printf(({ level, message, timestamp, stack, ...meta }) => {
 
   if (metaKeys.length > 0) {
     const metaObj = {};
-    metaKeys.forEach((key) => (metaObj[key] = meta[key]));
+    metaKeys.forEach((key) => {
+      // Special handling for Error objects in metadata
+      if (meta[key] instanceof Error) {
+        metaObj[key] = {
+          name: meta[key].name,
+          message: meta[key].message,
+          stack: meta[key].stack,
+        };
+      } else {
+        metaObj[key] = meta[key];
+      }
+    });
     const metaStr = JSON.stringify(metaObj, null, 2);
     output +=
       "\n" +
@@ -80,12 +91,23 @@ const prettyFormat = printf(({ level, message, timestamp, stack, ...meta }) => {
       );
   }
 
-  // Stack trace with styling
-  if (stack) {
-    const stackLines = stack.split("\n");
-    output += "\n" + chalk.red.bold("  Stack Trace:");
+  // Stack trace with styling (from winston errors format or metadata)
+  const errorStack = stack || (meta.error && meta.error.stack);
+  if (errorStack) {
+    const stackLines = errorStack.split("\n");
+    output += "\n" + chalk.red.bold("  📚 Stack Trace:");
     output +=
-      "\n" + stackLines.map((line) => chalk.dim(`    ${line}`)).join("\n");
+      "\n" +
+      stackLines
+        .map((line, idx) => {
+          // Highlight the first line (error message)
+          if (idx === 0) {
+            return chalk.red.bold(`    ${line}`);
+          }
+          // Dim the rest
+          return chalk.gray(`    ${line}`);
+        })
+        .join("\n");
   }
 
   return output;
@@ -187,7 +209,27 @@ const log = {
   },
 
   error: (...args) => {
-    logger.error(formatArgs(...args));
+    // Handle Error objects properly - don't stringify them
+    const errorObj = args.find((arg) => arg instanceof Error);
+    if (errorObj) {
+      // Log with error object for proper stack trace
+      const message = args
+        .filter((arg) => !(arg instanceof Error))
+        .map((arg) => (typeof arg === "object" ? JSON.stringify(arg) : arg))
+        .join(" ");
+      logger.error(message || errorObj.message, { error: errorObj });
+
+      // In development, also output to console.error for immediate visibility
+      if (!isProduction) {
+        console.error(
+          chalk.red.bold("\n❌ ERROR CAUGHT:"),
+          chalk.white(message || errorObj.message)
+        );
+        console.error(chalk.gray(errorObj.stack));
+      }
+    } else {
+      logger.error(formatArgs(...args));
+    }
   },
 
   warn: (...args) => {

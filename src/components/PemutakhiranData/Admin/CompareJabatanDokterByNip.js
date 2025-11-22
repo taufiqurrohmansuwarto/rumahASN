@@ -84,19 +84,19 @@ function CompareJabatanDokterByNip({ nip }) {
             {data?.length || 0}
           </MantineBadge>
         </Space>
-        <Table
-          columns={columns}
-          pagination={false}
-          loading={isLoading}
-          dataSource={data}
-          rowKey={(row) => row?.pegawai_id}
+      <Table
+        columns={columns}
+        pagination={false}
+        loading={isLoading}
+        dataSource={data}
+        rowKey={(row) => row?.pegawai_id}
           size="middle"
           scroll={{ x: 600 }}
           rowClassName={(record, index) =>
             index % 2 === 0 ? "table-row-light" : "table-row-dark"
           }
-        />
-      </Card>
+      />
+    </Card>
     </div>
   );
 }

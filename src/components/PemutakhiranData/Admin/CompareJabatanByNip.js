@@ -626,23 +626,23 @@ function CompareJabatanByNip({ nip }) {
       key: "jenis_dokumen",
       width: 140,
       render: (row) => (
-        <div>
+            <div>
           <MantineBadge
             size="sm"
             color={setJenisJabatanColor(row?.jenis_jabatan)}
             tt="none"
             style={{ marginBottom: 8 }}
-          >
+            >
             {row?.jenis_jabatan}
           </MantineBadge>
           {row?.file && (
-            <div>
+          <div>
               <a href={row.file} target="_blank" rel="noreferrer">
                 <Button size="small" icon={<IconFileText size={14} />}>
                   SK
                 </Button>
-              </a>
-            </div>
+            </a>
+          </div>
           )}
         </div>
       ),
@@ -658,8 +658,8 @@ function CompareJabatanByNip({ nip }) {
               size="sm"
               fw={row?.aktif === "Y" ? 600 : 500}
               td={row?.aktif === "Y" ? "underline" : "none"}
-            >
-              {row?.jabatan}
+          >
+            {row?.jabatan}
             </MantineText>
             <MantineText size="xs" c="dimmed">
               {row?.unor}
@@ -731,11 +731,11 @@ function CompareJabatanByNip({ nip }) {
         };
 
         return (
-          <FormUnorJabatanTransfer
-            dataSiasn={data}
-            data={payload}
-            kata="Pakai"
-          />
+            <FormUnorJabatanTransfer
+              dataSiasn={data}
+              data={payload}
+              kata="Pakai"
+            />
         );
       },
     },
@@ -749,7 +749,7 @@ function CompareJabatanByNip({ nip }) {
       render: (row) => {
         const jenisJabatan = checkJenisJabatan(row);
         return (
-          <div>
+            <div>
             <MantineBadge
               size="sm"
               color={setJenisJabatanColor(jenisJabatan)}
@@ -769,15 +769,15 @@ function CompareJabatanByNip({ nip }) {
                     SK
                   </Button>
                 </a>
-              </div>
+            </div>
             )}
             {row?.path?.[873] && (
               <div>
-                <a
+              <a
                   href={`/helpdesk/api/siasn/ws/download?filePath=${row?.path?.[873]?.dok_uri}`}
-                  target="_blank"
-                  rel="noreferrer"
-                >
+                target="_blank"
+                rel="noreferrer"
+              >
                   <Button size="small" icon={<IconFileText size={14} />}>
                     Lantik
                   </Button>
@@ -925,15 +925,15 @@ function CompareJabatanByNip({ nip }) {
                       {data?.length || 0}
                     </MantineBadge>
                   </Space>
-                  <Button
+                      <Button
                     size="small"
-                    onClick={() => refetch()}
+                        onClick={() => refetch()}
                     icon={<IconRefresh size={16} />}
-                    loading={isFetching}
-                  >
-                    Refresh
-                  </Button>
-                </Flex>
+                        loading={isFetching}
+                      >
+                        Refresh
+                      </Button>
+                    </Flex>
                 <Table
                   title={null}
                   columns={columns}

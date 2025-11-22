@@ -28,19 +28,19 @@ function HapusJabatan({ id }) {
   );
 
   return (
-    <Popconfirm
-      title="Are you sure you want to delete this item?"
-      onConfirm={async () => await hapus()}
-    >
-      <Tooltip title="Hapus">
+      <Popconfirm
+        title="Are you sure you want to delete this item?"
+        onConfirm={async () => await hapus()}
+      >
+        <Tooltip title="Hapus">
         <Button
           size="small"
           danger
           icon={<IconTrash size={14} />}
           loading={isLoading}
         />
-      </Tooltip>
-    </Popconfirm>
+        </Tooltip>
+      </Popconfirm>
   );
 }
 

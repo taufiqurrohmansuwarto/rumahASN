@@ -1,7 +1,7 @@
 import { reportSimasterEmployees } from "@/services/admin.services";
-import { CloudDownloadOutlined } from "@ant-design/icons";
+import { IconDownload } from "@tabler/icons-react";
 import { useMutation } from "@tanstack/react-query";
-import { Button, message } from "antd";
+import { Button, message, Tooltip } from "antd";
 import FileSaver from "file-saver";
 
 function ReportEmployeeMaster() {
@@ -24,15 +24,14 @@ function ReportEmployeeMaster() {
   };
 
   return (
-    <Button
-      type="primary"
-      onClick={handleClick}
-      loading={loadingDownload}
-      disabled={loadingDownload}
-      icon={<CloudDownloadOutlined />}
-    >
-      Unduh Data SIMASTER
-    </Button>
+    <Tooltip title="Unduh Data SIMASTER (Excel)">
+      <Button
+        type="primary"
+        onClick={handleClick}
+        loading={loadingDownload}
+        icon={<IconDownload size={16} />}
+      />
+    </Tooltip>
   );
 }
 

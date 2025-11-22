@@ -4,7 +4,7 @@ const ssoToken = require("../sso_token.json");
 const a = require("../utils/siasn-fetcher");
 const { createRedisInstance } = require("../utils/redis");
 const { default: Redlock } = require("redlock");
-const { log } = require("@/utils/logger");
+const { logger } = require("@/utils/logger");
 
 const dotenv = require("dotenv");
 dotenv.config();
@@ -39,9 +39,9 @@ const cleanup = async () => {
       httpsAgent = null;
     }
 
-    log.info("[SIASN] Cleanup completed");
+    logger.info("[SIASN] Cleanup completed");
   } catch (error) {
-    log.error("[SIASN] Cleanup failed:", error);
+    logger.error("[SIASN] Cleanup failed:", error);
   }
 };
 
@@ -57,9 +57,9 @@ const initRedis = async () => {
       if (!redisClient) {
         throw new Error("Failed to create Redis instance");
       }
-      log.info("[SIASN] Redis initialized");
+      logger.info("[SIASN] Redis initialized");
     } catch (error) {
-      log.error("[SIASN] Redis initialization failed:", error);
+      logger.error("[SIASN] Redis initialization failed:", error);
       throw error;
     }
   }
@@ -72,7 +72,7 @@ const initRedis = async () => {
         retryJitter: 200,
       });
     } catch (error) {
-      log.error("[SIASN] Redlock initialization failed:", error);
+      logger.error("[SIASN] Redlock initialization failed:", error);
       throw error;
     }
   }
@@ -125,12 +125,12 @@ const getOrCreateToken = async () => {
     }
 
     // Generate token baru
-    log.info("[SIASN] Creating new token");
+    logger.info("[SIASN] Creating new token");
     const token = await getoken();
     await redisClient.set(TOKEN_KEY, JSON.stringify(token), "EX", 3600); // TTL 1 hour
     return token;
   } catch (err) {
-    log.warn("[SIASN] Lock acquisition failed, trying fallback", {
+    logger.warn("[SIASN] Lock acquisition failed, trying fallback", {
       error: err.message,
     });
 
@@ -142,7 +142,7 @@ const getOrCreateToken = async () => {
 
     for (let i = 0; i < maxRetries; i++) {
       if (Date.now() - startTime > totalTimeout) {
-        log.error("[SIASN] Token retry timeout exceeded", {
+        logger.error("[SIASN] Token retry timeout exceeded", {
           elapsed: Date.now() - startTime,
         });
         throw new Error("Token retry timeout exceeded");
@@ -156,19 +156,19 @@ const getOrCreateToken = async () => {
 
       tokenData = await redisClient.get(TOKEN_KEY);
       if (tokenData) {
-        log.info(`[SIASN] Token acquired on retry ${i + 1}`);
+        logger.info(`[SIASN] Token acquired on retry ${i + 1}`);
         return JSON.parse(tokenData);
       }
     }
 
-    log.error("[SIASN] Failed to get token after retries");
+    logger.error("[SIASN] Failed to get token after retries");
     throw new Error("Failed to get token after retries");
   } finally {
     if (lock) {
       try {
         await lock.release();
       } catch (err) {
-        log.error("[SIASN] Lock release failed:", err);
+        logger.error("[SIASN] Lock release failed:", err);
       }
     }
   }
@@ -182,7 +182,7 @@ const requestHandler = async (request) => {
     request.headers.Auth = `bearer ${sso_token}`;
     return request;
   } catch (error) {
-    log.error("[SIASN] Request handler failed:", {
+    logger.error("[SIASN] Request handler failed:", {
       method: request.method,
       url: request.url,
       error: error.message,
@@ -211,7 +211,7 @@ const errorHandler = async (error) => {
     invalidJwt || runtimeError || tokenError || invalidCredentials || ECONRESET;
 
   if (isTokenError) {
-    log.warn("[SIASN] Token invalid/expired, invalidating cache", {
+    logger.warn("[SIASN] Token invalid/expired, invalidating cache", {
       url: requestUrl,
       status: statusCode,
     });
@@ -220,15 +220,25 @@ const errorHandler = async (error) => {
       try {
         await redisClient.del(TOKEN_KEY);
       } catch (delError) {
-        log.error("[SIASN] Failed to delete token from cache:", delError);
+        logger.error("[SIASN] Failed to delete token from cache:", delError);
       }
     }
   } else if (statusCode >= 500) {
-    // Only log server errors, skip client errors (4xx)
-    log.error("[SIASN] Server error:", {
+    // Server errors (5xx)
+    logger.error("[SIASN] Server error:", {
       url: requestUrl,
       status: statusCode,
       message: error.message,
+      data: errorData,
+    });
+  } else if (statusCode >= 400) {
+    // Client errors (4xx) - log as debug/warn instead of error
+    logger.debug("[SIASN] Client error:", {
+      url: requestUrl,
+      status: statusCode,
+      code: errorData.code,
+      message: errorData.message,
+      description: errorData.description,
     });
   }
 
@@ -243,7 +253,7 @@ const siasnMiddleware = async (req, res, next) => {
     req.siasnRequest = siasnWsAxios;
     next();
   } catch (error) {
-    log.error("[SIASN] Middleware error:", {
+    logger.error("[SIASN] Middleware error:", {
       method: req.method,
       path: req.path,
       error: error.message,

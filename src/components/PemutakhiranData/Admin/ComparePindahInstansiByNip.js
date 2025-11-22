@@ -222,7 +222,7 @@ function ComparePindahInstansiByNip({ nip }) {
           </Space>
         }
       >
-        <Stack>
+      <Stack>
           <Flex
             justify="space-between"
             align="center"
@@ -246,13 +246,13 @@ function ComparePindahInstansiByNip({ nip }) {
             </Button>
           </Flex>
 
-          <Table
+        <Table
             title={null}
-            columns={columns}
-            pagination={false}
-            dataSource={data}
+          columns={columns}
+          pagination={false}
+          dataSource={data}
             loading={isLoading || isFetching}
-            rowKey={(row) => row?.id}
+          rowKey={(row) => row?.id}
             size="middle"
             scroll={{ x: 800 }}
             rowClassName={(record, index) =>
@@ -271,21 +271,21 @@ function ComparePindahInstansiByNip({ nip }) {
             </MantineBadge>
           </Space>
 
-          <Table
+        <Table
             title={null}
-            columns={masterColumn}
-            pagination={false}
-            dataSource={pindahSimaster}
-            loading={isLoadingPindahSimaster}
-            rowKey={(row) => row?.pindah_id}
+          columns={masterColumn}
+          pagination={false}
+          dataSource={pindahSimaster}
+          loading={isLoadingPindahSimaster}
+          rowKey={(row) => row?.pindah_id}
             size="middle"
             scroll={{ x: 800 }}
             rowClassName={(record, index) =>
               index % 2 === 0 ? "table-row-light" : "table-row-dark"
             }
-          />
-        </Stack>
-      </Card>
+        />
+      </Stack>
+    </Card>
     </div>
   );
 }

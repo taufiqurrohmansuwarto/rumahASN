@@ -70,9 +70,9 @@ const CompareDataPendidikanSIMASTER = ({ nip }) => {
       key: "jenjang",
       width: isMobile ? 100 : 150,
       render: (jenjang) => (
-        <MantineText size="sm" fw={500}>
-          {jenjang}
-        </MantineText>
+          <MantineText size="sm" fw={500}>
+            {jenjang}
+          </MantineText>
       ),
     },
     {

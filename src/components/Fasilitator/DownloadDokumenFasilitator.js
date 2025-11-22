@@ -1,7 +1,7 @@
 import { getDokumenFasilitator } from "@/services/master.services";
-import { FileExcelOutlined } from "@ant-design/icons";
+import { IconDownload } from "@tabler/icons-react";
 import { useMutation } from "@tanstack/react-query";
-import { Button } from "antd";
+import { Button, Tooltip } from "antd";
 
 const downloadDocuments = async () => {
   const response = await getDokumenFasilitator();
@@ -20,14 +20,14 @@ function DownloadDokumenFasilitator() {
   const mutation = useMutation(downloadDocuments);
 
   return (
-    <Button
-      icon={<FileExcelOutlined />}
-      type="primary"
-      loading={mutation.isLoading}
-      onClick={() => mutation.mutate()}
-    >
-      SK Pelaksana
-    </Button>
+    <Tooltip title="Unduh SK Pelaksana (ZIP)">
+      <Button
+        type="primary"
+        loading={mutation.isLoading}
+        icon={<IconDownload size={16} />}
+        onClick={() => mutation.mutate()}
+      />
+    </Tooltip>
   );
 }
 

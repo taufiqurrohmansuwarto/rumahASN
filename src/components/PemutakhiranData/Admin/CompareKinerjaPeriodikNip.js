@@ -124,20 +124,20 @@ const CompareKinerjaPeriodikNip = ({ nip }) => {
       width: 60,
       align: "center",
       render: (_, row) => (
-        <Popconfirm
+          <Popconfirm
           title="Hapus Kinerja Periodik"
           description="Apakah anda yakin ingin menghapus data ini?"
-          onConfirm={() => handleHapus(row)}
+            onConfirm={() => handleHapus(row)}
           okText="Ya"
           cancelText="Tidak"
-        >
+          >
           <Button
             size="small"
             danger
             icon={<IconTrash size={14} />}
             loading={isLoadingHapus}
           />
-        </Popconfirm>
+          </Popconfirm>
       ),
     },
   ];
@@ -156,7 +156,7 @@ const CompareKinerjaPeriodikNip = ({ nip }) => {
       }
       extra={
         <Space>
-          <CreateKinerjaPeriodik />
+        <CreateKinerjaPeriodik />
           <Tooltip title="Refresh data Kinerja Periodik">
             <Button
               size="small"
@@ -169,17 +169,17 @@ const CompareKinerjaPeriodikNip = ({ nip }) => {
       }
       style={{ marginTop: 16 }}
     >
-      <Table
-        pagination={false}
-        columns={columns}
-        dataSource={data}
+        <Table
+          pagination={false}
+          columns={columns}
+          dataSource={data}
         loading={isLoading || isFetching}
         rowClassName={(_, index) =>
           index % 2 === 0 ? "table-row-light" : "table-row-dark"
         }
         size="small"
         scroll={{ x: "max-content" }}
-      />
+        />
     </Card>
   );
 };

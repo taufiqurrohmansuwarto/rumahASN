@@ -151,26 +151,26 @@ function CompareAngkaKreditByNip({ nip }) {
             <Descriptions.Item label="File">
               <Space>
                 {record?.path?.[880] && (
-                  <a
-                    href={`/helpdesk/api/siasn/ws/download?filePath=${record?.path?.[880]?.dok_uri}`}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
+                    <a
+                      href={`/helpdesk/api/siasn/ws/download?filePath=${record?.path?.[880]?.dok_uri}`}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
                     <Button size="small" icon={<IconFileText size={14} />}>
                       SK PAK
                     </Button>
-                  </a>
+                    </a>
                 )}
                 {record?.path?.[879] && (
-                  <a
-                    href={`/helpdesk/api/siasn/ws/download?filePath=${record?.path?.[879]?.dok_uri}`}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
+                    <a
+                      href={`/helpdesk/api/siasn/ws/download?filePath=${record?.path?.[879]?.dok_uri}`}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
                     <Button size="small" icon={<IconFileText size={14} />}>
                       Dok PAK
                     </Button>
-                  </a>
+                    </a>
                 )}
               </Space>
             </Descriptions.Item>
@@ -215,7 +215,7 @@ function CompareAngkaKreditByNip({ nip }) {
         return (
           <Space size="small">
             {record?.path?.[880] && (
-              <Tooltip title="SK PAK">
+            <Tooltip title="SK PAK">
                 <a
                   href={`/helpdesk/api/siasn/ws/download?filePath=${record?.path?.[880]?.dok_uri}`}
                   target="_blank"
@@ -227,10 +227,10 @@ function CompareAngkaKreditByNip({ nip }) {
                     icon={<IconFileText size={14} />}
                   />
                 </a>
-              </Tooltip>
+            </Tooltip>
             )}
             {record?.path?.[879] && (
-              <Tooltip title="Dok PAK">
+            <Tooltip title="Dok PAK">
                 <a
                   href={`/helpdesk/api/siasn/ws/download?filePath=${record?.path?.[879]?.dok_uri}`}
                   target="_blank"
@@ -242,7 +242,7 @@ function CompareAngkaKreditByNip({ nip }) {
                     icon={<IconFileText size={14} />}
                   />
                 </a>
-              </Tooltip>
+            </Tooltip>
             )}
           </Space>
         );
@@ -401,9 +401,9 @@ function CompareAngkaKreditByNip({ nip }) {
 
       // Set file
       const pdfFile = new File([data], "file.pdf", {
-        type: "application/pdf",
-      });
-      setFile(pdfFile);
+          type: "application/pdf",
+        });
+        setFile(pdfFile);
       setLoadingPakId(null);
     },
     onError: (error) => {
@@ -456,11 +456,11 @@ function CompareAngkaKreditByNip({ nip }) {
           <Descriptions column={1} size="small" layout="vertical">
             <Descriptions.Item label="File">
               {record?.file_pak && (
-                <a href={record?.file_pak} target="_blank" rel="noreferrer">
+              <a href={record?.file_pak} target="_blank" rel="noreferrer">
                   <Button size="small" icon={<IconFileText size={14} />}>
                     SK PAK
                   </Button>
-                </a>
+              </a>
               )}
             </Descriptions.Item>
             <Descriptions.Item label="Nomor SK">
@@ -508,7 +508,7 @@ function CompareAngkaKreditByNip({ nip }) {
           <>
             {record?.file_pak && (
               <Tooltip title="SK PAK">
-                <a href={record?.file_pak} target="_blank" rel="noreferrer">
+          <a href={record?.file_pak} target="_blank" rel="noreferrer">
                   <Button
                     size="small"
                     type="link"

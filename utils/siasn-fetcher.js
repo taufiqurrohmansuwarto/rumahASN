@@ -4,6 +4,7 @@ const clientId = process.env.CLIENT_ID;
 const nip = process.env.SSO_NIP;
 const password = process.env.SSO_PASSWORD;
 const axios = require("axios");
+const { logger } = require("./logger");
 
 const dayjs = require("dayjs");
 require("dayjs/locale/id");
@@ -52,12 +53,15 @@ const ssoFetcher = async () => {
       url,
     });
 
-    console.log(result?.data);
     const token = result?.data?.access_token;
+    logger.info("[SSO] Token fetched successfully", {
+      expiresIn: result?.data?.expires_in,
+    });
 
     return token;
   } catch (error) {
-    console.log(error);
+    logger.error("[SSO] Failed to fetch SSO token:", error);
+    throw error;
   }
 };
 
@@ -89,10 +93,14 @@ const wso2Fetcher = async () => {
     });
 
     const token = result?.data?.access_token;
+    logger.info("[WSO2] Token fetched successfully", {
+      expiresIn: result?.data?.expires_in,
+    });
 
     return token;
   } catch (error) {
-    console.log(error);
+    logger.error("[WSO2] Failed to fetch WSO2 token:", error);
+    throw error;
   }
 };
 

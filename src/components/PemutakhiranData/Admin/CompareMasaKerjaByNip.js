@@ -15,8 +15,8 @@ function CompareMasaKerjaByNip({ nip }) {
     refetch,
     isFetching,
   } = useQuery(["rw-masa-kerja", nip], () => dataRiwayatMasaKerja(nip), {
-    refetchOnWindowFocus: false,
-    keepPreviousData: true,
+      refetchOnWindowFocus: false,
+      keepPreviousData: true,
     enabled: !!nip,
   });
 
@@ -29,28 +29,28 @@ function CompareMasaKerjaByNip({ nip }) {
       render: (_, record) => {
         return (
           <Space direction="vertical" size={4}>
-            {record?.path?.[1643] && (
-              <a
-                href={`/helpdesk/api/siasn/ws/download?filePath=${record?.path?.[1643]?.dok_uri}`}
-                target="_blank"
-                rel="noreferrer"
-              >
+              {record?.path?.[1643] && (
+                <a
+                  href={`/helpdesk/api/siasn/ws/download?filePath=${record?.path?.[1643]?.dok_uri}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
                 <Button size="small" icon={<IconFileText size={14} />}>
                   Pertek
                 </Button>
-              </a>
-            )}
-            {record?.path?.[1644] && (
-              <a
-                href={`/helpdesk/api/siasn/ws/download?filePath=${record?.path?.[1644]?.dok_uri}`}
-                target="_blank"
-                rel="noreferrer"
-              >
+                </a>
+              )}
+              {record?.path?.[1644] && (
+                <a
+                  href={`/helpdesk/api/siasn/ws/download?filePath=${record?.path?.[1644]?.dok_uri}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
                 <Button size="small" icon={<IconFileText size={14} />}>
                   SK
                 </Button>
-              </a>
-            )}
+                </a>
+              )}
           </Space>
         );
       },

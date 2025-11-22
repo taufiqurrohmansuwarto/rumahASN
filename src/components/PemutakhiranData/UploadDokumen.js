@@ -108,14 +108,14 @@ function UploadDokumen({ id, nama, idRefDokumen, invalidateQueries }) {
 
   return (
     <>
-      <Tooltip title={`Unggah Dokumen ${nama}`}>
+        <Tooltip title={`Unggah Dokumen ${nama}`}>
         <Button
           size="small"
           type="primary"
           icon={<IconUpload size={14} />}
           onClick={handleOpen}
         />
-      </Tooltip>
+        </Tooltip>
       <ModalUploadDokumen
         invalidateQueries={invalidateQueries}
         nama={nama}

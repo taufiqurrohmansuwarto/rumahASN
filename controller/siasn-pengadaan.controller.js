@@ -39,7 +39,7 @@ const { createLogSIASN } = require("@/utils/logs");
 const { insightAIForParuhWaktu } = require("@/utils/helper/ai-insight.helper");
 const AIInsightParuhWaktu = require("@/models/ai-insight-paruh-waktu.model");
 const { nanoid } = require("nanoid");
-const { log, logger } = require("@/utils/logger");
+const { logger } = require("@/utils/logger");
 
 const syncPengadaan = async (req, res) => {
   const knex = SiasnPengadaan.knex();
@@ -56,7 +56,7 @@ const syncPengadaan = async (req, res) => {
       res.json(result);
     }
   } catch (error) {
-    console.log(error);
+    logger.error("[PENGADAAN] syncPengadaan failed:", error);
     const errorMessage =
       error?.response?.data?.message || "Internal Server Error";
     res.status(500).json({
@@ -72,7 +72,7 @@ const listPengadaanInstansi = async (req, res) => {
     const result = await daftarPengadaanInstansi(request, currentYears);
     res.json(result?.data);
   } catch (error) {
-    console.log(error);
+    logger.error("[PENGADAAN] listPengadaanInstansi failed:", error);
     const errorMessage =
       error?.response?.data?.message || "Internal Server Error";
     res.status(500).json({

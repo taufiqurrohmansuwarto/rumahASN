@@ -189,8 +189,8 @@ const CompareHukdisByNip = ({ nip }) => {
     refetch: refetchSiasn,
     isFetching: isFetchingSiasn,
   } = useQuery(["hukdis", nip], () => getHukdisByNip(nip), {
-    refetchOnWindowFocus: false,
-    keepPreviousData: true,
+      refetchOnWindowFocus: false,
+      keepPreviousData: true,
     enabled: !!nip,
   });
 
@@ -200,8 +200,8 @@ const CompareHukdisByNip = ({ nip }) => {
     refetch: refetchMaster,
     isFetching: isFetchingMaster,
   } = useQuery(["hukdis-master", nip], () => getRwHukdisByNip(nip), {
-    refetchOnWindowFocus: false,
-    keepPreviousData: true,
+      refetchOnWindowFocus: false,
+      keepPreviousData: true,
     enabled: !!nip,
   });
 
@@ -315,9 +315,9 @@ const CompareHukdisByNip = ({ nip }) => {
         return (
           <>
             {row?.file_disiplin && (
-              <a href={row?.file_disiplin} target="_blank" rel="noreferrer">
+          <a href={row?.file_disiplin} target="_blank" rel="noreferrer">
                 <Button size="small" icon={<IconFileText size={14} />} />
-              </a>
+          </a>
             )}
           </>
         );
@@ -407,14 +407,14 @@ const CompareHukdisByNip = ({ nip }) => {
         </Space>
       }
       extra={
-        <Button
-          onClick={handleOpen}
-          type="primary"
+      <Button
+        onClick={handleOpen}
+        type="primary"
           icon={<IconPlus size={14} />}
           size="small"
-        >
-          Tambah
-        </Button>
+      >
+        Tambah
+      </Button>
       }
       style={{ marginTop: 16 }}
     >
@@ -436,7 +436,7 @@ const CompareHukdisByNip = ({ nip }) => {
                   icon={<IconRefresh size={14} />}
                   onClick={() => refetchMaster()}
                   loading={isFetchingMaster}
-                />
+        />
               </Tooltip>
             </div>
           )}

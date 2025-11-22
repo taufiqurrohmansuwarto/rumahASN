@@ -526,20 +526,22 @@ const getAllEmployeesMasterPaging = async (req, res) => {
         limit: LIMIT,
       });
 
-      const nips = employeeData?.data?.results?.map((item) => item?.nip_master);
-      const detailedEmployeeData = await fetchDetailedEmployeeData(
-        siasnFetcher,
-        nips
-      );
+      const data = employeeData?.data;
 
-      const responsePayload = constructResponsePayload(
-        employeeData,
-        detailedEmployeeData
-      );
+      // const nips = employeeData?.data?.results?.map((item) => item?.nip_master);
+      // const detailedEmployeeData = await fetchDetailedEmployeeData(
+      //   siasnFetcher,
+      //   nips
+      // );
 
-      await redis.set(redisKey, JSON.stringify(responsePayload), "EX", 30);
+      // const responsePayload = constructResponsePayload(
+      //   employeeData,
+      //   detailedEmployeeData
+      // );
 
-      res.json(responsePayload);
+      // await redis.set(redisKey, JSON.stringify(responsePayload), "EX", 30);
+
+      res.json(data);
     }
   } catch (error) {
     console.log(error);
@@ -573,21 +575,23 @@ const getAllEmployeesMasterPagingAdmin = async (req, res) => {
         limit: LIMIT,
       });
 
-      const nips = employeeData?.data?.results?.map((item) => item?.nip_master);
-      const detailedEmployeeData = await fetchDetailedEmployeeData(
-        siasnFetcher,
-        nips
-      );
+      const data = employeeData?.data;
 
-      const responsePayload = constructResponsePayload(
-        employeeData,
-        detailedEmployeeData
-      );
+      // const nips = employeeData?.data?.results?.map((item) => item?.nip_master);
+      // const detailedEmployeeData = await fetchDetailedEmployeeData(
+      //   siasnFetcher,
+      //   nips
+      // );
 
-      // 45 seconds
-      await redis.set(redisKey, JSON.stringify(responsePayload), "EX", 30);
+      // const responsePayload = constructResponsePayload(
+      //   employeeData,
+      //   detailedEmployeeData
+      // );
 
-      res.json(responsePayload);
+      // // 45 seconds
+      // await redis.set(redisKey, JSON.stringify(responsePayload), "EX", 30);
+
+      res.json(data);
     }
   } catch (error) {
     console.log(error);

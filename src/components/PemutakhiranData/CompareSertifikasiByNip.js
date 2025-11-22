@@ -288,12 +288,12 @@ const CompareSertifikasiByNip = ({ nip }) => {
                 loading={isLoadingHapus}
               />
             </Popconfirm>
-            <UploadDokumen
-              id={row?.id}
-              idRefDokumen={"1683"}
-              invalidateQueries={["sertifikasi", nip]}
-              nama="Sertifikasi"
-            />
+              <UploadDokumen
+                id={row?.id}
+                idRefDokumen={"1683"}
+                invalidateQueries={["sertifikasi", nip]}
+                nama="Sertifikasi"
+              />
           </Space>
         );
       },
@@ -318,8 +318,8 @@ const CompareSertifikasiByNip = ({ nip }) => {
       style={{ marginTop: 16 }}
     >
       <Stack>
-        <Table
-          title={() => (
+      <Table
+        title={() => (
             <div
               style={{
                 display: "flex",
@@ -329,7 +329,7 @@ const CompareSertifikasiByNip = ({ nip }) => {
             >
               <MantineText fw="bold">SIMASTER</MantineText>
               <Tooltip title="Refresh data SIMASTER">
-                <Button
+              <Button
                   size="small"
                   icon={<IconRefresh size={14} />}
                   onClick={() => refetchMaster()}
@@ -337,20 +337,20 @@ const CompareSertifikasiByNip = ({ nip }) => {
                 />
               </Tooltip>
             </div>
-          )}
-          loading={isLoadingMaster || isFetchingMaster}
-          columns={columnsMaster}
-          pagination={false}
-          dataSource={dataMaster}
-          rowKey={(row) => row?.kompetensi_id}
+        )}
+        loading={isLoadingMaster || isFetchingMaster}
+        columns={columnsMaster}
+        pagination={false}
+        dataSource={dataMaster}
+        rowKey={(row) => row?.kompetensi_id}
           rowClassName={(_, index) =>
             index % 2 === 0 ? "table-row-light" : "table-row-dark"
           }
           size="small"
           scroll={{ x: "max-content" }}
-        />
-        <Table
-          title={() => (
+      />
+      <Table
+        title={() => (
             <div
               style={{
                 display: "flex",
@@ -368,18 +368,18 @@ const CompareSertifikasiByNip = ({ nip }) => {
                 />
               </Tooltip>
             </div>
-          )}
+        )}
           loading={isLoading || isFetchingSiasn}
-          columns={columns}
-          pagination={false}
-          dataSource={data}
-          rowKey={(row) => row?.id}
+        columns={columns}
+        pagination={false}
+        dataSource={data}
+        rowKey={(row) => row?.id}
           rowClassName={(_, index) =>
             index % 2 === 0 ? "table-row-light" : "table-row-dark"
           }
           size="small"
           scroll={{ x: "max-content" }}
-        />
+      />
       </Stack>
     </Card>
   );

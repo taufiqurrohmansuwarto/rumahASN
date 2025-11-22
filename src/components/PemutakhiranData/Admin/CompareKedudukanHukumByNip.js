@@ -20,9 +20,9 @@ function CompareKedudukanHukumByNip({ nip }) {
     refetch,
     isFetching,
   } = useQuery(["kedudukan-hukum", nip], () => rwKedudukanHukumByNip(nip), {
-    enabled: !!nip,
-    refetchOnWindowFocus: false,
-    keepPreviousData: true,
+      enabled: !!nip,
+      refetchOnWindowFocus: false,
+      keepPreviousData: true,
   });
 
   const columns = [
@@ -35,13 +35,13 @@ function CompareKedudukanHukumByNip({ nip }) {
         return (
           <>
             {record?.file_kedudukan_hukum && (
-              <a
-                href={record?.file_kedudukan_hukum}
-                target="_blank"
-                rel="noreferrer"
-              >
+            <a
+              href={record?.file_kedudukan_hukum}
+              target="_blank"
+              rel="noreferrer"
+            >
                 <Button size="small" icon={<IconFileText size={14} />} />
-              </a>
+            </a>
             )}
           </>
         );

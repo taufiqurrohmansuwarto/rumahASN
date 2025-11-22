@@ -11,9 +11,9 @@ function ComparePemberhentianByNip({ nip }) {
     refetch,
     isFetching,
   } = useQuery(["rw-pemberhentian", nip], () => rwPemberhentianByNip(nip), {
-    enabled: !!nip,
-    refetchOnWindowFocus: false,
-    keepPreviousData: true,
+      enabled: !!nip,
+      refetchOnWindowFocus: false,
+      keepPreviousData: true,
   });
 
   const columns = [

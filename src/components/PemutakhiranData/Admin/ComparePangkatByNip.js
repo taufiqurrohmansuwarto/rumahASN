@@ -278,21 +278,21 @@ function ComparePangkatByNip({ nip }) {
           </Space>
         }
       >
-        <Stack>
-          <PangkatSiasn
-            isLoading={isLoading}
+      <Stack>
+        <PangkatSiasn
+          isLoading={isLoading}
             isFetching={isFetching}
             refetch={refetch}
-            data={data?.pangkat_siasn}
-            dataSimaster={data?.pangkat_simaster}
-          />
+          data={data?.pangkat_siasn}
+          dataSimaster={data?.pangkat_simaster}
+        />
           <Divider />
           <PangkatSimaster
             isLoading={isLoading}
             data={data?.pangkat_simaster}
           />
-        </Stack>
-      </Card>
+      </Stack>
+    </Card>
     </div>
   );
 }

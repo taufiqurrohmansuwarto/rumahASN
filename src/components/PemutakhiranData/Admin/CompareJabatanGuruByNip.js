@@ -109,19 +109,19 @@ function CompareJabatanGuruByNip({ nip }) {
             {data?.length || 0}
           </MantineBadge>
         </Space>
-        <Table
-          columns={columns}
-          dataSource={data}
-          loading={isLoading}
-          rowKey={(row) => row?.guru_id}
-          pagination={false}
+      <Table
+        columns={columns}
+        dataSource={data}
+        loading={isLoading}
+        rowKey={(row) => row?.guru_id}
+        pagination={false}
           size="middle"
           scroll={{ x: 800 }}
           rowClassName={(record, index) =>
             index % 2 === 0 ? "table-row-light" : "table-row-dark"
           }
-        />
-      </Card>
+      />
+    </Card>
     </div>
   );
 }
