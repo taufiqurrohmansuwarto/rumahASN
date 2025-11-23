@@ -24,6 +24,7 @@ import {
   IconLayoutDashboard,
   IconUsers,
   IconRefresh,
+  IconSearch,
 } from "@tabler/icons-react";
 import { Dropdown, Input, Space } from "antd";
 import { trim } from "lodash";
@@ -190,23 +191,35 @@ function RekonLayout({ children, active = "rekon-unor" }) {
       logo={null}
       layout="mix"
       token={layoutToken}
-      actionsRender={(props) => {
-        return [
-          <div key="search" style={{ width: "100%", maxWidth: "300px" }}>
+      headerContentRender={(props) => {
+        return (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flex: 1,
+              maxWidth: "500px",
+              margin: "0 auto",
+            }}
+          >
             <Input.Search
               onClear={() => handleSearch("")}
               allowClear
-              placeholder="Ketik NIP atau Nama..."
-              size={props.isMobile ? "small" : "middle"}
+              placeholder="Cari NIP / Nama..."
+              size="small"
               onSearch={handleSearch}
-              className="search-input-professional"
+              prefix={<IconSearch size={14} style={{ color: "#999" }} />}
               style={{
                 width: "100%",
-                transition: "all 0.3s ease",
-                display: props.collapsed && props.isMobile ? "none" : "block",
+                fontSize: "13px",
               }}
             />
-          </div>,
+          </div>
+        );
+      }}
+      actionsRender={(props) => {
+        return [
           <NotifikasiKepegawaian
             key="kepegawaian"
             url="kepegawaian"
