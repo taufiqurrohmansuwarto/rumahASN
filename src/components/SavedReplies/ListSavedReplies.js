@@ -1,32 +1,14 @@
 import { deleteSavedReplies, getSavedReplies } from "@/services/index";
+import { Avatar, Box, Flex, Stack, Text } from "@mantine/core";
+import { IconEdit, IconMessage, IconTrash } from "@tabler/icons-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  Card,
-  List,
-  message,
-  Typography,
-  theme,
-  Empty,
-  Modal,
-  Button,
-  Row,
-  Col,
-} from "antd";
-import {
-  MessageOutlined,
-  EditOutlined,
-  DeleteOutlined,
-  ExclamationCircleOutlined,
-} from "@ant-design/icons";
+import { Button, Empty, message, Modal } from "antd";
+import { ExclamationCircleOutlined } from "@ant-design/icons";
 import { truncate } from "lodash";
 import { useRouter } from "next/router";
 import CreateSavedReplies from "./CreateSavedReplies";
 
-const { Title, Text } = Typography;
-const { useToken } = theme;
-
 function ListSavedReplies() {
-  const { token } = useToken();
   const queryClient = useQueryClient();
   const router = useRouter();
 
@@ -72,128 +54,92 @@ function ListSavedReplies() {
     }
   );
 
+  if ((!data || data?.length === 0) && !isLoading) {
+    return (
+      <Stack spacing={8}>
+        <Box style={{ padding: "48px 24px", textAlign: "center" }}>
+          <Empty
+            description={
+              <Text size="13px" c="dimmed">
+                Belum ada template balasan
+              </Text>
+            }
+          />
+        </Box>
+        <CreateSavedReplies />
+      </Stack>
+    );
+  }
+
   return (
-    <Row gutter={[24, 24]}>
-      <Col span={24}>
-        {(!data || data?.length === 0) && !isLoading ? (
-          <div
+    <Stack spacing={8}>
+      <Stack spacing={4}>
+        {data?.map((item) => (
+          <Box
+            key={item?.id}
+            p="sm"
             style={{
-              padding: "64px 32px",
-              textAlign: "center",
+              borderRadius: 6,
+              backgroundColor: "white",
+              border: "1px solid #E5E7EB",
+              transition: "all 0.2s ease",
+            }}
+            sx={{
+              "&:hover": {
+                backgroundColor: "#F9FAFB",
+              },
             }}
           >
-            <Empty
-              description={
-                <Text style={{ color: "#6B7280", fontSize: "16px" }}>
-                  Belum ada template balasan
-                </Text>
-              }
-            />
-          </div>
-        ) : (
-          <List
-            dataSource={data}
-            size="small"
-            rowKey={(row) => row?.id}
-            loading={isLoading}
-            renderItem={(item) => (
-              <List.Item
-                style={{
-                  padding: "16px",
-                  borderRadius: "8px",
-                  marginBottom: "8px",
-                  backgroundColor: "white",
-                  transition: "all 0.2s ease",
-                }}
-              >
-                <List.Item.Meta
-                  avatar={
-                    <div
-                      style={{
-                        width: "40px",
-                        height: "40px",
-                        borderRadius: "8px",
-                        backgroundColor: "#FEF2F2",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        border: "1px solid #FECACA",
-                      }}
-                    >
-                      <MessageOutlined
-                        style={{
-                          color: "#EF4444",
-                          fontSize: "16px",
-                        }}
-                      />
-                    </div>
-                  }
-                  title={
-                    <Text
-                      strong
-                      style={{
-                        color: "#1F2937",
-                        fontSize: "14px",
-                        lineHeight: "1.4",
-                      }}
-                    >
-                      {item?.name}
-                    </Text>
-                  }
-                  description={
-                    <Text
-                      type="secondary"
-                      style={{
-                        fontSize: "12px",
-                        lineHeight: "1.4",
-                      }}
-                    >
-                      {truncate(item?.content, { length: 80 })}
-                    </Text>
-                  }
-                />
-                <div
+            <Flex gap="sm" align="center" justify="space-between">
+              <Flex gap="sm" align="flex-start" style={{ flex: 1, minWidth: 0 }}>
+                <Avatar
+                  size={32}
+                  radius="md"
                   style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px",
+                    backgroundColor: "#FEF2F2",
+                    border: "1px solid #FECACA",
+                    flexShrink: 0,
                   }}
                 >
-                  <Button
-                    type="primary"
-                    size="small"
-                    icon={<EditOutlined />}
-                    onClick={() => gotoEdit(item?.id)}
-                    style={{
-                      borderRadius: "6px",
-                      fontWeight: 500,
-                    }}
-                  >
-                    Edit
-                  </Button>
-                  <Button
-                    danger
-                    size="small"
-                    icon={<DeleteOutlined />}
-                    loading={isLoadingRemove}
-                    onClick={() => handleRemove(item?.id, item?.name)}
-                    style={{
-                      borderRadius: "6px",
-                      fontWeight: 500,
-                    }}
-                  >
-                    Hapus
-                  </Button>
-                </div>
-              </List.Item>
-            )}
-          />
-        )}
-      </Col>
-      <Col span={24}>
-        <CreateSavedReplies />
-      </Col>
-    </Row>
+                  <IconMessage size={14} style={{ color: "#EF4444" }} />
+                </Avatar>
+
+                <Stack spacing={2} style={{ flex: 1, minWidth: 0 }}>
+                  <Text size="12px" fw={600} lineClamp={1}>
+                    {item?.name}
+                  </Text>
+                  <Text size="11px" c="dimmed" lineClamp={2}>
+                    {truncate(item?.content, { length: 80 })}
+                  </Text>
+                </Stack>
+              </Flex>
+
+              <Flex gap={4} style={{ flexShrink: 0 }}>
+                <Button
+                  type="primary"
+                  size="small"
+                  icon={<IconEdit size={14} />}
+                  onClick={() => gotoEdit(item?.id)}
+                >
+                  Edit
+                </Button>
+                <Button
+                  danger
+                  size="small"
+                  icon={<IconTrash size={14} />}
+                  loading={isLoadingRemove}
+                  onClick={() => handleRemove(item?.id, item?.name)}
+                >
+                  Hapus
+                </Button>
+              </Flex>
+            </Flex>
+          </Box>
+        ))}
+      </Stack>
+
+      <CreateSavedReplies />
+    </Stack>
   );
 }
 

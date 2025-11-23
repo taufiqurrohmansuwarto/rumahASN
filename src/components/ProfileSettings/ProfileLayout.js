@@ -1,26 +1,14 @@
 import PageContainer from "@/components/PageContainer";
+import { Box, Flex, Grid as MantineGrid, Paper, Stack, Text } from "@mantine/core";
 import {
-  Breadcrumb,
-  Card,
-  Grid,
-  Tabs,
-  Typography,
-  Flex,
-  theme,
-  Row,
-  Col,
-} from "antd";
-import {
-  UserOutlined,
-  HistoryOutlined,
-  BookOutlined,
-  MessageOutlined,
-} from "@ant-design/icons";
+  IconBookmark,
+  IconHistory,
+  IconMessage,
+  IconUser,
+} from "@tabler/icons-react";
+import { Breadcrumb, Grid, Tabs } from "antd";
 import Link from "next/link";
 import { useRouter } from "next/router";
-
-const { Title, Text } = Typography;
-const { useToken } = theme;
 
 function ProfileLayout({
   children,
@@ -28,33 +16,31 @@ function ProfileLayout({
   title = "Pengaturan Profil",
 }) {
   const router = useRouter();
-  const { token } = useToken();
   const screens = Grid.useBreakpoint();
-  const breakPoint = Grid.useBreakpoint();
 
   const items = [
     {
       label: "Profil",
       key: "profil",
-      icon: <UserOutlined />,
+      icon: <IconUser size={14} />,
       color: "#6366F1",
     },
     {
       label: "Aktivitas",
       key: "activities",
-      icon: <HistoryOutlined />,
+      icon: <IconHistory size={14} />,
       color: "#22C55E",
     },
     {
       label: "Pertanyaan Tersimpan",
       key: "saved",
-      icon: <BookOutlined />,
+      icon: <IconBookmark size={14} />,
       color: "#F59E0B",
     },
     {
       label: "Template Balasan",
       key: "saved-replies",
-      icon: <MessageOutlined />,
+      icon: <IconMessage size={14} />,
       color: "#EF4444",
     },
   ];
@@ -75,14 +61,14 @@ function ProfileLayout({
 
   return (
     <PageContainer
-      title={currentTab.label}
-      subTitle={`Kelola dan pantau data Anda`}
+      title="Pengaturan Profil"
+      subTitle="Kelola dan pantau data Anda"
       childrenContentStyle={{
-        paddingLeft: breakPoint.xs ? 16 : null,
-        paddingRight: breakPoint.xs ? 16 : null,
+        paddingLeft: screens.xs ? 12 : null,
+        paddingRight: screens.xs ? 12 : null,
       }}
       breadcrumbRender={() => (
-        <Breadcrumb style={{ marginBottom: "24px" }}>
+        <Breadcrumb style={{ marginBottom: 16, fontSize: "13px" }}>
           <Breadcrumb.Item>
             <Link href="/feeds">Beranda</Link>
           </Breadcrumb.Item>
@@ -90,183 +76,55 @@ function ProfileLayout({
         </Breadcrumb>
       )}
     >
-      {/* Navigation & Content */}
-      {screens.md ? (
-        <Row gutter={24}>
-          {/* Sidebar Navigation */}
-          <Col span={5}>
-            <Card
-              style={{
-                borderRadius: "16px",
-                border: "1px solid #E5E7EB",
-                boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
-                height: "fit-content",
-              }}
-              bodyStyle={{ padding: "16px" }}
-            >
-              <div
-                style={{ display: "flex", flexDirection: "column", gap: "4px" }}
-              >
-                {items.map((item) => (
-                  <div
-                    key={item.key}
-                    onClick={() => handleTabChange(item.key)}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "12px",
-                      padding: "12px 16px",
-                      borderRadius: "8px",
-                      cursor: "pointer",
-                      transition: "all 0.2s ease",
-                      backgroundColor:
-                        tabActiveKey === item.key ? "#F3F4F6" : "transparent",
-                      borderLeft:
-                        tabActiveKey === item.key
-                          ? `3px solid ${item.color}`
-                          : "3px solid transparent",
-                    }}
-                    onMouseEnter={(e) => {
-                      if (tabActiveKey !== item.key) {
-                        e.currentTarget.style.backgroundColor = "#F9FAFB";
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (tabActiveKey !== item.key) {
-                        e.currentTarget.style.backgroundColor = "transparent";
-                      }
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: "24px",
-                        height: "24px",
-                        borderRadius: "6px",
-                        backgroundColor:
-                          tabActiveKey === item.key ? item.color : "#E5E7EB",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        transition: "all 0.2s ease",
-                      }}
-                    >
-                      {React.cloneElement(item.icon, {
-                        style: {
-                          color:
-                            tabActiveKey === item.key ? "white" : "#6B7280",
-                          fontSize: "12px",
-                        },
-                      })}
-                    </div>
-                    <span
-                      style={{
-                        fontWeight: tabActiveKey === item.key ? 600 : 500,
-                        fontSize: "14px",
-                        color:
-                          tabActiveKey === item.key ? "#1F2937" : "#6B7280",
-                      }}
-                    >
-                      {item.label}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </Card>
-          </Col>
-
-          {/* Content Area */}
-          <Col span={19}>
-            <Card
-              title={title}
-              style={{
-                borderRadius: "16px",
-                border: "1px solid #E5E7EB",
-                boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
-                minHeight: "600px",
-              }}
-              bodyStyle={{ padding: "32px" }}
-            >
-              {children}
-            </Card>
-          </Col>
-        </Row>
-      ) : (
-        /* Mobile Navigation */
-        <Card
-          style={{
-            borderRadius: "16px",
-            border: "1px solid #E5E7EB",
-            boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
-          }}
-          bodyStyle={{ padding: 0 }}
-        >
+      {/* Horizontal Tabs Layout - Ultra Compact */}
+      <Paper radius="md" withBorder>
           <Tabs
             activeKey={tabActiveKey}
-            onTabClick={handleTabChange}
-            style={{ minHeight: "500px" }}
+          onChange={handleTabChange}
+          size="small"
             tabBarStyle={{
-              backgroundColor: "#F9FAFB",
               margin: 0,
-              padding: "12px 16px",
+            padding: "8px 12px 0 12px",
               borderBottom: "1px solid #E5E7EB",
+            backgroundColor: "#FAFAFA",
             }}
             items={items.map((item) => ({
               key: item.key,
               label: (
-                <div
-                  style={{
+              <Flex align="center" gap={6} style={{ padding: "2px 6px" }}>
+                <Box
+                  sx={{
                     display: "flex",
                     alignItems: "center",
-                    gap: "8px",
-                    padding: "6px 12px",
-                    borderRadius: "6px",
+                    justifyContent: "center",
+                    width: 18,
+                    height: 18,
+                    borderRadius: 4,
+                    backgroundColor: tabActiveKey === item.key ? item.color : "#E5E7EB",
+                    color: tabActiveKey === item.key ? "white" : "#6B7280",
+                    transition: "all 0.2s ease",
                   }}
                 >
-                  <div
-                    style={{
-                      width: "20px",
-                      height: "20px",
-                      borderRadius: "4px",
-                      backgroundColor:
-                        tabActiveKey === item.key ? item.color : "#E5E7EB",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    {React.cloneElement(item.icon, {
-                      style: {
-                        color: tabActiveKey === item.key ? "white" : "#6B7280",
-                        fontSize: "10px",
-                      },
-                    })}
-                  </div>
-                  <span
-                    style={{
-                      fontWeight: tabActiveKey === item.key ? 600 : 500,
-                      fontSize: "12px",
-                      color: tabActiveKey === item.key ? "#1F2937" : "#6B7280",
-                    }}
+                  {item.icon}
+                </Box>
+                <Text
+                  size="12px"
+                  weight={tabActiveKey === item.key ? 600 : 500}
+                  color={tabActiveKey === item.key ? "dark" : "dimmed"}
+                  style={{ transition: "all 0.2s ease" }}
                   >
                     {item.label}
-                  </span>
-                </div>
+                </Text>
+              </Flex>
               ),
               children: (
-                <div
-                  style={{
-                    padding: "20px",
-                    backgroundColor: "white",
-                    minHeight: "400px",
-                  }}
-                >
+              <Box p={screens.xs ? "xs" : "sm"} style={{ minHeight: 500 }}>
                   {children}
-                </div>
+              </Box>
               ),
             }))}
           />
-        </Card>
-      )}
+      </Paper>
     </PageContainer>
   );
 }
