@@ -54,15 +54,15 @@ const MenuButton = ({ item, onClick, isMobile }) => {
     <Card
       hoverable
       style={{
-        height: isMobile ? "100px" : "120px",
+        height: isMobile ? "75px" : "85px",
         backgroundColor: "#FFFFFF",
         border: "1px solid #EDEFF1",
-        borderRadius: "8px",
+        borderRadius: "6px",
         cursor: "pointer",
         transition: "all 0.2s ease",
       }}
       bodyStyle={{
-        padding: isMobile ? "12px" : "16px",
+        padding: isMobile ? "6px" : "8px",
         height: "100%",
         display: "flex",
         flexDirection: "column",
@@ -73,8 +73,8 @@ const MenuButton = ({ item, onClick, isMobile }) => {
       onClick={() => onClick(item?.path)}
       onMouseEnter={(e) => {
         e.currentTarget.style.borderColor = item.color;
-        e.currentTarget.style.transform = "translateY(-4px)";
-        e.currentTarget.style.boxShadow = `0 4px 12px ${item.color}33`;
+        e.currentTarget.style.transform = "translateY(-2px)";
+        e.currentTarget.style.boxShadow = `0 2px 8px ${item.color}33`;
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.borderColor = "#EDEFF1";
@@ -83,29 +83,29 @@ const MenuButton = ({ item, onClick, isMobile }) => {
       }}
     >
       <IconComponent
-        size={isMobile ? 28 : 36}
+        size={isMobile ? 22 : 26}
         color={item.color}
         stroke={1.5}
-        style={{ marginBottom: isMobile ? "8px" : "12px" }}
+        style={{ marginBottom: isMobile ? "4px" : "6px" }}
       />
       <Text
         fw={600}
-        size={isMobile ? "xs" : "sm"}
+        size={isMobile ? "10px" : "xs"}
         style={{
           color: "#1A1A1B",
           margin: 0,
-          lineHeight: "1.3",
+          lineHeight: "1.2",
           textAlign: "center",
         }}
       >
         {item.title}
       </Text>
       <Text
-        size={isMobile ? "10px" : "xs"}
+        size={isMobile ? "9px" : "10px"}
         c="dimmed"
         style={{
-          marginTop: "4px",
-          lineHeight: "1.2",
+          marginTop: "2px",
+          lineHeight: "1.1",
           textAlign: "center",
         }}
       >
@@ -130,7 +130,7 @@ const MenuProxy = () => {
   return (
     <div>
       {/* Menu Grid */}
-      <Row gutter={[12, 12]}>
+      <Row gutter={[8, 8]} justify="center">
         {menuItems.map((item) => (
           <Col key={item.title} xs={12} sm={8} md={6} lg={4} xl={4}>
             <MenuButton item={item} onClick={handleClick} isMobile={isMobile} />

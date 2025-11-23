@@ -17,23 +17,27 @@ const RekonIPASN = () => {
   return (
     <>
       <Head>
-        <title>Rumah ASN - Rekon - Dashboard</title>
+        <title>Rumah ASN - Rekonisiliasi - Indeks Profesionalitas ASN</title>
       </Head>
       <PageContainer
         childrenContentStyle={{
           padding: breakPoint.xs ? 0 : null,
         }}
         onBack={handleBack}
-        title="Dashboard IPASN"
-        content="Dashboard IPASN"
+        title="Indeks Profesionalitas ASN"
+        content="Monitoring dan rekonisiliasi data IPASN"
+        subTitle="Pantau indeks profesionalitas dan kompetensi ASN dengan sistem SIASN"
         breadcrumbRender={() => {
           return (
             <>
               <Breadcrumb>
                 <Breadcrumb.Item>
+                  <Link href="/rekon/dashboard">Rekonisiliasi</Link>
+                </Breadcrumb.Item>
+                <Breadcrumb.Item>
                   <Link href="/rekon/dashboard">Dashboard</Link>
                 </Breadcrumb.Item>
-                <Breadcrumb.Item>Dashboard IPASN</Breadcrumb.Item>
+                <Breadcrumb.Item>Indeks Profesionalitas ASN</Breadcrumb.Item>
               </Breadcrumb>
             </>
           );

@@ -16,7 +16,7 @@ const RekonPemberhentian = () => {
   return (
     <>
       <Head>
-        <title>Rumah ASN - Rekon - Dashboard</title>
+        <title>Rumah ASN - Rekonisiliasi - Layanan Pemberhentian</title>
       </Head>
       <PageContainer
         childrenContentStyle={{
@@ -24,11 +24,15 @@ const RekonPemberhentian = () => {
         }}
         onBack={handleBack}
         title="Layanan Pemberhentian"
-        content="Layanan Pemberhentian"
+        content="Monitoring dan rekonisiliasi data pemberhentian pegawai"
+        subTitle="Kelola data pensiun dan pemberhentian pegawai dengan sistem SIASN"
         breadcrumbRender={() => {
           return (
             <>
               <Breadcrumb>
+                <Breadcrumb.Item>
+                  <Link href="/rekon/dashboard">Rekonisiliasi</Link>
+                </Breadcrumb.Item>
                 <Breadcrumb.Item>
                   <Link href="/rekon/dashboard">Dashboard</Link>
                 </Breadcrumb.Item>

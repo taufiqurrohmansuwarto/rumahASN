@@ -16,7 +16,17 @@ export const appLists = [
     color: "#1A73E8",
     url: "/",
     icon: "https://siasn.bkd.jatimprov.go.id:9000/public/icon-beranda.png",
-    userType: ["asn", "non_asn", "umum", "fasilitator"],
+    userType: ["asn", "non_asn", "umum"],
+    target: "_blank",
+  },
+  {
+    rightIcon: <IconHome />,
+    title: "Knowledge Base",
+    desc: "Knowledge Base",
+    color: "#1A73E8",
+    url: "/feeds",
+    icon: "https://siasn.bkd.jatimprov.go.id:9000/public/icon-beranda.png",
+    userType: ["fasilitator"],
     target: "_blank",
   },
   {

@@ -11,19 +11,26 @@ const ProxyPGAkademik = () => {
   return (
     <>
       <Head>
-        <title>Rumah ASN - Rekon - Proxy Sinkronisasi</title>
+        <title>Rumah ASN - Rekonisiliasi - Integrasi Gelar Akademik</title>
       </Head>
       <PageContainer
         onBack={() => router.push("/rekon/dashboard")}
-        title="Rekon"
-        content="Proxy Kenaikan Pangkat"
+        title="Integrasi Gelar Akademik"
+        content="Sinkronisasi pencantuman gelar akademik dengan SIASN"
+        subTitle="Kelola dan monitor integrasi data pencantuman gelar akademik pegawai"
         header={{
           breadcrumbRender: () => (
             <Breadcrumb>
               <Breadcrumb.Item>
+                <Link href="/rekon/dashboard">Rekonisiliasi</Link>
+              </Breadcrumb.Item>
+              <Breadcrumb.Item>
                 <Link href="/rekon/dashboard">Dashboard</Link>
               </Breadcrumb.Item>
-              <Breadcrumb.Item>Proxy PG Akademik</Breadcrumb.Item>
+              <Breadcrumb.Item>
+                <Link href="/rekon/dashboard">Menu Integrasi</Link>
+              </Breadcrumb.Item>
+              <Breadcrumb.Item>Gelar Akademik</Breadcrumb.Item>
             </Breadcrumb>
           ),
         }}

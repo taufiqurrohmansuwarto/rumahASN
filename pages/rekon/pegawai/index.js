@@ -12,14 +12,18 @@ const Pegawai = () => {
   return (
     <>
       <Head>
-        <title>Rumah ASN - Rekon - Daftar Pegawai</title>
+        <title>Rumah ASN - Rekonisiliasi - Daftar Pegawai</title>
       </Head>
       <PageContainer
-        title="Rekon"
-        content="Daftar Pegawai"
+        title="Daftar Pegawai Rekonisiliasi"
+        content="Kelola dan monitor data pegawai untuk rekonisiliasi"
+        subTitle="Lihat daftar lengkap pegawai dan status sinkronisasi data dengan sistem SIASN"
         breadcrumbRender={() => {
           return (
             <Breadcrumb>
+              <Breadcrumb.Item>
+                <Link href="/rekon/dashboard">Rekonisiliasi</Link>
+              </Breadcrumb.Item>
               <Breadcrumb.Item>
                 <Link href="/rekon/dashboard">Dashboard</Link>
               </Breadcrumb.Item>

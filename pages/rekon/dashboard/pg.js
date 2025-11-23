@@ -17,7 +17,7 @@ const RekonPG = () => {
   return (
     <>
       <Head>
-        <title>Rumah ASN - Rekon - Dashboard</title>
+        <title>Rumah ASN - Rekonisiliasi - Pencantuman Gelar</title>
       </Head>
       <PageContainer
         childrenContentStyle={{
@@ -25,11 +25,15 @@ const RekonPG = () => {
         }}
         onBack={handleBack}
         title="Pencantuman Gelar"
-        content="Pencantuman Gelar"
+        content="Monitoring dan rekonisiliasi data pencantuman gelar"
+        subTitle="Kelola data pencantuman gelar akademik dan profesi pegawai"
         breadcrumbRender={() => {
           return (
             <>
               <Breadcrumb>
+                <Breadcrumb.Item>
+                  <Link href="/rekon/dashboard">Rekonisiliasi</Link>
+                </Breadcrumb.Item>
                 <Breadcrumb.Item>
                   <Link href="/rekon/dashboard">Dashboard</Link>
                 </Breadcrumb.Item>

@@ -9,11 +9,12 @@ import {
   IconUsers,
 } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
-import { Avatar, Button, Card, Space, Table, Tooltip } from "antd";
+import { Button, Card, Space, Table, Tooltip } from "antd";
+import Image from "next/image";
 import { useRouter } from "next/router";
 import DownloadDokumenFasilitator from "./DownloadDokumenFasilitator";
 import EmployeesTableFilter from "../Filter/EmployeesTableFilter";
-import React from "react";
+import React, { useState } from "react";
 
 function EmployeesTable() {
   const router = useRouter();
@@ -39,28 +40,62 @@ function EmployeesTable() {
     router.push(`/rekon/pegawai/${nip}/detail`);
   };
 
+  const EmployeeAvatar = ({ foto, nama }) => {
+    const [imageError, setImageError] = useState(false);
+
+    return (
+      <div
+        style={{
+          position: "relative",
+          width: 48,
+          height: 48,
+          borderRadius: "6px",
+          border: "1px solid #f0f0f0",
+          boxShadow: "0 1px 4px rgba(0,0,0,0.06)",
+          overflow: "hidden",
+          backgroundColor: "#f5f5f5",
+          flexShrink: 0,
+        }}
+      >
+        {foto && !imageError ? (
+          <Image
+            src={foto}
+            alt={nama || "Foto Pegawai"}
+            fill
+            sizes="48px"
+            style={{ objectFit: "cover" }}
+            onError={() => setImageError(true)}
+          />
+        ) : (
+          <div
+            style={{
+              width: "100%",
+              height: "100%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              backgroundColor: "#e8e8e8",
+            }}
+          >
+            <IconUser size={20} style={{ color: "#999" }} />
+          </div>
+        )}
+      </div>
+    );
+  };
+
   const columns = [
     {
       title: "Pegawai",
       key: "pegawai",
-      width: 340,
+      width: 280,
       render: (_, row) => (
-        <Space size="middle">
-          <Avatar
-            src={row?.foto}
-            size={64}
-            shape="square"
-            icon={<IconUser size={24} />}
-            style={{
-              border: "2px solid #f0f0f0",
-              boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-              borderRadius: "8px",
-            }}
-          />
-          <Stack spacing={4}>
+        <Space size="small">
+          <EmployeeAvatar foto={row?.foto} nama={row?.nama_master} />
+          <Stack spacing={2}>
             <Text
               fw={600}
-              size="sm"
+              size="xs"
               style={{
                 cursor: "pointer",
                 color: "#1890ff",
@@ -70,19 +105,19 @@ function EmployeesTable() {
             >
               {row?.nama_master}
             </Text>
-            <Text size="xs" c="dimmed" ff="monospace">
+            <Text size="10px" c="dimmed" ff="monospace">
               {row?.nip_master}
             </Text>
-            <Group spacing={6}>
+            <Group spacing={4}>
               <MantineBadge
                 color={row?.status_master === "PNS" ? "blue" : "cyan"}
                 variant="light"
-                size="sm"
+                size="xs"
                 tt="none"
               >
                 {row?.status_master}
               </MantineBadge>
-              <MantineBadge color="gray" variant="outline" size="sm" tt="none">
+              <MantineBadge color="gray" variant="outline" size="xs" tt="none">
                 {row?.golongan_master}
               </MantineBadge>
             </Group>
@@ -93,11 +128,11 @@ function EmployeesTable() {
     {
       title: "Jabatan & Unit Organisasi",
       key: "jabatan_unit",
-      width: 450,
+      width: 380,
       render: (_, row) => (
         <Tooltip
           title={
-            <Stack spacing={8}>
+            <Stack spacing={6}>
               <div>
                 <Text size="xs" fw={600}>
                   Jabatan:
@@ -114,22 +149,26 @@ function EmployeesTable() {
           }
           placement="topLeft"
         >
-          <Stack spacing={4}>
-            <Group spacing={6}>
-              <IconBriefcase size={14} style={{ color: "#888" }} />
-              <Text size="sm" fw={500} lineClamp={1}>
+          <Stack spacing={2}>
+            <Group spacing={4}>
+              <IconBriefcase size={12} style={{ color: "#888" }} />
+              <Text size="xs" fw={500} lineClamp={1}>
                 {row?.jabatan_master || "-"}
               </Text>
             </Group>
-            <Group spacing={6}>
-              <IconBuilding size={14} style={{ color: "#888" }} />
-              <Text size="xs" c="dimmed" lineClamp={1}>
+            <Group spacing={4}>
+              <IconBuilding size={12} style={{ color: "#888" }} />
+              <Text size="10px" c="dimmed" lineClamp={1}>
                 {row?.opd_master || "-"}
               </Text>
             </Group>
             <div>
-              <MantineBadge color="orange" variant="light" size="sm" tt="none">
-                {row?.jenjang_master || "Belum ada jenjang"}
+              <MantineBadge color="orange" variant="light" size="xs" tt="none">
+                {row?.jenjang_master
+                  ? row?.prodi_master
+                    ? `${row.jenjang_master} (${row.prodi_master})`
+                    : row.jenjang_master
+                  : "Belum ada jenjang"}
               </MantineBadge>
             </div>
           </Stack>
@@ -139,14 +178,14 @@ function EmployeesTable() {
     {
       title: "Aksi",
       key: "action",
-      width: 80,
+      width: 70,
       align: "center",
       render: (_, row) => (
         <Tooltip title="Lihat Detail">
           <Button
             type="primary"
             size="small"
-            icon={<IconEye size={16} />}
+            icon={<IconEye size={14} />}
             onClick={() => gotoDetail(row?.nip_master)}
           />
         </Tooltip>
@@ -156,12 +195,12 @@ function EmployeesTable() {
 
   return (
     <Card>
-      <Stack spacing="md">
+      <Stack spacing="sm">
         {/* Header */}
         <Group position="apart" align="center">
-          <Group spacing="xs">
-            <IconUsers size={20} style={{ color: "#1890ff" }} />
-            <Text size="lg" fw={600}>
+          <Group spacing={6}>
+            <IconUsers size={18} style={{ color: "#1890ff" }} />
+            <Text size="md" fw={600}>
               Data Pegawai
             </Text>
           </Group>
@@ -184,6 +223,7 @@ function EmployeesTable() {
             total: data?.total,
             showSizeChanger: false,
             onChange: handleChangePage,
+            size: "small",
             showTotal: (total, range) =>
               `${range[0].toLocaleString("id-ID")}-${range[1].toLocaleString(
                 "id-ID"
@@ -191,9 +231,9 @@ function EmployeesTable() {
           }}
           locale={{
             emptyText: (
-              <Stack align="center" spacing="xs" style={{ padding: 40 }}>
-                <IconUsers size={48} style={{ color: "#d1d5db" }} />
-                <Text size="sm" c="dimmed">
+              <Stack align="center" spacing={6} style={{ padding: 30 }}>
+                <IconUsers size={40} style={{ color: "#d1d5db" }} />
+                <Text size="xs" c="dimmed">
                   Tidak ada data pegawai
                 </Text>
               </Stack>

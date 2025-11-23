@@ -220,16 +220,6 @@ function RekonLayout({ children, active = "rekon-unor" }) {
       }}
       actionsRender={(props) => {
         return [
-          <NotifikasiKepegawaian
-            key="kepegawaian"
-            url="kepegawaian"
-            title="Inbox Kepegawaian"
-          />,
-          <NotifikasiPrivateMessage
-            key="private-message"
-            url="/mails/inbox"
-            title="Inbox Pesan Pribadi"
-          />,
           <NotifikasiASNConnect
             key="asn-connect"
             url="asn-connect"

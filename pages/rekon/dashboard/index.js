@@ -8,13 +8,17 @@ const RekonDashboard = () => {
   return (
     <>
       <Head>
-        <title>Rumah ASN - Rekon - Dashboard</title>
+        <title>Rumah ASN - Rekonisiliasi - Dashboard</title>
       </Head>
       <PageContainer
+        title="Dashboard Rekonisiliasi"
+        content="Monitoring dan rekonisiliasi data layanan SIASN"
+        subTitle="Kelola dan pantau integrasi data kepegawaian dengan sistem SIASN"
         breadcrumbRender={() => {
           return (
             <>
               <Breadcrumb>
+                <Breadcrumb.Item>Rekonisiliasi</Breadcrumb.Item>
                 <Breadcrumb.Item>Dashboard</Breadcrumb.Item>
               </Breadcrumb>
             </>

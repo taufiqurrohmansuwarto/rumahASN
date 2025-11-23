@@ -925,3 +925,83 @@
 {"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-23T10:41:39.636Z","type":"Status report"}
 {"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-23T10:41:40.696Z","type":"Status report"}
 {"level":"error","message":"[SIASN] Error data:","timestamp":"2025-11-23T10:41:40.698Z"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-23T13:53:50.339Z","type":"Status report"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-23T13:53:51.286Z","type":"Status report"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-23T13:53:51.382Z","type":"Status report"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-23T13:53:51.865Z","type":"Status report"}
+{"level":"error","message":"[SIASN] Error data:","timestamp":"2025-11-23T13:53:52.772Z"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-23T13:53:53.386Z","type":"Status report"}
+{"level":"error","message":"[SIASN] Error data:","timestamp":"2025-11-23T13:53:55.374Z"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-23T13:53:56.118Z","type":"Status report"}
+{"level":"error","message":"[SIASN] Error data:","timestamp":"2025-11-23T13:53:57.988Z"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-23T13:54:01.624Z","type":"Status report"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-23T13:54:01.816Z","type":"Status report"}
+{"level":"error","message":"[SIASN] Error data:","timestamp":"2025-11-23T13:54:02.321Z"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-23T13:54:04.534Z","type":"Status report"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-23T13:54:05.318Z","type":"Status report"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-23T13:54:05.374Z","type":"Status report"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-23T13:54:05.456Z","type":"Status report"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-23T13:54:06.041Z","type":"Status report"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-23T13:54:06.047Z","type":"Status report"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-23T13:54:06.987Z","type":"Status report"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-23T13:54:07.305Z","type":"Status report"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-23T13:54:07.308Z","type":"Status report"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-23T13:54:07.371Z","type":"Status report"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-23T13:54:08.636Z","type":"Status report"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-23T13:54:09.229Z","type":"Status report"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-23T13:54:09.649Z","type":"Status report"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-23T13:54:10.154Z","type":"Status report"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-23T13:54:10.158Z","type":"Status report"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-23T13:54:13.297Z","type":"Status report"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-23T13:54:13.309Z","type":"Status report"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-23T13:54:13.773Z","type":"Status report"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-23T13:54:15.652Z","type":"Status report"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-23T13:54:15.655Z","type":"Status report"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-23T13:54:15.733Z","type":"Status report"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-23T13:54:33.695Z","type":"Status report"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-23T13:54:47.365Z","type":"Status report"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-23T13:54:55.652Z","type":"Status report"}
+{"level":"error","message":"Error occurred: {\n  \"message\": \"Not Found\",\n  \"code\": 500\n}","timestamp":"2025-11-23T13:54:55.653Z"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-23T13:54:56.352Z","type":"Status report"}
+{"level":"error","message":"Error occurred: {\n  \"message\": \"Not Found\",\n  \"code\": 500\n}","timestamp":"2025-11-23T13:54:56.353Z"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-23T13:54:57.371Z","type":"Status report"}
+{"level":"error","message":"Error occurred: {\n  \"message\": \"Not Found\",\n  \"code\": 500\n}","timestamp":"2025-11-23T13:54:57.372Z"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-23T13:54:59.341Z","type":"Status report"}
+{"level":"error","message":"Error occurred: {\n  \"message\": \"Not Found\",\n  \"code\": 500\n}","timestamp":"2025-11-23T13:54:59.341Z"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-23T13:55:01.106Z","type":"Status report"}
+{"level":"error","message":"Error occurred: {\n  \"message\": \"Not Found\",\n  \"code\": 500\n}","timestamp":"2025-11-23T13:55:01.107Z"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-23T13:55:03.128Z","type":"Status report"}
+{"level":"error","message":"Error occurred: {\n  \"message\": \"Not Found\",\n  \"code\": 500\n}","timestamp":"2025-11-23T13:55:03.129Z"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-23T13:55:16.445Z","type":"Status report"}
+{"level":"error","message":"Error occurred: {\n  \"message\": \"Not Found\",\n  \"code\": 500\n}","timestamp":"2025-11-23T13:55:16.446Z"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-23T13:55:17.125Z","type":"Status report"}
+{"level":"error","message":"Error occurred: {\n  \"message\": \"Not Found\",\n  \"code\": 500\n}","timestamp":"2025-11-23T13:55:17.127Z"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-23T13:56:09.797Z","type":"Status report"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-23T13:56:12.387Z","type":"Status report"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-23T13:56:12.692Z","type":"Status report"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-23T13:56:13.720Z","type":"Status report"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-23T13:56:14.776Z","type":"Status report"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-23T13:56:14.852Z","type":"Status report"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-23T13:56:15.398Z","type":"Status report"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-23T13:56:15.434Z","type":"Status report"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-23T13:56:16.818Z","type":"Status report"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-23T13:56:17.344Z","type":"Status report"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-23T13:56:18.969Z","type":"Status report"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-23T13:56:19.555Z","type":"Status report"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-23T13:56:19.557Z","type":"Status report"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-23T13:56:22.182Z","type":"Status report"}
+{"level":"error","message":"[SIASN] Error data:","timestamp":"2025-11-23T13:56:22.593Z"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-23T13:56:23.447Z","type":"Status report"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-23T13:56:24.323Z","type":"Status report"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-23T13:56:24.986Z","type":"Status report"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-23T13:56:27.480Z","type":"Status report"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-23T13:56:33.440Z","type":"Status report"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-23T13:56:34.640Z","type":"Status report"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-23T13:56:35.775Z","type":"Status report"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-23T13:56:37.063Z","type":"Status report"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-23T13:56:38.221Z","type":"Status report"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-23T13:56:40.156Z","type":"Status report"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-23T13:56:41.925Z","type":"Status report"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-23T13:56:45.685Z","type":"Status report"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-23T13:56:46.129Z","type":"Status report"}
+{"code":0,"data":"Data tidak ditemukan","level":"error","message":"[SIASN] Error data:","timestamp":"2025-11-23T14:14:57.608Z"}

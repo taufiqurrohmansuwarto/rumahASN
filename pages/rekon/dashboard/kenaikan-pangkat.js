@@ -17,7 +17,7 @@ const RekonKenaikanPangkat = () => {
   return (
     <>
       <Head>
-        <title>Rumah ASN - Rekon - Dashboard - Layanan Kenaikan Pangkat</title>
+        <title>Rumah ASN - Rekonisiliasi - Layanan Kenaikan Pangkat</title>
       </Head>
       <PageContainer
         childrenContentStyle={{
@@ -25,11 +25,15 @@ const RekonKenaikanPangkat = () => {
         }}
         onBack={handleBack}
         title="Layanan Kenaikan Pangkat"
-        content="Layanan Kenaikan Pangkat"
+        content="Monitoring dan rekonisiliasi data kenaikan pangkat pegawai"
+        subTitle="Kelola dan pantau proses kenaikan pangkat dengan sistem SIASN"
         breadcrumbRender={() => {
           return (
             <>
               <Breadcrumb>
+                <Breadcrumb.Item>
+                  <Link href="/rekon/dashboard">Rekonisiliasi</Link>
+                </Breadcrumb.Item>
                 <Breadcrumb.Item>
                   <Link href="/rekon/dashboard">Dashboard</Link>
                 </Breadcrumb.Item>

@@ -11,7 +11,7 @@ const Logs = () => {
   return (
     <>
       <Head>
-        <title>Rumah ASN - Rekon - Logs</title>
+        <title>Rumah ASN - Rekonisiliasi - Riwayat Log</title>
       </Head>
       <PageContainer
         childrenContentStyle={{
@@ -20,13 +20,17 @@ const Logs = () => {
         breadcrumbRender={() => (
           <Breadcrumb>
             <Breadcrumb.Item>
+              <Link href="/rekon/dashboard">Rekonisiliasi</Link>
+            </Breadcrumb.Item>
+            <Breadcrumb.Item>
               <Link href="/rekon/dashboard">Dashboard</Link>
             </Breadcrumb.Item>
             <Breadcrumb.Item>Riwayat Log</Breadcrumb.Item>
           </Breadcrumb>
         )}
-        title="Rekon"
-        content="Riwayat Log"
+        title="Riwayat Log Rekonisiliasi"
+        content="Pantau aktivitas dan log sinkronisasi data SIASN"
+        subTitle="Lihat detail log integrasi dan history sinkronisasi data kepegawaian"
       >
         <DashboardLogSiasn />
         <LogHistorySIASN />

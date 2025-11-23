@@ -227,12 +227,9 @@ export const dataUtamaMasterByNip = async (req, res) => {
       if (!isTheSameOrganization) {
         res.json(null);
       } else {
-        const anomali = await Anomali23.query()
-          .where({ nip_baru: nip })
-          .withGraphFetched("user(simpleSelect)");
         const data = {
           ...result?.data,
-          anomali,
+          anomali: null,
         };
 
         res.json(data);

@@ -11,19 +11,26 @@ const ProxyPensiun = () => {
   return (
     <>
       <Head>
-        <title>Rumah ASN - Rekon - Proxy Sinkronisasi</title>
+        <title>Rumah ASN - Rekonisiliasi - Integrasi Pensiun</title>
       </Head>
       <PageContainer
         onBack={() => router.push("/rekon/dashboard")}
-        title="Rekon"
-        content="Proxy Pensiun"
+        title="Integrasi Data Pensiun"
+        content="Sinkronisasi data pensiun dengan SIASN"
+        subTitle="Kelola dan monitor integrasi data pensiun pegawai"
         header={{
           breadcrumbRender: () => (
             <Breadcrumb>
               <Breadcrumb.Item>
+                <Link href="/rekon/dashboard">Rekonisiliasi</Link>
+              </Breadcrumb.Item>
+              <Breadcrumb.Item>
                 <Link href="/rekon/dashboard">Dashboard</Link>
               </Breadcrumb.Item>
-              <Breadcrumb.Item>Proxy Pensiun</Breadcrumb.Item>
+              <Breadcrumb.Item>
+                <Link href="/rekon/dashboard">Menu Integrasi</Link>
+              </Breadcrumb.Item>
+              <Breadcrumb.Item>Data Pensiun</Breadcrumb.Item>
             </Breadcrumb>
           ),
         }}
