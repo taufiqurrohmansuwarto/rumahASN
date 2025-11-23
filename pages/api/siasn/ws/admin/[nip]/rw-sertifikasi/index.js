@@ -7,6 +7,7 @@ import {
   createSertifikasiByNip,
   getSertifikasiByNip,
 } from "@/controller/siasn/rw-sertifkasi.controller";
+import { apiErrorHandler } from "@/utils/api-handler";
 const router = createRouter();
 
 router
@@ -17,4 +18,4 @@ router
   .get(getSertifikasiByNip)
   .post(createSertifikasiByNip);
 
-export default router.handler();
+export default router.handler(apiErrorHandler);

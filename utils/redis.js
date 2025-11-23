@@ -3,6 +3,9 @@ loadEnv(); // ☑️ load env vars
 
 const Redis = require("ioredis");
 
+// ✅ Flag untuk prevent duplicate listeners
+let shutdownHandlersAttached = false;
+
 // ✅ Use global in development to persist across HMR
 const getRedisClient = () => {
   if (process.env.NODE_ENV === "development") {
@@ -20,6 +23,29 @@ const setRedisClient = (client) => {
   } else {
     global.redisClient = client;
   }
+};
+
+// ✅ Setup shutdown handlers sekali saja
+const setupShutdownHandlers = () => {
+  if (shutdownHandlersAttached) return;
+
+  const gracefulShutdown = async (signal) => {
+    const client = getRedisClient();
+    if (client) {
+      console.log(`🔄 [${signal}] Closing Redis connection...`);
+      try {
+        await client.quit();
+        setRedisClient(null);
+      } catch (err) {
+        console.error(`Error closing Redis on ${signal}:`, err);
+      }
+    }
+  };
+
+  process.once("SIGTERM", () => gracefulShutdown("SIGTERM"));
+  process.once("SIGINT", () => gracefulShutdown("SIGINT"));
+  
+  shutdownHandlersAttached = true;
 };
 
 const createRedisInstance = () => {
@@ -52,24 +78,8 @@ const createRedisInstance = () => {
     // ✅ Store in global for persistence
     setRedisClient(redisClient);
 
-    // ✅ Graceful shutdown handler
-    process.on("SIGTERM", async () => {
-      const client = getRedisClient();
-      if (client) {
-        console.log("🔄 Closing Redis connection...");
-        await client.quit();
-        setRedisClient(null);
-      }
-    });
-
-    process.on("SIGINT", async () => {
-      const client = getRedisClient();
-      if (client) {
-        console.log("🔄 Closing Redis connection...");
-        await client.quit();
-        setRedisClient(null);
-      }
-    });
+    // ✅ Setup shutdown handlers hanya sekali
+    setupShutdownHandlers();
 
     console.log(
       `🔗 Redis connected to ${host}:${port} - Pool ready (${process.env.NODE_ENV})`

@@ -5,7 +5,7 @@ import checkEmployee from "@/middleware/check-employee.middleware";
 import { siasnMiddleware } from "@/middleware/siasn.middleware";
 import { createRouter } from "next-connect";
 import siasnTokenMiddleware from "@/middleware/token-siasn-proxy.middleware";
-
+import { apiErrorHandler } from "@/utils/api-handler";
 const router = createRouter();
 
 router
@@ -16,4 +16,4 @@ router
   .use(checkEmployee)
   .get(getDMSProfileController);
 
-export default router.handler();
+export default router.handler(apiErrorHandler);

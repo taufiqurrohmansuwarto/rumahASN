@@ -2,8 +2,9 @@ import { siasnPendBackup } from "@/controller/backup.controller";
 import adminFasilitatorAsnMiddleware from "@/middleware/admin-fasilitator-asn.middleware";
 import auth from "@/middleware/auth.middleware";
 import { createRouter } from "next-connect";
+import { apiErrorHandler } from "@/utils/api-handler";
 const router = createRouter();
 
 router.use(auth).use(adminFasilitatorAsnMiddleware).get(siasnPendBackup);
 
-export default router.handler();
+export default router.handler(apiErrorHandler);

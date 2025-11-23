@@ -3,6 +3,7 @@ import adminFasilitatorAsnMiddleware from "@/middleware/admin-fasilitator-asn.mi
 import auth from "@/middleware/auth.middleware";
 import { siasnMiddleware } from "@/middleware/siasn.middleware";
 import { createRouter } from "next-connect";
+import { apiErrorHandler } from "@/utils/api-handler";
 const router = createRouter();
 
 router
@@ -11,4 +12,4 @@ router
   .use(siasnMiddleware)
   .get(documentDownloadSiasn);
 
-export default router.handler();
+export default router.handler(apiErrorHandler);

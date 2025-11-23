@@ -3,7 +3,7 @@
  *
  * Strategy:
  * - Cache OAuth2 token di Redis dengan TTL 1 jam
- * - Gunakan distributed lock (Redlock) untuk prevent race condition
+ * - Gunakan simple Redis lock (SET NX EX) untuk prevent race condition
  * - Auto-refresh token saat expired
  * - Retry mechanism dengan exponential backoff
  *
@@ -18,77 +18,76 @@ const { default: axios } = require("axios");
 const ClientOAuth2 = require("client-oauth2");
 const { logger } = require("@/utils/logger");
 const { createRedisInstance } = require("../utils/redis");
-const { default: Redlock } = require("redlock");
 
 const clientId = process.env.CLIENT_ID_CC;
 const clientSecret = process.env.CLIENT_SECRET_CC;
 
 const TOKEN_KEY = "client_credentials_token";
 const LOCK_KEY = "client_credentials_lock";
+const LOCK_TTL = 10; // Lock TTL in seconds
 
 // Use global to persist across hot reloads in development
 let redisClient = global.__ccRedisClient;
-let redlock = global.__ccRedlock;
+
+// Simple Redis lock functions
+const acquireLock = async (key, ttl) => {
+  try {
+    const result = await redisClient.set(key, "locked", "NX", "EX", ttl);
+    return result === "OK";
+  } catch (error) {
+    logger.error("[Client Credentials] Lock acquisition error:", {
+      error: error.message,
+    });
+    return false;
+  }
+};
+
+const releaseLock = async (key) => {
+  try {
+    await redisClient.del(key);
+  } catch (error) {
+    logger.error("[Client Credentials] Lock release error:", {
+      error: error.message,
+    });
+  }
+};
 
 // Cleanup function untuk mencegah memory leak
 const cleanup = async () => {
   try {
-    if (redlock) {
-      await redlock.quit();
-      redlock = null;
-    }
-    if (redisClient) {
-      await redisClient.quit();
-      redisClient = null;
-    }
     logger.info("[Client Credentials] Cleanup completed");
   } catch (error) {
-    logger.error("[Client Credentials] Cleanup failed:", error);
+    logger.error("[Client Credentials] Cleanup failed:", {
+      error: error.message,
+    });
   }
 };
-
-// Handle process termination
-process.on("SIGTERM", cleanup);
-process.on("SIGINT", cleanup);
 
 // Initialize Redis
 const initRedis = async () => {
   if (!redisClient) {
     try {
       const isFirstInit = !global.__ccRedisClient;
-      
-      redisClient = global.__ccRedisClient || await createRedisInstance();
-      
+
+      redisClient = global.__ccRedisClient || (await createRedisInstance());
+
       if (!redisClient) {
         throw new Error("Failed to create Redis instance");
       }
-      
+
       global.__ccRedisClient = redisClient;
-      
+
       if (isFirstInit) {
         logger.info("[Client Credentials] Redis initialized");
       } else {
-        logger.debug("[Client Credentials] Redis restored from global (hot reload)");
+        logger.debug(
+          "[Client Credentials] Redis restored from global (hot reload)"
+        );
       }
     } catch (error) {
-      logger.error("[Client Credentials] Redis initialization failed:", error);
-      throw error;
-    }
-  }
-  if (!redlock) {
-    try {
-      redlock = global.__ccRedlock || new Redlock([redisClient], {
-        driftFactor: 0.01,
-        retryCount: 3,
-        retryDelay: 200,
-        retryJitter: 200,
+      logger.error("[Client Credentials] Redis initialization failed:", {
+        error: error.message,
       });
-      global.__ccRedlock = redlock;
-    } catch (error) {
-      logger.error(
-        "[Client Credentials] Redlock initialization failed:",
-        error
-      );
       throw error;
     }
   }
@@ -147,7 +146,7 @@ const generateToken = async () => {
   };
 };
 
-// Get or create token dengan Redis caching dan distributed lock
+// Get or create token dengan Redis caching dan simple lock
 const getOrCreateToken = async () => {
   await initRedis();
 
@@ -167,77 +166,80 @@ const getOrCreateToken = async () => {
     }
   }
 
-  // Gunakan distributed lock untuk mencegah race condition
-  let lock;
+  // Try to acquire lock
+  let lockAcquired = false;
   try {
-    // Acquire lock dengan TTL 10 detik
-    lock = await redlock.acquire([LOCK_KEY], 10000);
+    // Acquire lock dengan TTL
+    lockAcquired = await acquireLock(LOCK_KEY, LOCK_TTL);
 
-    // Double-check token setelah acquire lock
-    tokenData = await redisClient.get(TOKEN_KEY);
-    if (tokenData) {
-      const parsed = JSON.parse(tokenData);
-      if (parsed.expiresAt && Date.now() < parsed.expiresAt) {
-        logger.debug("[Client Credentials] Token found after lock acquired");
-        return parsed.accessToken;
-      }
-    }
-
-    // Generate token baru
-    logger.info("[Client Credentials] Creating new token");
-    const tokenInfo = await generateToken();
-
-    // Cache dengan TTL 3600 detik (1 jam)
-    await redisClient.set(TOKEN_KEY, JSON.stringify(tokenInfo), "EX", 3600);
-
-    return tokenInfo.accessToken;
-  } catch (err) {
-    logger.warn(
-      "[Client Credentials] Lock acquisition failed, trying fallback",
-      {
-        error: err.message,
-      }
-    );
-
-    // Fallback: coba tunggu token dari process lain
-    const maxRetries = 5;
-    const retryTimeout = 1000;
-    const totalTimeout = 10000;
-    const startTime = Date.now();
-
-    for (let i = 0; i < maxRetries; i++) {
-      if (Date.now() - startTime > totalTimeout) {
-        logger.error("[Client Credentials] Token retry timeout exceeded", {
-          elapsed: Date.now() - startTime,
-        });
-        throw new Error("Token retry timeout exceeded");
-      }
-
-      await new Promise((resolve) => setTimeout(resolve, retryTimeout));
-
-      if (!redisClient) {
-        throw new Error("Redis client unavailable during token retry");
-      }
-
+    if (lockAcquired) {
+      // Double-check token setelah acquire lock
       tokenData = await redisClient.get(TOKEN_KEY);
       if (tokenData) {
         const parsed = JSON.parse(tokenData);
         if (parsed.expiresAt && Date.now() < parsed.expiresAt) {
-          logger.info(`[Client Credentials] Token acquired on retry ${i + 1}`);
+          logger.debug("[Client Credentials] Token found after lock acquired");
           return parsed.accessToken;
         }
       }
-    }
 
-    logger.error("[Client Credentials] Failed to get token after retries");
-    throw new Error("Failed to get token after retries");
-  } finally {
-    if (lock) {
-      try {
-        await lock.release();
-      } catch (err) {
-        logger.error("[Client Credentials] Lock release failed:", err);
+      // Generate token baru
+      logger.info("[Client Credentials] Creating new token");
+      const tokenInfo = await generateToken();
+
+      // Cache dengan TTL 3600 detik (1 jam)
+      await redisClient.set(TOKEN_KEY, JSON.stringify(tokenInfo), "EX", 3600);
+
+      return tokenInfo.accessToken;
+    } else {
+      // Lock acquisition failed, try fallback
+      logger.warn(
+        "[Client Credentials] Lock acquisition failed, trying fallback"
+      );
+
+      // Fallback: coba tunggu token dari process lain
+      const maxRetries = 5;
+      const retryTimeout = 1000;
+      const totalTimeout = 10000;
+      const startTime = Date.now();
+
+      for (let i = 0; i < maxRetries; i++) {
+        if (Date.now() - startTime > totalTimeout) {
+          logger.error("[Client Credentials] Token retry timeout exceeded", {
+            elapsed: Date.now() - startTime,
+          });
+          throw new Error("Token retry timeout exceeded");
+        }
+
+        await new Promise((resolve) => setTimeout(resolve, retryTimeout));
+
+        if (!redisClient) {
+          throw new Error("Redis client unavailable during token retry");
+        }
+
+        tokenData = await redisClient.get(TOKEN_KEY);
+        if (tokenData) {
+          const parsed = JSON.parse(tokenData);
+          if (parsed.expiresAt && Date.now() < parsed.expiresAt) {
+            logger.info(
+              `[Client Credentials] Token acquired on retry ${i + 1}`
+            );
+            return parsed.accessToken;
+          }
+        }
       }
+
+      logger.error("[Client Credentials] Failed to get token after retries");
+      throw new Error("Failed to get token after retries");
+    }
+  } catch (err) {
+    logger.error("[Client Credentials] Token acquisition error:", {
+      error: err.message,
+    });
+    throw err;
+  } finally {
+    if (lockAcquired) {
+      await releaseLock(LOCK_KEY);
     }
   }
 };
@@ -261,12 +263,13 @@ module.exports = async (req, res, next) => {
 
     next();
   } catch (error) {
-    // Log error dengan detail lengkap
-    logger.error("[Client Credentials] Gagal mendapatkan token:", error, {
+    // Log error dengan detail lengkap - safe logging to prevent circular structure
+    logger.error("[Client Credentials] Gagal mendapatkan token:", {
       clientId: clientId?.substring(0, 10) + "...", // Log sebagian client ID
       url: error.request?.url,
       code: error.code || error.cause?.code,
       errorName: error.name,
+      message: error.message,
     });
 
     // Response yang lebih informatif berdasarkan jenis error

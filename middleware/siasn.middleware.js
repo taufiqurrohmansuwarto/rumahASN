@@ -3,7 +3,6 @@ const https = require("https");
 const ssoToken = require("../sso_token.json");
 const a = require("../utils/siasn-fetcher");
 const { createRedisInstance } = require("../utils/redis");
-const { default: Redlock } = require("redlock");
 const { logger } = require("@/utils/logger");
 
 const dotenv = require("dotenv");
@@ -11,12 +10,31 @@ dotenv.config();
 
 const baseUrl = process.env.API_SIASN;
 const TOKEN_KEY = "siasn_token";
-const LOCK_KEY = "token_lock";
+const LOCK_KEY = "siasn_token_lock";
+const LOCK_TTL = 10; // Lock TTL in seconds
 
 // Use global to persist across hot reloads in development
 let redisClient = global.__siasnRedisClient;
-let redlock = global.__siasnRedlock;
 let httpsAgent = global.__siasnHttpsAgent;
+
+// Simple Redis lock functions
+const acquireLock = async (key, ttl) => {
+  try {
+    const result = await redisClient.set(key, "locked", "NX", "EX", ttl);
+    return result === "OK";
+  } catch (error) {
+    logger.error("[SIASN] Lock acquisition error:", { error: error.message });
+    return false;
+  }
+};
+
+const releaseLock = async (key) => {
+  try {
+    await redisClient.del(key);
+  } catch (error) {
+    logger.error("[SIASN] Lock release error:", { error: error.message });
+  }
+};
 
 // Cleanup function untuk mencegah memory leak
 const cleanup = async () => {
@@ -27,14 +45,6 @@ const cleanup = async () => {
       siasnWsAxios.interceptors.response.clear();
     }
 
-    if (redlock) {
-      await redlock.quit();
-      redlock = null;
-    }
-    if (redisClient) {
-      await redisClient.quit();
-      redisClient = null;
-    }
     if (httpsAgent) {
       httpsAgent.destroy();
       httpsAgent = null;
@@ -42,14 +52,9 @@ const cleanup = async () => {
 
     logger.info("[SIASN] Cleanup completed");
   } catch (error) {
-    logger.error("[SIASN] Cleanup failed:", error);
+    logger.error("[SIASN] Cleanup failed:", { error: error.message });
   }
 };
-
-// Handle process termination
-process.on("SIGTERM", cleanup);
-process.on("SIGINT", cleanup);
-process.on("beforeExit", cleanup);
 
 const initRedis = async () => {
   if (!redisClient) {
@@ -70,23 +75,9 @@ const initRedis = async () => {
         logger.debug("[SIASN] Redis restored from global (hot reload)");
       }
     } catch (error) {
-      logger.error("[SIASN] Redis initialization failed:", error);
-      throw error;
-    }
-  }
-  if (!redlock) {
-    try {
-      redlock =
-        global.__siasnRedlock ||
-        new Redlock([redisClient], {
-          driftFactor: 0.01,
-          retryCount: 3,
-          retryDelay: 200,
-          retryJitter: 200,
-        });
-      global.__siasnRedlock = redlock;
-    } catch (error) {
-      logger.error("[SIASN] Redlock initialization failed:", error);
+      logger.error("[SIASN] Redis initialization failed:", {
+        error: error.message,
+      });
       throw error;
     }
   }
@@ -129,64 +120,64 @@ const getOrCreateToken = async () => {
     return JSON.parse(tokenData);
   }
 
-  // Gunakan distributed lock untuk mencegah race condition
-  let lock;
+  // Try to acquire lock
+  let lockAcquired = false;
   try {
-    // Acquire lock dengan TTL 10 detik
-    lock = await redlock.acquire([LOCK_KEY], 10000);
+    // Acquire lock dengan TTL
+    lockAcquired = await acquireLock(LOCK_KEY, LOCK_TTL);
 
-    // Double-check token setelah acquire lock
-    tokenData = await redisClient.get(TOKEN_KEY);
-    if (tokenData) {
-      return JSON.parse(tokenData);
-    }
-
-    // Generate token baru
-    logger.info("[SIASN] Creating new token");
-    const token = await getoken();
-    await redisClient.set(TOKEN_KEY, JSON.stringify(token), "EX", 3600); // TTL 1 hour
-    return token;
-  } catch (err) {
-    logger.warn("[SIASN] Lock acquisition failed, trying fallback", {
-      error: err.message,
-    });
-
-    // Fallback: coba tunggu token dari process lain
-    const maxRetries = 5;
-    const retryTimeout = 1000;
-    const totalTimeout = 10000;
-    const startTime = Date.now();
-
-    for (let i = 0; i < maxRetries; i++) {
-      if (Date.now() - startTime > totalTimeout) {
-        logger.error("[SIASN] Token retry timeout exceeded", {
-          elapsed: Date.now() - startTime,
-        });
-        throw new Error("Token retry timeout exceeded");
-      }
-
-      await new Promise((resolve) => setTimeout(resolve, retryTimeout));
-
-      if (!redisClient) {
-        throw new Error("Redis client unavailable during token retry");
-      }
-
+    if (lockAcquired) {
+      // Double-check token setelah acquire lock
       tokenData = await redisClient.get(TOKEN_KEY);
       if (tokenData) {
-        logger.info(`[SIASN] Token acquired on retry ${i + 1}`);
         return JSON.parse(tokenData);
       }
-    }
 
-    logger.error("[SIASN] Failed to get token after retries");
-    throw new Error("Failed to get token after retries");
-  } finally {
-    if (lock) {
-      try {
-        await lock.release();
-      } catch (err) {
-        logger.error("[SIASN] Lock release failed:", err);
+      // Generate token baru
+      logger.info("[SIASN] Creating new token");
+      const token = await getoken();
+      await redisClient.set(TOKEN_KEY, JSON.stringify(token), "EX", 3600); // TTL 1 hour
+      return token;
+    } else {
+      // Lock acquisition failed, try fallback
+      logger.warn("[SIASN] Lock acquisition failed, trying fallback");
+
+      // Fallback: coba tunggu token dari process lain
+      const maxRetries = 5;
+      const retryTimeout = 1000;
+      const totalTimeout = 10000;
+      const startTime = Date.now();
+
+      for (let i = 0; i < maxRetries; i++) {
+        if (Date.now() - startTime > totalTimeout) {
+          logger.error("[SIASN] Token retry timeout exceeded", {
+            elapsed: Date.now() - startTime,
+          });
+          throw new Error("Token retry timeout exceeded");
+        }
+
+        await new Promise((resolve) => setTimeout(resolve, retryTimeout));
+
+        if (!redisClient) {
+          throw new Error("Redis client unavailable during token retry");
+        }
+
+        tokenData = await redisClient.get(TOKEN_KEY);
+        if (tokenData) {
+          logger.info(`[SIASN] Token acquired on retry ${i + 1}`);
+          return JSON.parse(tokenData);
+        }
       }
+
+      logger.error("[SIASN] Failed to get token after retries");
+      throw new Error("Failed to get token after retries");
+    }
+  } catch (err) {
+    logger.error("[SIASN] Token acquisition error:", { error: err.message });
+    throw err;
+  } finally {
+    if (lockAcquired) {
+      await releaseLock(LOCK_KEY);
     }
   }
 };
@@ -214,7 +205,17 @@ const errorHandler = async (error) => {
   const errorData = error?.response?.data || {};
   const statusCode = error?.response?.status;
   const requestUrl = error?.config?.url;
-  logger.error("[SIASN] Error data:", errorData);
+
+  // Safe logging - prevent circular structure error
+  const safeErrorData = {
+    code: errorData.code,
+    message: errorData.message,
+    type: errorData.type,
+    description: errorData.description,
+    data: errorData.data,
+  };
+
+  logger.error("[SIASN] Error data:", safeErrorData);
 
   const ECONRESET = error?.code === "ECONNRESET";
   const invalidJwt = errorData.message === "invalid or expired jwt";
@@ -232,13 +233,16 @@ const errorHandler = async (error) => {
     logger.warn("[SIASN] Token invalid/expired, invalidating cache", {
       url: requestUrl,
       status: statusCode,
+      errorCode: error?.code,
     });
 
     if (redisClient) {
       try {
         await redisClient.del(TOKEN_KEY);
       } catch (delError) {
-        logger.error("[SIASN] Failed to delete token from cache:", delError);
+        logger.error("[SIASN] Failed to delete token from cache:", {
+          error: delError.message,
+        });
       }
     }
   } else if (statusCode >= 500) {
@@ -247,7 +251,8 @@ const errorHandler = async (error) => {
       url: requestUrl,
       status: statusCode,
       message: error.message,
-      data: errorData,
+      code: errorData.code,
+      description: errorData.description,
     });
   } else if (statusCode >= 400) {
     // Client errors (4xx) - log as debug/warn instead of error
