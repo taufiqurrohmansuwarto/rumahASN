@@ -1005,3 +1005,9 @@
 {"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-23T13:56:45.685Z","type":"Status report"}
 {"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-23T13:56:46.129Z","type":"Status report"}
 {"code":0,"data":"Data tidak ditemukan","level":"error","message":"[SIASN] Error data:","timestamp":"2025-11-23T14:14:57.608Z"}
+{"level":"error","message":"Error occurred: {\n  \"message\": \"\",\n  \"code\": 500,\n  \"stack\": \"AggregateError [ECONNREFUSED]: \\n    at internalConnectMultiple (node:net:1134:18)\\n    at afterConnectMultiple (node:net:1715:7)\"\n}","timestamp":"2025-11-24T03:40:05.046Z"}
+{"level":"error","message":"Error occurred: {\n  \"message\": \"\",\n  \"code\": 500,\n  \"stack\": \"AggregateError [ECONNREFUSED]: \\n    at internalConnectMultiple (node:net:1134:18)\\n    at afterConnectMultiple (node:net:1715:7)\"\n}","timestamp":"2025-11-24T03:40:06.108Z"}
+{"level":"error","message":"Error occurred: {\n  \"message\": \"\",\n  \"code\": 500,\n  \"stack\": \"AggregateError [ECONNREFUSED]: \\n    at internalConnectMultiple (node:net:1134:18)\\n    at afterConnectMultiple (node:net:1715:7)\"\n}","timestamp":"2025-11-24T03:40:08.151Z"}
+{"level":"error","message":"Error occurred: {\n  \"message\": \"\",\n  \"code\": 500,\n  \"stack\": \"AggregateError [ECONNREFUSED]: \\n    at internalConnectMultiple (node:net:1134:18)\\n    at afterConnectMultiple (node:net:1715:7)\"\n}","timestamp":"2025-11-24T03:40:15.018Z"}
+{"level":"error","message":"[SIASN] Error data: Internal Server Error","timestamp":"2025-11-24T03:44:16.930Z"}
+{"level":"error","message":"[SIASN] Server error: Request failed with status code 500","status":500,"timestamp":"2025-11-24T03:44:16.931Z","url":"/partition/list-pg-instansi?nip=199103052019031008"}

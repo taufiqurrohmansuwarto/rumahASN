@@ -11,6 +11,8 @@ dotenv.config();
 const baseUrl = process.env.API_SIASN;
 const TOKEN_KEY = "siasn_token";
 const LOCK_KEY = "siasn_token_lock";
+const COOKIE_KEY = "siasn_cookies";
+const COOKIE_LOCK_KEY = "siasn_cookies_lock";
 const LOCK_TTL = 10; // Lock TTL in seconds
 
 // Use global to persist across hot reloads in development
@@ -182,12 +184,163 @@ const getOrCreateToken = async () => {
   }
 };
 
+/**
+ * Fetch cookies dari APIM BKN base URL
+ * Hit ke https://apimws.bkn.go.id:8243/ untuk mendapatkan session cookies
+ */
+const fetchCookiesFromAPIM = async () => {
+  try {
+    logger.info("[SIASN] Fetching cookies from APIM base URL");
+
+    // Create axios instance untuk initial request
+    const cookieFetcher = axios.create({
+      baseURL: baseUrl, // https://apimws.bkn.go.id:8243
+      httpsAgent: createHttpsAgent(),
+      maxRedirects: 5,
+      validateStatus: () => true, // Accept semua status code
+    });
+
+    // Hit base URL untuk trigger cookie generation
+    const response = await cookieFetcher.get("/", {
+      headers: {
+        Accept: "text/html,application/xhtml+xml,application/xml",
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+      },
+    });
+
+    // Extract cookies dari response
+    const setCookieHeaders = response.headers["set-cookie"];
+
+    if (setCookieHeaders && Array.isArray(setCookieHeaders)) {
+      // Parse semua cookies
+      const cookies = setCookieHeaders
+        .map((cookie) => {
+          // Ambil bagian cookie name=value saja (sebelum semicolon)
+          const cookieParts = cookie.split(";")[0].trim();
+          return cookieParts;
+        })
+        .filter(Boolean)
+        .join("; ");
+
+      if (cookies) {
+        logger.info("[SIASN] Cookies fetched successfully from APIM", {
+          cookieCount: setCookieHeaders.length,
+          preview: cookies.substring(0, 100) + "...",
+        });
+        return cookies;
+      }
+    }
+
+    logger.warn("[SIASN] No cookies received from APIM base URL");
+    return null;
+  } catch (error) {
+    logger.error("[SIASN] Failed to fetch cookies from APIM:", {
+      error: error.message,
+    });
+    return null;
+  }
+};
+
+/**
+ * Get or Create Cookies dengan Redis caching
+ * Optimized: hanya fetch sekali, setelahnya pakai cache
+ */
+const getOrCreateCookies = async () => {
+  await initRedis();
+
+  // Fast path: Check cache terlebih dahulu (no lock needed)
+  let cookies = await redisClient.get(COOKIE_KEY);
+  if (cookies) {
+    // Cache hit - return langsung tanpa processing
+    return cookies;
+  }
+
+  // Slow path: Cache miss, perlu fetch (dengan lock)
+  let lockAcquired = false;
+  try {
+    lockAcquired = await acquireLock(COOKIE_LOCK_KEY, LOCK_TTL);
+
+    if (lockAcquired) {
+      // Double-check cache setelah acquire lock
+      // (mungkin sudah di-fetch oleh process lain)
+      cookies = await redisClient.get(COOKIE_KEY);
+      if (cookies) {
+        return cookies;
+      }
+
+      // Benar-benar perlu fetch - log ini
+      logger.info("[SIASN] Fetching fresh cookies (cache miss)");
+
+      // Fetch fresh cookies dari APIM
+      cookies = await fetchCookiesFromAPIM();
+
+      if (cookies) {
+        // Cache cookies dengan TTL 30 menit
+        const TTL = 1800; // 30 menit
+        await redisClient.set(COOKIE_KEY, cookies, "EX", TTL);
+        logger.info("[SIASN] Cookies cached", { ttl: `${TTL}s` });
+        return cookies;
+      }
+
+      // Fallback ke environment variable jika fetch gagal
+      const envCookies = process.env.SIASN_COOKIES;
+      if (envCookies) {
+        logger.warn("[SIASN] Using fallback cookies from env");
+        await redisClient.set(COOKIE_KEY, envCookies, "EX", 1800);
+        return envCookies;
+      }
+
+      logger.warn("[SIASN] No cookies available");
+      return null;
+    } else {
+      // Lock sudah diambil process lain, tunggu sebentar
+      // Kemungkinan besar process lain sedang fetch
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      // Cek cache lagi
+      cookies = await redisClient.get(COOKIE_KEY);
+      if (cookies) {
+        return cookies;
+      }
+
+      // Masih tidak ada, wait sedikit lagi (max 2 retries)
+      for (let i = 0; i < 2; i++) {
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        cookies = await redisClient.get(COOKIE_KEY);
+        if (cookies) {
+          return cookies;
+        }
+      }
+
+      // Timeout, return null (request tetap jalan tanpa cookies)
+      logger.warn("[SIASN] Cookie fetch timeout, proceeding without cookies");
+      return null;
+    }
+  } catch (err) {
+    logger.error("[SIASN] Cookie error:", { error: err.message });
+    return null;
+  } finally {
+    if (lockAcquired) {
+      await releaseLock(COOKIE_LOCK_KEY);
+    }
+  }
+};
+
 const requestHandler = async (request) => {
   try {
     const token = await getOrCreateToken();
     const { sso_token, wso_token } = token;
     request.headers.Authorization = `Bearer ${wso_token}`;
     request.headers.Auth = `bearer ${sso_token}`;
+
+    // Tambahkan cookies ke request (async tapi non-blocking)
+    // Jika cookies tidak ada, request tetap jalan
+    const cookies = await getOrCreateCookies();
+    if (cookies) {
+      request.headers.Cookie = cookies;
+    }
+
     return request;
   } catch (error) {
     logger.error("[SIASN] Request handler failed:", {
@@ -230,7 +383,7 @@ const errorHandler = async (error) => {
     invalidJwt || runtimeError || tokenError || invalidCredentials || ECONRESET;
 
   if (isTokenError) {
-    logger.warn("[SIASN] Token invalid/expired, invalidating cache", {
+    logger.warn("[SIASN] Token/Cookie invalid, invalidating cache", {
       url: requestUrl,
       status: statusCode,
       errorCode: error?.code,
@@ -238,9 +391,12 @@ const errorHandler = async (error) => {
 
     if (redisClient) {
       try {
+        // Invalidate both token and cookies
         await redisClient.del(TOKEN_KEY);
+        await redisClient.del(COOKIE_KEY);
+        logger.info("[SIASN] Token and cookies cache cleared");
       } catch (delError) {
-        logger.error("[SIASN] Failed to delete token from cache:", {
+        logger.error("[SIASN] Failed to delete cache:", {
           error: delError.message,
         });
       }
@@ -289,5 +445,6 @@ module.exports = {
   siasnMiddleware,
   siasnWsAxios,
   getOrCreateToken, // Export for job processors
+  getOrCreateCookies, // Export for manual cookie management
   cleanup, // Export cleanup function untuk testing atau manual cleanup
 };
