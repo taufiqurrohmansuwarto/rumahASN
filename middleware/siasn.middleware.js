@@ -185,12 +185,12 @@ const getOrCreateToken = async () => {
 };
 
 /**
- * Fetch cookies dari APIM BKN base URL
- * Hit ke https://apimws.bkn.go.id:8243/ untuk mendapatkan session cookies
+ * Fetch cookies dari APIM BKN API endpoint
+ * Hit ke https://apimws.bkn.go.id:8243/apisiasn/1.0 untuk mendapatkan session cookies
  */
 const fetchCookiesFromAPIM = async () => {
   try {
-    logger.info("[SIASN] Fetching cookies from APIM base URL");
+    logger.info("[SIASN] Fetching cookies from APIM API endpoint");
 
     // Create axios instance untuk initial request
     const cookieFetcher = axios.create({
@@ -200,10 +200,11 @@ const fetchCookiesFromAPIM = async () => {
       validateStatus: () => true, // Accept semua status code
     });
 
-    // Hit base URL untuk trigger cookie generation
-    const response = await cookieFetcher.get("/", {
+    // Hit API endpoint untuk trigger cookie generation
+    // Endpoint ini akan trigger load balancer cookies
+    const response = await cookieFetcher.get("/apisiasn/1.0", {
       headers: {
-        Accept: "text/html,application/xhtml+xml,application/xml",
+        Accept: "application/json",
         "User-Agent":
           "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
       },
@@ -232,7 +233,7 @@ const fetchCookiesFromAPIM = async () => {
       }
     }
 
-    logger.warn("[SIASN] No cookies received from APIM base URL");
+    logger.warn("[SIASN] No cookies received from APIM endpoint");
     return null;
   } catch (error) {
     logger.error("[SIASN] Failed to fetch cookies from APIM:", {
@@ -272,49 +273,58 @@ const getOrCreateCookies = async () => {
       // Benar-benar perlu fetch - log ini
       logger.info("[SIASN] Fetching fresh cookies (cache miss)");
 
-      // Fetch fresh cookies dari APIM
+      // Primary: Use env variable (APIM tidak return cookies via API)
+      const envCookies = process.env.SIASN_COOKIES;
+      if (envCookies) {
+        const TTL = 1800; // 30 menit
+        await redisClient.set(COOKIE_KEY, envCookies, "EX", TTL);
+        logger.info("[SIASN] Cookies cached from env", { ttl: `${TTL}s` });
+        return envCookies;
+      }
+
+      // Fallback: Try fetch dari APIM (biasanya tidak dapat)
+      logger.debug("[SIASN] Trying to fetch cookies from APIM endpoint");
       cookies = await fetchCookiesFromAPIM();
 
       if (cookies) {
-        // Cache cookies dengan TTL 30 menit
-        const TTL = 1800; // 30 menit
+        const TTL = 1800;
         await redisClient.set(COOKIE_KEY, cookies, "EX", TTL);
-        logger.info("[SIASN] Cookies cached", { ttl: `${TTL}s` });
+        logger.info("[SIASN] Cookies cached from APIM", { ttl: `${TTL}s` });
         return cookies;
-      }
-
-      // Fallback ke environment variable jika fetch gagal
-      const envCookies = process.env.SIASN_COOKIES;
-      if (envCookies) {
-        logger.warn("[SIASN] Using fallback cookies from env");
-        await redisClient.set(COOKIE_KEY, envCookies, "EX", 1800);
-        return envCookies;
       }
 
       logger.warn("[SIASN] No cookies available");
       return null;
     } else {
-      // Lock sudah diambil process lain, tunggu sebentar
-      // Kemungkinan besar process lain sedang fetch
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      // Lock sudah diambil process lain, tunggu fetch selesai
+      // Fetch cookies biasanya butuh 1-3 detik
+      const maxRetries = 6; // Total 3 detik (6 x 500ms)
+      const retryDelay = 500; // 500ms per retry
 
-      // Cek cache lagi
-      cookies = await redisClient.get(COOKIE_KEY);
-      if (cookies) {
-        return cookies;
-      }
+      for (let i = 0; i < maxRetries; i++) {
+        await new Promise((resolve) => setTimeout(resolve, retryDelay));
 
-      // Masih tidak ada, wait sedikit lagi (max 2 retries)
-      for (let i = 0; i < 2; i++) {
-        await new Promise((resolve) => setTimeout(resolve, 500));
         cookies = await redisClient.get(COOKIE_KEY);
         if (cookies) {
+          logger.debug(
+            `[SIASN] Cookies acquired after ${(i + 1) * retryDelay}ms wait`
+          );
           return cookies;
         }
       }
 
-      // Timeout, return null (request tetap jalan tanpa cookies)
-      logger.warn("[SIASN] Cookie fetch timeout, proceeding without cookies");
+      // Final check: mungkin baru saja selesai
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      cookies = await redisClient.get(COOKIE_KEY);
+      if (cookies) {
+        logger.debug("[SIASN] Cookies acquired on final check");
+        return cookies;
+      }
+
+      // Benar-benar timeout, proceed without cookies
+      logger.warn(
+        "[SIASN] Cookie fetch timeout after 3.5s, proceeding without cookies"
+      );
       return null;
     }
   } catch (err) {
@@ -339,6 +349,24 @@ const requestHandler = async (request) => {
     const cookies = await getOrCreateCookies();
     if (cookies) {
       request.headers.Cookie = cookies;
+
+      // Log untuk verify cookies dikirim
+      const cookiePreview =
+        cookies.length > 100 ? cookies.substring(0, 100) + "..." : cookies;
+
+      logger.info("[SIASN] Request with cookies", {
+        method: request.method,
+        url: request.url,
+        cookieLength: cookies.length,
+        cookiePreview,
+        hasCookie: true,
+      });
+    } else {
+      logger.warn("[SIASN] Request WITHOUT cookies", {
+        method: request.method,
+        url: request.url,
+        hasCookie: false,
+      });
     }
 
     return request;

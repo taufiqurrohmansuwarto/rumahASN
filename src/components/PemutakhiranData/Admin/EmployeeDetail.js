@@ -38,6 +38,7 @@ import {
   IconUser,
   IconUsers,
   IconX,
+  IconRefresh,
 } from "@tabler/icons-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -670,15 +671,53 @@ const StatusMaster = ({ status }) => {
   );
 };
 
+const UpdateKPPN = ({ nip }) => {
+  const queryClient = useQueryClient();
+
+  const { mutateAsync: updateKPPN, isLoading: isLoadingUpdateKPPN } =
+    useMutation((data) => updateDataUtamaByNip(data), {
+      onSuccess: () => message.success("Berhasil memperbarui data"),
+      onError: () => message.error("Gagal memperbarui data"),
+      onSettled: () => {
+        queryClient.invalidateQueries(["data-utama-siasn", nip]);
+      },
+    });
+
+  const handleUpdate = async () => {
+    const payload = {
+      nip,
+      data: {
+        type: "KPKN",
+      },
+    };
+    await updateKPPN(payload);
+  };
+  return (
+    <Tooltip title="Update KPPN">
+      <Button
+        disabled={isLoadingUpdateKPPN}
+        type="primary"
+        size="small"
+        loading={isLoadingUpdateKPPN}
+        icon={<IconRefresh size={14} />}
+        onClick={handleUpdate}
+      />
+    </Tooltip>
+  );
+};
+
 const Kppn = ({ id }) => {
   const router = useRouter();
   const nip = router?.query?.nip;
   const queryClient = useQueryClient();
   const { data, isLoading, isError } = useQuery(
-    ["data-kppn"],
+    ["data-kppn", nip],
     () => getDataKppn(),
     {
       refetchOnWindowFocus: false,
+      enabled: !!nip,
+      keepPreviousData: true,
+      staleTime: 500000,
     }
   );
 
@@ -813,6 +852,7 @@ function EmployeeDetail({ nip }) {
           <CekPencantumanGelarProfesi nip={nip} />
           <Kppn id={siasn?.kppnId} />
           <PengaturanGelarByNip nip={nip} />
+          <UpdateKPPN nip={nip} />
         </Group>
       </Stack>
     </Paper>

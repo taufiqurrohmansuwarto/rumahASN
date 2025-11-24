@@ -2,7 +2,6 @@ const {
   daftarPengadaanInstansi,
   daftarPengadaanDokumen,
   downloadDokumenAPI,
-  daftarDokumenPengadaan,
 } = require("@/utils/siasn-utils");
 const { z } = require("zod");
 const archiver = require("archiver");
@@ -39,7 +38,7 @@ const { createLogSIASN } = require("@/utils/logs");
 const { insightAIForParuhWaktu } = require("@/utils/helper/ai-insight.helper");
 const AIInsightParuhWaktu = require("@/models/ai-insight-paruh-waktu.model");
 const { nanoid } = require("nanoid");
-const { logger } = require("@/utils/logger");
+const { logger, log } = require("@/utils/logger");
 
 const syncPengadaan = async (req, res) => {
   const knex = SiasnPengadaan.knex();

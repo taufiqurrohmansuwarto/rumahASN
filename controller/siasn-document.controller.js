@@ -1,4 +1,5 @@
 const FormData = require("form-data");
+const { createLogSIASN } = require("@/utils/logs");
 
 const uplaodDokRwSIASN = async (req, res) => {
   try {
@@ -19,6 +20,18 @@ const uplaodDokRwSIASN = async (req, res) => {
 
     const responseMessage =
       response?.data?.message || "Berhasil Upload Dokumen";
+
+    await createLogSIASN({
+      userId: req?.user?.customId,
+      employeeNumber: null,
+      siasnService: "upload-dok-rw",
+      type: "CREATE",
+      request_data: JSON.stringify({
+        id_riwayat,
+        id_ref_dokumen,
+      }),
+    });
+
     res.json(responseMessage);
   } catch (error) {
     console.log("error", error);

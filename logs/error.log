@@ -1011,3 +1011,126 @@
 {"level":"error","message":"Error occurred: {\n  \"message\": \"\",\n  \"code\": 500,\n  \"stack\": \"AggregateError [ECONNREFUSED]: \\n    at internalConnectMultiple (node:net:1134:18)\\n    at afterConnectMultiple (node:net:1715:7)\"\n}","timestamp":"2025-11-24T03:40:15.018Z"}
 {"level":"error","message":"[SIASN] Error data: Internal Server Error","timestamp":"2025-11-24T03:44:16.930Z"}
 {"level":"error","message":"[SIASN] Server error: Request failed with status code 500","status":500,"timestamp":"2025-11-24T03:44:16.931Z","url":"/partition/list-pg-instansi?nip=199103052019031008"}
+{"level":"error","message":"[SIASN] Error data:","timestamp":"2025-11-24T04:10:07.205Z"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-24T04:16:19.330Z","type":"Status report"}
+{"level":"error","message":"[SIASN] Error data:","timestamp":"2025-11-24T04:16:25.451Z"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-24T04:16:25.480Z","type":"Status report"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-24T04:16:28.129Z","type":"Status report"}
+{"error":"read ETIMEDOUT","level":"error","message":"[SIASN] Failed to fetch cookies from APIM:","timestamp":"2025-11-24T04:16:28.514Z"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-24T04:16:31.612Z","type":"Status report"}
+{"level":"error","message":"[SIASN] Error data:","timestamp":"2025-11-24T04:16:36.085Z"}
+{"level":"error","message":"[SIASN] Error data:","timestamp":"2025-11-24T04:16:36.127Z"}
+{"error":"read EADDRNOTAVAIL","level":"error","message":"[SIASN] Failed to fetch cookies from APIM:","timestamp":"2025-11-24T04:16:36.812Z"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-24T04:16:40.449Z","type":"Status report"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-24T04:16:40.833Z","type":"Status report"}
+{"level":"error","message":"[SIASN] Error data:","timestamp":"2025-11-24T04:16:40.835Z"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-24T04:16:44.495Z","type":"Status report"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-24T04:16:44.975Z","type":"Status report"}
+{"level":"error","message":"[SIASN] Error data:","timestamp":"2025-11-24T04:16:46.063Z"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-24T04:16:49.885Z","type":"Status report"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-24T04:16:53.178Z","type":"Status report"}
+{"level":"error","message":"[SIASN] Error data:","timestamp":"2025-11-24T04:16:55.893Z"}
+{"level":"error","message":"[SIASN] Error data:","timestamp":"2025-11-24T04:17:29.385Z"}
+{"level":"error","message":"[SIASN] Error data:","timestamp":"2025-11-24T04:18:45.436Z"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-24T04:18:47.350Z","type":"Status report"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-24T04:18:47.432Z","type":"Status report"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-24T04:18:48.059Z","type":"Status report"}
+{"level":"error","message":"[SIASN] Error data:","timestamp":"2025-11-24T04:18:54.679Z"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-24T04:18:54.695Z","type":"Status report"}
+{"level":"error","message":"[SIASN] Error data:","timestamp":"2025-11-24T04:18:55.402Z"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-24T04:18:58.380Z","type":"Status report"}
+{"level":"error","message":"[SIASN] Error data:","timestamp":"2025-11-24T04:19:22.043Z"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-24T04:19:22.792Z","type":"Status report"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-24T04:19:25.180Z","type":"Status report"}
+{"level":"error","message":"[SIASN] Error data:","timestamp":"2025-11-24T04:28:49.812Z"}
+{"level":"error","message":"[SIASN] Error data:","timestamp":"2025-11-24T04:29:21.178Z"}
+{"level":"error","message":"[SIASN] Error data:","timestamp":"2025-11-24T04:29:21.372Z"}
+{"level":"error","message":"[SIASN] Error data:","timestamp":"2025-11-24T04:29:22.051Z"}
+{"level":"error","message":"[SIASN] Error data:","timestamp":"2025-11-24T04:29:22.585Z"}
+{"level":"error","message":"[SIASN] Error data:","timestamp":"2025-11-24T04:29:23.350Z"}
+{"level":"error","message":"[SIASN] Error data:","timestamp":"2025-11-24T04:29:23.788Z"}
+{"level":"error","message":"[SIASN] Error data:","timestamp":"2025-11-24T04:29:25.074Z"}
+{"level":"error","message":"[SIASN] Error data:","timestamp":"2025-11-24T04:29:25.686Z"}
+{"level":"error","message":"[SIASN] Failed to get token after retries","timestamp":"2025-11-24T04:29:27.431Z"}
+{"error":"Failed to get token after retries","level":"error","message":"[SIASN] Token acquisition error:","timestamp":"2025-11-24T04:29:27.432Z"}
+{"error":"Failed to get token after retries","level":"error","message":"[SIASN] Request handler failed:","method":"get","timestamp":"2025-11-24T04:29:27.433Z","url":"/pns/rw-pwk/197112141998031011"}
+{"level":"error","message":"[SIASN] Error data:","timestamp":"2025-11-24T04:29:27.433Z"}
+{"level":"error","message":"[SIASN] Error data:","timestamp":"2025-11-24T04:29:29.453Z"}
+{"level":"error","message":"[SIASN] Failed to get token after retries","timestamp":"2025-11-24T04:29:29.859Z"}
+{"error":"Failed to get token after retries","level":"error","message":"[SIASN] Token acquisition error:","timestamp":"2025-11-24T04:29:29.860Z"}
+{"error":"Failed to get token after retries","level":"error","message":"[SIASN] Request handler failed:","method":"get","timestamp":"2025-11-24T04:29:29.860Z","url":"/pns/rw-pindahinstansi/197112141998031011"}
+{"level":"error","message":"[SIASN] Error data:","timestamp":"2025-11-24T04:29:29.860Z"}
+{"level":"error","message":"[SIASN] Error data:","timestamp":"2025-11-24T04:29:30.048Z"}
+{"level":"error","message":"[SIASN] Error data:","timestamp":"2025-11-24T04:29:32.818Z"}
+{"level":"error","message":"[SIASN] Error data:","timestamp":"2025-11-24T04:29:33.189Z"}
+{"level":"error","message":"[SIASN] Error data:","timestamp":"2025-11-24T04:29:33.761Z"}
+{"level":"error","message":"[SIASN] Error data:","timestamp":"2025-11-24T04:29:34.664Z"}
+{"level":"error","message":"[SIASN] Error data:","timestamp":"2025-11-24T04:29:35.138Z"}
+{"level":"error","message":"[SIASN] Error data:","timestamp":"2025-11-24T04:29:35.138Z"}
+{"level":"error","message":"[SIASN] Error data:","timestamp":"2025-11-24T04:29:37.402Z"}
+{"level":"error","message":"[SIASN] Failed to get token after retries","timestamp":"2025-11-24T04:29:42.203Z"}
+{"error":"Failed to get token after retries","level":"error","message":"[SIASN] Token acquisition error:","timestamp":"2025-11-24T04:29:42.206Z"}
+{"error":"Failed to get token after retries","level":"error","message":"[SIASN] Request handler failed:","method":"get","timestamp":"2025-11-24T04:29:42.206Z","url":"/pns/rw-kinerjaperiodik/197112141998031011"}
+{"level":"error","message":"[SIASN] Error data:","timestamp":"2025-11-24T04:29:42.207Z"}
+{"level":"error","message":"[SIASN] Error data:","timestamp":"2025-11-24T04:29:50.395Z"}
+{"level":"error","message":"[SIASN] Error data:","timestamp":"2025-11-24T04:30:10.812Z"}
+{"level":"error","message":"[SIASN] Error data:","timestamp":"2025-11-24T04:30:17.189Z"}
+{"level":"error","message":"[SIASN] Error data:","timestamp":"2025-11-24T04:30:19.832Z"}
+{"level":"error","message":"[SIASN] Error data:","timestamp":"2025-11-24T04:30:39.485Z"}
+{"level":"error","message":"[SIASN] Error data:","timestamp":"2025-11-24T04:30:39.646Z"}
+{"level":"error","message":"[SIASN] Error data:","timestamp":"2025-11-24T04:30:39.998Z"}
+{"level":"error","message":"[SIASN] Error data:","timestamp":"2025-11-24T04:30:40.568Z"}
+{"level":"error","message":"[SIASN] Failed to get token after retries","timestamp":"2025-11-24T04:30:44.136Z"}
+{"error":"Failed to get token after retries","level":"error","message":"[SIASN] Token acquisition error:","timestamp":"2025-11-24T04:30:44.138Z"}
+{"error":"Failed to get token after retries","level":"error","message":"[SIASN] Request handler failed:","method":"get","timestamp":"2025-11-24T04:30:44.138Z","url":"/partition/list-pg-instansi?nip=197112141998031011"}
+{"level":"error","message":"[SIASN] Error data:","timestamp":"2025-11-24T04:30:44.139Z"}
+{"level":"error","message":"[SIASN] Failed to get token after retries","timestamp":"2025-11-24T04:30:44.418Z"}
+{"error":"Failed to get token after retries","level":"error","message":"[SIASN] Token acquisition error:","timestamp":"2025-11-24T04:30:44.419Z"}
+{"error":"Failed to get token after retries","level":"error","message":"[SIASN] Request handler failed:","method":"get","timestamp":"2025-11-24T04:30:44.420Z","url":"/pns/data-utama/197112141998031011"}
+{"level":"error","message":"[SIASN] Error data:","timestamp":"2025-11-24T04:30:44.420Z"}
+{"level":"error","message":"[SIASN] Error data:","timestamp":"2025-11-24T04:31:07.688Z"}
+{"level":"error","message":"[SIASN] Error data:","timestamp":"2025-11-24T04:31:07.741Z"}
+{"level":"error","message":"[SIASN] Error data:","timestamp":"2025-11-24T04:31:09.488Z"}
+{"level":"error","message":"[SIASN] Error data:","timestamp":"2025-11-24T04:31:22.831Z"}
+{"level":"error","message":"[SIASN] Error data:","timestamp":"2025-11-24T04:31:23.330Z"}
+{"level":"error","message":"[SIASN] Failed to get token after retries","timestamp":"2025-11-24T04:31:27.592Z"}
+{"error":"Failed to get token after retries","level":"error","message":"[SIASN] Token acquisition error:","timestamp":"2025-11-24T04:31:27.593Z"}
+{"error":"Failed to get token after retries","level":"error","message":"[SIASN] Request handler failed:","method":"get","timestamp":"2025-11-24T04:31:27.593Z","url":"/partition/profesi-instansi?nip=197112141998031011"}
+{"level":"error","message":"[SIASN] Error data:","timestamp":"2025-11-24T04:31:27.593Z"}
+{"level":"error","message":"[SIASN] Failed to get token after retries","timestamp":"2025-11-24T04:31:27.768Z"}
+{"error":"Failed to get token after retries","level":"error","message":"[SIASN] Token acquisition error:","timestamp":"2025-11-24T04:31:27.768Z"}
+{"error":"Failed to get token after retries","level":"error","message":"[SIASN] Request handler failed:","method":"get","timestamp":"2025-11-24T04:31:27.768Z","url":"/pns/photo/A5EB041E87DCF6A0E040640A040252AD"}
+{"level":"error","message":"[SIASN] Error data:","timestamp":"2025-11-24T04:31:27.768Z"}
+{"level":"error","message":"[SIASN] Failed to get token after retries","timestamp":"2025-11-24T04:31:27.986Z"}
+{"error":"Failed to get token after retries","level":"error","message":"[SIASN] Token acquisition error:","timestamp":"2025-11-24T04:31:27.987Z"}
+{"error":"Failed to get token after retries","level":"error","message":"[SIASN] Request handler failed:","method":"get","timestamp":"2025-11-24T04:31:27.987Z","url":"/pns/nilaiipasn/197112141998031011"}
+{"level":"error","message":"[SIASN] Error data:","timestamp":"2025-11-24T04:31:27.987Z"}
+{"level":"error","message":"[SIASN] Failed to get token after retries","timestamp":"2025-11-24T04:31:28.003Z"}
+{"error":"Failed to get token after retries","level":"error","message":"[SIASN] Token acquisition error:","timestamp":"2025-11-24T04:31:28.004Z"}
+{"error":"Failed to get token after retries","level":"error","message":"[SIASN] Request handler failed:","method":"get","timestamp":"2025-11-24T04:31:28.004Z","url":"/pns/data-utama/197112141998031011"}
+{"level":"error","message":"[SIASN] Error data:","timestamp":"2025-11-24T04:31:28.004Z"}
+{"level":"error","message":"[SIASN] Error data:","timestamp":"2025-11-24T04:31:40.020Z"}
+{"level":"error","message":"[SIASN] Error data:","timestamp":"2025-11-24T04:31:40.576Z"}
+{"level":"error","message":"[SIASN] Error data:","timestamp":"2025-11-24T04:31:42.176Z"}
+{"level":"error","message":"[SIASN] Error data:","timestamp":"2025-11-24T04:31:43.426Z"}
+{"level":"error","message":"[SIASN] Failed to get token after retries","timestamp":"2025-11-24T04:31:44.957Z"}
+{"error":"Failed to get token after retries","level":"error","message":"[SIASN] Token acquisition error:","timestamp":"2025-11-24T04:31:44.957Z"}
+{"error":"Failed to get token after retries","level":"error","message":"[SIASN] Request handler failed:","method":"get","timestamp":"2025-11-24T04:31:44.958Z","url":"/pns/photo/A5EB041E87DCF6A0E040640A040252AD"}
+{"level":"error","message":"[SIASN] Error data:","timestamp":"2025-11-24T04:31:44.958Z"}
+{"level":"error","message":"[SIASN] Error data:","timestamp":"2025-11-24T04:32:07.557Z"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-24T04:32:52.818Z","type":"Status report"}
+{"level":"error","message":"[SIASN] Error data:","timestamp":"2025-11-24T04:32:52.904Z"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-24T04:32:53.191Z","type":"Status report"}
+{"level":"error","message":"[SIASN] Error data:","timestamp":"2025-11-24T04:33:02.950Z"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-24T04:33:04.379Z","type":"Status report"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-24T04:33:05.894Z","type":"Status report"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-24T04:33:05.907Z","type":"Status report"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-24T04:33:05.915Z","type":"Status report"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-24T04:33:05.928Z","type":"Status report"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-24T04:33:06.023Z","type":"Status report"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-24T04:33:07.710Z","type":"Status report"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-24T04:33:07.748Z","type":"Status report"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-24T04:33:07.871Z","type":"Status report"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-24T04:33:08.090Z","type":"Status report"}
+{"code":"404","description":"The requested resource is not available.","level":"error","message":"[SIASN] Error data: Not Found","timestamp":"2025-11-24T04:33:08.252Z","type":"Status report"}
+{"level":"error","message":"[SIASN] Error data:","timestamp":"2025-11-24T06:39:07.026Z"}

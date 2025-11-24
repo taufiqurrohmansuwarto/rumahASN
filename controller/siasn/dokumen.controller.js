@@ -4,6 +4,7 @@ const { logger } = require("@/utils/logger");
 const { uploadDokumenSiasn } = require("@/utils/siasn-utils");
 const SiasnEmployee = require("@/models/siasn-employees.model");
 const { handleError } = require("@/utils/helper/controller-helper");
+const { createLogSIASN } = require("@/utils/logs");
 
 const kodeDokumen = {
   887: "SK PNS",
@@ -26,6 +27,16 @@ export const unggahDokumenSiasn = async (req, res) => {
       id_riwayat
     );
     logger.info("success upload dokumen", result);
+    await createLogSIASN({
+      userId: req?.user?.customId,
+      employeeNumber: null,
+      siasnService: "upload-dok-rw",
+      type: "CREATE",
+      request_data: JSON.stringify({
+        id_riwayat,
+        id_ref_dokumen,
+      }),
+    });
     res.json({
       message: "Berhasil upload dokumen",
       data: result,

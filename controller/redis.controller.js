@@ -22,8 +22,20 @@ export const getRedisKeyById = async (req, res) => {
   const redis = createRedisInstance();
   try {
     const id = req.query.id;
-    const key = await redis.get(id);
-    res.json(JSON.parse(key));
+    const value = await redis.get(id);
+    
+    if (value === null) {
+      return res.status(404).json({ message: "Key not found" });
+    }
+
+    // Try to parse as JSON, fallback to raw string
+    try {
+      const parsed = JSON.parse(value);
+      res.json(parsed);
+    } catch (parseError) {
+      // Not JSON, return as plain string
+      res.json({ value, type: "string" });
+    }
   } catch (error) {
     console.error("Error getting redis key by id:", error);
     res.status(500).json({ message: "Internal server error" });
