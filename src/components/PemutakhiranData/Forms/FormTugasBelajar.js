@@ -6,11 +6,20 @@ import {
   Select,
   Row,
   Col,
-  Divider,
-  Typography,
+  Button,
+  Collapse,
 } from "antd";
-
-const { Text } = Typography;
+import { Text, Stack, Flex } from "@mantine/core";
+import {
+  IconSchool,
+  IconCertificate,
+  IconCalendar,
+  IconId,
+  IconBook,
+  IconAward,
+  IconFileText,
+  IconHash,
+} from "@tabler/icons-react";
 
 function FormTugasBelajar({ open, onCancel, onFinish }) {
   const [form] = Form.useForm();
@@ -21,207 +30,268 @@ function FormTugasBelajar({ open, onCancel, onFinish }) {
     onCancel();
   };
 
+  const collapseItems = [
+    {
+      key: "referensi",
+      label: (
+        <Flex align="center" gap={6}>
+          <IconId size={14} />
+          <Text size="xs" fw={500}>
+            Referensi ID
+          </Text>
+        </Flex>
+      ),
+      children: (
+        <Row gutter={[12, 8]}>
+          <Col span={8}>
+            <Text
+              size="xs"
+              fw={500}
+              style={{ display: "block", marginBottom: 4 }}
+            >
+              Pendidikan ID
+            </Text>
+            <Form.Item name="pendidikanId" style={{ marginBottom: 0 }}>
+              <Input
+                size="small"
+                placeholder="Kode pendidikan"
+                prefix={<IconHash size={14} />}
+              />
+            </Form.Item>
+          </Col>
+          <Col span={8}>
+            <Text
+              size="xs"
+              fw={500}
+              style={{ display: "block", marginBottom: 4 }}
+            >
+              TK Pendidikan ID
+            </Text>
+            <Form.Item name="tkPendidikanId" style={{ marginBottom: 0 }}>
+              <Input
+                size="small"
+                placeholder="Kode tingkat"
+                prefix={<IconHash size={14} />}
+              />
+            </Form.Item>
+          </Col>
+          <Col span={8}>
+            <Text
+              size="xs"
+              fw={500}
+              style={{ display: "block", marginBottom: 4 }}
+            >
+              Jenis Tubel ID
+            </Text>
+            <Form.Item name="refJenisTubelId" style={{ marginBottom: 0 }}>
+              <Input
+                size="small"
+                placeholder="Kode jenis tubel"
+                prefix={<IconHash size={14} />}
+              />
+            </Form.Item>
+          </Col>
+        </Row>
+      ),
+    },
+  ];
+
   return (
     <Modal
       centered
-      width={900}
+      width={700}
       open={open}
       onCancel={onCancel}
-      title="Form Tugas Belajar"
-      okText="Simpan"
-      okButtonProps={{
-        type: "primary",
-      }}
-      cancelText="Batal"
-      cancelButtonProps={{
-        type: "default",
-      }}
-      onOk={handleFinish}
-      bodyStyle={{
-        maxHeight: "70vh",
-        overflowY: "auto",
-        overflowX: "hidden",
-        paddingRight: "6px",
-      }}
+      title={
+        <Flex align="center" gap={8}>
+          <IconBook size={18} />
+          <Text size="sm" fw={600}>
+            Form Tugas Belajar
+          </Text>
+        </Flex>
+      }
+      footer={
+        <Flex justify="end" gap={8}>
+          <Button onClick={onCancel}>Batal</Button>
+          <Button type="primary" onClick={handleFinish}>
+            Simpan
+          </Button>
+        </Flex>
+      }
     >
-      <Form form={form} onFinish={onFinish} layout="vertical">
-        {/* Informasi Gelar */}
-        <div style={{ marginBottom: 16 }}>
-          <Text strong style={{ fontSize: 16 }}>
-            📚 Informasi Gelar
-          </Text>
-          <Text
-            type="secondary"
-            style={{ display: "block", fontSize: 12, marginTop: 4 }}
-          >
-            Isi gelar akademik yang akan diperoleh
-          </Text>
-        </div>
+      <Form form={form} onFinish={onFinish} layout="vertical" size="small">
+        <Stack spacing={12}>
+          {/* Gelar */}
+          <div>
+            <Flex align="center" gap={6} mb={8}>
+              <IconAward size={14} />
+              <Text size="xs" fw={600}>
+                Gelar
+              </Text>
+            </Flex>
+            <Row gutter={[12, 8]}>
+              <Col span={12}>
+                <Text
+                  size="xs"
+                  fw={500}
+                  style={{ display: "block", marginBottom: 4 }}
+                >
+                  Gelar Depan
+                </Text>
+                <Form.Item name="gelarDepan" style={{ marginBottom: 0 }}>
+                  <Input
+                    size="small"
+                    placeholder="Dr., Prof., Ir."
+                    prefix={<IconCertificate size={14} />}
+                  />
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Text
+                  size="xs"
+                  fw={500}
+                  style={{ display: "block", marginBottom: 4 }}
+                >
+                  Gelar Belakang
+                </Text>
+                <Form.Item name="gelarBelakang" style={{ marginBottom: 0 }}>
+                  <Input
+                    size="small"
+                    placeholder="S.Kom., M.T., Ph.D"
+                    prefix={<IconCertificate size={14} />}
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
+          </div>
 
-        <Row gutter={16}>
-          <Col span={12}>
-            <Form.Item
-              label="Gelar Depan"
-              name="gelarDepan"
-              tooltip="Contoh: Dr., Prof., Ir."
-            >
-              <Input placeholder="Dr., Prof., Ir." />
-            </Form.Item>
-          </Col>
-          <Col span={12}>
-            <Form.Item
-              label="Gelar Belakang"
-              name="gelarBelakang"
-              tooltip="Contoh: S.Kom., M.T., Ph.D"
-            >
-              <Input placeholder="S.Kom., M.T., Ph.D" />
-            </Form.Item>
-          </Col>
-        </Row>
+          {/* Institusi */}
+          <div>
+            <Flex align="center" gap={6} mb={8}>
+              <IconSchool size={14} />
+              <Text size="xs" fw={600}>
+                Institusi Pendidikan
+              </Text>
+            </Flex>
+            <Row gutter={[12, 8]}>
+              <Col span={24}>
+                <Text
+                  size="xs"
+                  fw={500}
+                  style={{ display: "block", marginBottom: 4 }}
+                >
+                  Nama Sekolah/Universitas
+                </Text>
+                <Form.Item name="namaSekolah" style={{ marginBottom: 0 }}>
+                  <Input
+                    size="small"
+                    placeholder="Universitas Indonesia, ITB, dll"
+                    prefix={<IconSchool size={14} />}
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
+            <Row gutter={[12, 8]} style={{ marginTop: 8 }}>
+              <Col span={12}>
+                <Text
+                  size="xs"
+                  fw={500}
+                  style={{ display: "block", marginBottom: 4 }}
+                >
+                  No Akreditasi
+                </Text>
+                <Form.Item
+                  name="noAkreditasiJurusan"
+                  style={{ marginBottom: 0 }}
+                >
+                  <Input
+                    size="small"
+                    placeholder="123/SK/BAN-PT/..."
+                    prefix={<IconFileText size={14} />}
+                  />
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Text
+                  size="xs"
+                  fw={500}
+                  style={{ display: "block", marginBottom: 4 }}
+                >
+                  Predikat Akreditasi
+                </Text>
+                <Form.Item
+                  name="predikatAkreditasiJurusan"
+                  style={{ marginBottom: 0 }}
+                >
+                  <Select size="small" placeholder="Pilih predikat">
+                    <Select.Option value="A">A (Sangat Baik)</Select.Option>
+                    <Select.Option value="B">B (Baik)</Select.Option>
+                    <Select.Option value="C">C (Cukup)</Select.Option>
+                    <Select.Option value="Unggul">Unggul</Select.Option>
+                    <Select.Option value="Baik Sekali">
+                      Baik Sekali
+                    </Select.Option>
+                    <Select.Option value="Baik">Baik</Select.Option>
+                  </Select>
+                </Form.Item>
+              </Col>
+            </Row>
+          </div>
 
-        <Divider />
+          {/* Periode */}
+          <div>
+            <Flex align="center" gap={6} mb={8}>
+              <IconCalendar size={14} />
+              <Text size="xs" fw={600}>
+                Periode Tugas Belajar
+              </Text>
+            </Flex>
+            <Row gutter={[12, 8]}>
+              <Col span={12}>
+                <Text
+                  size="xs"
+                  fw={500}
+                  style={{ display: "block", marginBottom: 4 }}
+                >
+                  Tanggal Mulai
+                </Text>
+                <Form.Item name="tglMulai" style={{ marginBottom: 0 }}>
+                  <DatePicker
+                    size="small"
+                    style={{ width: "100%" }}
+                    placeholder="Pilih tanggal"
+                    format="DD-MM-YYYY"
+                  />
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Text
+                  size="xs"
+                  fw={500}
+                  style={{ display: "block", marginBottom: 4 }}
+                >
+                  Tanggal Selesai
+                </Text>
+                <Form.Item name="tglSelesai" style={{ marginBottom: 0 }}>
+                  <DatePicker
+                    size="small"
+                    style={{ width: "100%" }}
+                    placeholder="Pilih tanggal"
+                    format="DD-MM-YYYY"
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
+          </div>
 
-        {/* Informasi Institusi */}
-        <div style={{ marginBottom: 16 }}>
-          <Text strong style={{ fontSize: 16 }}>
-            🏫 Informasi Institusi Pendidikan
-          </Text>
-          <Text
-            type="secondary"
-            style={{ display: "block", fontSize: 12, marginTop: 4 }}
-          >
-            Detail tentang institusi tempat tugas belajar
-          </Text>
-        </div>
-
-        <Row gutter={16}>
-          <Col span={24}>
-            <Form.Item
-              label="Nama Sekolah/Universitas"
-              name="namaSekolah"
-              tooltip="Nama lengkap institusi pendidikan"
-            >
-              <Input placeholder="Universitas Indonesia, Institut Teknologi Bandung, dll" />
-            </Form.Item>
-          </Col>
-        </Row>
-
-        <Row gutter={16}>
-          <Col span={12}>
-            <Form.Item
-              label="No Akreditasi Jurusan"
-              name="noAkreditasiJurusan"
-              tooltip="Nomor sertifikat akreditasi program studi"
-            >
-              <Input placeholder="123/SK/BAN-PT/Akred/S/2023" />
-            </Form.Item>
-          </Col>
-          <Col span={12}>
-            <Form.Item
-              label="Predikat Akreditasi"
-              name="predikatAkreditasiJurusan"
-              tooltip="Tingkat akreditasi program studi"
-            >
-              <Select placeholder="Pilih predikat akreditasi">
-                <Select.Option value="A">A (Sangat Baik)</Select.Option>
-                <Select.Option value="B">B (Baik)</Select.Option>
-                <Select.Option value="C">C (Cukup)</Select.Option>
-                <Select.Option value="Unggul">Unggul</Select.Option>
-                <Select.Option value="Baik Sekali">Baik Sekali</Select.Option>
-                <Select.Option value="Baik">Baik</Select.Option>
-              </Select>
-            </Form.Item>
-          </Col>
-        </Row>
-
-        <Divider />
-
-        {/* Informasi Referensi */}
-        <div style={{ marginBottom: 16 }}>
-          <Text strong style={{ fontSize: 16 }}>
-            🔗 Informasi Referensi
-          </Text>
-          <Text
-            type="secondary"
-            style={{ display: "block", fontSize: 12, marginTop: 4 }}
-          >
-            ID referensi sistem untuk kategori pendidikan
-          </Text>
-        </div>
-
-        <Row gutter={16}>
-          <Col span={8}>
-            <Form.Item
-              label="Pendidikan ID"
-              name="pendidikanId"
-              tooltip="ID referensi jenjang pendidikan"
-            >
-              <Input placeholder="Kode pendidikan" />
-            </Form.Item>
-          </Col>
-          <Col span={8}>
-            <Form.Item
-              label="TK Pendidikan ID"
-              name="tkPendidikanId"
-              tooltip="ID tingkat pendidikan"
-            >
-              <Input placeholder="Kode tingkat" />
-            </Form.Item>
-          </Col>
-          <Col span={8}>
-            <Form.Item
-              label="Jenis Tubel ID"
-              name="refJenisTubelId"
-              tooltip="ID jenis tugas belajar"
-            >
-              <Input placeholder="Kode jenis tubel" />
-            </Form.Item>
-          </Col>
-        </Row>
-
-        <Divider />
-
-        {/* Periode Waktu */}
-        <div style={{ marginBottom: 16 }}>
-          <Text strong style={{ fontSize: 16 }}>
-            📅 Periode Tugas Belajar
-          </Text>
-          <Text
-            type="secondary"
-            style={{ display: "block", fontSize: 12, marginTop: 4 }}
-          >
-            Tentukan periode waktu pelaksanaan tugas belajar
-          </Text>
-        </div>
-
-        <Row gutter={16}>
-          <Col span={12}>
-            <Form.Item
-              label="Tanggal Mulai"
-              name="tglMulai"
-              tooltip="Tanggal dimulainya tugas belajar"
-            >
-              <DatePicker
-                style={{ width: "100%" }}
-                placeholder="Pilih tanggal mulai"
-                format="YYYY-MM-DD"
-              />
-            </Form.Item>
-          </Col>
-          <Col span={12}>
-            <Form.Item
-              label="Tanggal Selesai"
-              name="tglSelesai"
-              tooltip="Tanggal berakhirnya tugas belajar"
-            >
-              <DatePicker
-                style={{ width: "100%" }}
-                placeholder="Pilih tanggal selesai"
-                format="YYYY-MM-DD"
-              />
-            </Form.Item>
-          </Col>
-        </Row>
+          {/* Referensi ID - Collapse */}
+          <Collapse
+            size="small"
+            items={collapseItems}
+            bordered={false}
+            style={{ background: "transparent" }}
+          />
+        </Stack>
       </Form>
     </Modal>
   );

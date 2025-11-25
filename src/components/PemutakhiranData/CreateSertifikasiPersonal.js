@@ -7,48 +7,33 @@ import {
   message,
   Modal,
   Select,
-  Space,
+  Row,
+  Col,
 } from "antd";
+import { Text, Stack, Flex } from "@mantine/core";
+import {
+  IconPlus,
+  IconCertificate,
+  IconFileText,
+  IconCalendar,
+  IconBuilding,
+  IconBriefcase,
+  IconAward,
+} from "@tabler/icons-react";
 import { useEffect, useState } from "react";
-
 import dayjs from "dayjs";
 
 import { urlToPdf } from "@/services/master.services";
 import {
   createRwSertifikasiPersonal,
-  createSertifikasiByNip,
   findLembagaSertifikasi,
   findRumpunJabatan,
   uploadDokRiwayat,
 } from "@/services/siasn-services";
-import { FilePdfOutlined, PlusOutlined } from "@ant-design/icons";
 import FileUploadSIASN from "./FileUploadSIASN";
 import useFileStore from "@/store/useFileStore";
-const FORMAT = "DD-MM-YYYY";
 
-/**{
-  "gelarBelakangSert": "string",
-  "gelarDepanSert": "string",
-  "id": "string",
-  "lembagaSertifikasiId": "string",
-  "lembagaSertifikasiNama": "string",
-  "masaBerlakuSertMulai": "string",
-  "masaBerlakuSertSelasai": "string",
-  "namaSertifikasi": "string",
-  "nomorSertifikat": "string",
-  "path": [
-    {
-      "dok_id": "string",
-      "dok_nama": "string",
-      "dok_uri": "string",
-      "object": "string",
-      "slug": "string"
-    }
-  ],
-  "pnsOrangId": "string",
-  "rumpunJabatanId": "string",
-  "tanggalSertifikat": "string"
-} */
+const FORMAT = "DD-MM-YYYY";
 
 const ModalCreateSertifikasi = ({
   nip,
@@ -58,9 +43,7 @@ const ModalCreateSertifikasi = ({
   type = "create",
 }) => {
   const queryClient = useQueryClient();
-
   const [form] = Form.useForm();
-
   const fileList = useFileStore((state) => state.fileList);
 
   const { data: refLembagaSertifikasi } = useQuery({
@@ -146,14 +129,8 @@ const ModalCreateSertifikasi = ({
         await uploadDokRiwayat(formData);
         queryClient.invalidateQueries({ queryKey: ["sertifikasi-personal"] });
       }
-
-      // const currentFile = await urlToPdf({ url: row?.file_kompetensi });
-      // const file = new File([currentFile], "file.pdf", {
-      //   type: "application/pdf",
-      // });
-      // console.log(file);
     } catch (error) {
-      message.error("Gagal menambahkan sertifikasi file kompetensi");
+      message.error("Gagal menambahkan sertifikasi");
       queryClient.invalidateQueries({ queryKey: ["sertifikasi-personal"] });
     }
   };
@@ -161,157 +138,291 @@ const ModalCreateSertifikasi = ({
   return (
     <Modal
       centered
-      width={900}
+      width={700}
       title={
-        type === "create"
-          ? "Tambah Sertifikasi SIASN"
-          : "Transfer Sertifikasi SIASN"
+        <Flex align="center" gap={8}>
+          <IconCertificate size={18} />
+          <Text size="sm" fw={600}>
+            {type === "create" ? "Tambah Sertifikasi" : "Transfer Sertifikasi"}
+          </Text>
+        </Flex>
       }
       open={open}
       onCancel={onCancel}
-      footer={[
-        <Button key="cancel" onClick={onCancel}>
-          Batal
-        </Button>,
-        <Button
-          key="submit"
-          type="primary"
-          loading={isPosting}
-          onClick={handleSubmit}
-        >
-          Simpan
-        </Button>,
-      ]}
+      footer={
+        <Flex justify="end" gap={8}>
+          <Button onClick={onCancel}>Batal</Button>
+          <Button type="primary" loading={isPosting} onClick={handleSubmit}>
+            Simpan
+          </Button>
+        </Flex>
+      }
     >
       <Form
         form={form}
         layout="vertical"
-        onFinish={handleSubmit}
-        initialValues={{
-          pnsOrangId: nip,
-        }}
+        size="small"
+        initialValues={{ pnsOrangId: nip }}
       >
-        {type === "create" && <FileUploadSIASN />}
-        {row?.file_kompetensi && (
-          <a href={row?.file_kompetensi} target="_blank" rel="noreferrer">
-            <Button type="link" icon={<FilePdfOutlined />}>
+        <Stack spacing={12}>
+          {/* File Upload */}
+          {type === "create" && <FileUploadSIASN />}
+          {row?.file_kompetensi && (
+            <Button
+              size="small"
+              type="link"
+              icon={<IconFileText size={14} />}
+              href={row?.file_kompetensi}
+              target="_blank"
+              style={{ padding: 0, height: "auto" }}
+            >
               Lihat File
             </Button>
-          </a>
-        )}
+          )}
 
-        <Space.Compact block style={{ marginBottom: 16 }}>
-          <Form.Item
-            label="Gelar Depan"
-            name="gelarDepanSert"
-            style={{ width: "50%", marginRight: 8 }}
-          >
-            <Input placeholder="Dr., Prof., dll" />
-          </Form.Item>
-          <Form.Item
-            label="Gelar Belakang"
-            name="gelarBelakangSert"
-            style={{ width: "50%" }}
-          >
-            <Input placeholder="S.Kom., M.T., dll" />
-          </Form.Item>
-        </Space.Compact>
+          {/* Gelar */}
+          <div>
+            <Flex align="center" gap={6} mb={8}>
+              <IconAward size={14} />
+              <Text size="xs" fw={600}>
+                Gelar
+              </Text>
+            </Flex>
+            <Row gutter={[12, 8]}>
+              <Col span={12}>
+                <Text
+                  size="xs"
+                  fw={500}
+                  style={{ display: "block", marginBottom: 4 }}
+                >
+                  Gelar Depan
+                </Text>
+                <Form.Item name="gelarDepanSert" style={{ marginBottom: 0 }}>
+                  <Input
+                    size="small"
+                    placeholder="Dr., Prof., dll"
+                    prefix={<IconAward size={14} />}
+                  />
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Text
+                  size="xs"
+                  fw={500}
+                  style={{ display: "block", marginBottom: 4 }}
+                >
+                  Gelar Belakang
+                </Text>
+                <Form.Item name="gelarBelakangSert" style={{ marginBottom: 0 }}>
+                  <Input
+                    size="small"
+                    placeholder="S.Kom., M.T., dll"
+                    prefix={<IconAward size={14} />}
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
+          </div>
 
-        <Form.Item
-          label="Nama Sertifikasi"
-          name="namaSertifikasi"
-          rules={[{ required: true, message: "Nama sertifikasi harus diisi!" }]}
-        >
-          <Input placeholder="Masukkan nama sertifikasi" />
-        </Form.Item>
+          {/* Informasi Sertifikasi */}
+          <div>
+            <Flex align="center" gap={6} mb={8}>
+              <IconCertificate size={14} />
+              <Text size="xs" fw={600}>
+                Informasi Sertifikasi
+              </Text>
+            </Flex>
+            <Row gutter={[12, 8]}>
+              <Col span={16}>
+                <Text
+                  size="xs"
+                  fw={500}
+                  style={{ display: "block", marginBottom: 4 }}
+                >
+                  Nama Sertifikasi
+                </Text>
+                <Form.Item
+                  name="namaSertifikasi"
+                  rules={[{ required: true, message: "Wajib diisi" }]}
+                  style={{ marginBottom: 0 }}
+                >
+                  <Input
+                    size="small"
+                    placeholder="Nama sertifikasi"
+                    prefix={<IconCertificate size={14} />}
+                  />
+                </Form.Item>
+              </Col>
+              <Col span={8}>
+                <Text
+                  size="xs"
+                  fw={500}
+                  style={{ display: "block", marginBottom: 4 }}
+                >
+                  Nomor Sertifikat
+                </Text>
+                <Form.Item
+                  name="nomorSertifikat"
+                  rules={[{ required: true, message: "Wajib diisi" }]}
+                  style={{ marginBottom: 0 }}
+                >
+                  <Input
+                    size="small"
+                    placeholder="Nomor"
+                    prefix={<IconFileText size={14} />}
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
+          </div>
 
-        <Form.Item
-          label="Nomor Sertifikat"
-          name="nomorSertifikat"
-          rules={[{ required: true, message: "Nomor sertifikat harus diisi!" }]}
-        >
-          <Input placeholder="Masukkan nomor sertifikat" />
-        </Form.Item>
+          {/* Lembaga & Rumpun */}
+          <div>
+            <Flex align="center" gap={6} mb={8}>
+              <IconBuilding size={14} />
+              <Text size="xs" fw={600}>
+                Lembaga & Rumpun
+              </Text>
+            </Flex>
+            <Row gutter={[12, 8]}>
+              <Col span={12}>
+                <Text
+                  size="xs"
+                  fw={500}
+                  style={{ display: "block", marginBottom: 4 }}
+                >
+                  Lembaga Sertifikasi
+                </Text>
+                <Form.Item
+                  name="lembagaSertifikasiId"
+                  rules={[{ required: true, message: "Wajib diisi" }]}
+                  style={{ marginBottom: 0 }}
+                >
+                  <Select
+                    size="small"
+                    showSearch
+                    optionFilterProp="name"
+                    placeholder="Pilih lembaga"
+                  >
+                    {refLembagaSertifikasi?.map((item) => (
+                      <Select.Option
+                        name={item.nama}
+                        key={item.id}
+                        value={item.id}
+                      >
+                        {item.nama}
+                      </Select.Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Text
+                  size="xs"
+                  fw={500}
+                  style={{ display: "block", marginBottom: 4 }}
+                >
+                  Rumpun Jabatan
+                </Text>
+                <Form.Item name="rumpunJabatanId" style={{ marginBottom: 0 }}>
+                  <Select
+                    size="small"
+                    showSearch
+                    optionFilterProp="name"
+                    placeholder="Pilih rumpun"
+                    allowClear
+                  >
+                    {refRumpunJabatan?.map((item) => (
+                      <Select.Option
+                        name={item.nama}
+                        key={item.id}
+                        value={item.id}
+                      >
+                        {item.nama}
+                      </Select.Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              </Col>
+            </Row>
+          </div>
 
-        <Form.Item
-          label="Lembaga Sertifikasi"
-          name="lembagaSertifikasiId"
-          rules={[
-            { required: true, message: "Lembaga sertifikasi harus diisi!" },
-          ]}
-        >
-          <Select
-            showSearch
-            optionFilterProp="name"
-            placeholder="Pilih lembaga sertifikasi"
-          >
-            {refLembagaSertifikasi?.map((item) => (
-              <Select.Option name={item.nama} key={item.id} value={item.id}>
-                {item.nama}
-              </Select.Option>
-            ))}
-          </Select>
-        </Form.Item>
-
-        <Form.Item label="Rumpun Jabatan" name="rumpunJabatanId">
-          <Select
-            showSearch
-            optionFilterProp="name"
-            placeholder="Pilih rumpun jabatan"
-          >
-            {refRumpunJabatan?.map((item) => (
-              <Select.Option name={item.nama} key={item.id} value={item.id}>
-                {item.nama}
-              </Select.Option>
-            ))}
-          </Select>
-        </Form.Item>
-
-        <Form.Item
-          label="Tanggal Sertifikat"
-          name="tanggalSertifikat"
-          rules={[
-            { required: true, message: "Tanggal sertifikat harus diisi!" },
-          ]}
-        >
-          <DatePicker
-            disabled={type === "transfer"}
-            format={FORMAT}
-            style={{ width: "100%" }}
-            placeholder="Pilih tanggal sertifikat"
-          />
-        </Form.Item>
-
-        <Space.Compact block>
-          <Form.Item
-            label="Masa Berlaku Mulai"
-            name="masaBerlakuSertMulai"
-            style={{ width: "50%", marginRight: 8 }}
-            rules={[
-              { required: true, message: "Masa berlaku mulai harus diisi!" },
-            ]}
-          >
-            <DatePicker
-              format={FORMAT}
-              style={{ width: "100%" }}
-              placeholder="Pilih tanggal mulai"
-            />
-          </Form.Item>
-          <Form.Item
-            label="Masa Berlaku Selesai"
-            name="masaBerlakuSertSelasai"
-            style={{ width: "50%" }}
-            rules={[
-              { required: true, message: "Masa berlaku selesai harus diisi!" },
-            ]}
-          >
-            <DatePicker
-              format={FORMAT}
-              style={{ width: "100%" }}
-              placeholder="Pilih tanggal selesai"
-            />
-          </Form.Item>
-        </Space.Compact>
+          {/* Tanggal */}
+          <div>
+            <Flex align="center" gap={6} mb={8}>
+              <IconCalendar size={14} />
+              <Text size="xs" fw={600}>
+                Tanggal & Masa Berlaku
+              </Text>
+            </Flex>
+            <Row gutter={[12, 8]}>
+              <Col span={8}>
+                <Text
+                  size="xs"
+                  fw={500}
+                  style={{ display: "block", marginBottom: 4 }}
+                >
+                  Tanggal Sertifikat
+                </Text>
+                <Form.Item
+                  name="tanggalSertifikat"
+                  rules={[{ required: true, message: "Wajib diisi" }]}
+                  style={{ marginBottom: 0 }}
+                >
+                  <DatePicker
+                    size="small"
+                    disabled={type === "transfer"}
+                    format={FORMAT}
+                    style={{ width: "100%" }}
+                    placeholder="Pilih tanggal"
+                  />
+                </Form.Item>
+              </Col>
+              <Col span={8}>
+                <Text
+                  size="xs"
+                  fw={500}
+                  style={{ display: "block", marginBottom: 4 }}
+                >
+                  Masa Berlaku Mulai
+                </Text>
+                <Form.Item
+                  name="masaBerlakuSertMulai"
+                  rules={[{ required: true, message: "Wajib diisi" }]}
+                  style={{ marginBottom: 0 }}
+                >
+                  <DatePicker
+                    size="small"
+                    format={FORMAT}
+                    style={{ width: "100%" }}
+                    placeholder="Mulai"
+                  />
+                </Form.Item>
+              </Col>
+              <Col span={8}>
+                <Text
+                  size="xs"
+                  fw={500}
+                  style={{ display: "block", marginBottom: 4 }}
+                >
+                  Masa Berlaku Selesai
+                </Text>
+                <Form.Item
+                  name="masaBerlakuSertSelasai"
+                  rules={[{ required: true, message: "Wajib diisi" }]}
+                  style={{ marginBottom: 0 }}
+                >
+                  <DatePicker
+                    size="small"
+                    format={FORMAT}
+                    style={{ width: "100%" }}
+                    placeholder="Selesai"
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
+          </div>
+        </Stack>
       </Form>
     </Modal>
   );
@@ -320,28 +431,20 @@ const ModalCreateSertifikasi = ({
 const CreateSertifikasiPersonal = ({ row = null, type = "create" }) => {
   const [open, setOpen] = useState(false);
 
-  const handleOpen = () => {
-    setOpen(true);
-  };
-
-  const handleCancel = () => {
-    setOpen(false);
-  };
-
   return (
     <>
       <Button
-        shape="round"
-        style={{ marginBottom: 10 }}
+        size="small"
         type="primary"
-        onClick={handleOpen}
-        icon={<PlusOutlined />}
+        onClick={() => setOpen(true)}
+        icon={<IconPlus size={14} />}
+        style={{ marginBottom: 10 }}
       >
-        {type === "create" ? "Tambah Sertifikasi" : "Transfer Sertifikasi"}
+        {type === "create" ? "Tambah" : "Transfer"}
       </Button>
       <ModalCreateSertifikasi
         open={open}
-        onCancel={handleCancel}
+        onCancel={() => setOpen(false)}
         row={row}
         type={type}
       />

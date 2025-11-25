@@ -3,10 +3,23 @@ import {
   dataUtamSIASNByNip,
   uploadDokumenSiasnBaru,
 } from "@/services/siasn-services";
-import { Alert, Text, Badge as MantineBadge } from "@mantine/core";
-import { IconInfoCircle, IconArrowRight } from "@tabler/icons-react";
+import {
+  Alert,
+  Text,
+  Badge,
+  Stack,
+  Flex,
+  Group,
+  SimpleGrid,
+} from "@mantine/core";
+import {
+  IconInfoCircle,
+  IconArrowRight,
+  IconEye,
+  IconExternalLink,
+} from "@tabler/icons-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button, Modal, Space, Spin, message } from "antd";
+import { Button, Modal, Spin, message, Tooltip } from "antd";
 import { useRouter } from "next/router";
 import { useState } from "react";
 
@@ -30,7 +43,7 @@ const dokumenLainnya = [
   { key: "file_npwp", label: "NPWP" },
   { key: "file_konversi_nip", label: "Konversi NIP" },
   { key: "file_sumpah_pns", label: "Sumpah PNS" },
-  { key: "file_nota_persetujuan_bkn", label: "Nota Persetujuan BKN" },
+  { key: "file_nota_persetujuan_bkn", label: "Nota BKN" },
   { key: "file_kartu_taspen", label: "Kartu Taspen" },
   { key: "file_kartu_asn_virtual", label: "Kartu ASN Virtual" },
 ];
@@ -69,87 +82,43 @@ function DokumenPendukungNip() {
     (data) => uploadDokumenSiasnBaru(data),
     {
       onSuccess: (data, variables) => {
-        message.success("Berhasil transfer dokumen ke SIASN");
+        message.success("Berhasil transfer ke SIASN");
         queryClient.invalidateQueries(["data-utama-siasn", nip]);
-        // Clear loading state untuk dokumen ini
-        setTransferringDocs((prev) => ({
-          ...prev,
-          [variables.dokKey]: false,
-        }));
+        setTransferringDocs((prev) => ({ ...prev, [variables.dokKey]: false }));
       },
       onError: (error, variables) => {
-        console.error("Transfer error:", error);
-        message.error(
-          error?.response?.data?.message || "Gagal transfer dokumen"
-        );
-        // Clear loading state untuk dokumen ini
-        setTransferringDocs((prev) => ({
-          ...prev,
-          [variables.dokKey]: false,
-        }));
+        message.error(error?.response?.data?.message || "Gagal transfer");
+        setTransferringDocs((prev) => ({ ...prev, [variables.dokKey]: false }));
       },
     }
   );
 
   const handleTransfer = async (dok, fileUrl) => {
-    // Get ID from various possible structures
     const idRiwayat = siasn?.data?.data?.id || siasn?.data?.id || siasn?.id;
-
     if (!idRiwayat) {
       message.error("ID riwayat tidak ditemukan");
       return;
     }
 
-    // Set loading state untuk dokumen ini
-    setTransferringDocs((prev) => ({
-      ...prev,
-      [dok.key]: true,
-    }));
+    setTransferringDocs((prev) => ({ ...prev, [dok.key]: true }));
 
     try {
-      // Fetch file menggunakan urlToPdf service
       const response = await urlToPdf({ url: fileUrl });
-
-      // Convert blob response ke File object
       const file = new File([response], `${nip}_${dok.label}.pdf`, {
         type: "application/pdf",
       });
 
-      // Create FormData
       const formData = new FormData();
       formData.append("file", file);
       formData.append("id_riwayat", idRiwayat);
       formData.append("id_ref_dokumen", dok.siasnCode);
-
-      // Add dokKey untuk tracking di mutation
       formData.dokKey = dok.key;
-
-      console.log("Transfer data:", {
-        fileName: file.name,
-        fileSize: file.size,
-        id_riwayat: idRiwayat,
-        id_ref_dokumen: dok.siasnCode,
-      });
 
       transferDokumen(formData);
     } catch (error) {
-      console.error("Handle transfer error:", error);
-      message.error(
-        error?.response?.data?.message ||
-          error?.message ||
-          "Gagal memproses transfer"
-      );
-      // Clear loading state jika error
-      setTransferringDocs((prev) => ({
-        ...prev,
-        [dok.key]: false,
-      }));
+      message.error(error?.message || "Gagal transfer");
+      setTransferringDocs((prev) => ({ ...prev, [dok.key]: false }));
     }
-  };
-
-  const handleView = (file) => {
-    setSelectedFile(file);
-    setModalOpen(true);
   };
 
   const getFileUrl = (url) => {
@@ -158,116 +127,107 @@ function DokumenPendukungNip() {
     return `https://master.bkd.jatimprov.go.id/files_jatimprov/${url}`;
   };
 
-  const isImage = (url) => {
-    if (!url) return false;
-    return /\.(jpg|jpeg|png|gif|webp)$/i.test(url);
-  };
-
-  const isPdf = (url) => {
-    if (!url) return false;
-    return /\.pdf$/i.test(url);
-  };
+  const isImage = (url) => /\.(jpg|jpeg|png|gif|webp)$/i.test(url || "");
+  const isPdf = (url) => /\.pdf$/i.test(url || "");
 
   if (isLoading || loadingSiasn) {
     return (
-      <div style={{ textAlign: "center", padding: "40px" }}>
-        <Spin size="large" />
-        <Text size="xs" color="dimmed" style={{ marginTop: 8 }}>
-          {isLoading && "Loading SIMASTER..."}
-          {loadingSiasn && " Loading SIASN..."}
+      <Flex align="center" justify="center" py={40}>
+        <Spin size="small" />
+        <Text size="xs" c="dimmed" ml={8}>
+          Loading...
         </Text>
-      </div>
+      </Flex>
     );
   }
 
-  const renderDokumen = (dokList) => {
-    return dokList.map((dok) => {
-      const fileUrl = data?.[dok.key];
-      const fullUrl = getFileUrl(fileUrl);
-      const tglEdit = data?.[`tgl_edit_${dok.key}`];
+  const DokumenItem = ({ dok }) => {
+    const fileUrl = data?.[dok.key];
+    const fullUrl = getFileUrl(fileUrl);
 
-      // Check SIASN document - parse if string
-      // Try different path structures
-      let pathData =
-        siasn?.data?.path || siasn?.path || siasn?.data?.data?.path;
-
-      if (typeof pathData === "string") {
-        try {
-          pathData = JSON.parse(pathData);
-        } catch (e) {
-          pathData = null;
-        }
+    let pathData = siasn?.data?.path || siasn?.path || siasn?.data?.data?.path;
+    if (typeof pathData === "string") {
+      try {
+        pathData = JSON.parse(pathData);
+      } catch {
+        pathData = null;
       }
+    }
 
-      const siasnDoc = dok.siasnCode ? pathData?.[dok.siasnCode] : null;
-      const siasnUrl = siasnDoc?.dok_uri
-        ? `/helpdesk/api/siasn/ws/download?filePath=${siasnDoc.dok_uri}`
-        : null;
+    const siasnDoc = dok.siasnCode ? pathData?.[dok.siasnCode] : null;
+    const siasnUrl = siasnDoc?.dok_uri
+      ? `/helpdesk/api/siasn/ws/download?filePath=${siasnDoc.dok_uri}`
+      : null;
 
-      return (
-        <div
-          key={dok.key}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            padding: "8px 12px",
-            border: "1px solid #e9ecef",
-            borderRadius: "6px",
-            backgroundColor: fileUrl || siasnDoc ? "#fff" : "#f8f9fa",
-          }}
+    return (
+      <Flex
+        direction={{ base: "column", sm: "row" }}
+        align={{ base: "stretch", sm: "center" }}
+        justify="space-between"
+        gap={8}
+        py={8}
+        px={10}
+        style={{
+          border: "1px solid #e9ecef",
+          borderRadius: 6,
+          backgroundColor: fileUrl || siasnDoc ? "#fff" : "#f8f9fa",
+        }}
+      >
+        <Flex
+          direction={{ base: "column", xs: "row" }}
+          align={{ base: "flex-start", xs: "center" }}
+          gap={8}
+          style={{ flex: 1, minWidth: 0 }}
         >
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div>
-              <Text size="xs" weight={500}>
-                {dok.label}
-              </Text>
-            </div>
-            <Space size={8} style={{ marginTop: 4 }}>
-              <MantineBadge
-                size="sm"
-                color={fileUrl ? "green" : "red"}
+          <Text size="xs" fw={500} style={{ minWidth: 100 }}>
+            {dok.label}
+          </Text>
+          <Group gap={4}>
+            <Badge
+              size="xs"
+              color={fileUrl ? "green" : "gray"}
+              variant="filled"
+            >
+              SIMASTER
+            </Badge>
+            {dok.siasnCode && (
+              <Badge
+                size="xs"
+                color={siasnDoc ? "green" : "gray"}
                 variant="filled"
               >
-                SIMASTER
-              </MantineBadge>
-              {dok.siasnCode && (
-                <MantineBadge
-                  size="sm"
-                  color={siasnDoc ? "green" : "red"}
-                  variant="filled"
-                >
-                  SIASN
-                </MantineBadge>
-              )}
-            </Space>
-            {tglEdit && (
-              <Text size="xs" color="dimmed" style={{ marginTop: 2 }}>
-                {tglEdit}
-              </Text>
+                SIASN
+              </Badge>
             )}
-          </div>
-          <Space size={6}>
+          </Group>
+        </Flex>
+
+        <Group gap={4} wrap="nowrap">
+          <Tooltip title="Lihat SIMASTER">
             <Button
               size="small"
-              type="default"
+              type="text"
               disabled={!fileUrl}
-              onClick={() => handleView({ label: dok.label, url: fullUrl })}
-            >
-              Lihat SIMASTER
-            </Button>
-            {dok.siasnCode && (
-              <>
+              onClick={() => {
+                setSelectedFile({ label: dok.label, url: fullUrl });
+                setModalOpen(true);
+              }}
+              icon={<IconEye size={14} />}
+            />
+          </Tooltip>
+          {dok.siasnCode && (
+            <>
+              <Tooltip title="Lihat SIASN">
                 <Button
                   size="small"
-                  type="default"
+                  type="text"
                   disabled={!siasnDoc}
                   href={siasnUrl}
                   target="_blank"
-                  rel="noreferrer"
-                >
-                  Lihat SIASN
-                </Button>
+                  icon={<IconExternalLink size={14} />}
+                />
+              </Tooltip>
+              <Tooltip title="Transfer ke SIASN">
                 <Button
                   size="small"
                   type="primary"
@@ -275,49 +235,50 @@ function DokumenPendukungNip() {
                   loading={transferringDocs[dok.key]}
                   onClick={() => handleTransfer(dok, fullUrl)}
                   icon={<IconArrowRight size={14} />}
-                >
-                  Transfer
-                </Button>
-              </>
-            )}
-          </Space>
-        </div>
-      );
-    });
+                />
+              </Tooltip>
+            </>
+          )}
+        </Group>
+      </Flex>
+    );
   };
 
   return (
-    <>
+    <Stack gap="sm">
       <Alert
-        icon={<IconInfoCircle size={16} />}
-        title="Informasi Upload Dokumen"
+        icon={<IconInfoCircle size={14} />}
         color="blue"
-        style={{ marginBottom: "16px" }}
+        variant="light"
+        p="xs"
+        radius="sm"
       >
-        Dokumen pendukung dapat diunggah melalui Aplikasi SIMASTER. Pastikan
-        file dalam format yang sesuai (PDF, JPG, PNG) dan ukuran maksimal 2MB.
+        <Text size="xs">
+          Gunakan fitur transfer dari SIMASTER untuk mempercepat sinkronisasi ke
+          SIASN
+        </Text>
       </Alert>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-        {/* Dokumen Penting */}
-        <div>
-          <Text size="sm" weight={600} mb={8} color="blue">
-            Dokumen Penting
-          </Text>
-          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-            {renderDokumen(dokumenPenting)}
-          </div>
-        </div>
+      <div>
+        <Text size="xs" fw={600} c="blue" mb={6}>
+          Dokumen Penting
+        </Text>
+        <SimpleGrid cols={{ base: 1, md: 2, lg: 3 }} spacing="xs">
+          {dokumenPenting.map((dok) => (
+            <DokumenItem key={dok.key} dok={dok} />
+          ))}
+        </SimpleGrid>
+      </div>
 
-        {/* Dokumen Lainnya */}
-        <div>
-          <Text size="sm" weight={600} mb={8} color="dimmed">
-            Dokumen Lainnya
-          </Text>
-          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-            {renderDokumen(dokumenLainnya)}
-          </div>
-        </div>
+      <div>
+        <Text size="xs" fw={600} c="dimmed" mb={6}>
+          Dokumen Lainnya
+        </Text>
+        <SimpleGrid cols={{ base: 1, md: 2, lg: 3 }} spacing="xs">
+          {dokumenLainnya.map((dok) => (
+            <DokumenItem key={dok.key} dok={dok} />
+          ))}
+        </SimpleGrid>
       </div>
 
       <Modal
@@ -344,19 +305,19 @@ function DokumenPendukungNip() {
                 title={selectedFile.label}
               />
             ) : (
-              <div>
-                <Text size="sm" color="dimmed" mb="md">
+              <Stack align="center" gap="sm">
+                <Text size="sm" c="dimmed">
                   Preview tidak tersedia
                 </Text>
                 <Button type="primary" href={selectedFile.url} target="_blank">
                   Buka File
                 </Button>
-              </div>
+              </Stack>
             )}
           </div>
         )}
       </Modal>
-    </>
+    </Stack>
   );
 }
 
