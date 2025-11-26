@@ -34,6 +34,13 @@ const dokumenPenting = [
   { key: "file_pns", label: "SK PNS", siasnCode: "887" },
   { key: "file_spmt_cpns", label: "SPMT", siasnCode: "888" },
   { key: "file_cpns", label: "SK CPNS", siasnCode: "889" },
+  {
+    key: "file_pertek",
+    label: "Pertimbangan Teknis BKN",
+    siasnCode: "2",
+    sourceKey: "file_nota_persetujuan_bkn",
+    confirmTransfer: true,
+  },
 ];
 
 const dokumenLainnya = [
@@ -168,7 +175,9 @@ function DokumenPendukungNip() {
   }
 
   const DokumenItem = ({ dok }) => {
-    const fileUrl = data?.[dok.key];
+    // Gunakan sourceKey jika ada, jika tidak gunakan key biasa
+    const sourceKey = dok.sourceKey || dok.key;
+    const fileUrl = data?.[sourceKey];
     const fullUrl = getFileUrl(fileUrl);
 
     let pathData = siasn?.data?.path || siasn?.path || siasn?.data?.data?.path;
@@ -321,16 +330,31 @@ function DokumenPendukungNip() {
                   icon={<IconExternalLink size={14} />}
                 />
               </Tooltip>
-              <Tooltip title="Transfer ke SIASN">
-                <Button
-                  size="small"
-                  type="primary"
-                  disabled={!fileUrl || transferringDocs[dok.key]}
-                  loading={transferringDocs[dok.key]}
-                  onClick={() => handleTransfer(dok, fullUrl)}
-                  icon={<IconArrowRight size={14} />}
-                />
-              </Tooltip>
+              {/* Tombol transfer - tidak tampil jika SIASN sudah ada */}
+              {!siasnDoc && (
+                <Tooltip title="Transfer ke SIASN">
+                  <Button
+                    size="small"
+                    type="primary"
+                    disabled={!fileUrl || transferringDocs[dok.key]}
+                    loading={transferringDocs[dok.key]}
+                    onClick={() => {
+                      if (dok.confirmTransfer) {
+                        Modal.confirm({
+                          title: "Konfirmasi Transfer",
+                          content: `Apakah Anda yakin ingin mentransfer "${dok.label}" dari file Nota BKN ke SIASN?`,
+                          okText: "Ya, Transfer",
+                          cancelText: "Batal",
+                          onOk: () => handleTransfer(dok, fullUrl),
+                        });
+                      } else {
+                        handleTransfer(dok, fullUrl);
+                      }
+                    }}
+                    icon={<IconArrowRight size={14} />}
+                  />
+                </Tooltip>
+              )}
             </>
           )}
         </Group>
