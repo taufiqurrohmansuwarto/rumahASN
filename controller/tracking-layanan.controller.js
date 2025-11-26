@@ -1,5 +1,6 @@
 // siasn
 const User = require("@/models/users.model");
+const { cekPencantumanGelar } = require("@/utils/siasn-utils");
 
 // pemberhentian
 const listLayananSIASN = [
@@ -77,21 +78,10 @@ const layananIpASN = async (req, res) => {
 
 const layananPencantumanGelar = async (req, res) => {
   try {
-    const { fetcher } = req;
+    const { siasnRequest: fetcher } = req;
     const { employee_number: nip } = req?.user;
-    // const nip = "196504091990032002";
-
-    const result = await fetcher.get(
-      `/siasn-ws/layanan/pencantuman-gelar/${nip}`
-    );
-
-    const hasil = result?.data;
-
-    if (!hasil) {
-      res.json([]);
-    } else {
-      res.json(hasil);
-    }
+    const data = await cekPencantumanGelar(fetcher, nip);
+    res.json(data);
   } catch (error) {
     console.log(error);
     res.status(500).json({

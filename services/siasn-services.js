@@ -330,14 +330,16 @@ export const cekPencantumanGelarSiasnByNip = (nip) => {
     .then((res) => res?.data);
 };
 
-export const cekPencantumanGelarSiasnPersonal = (nip) => {
+export const cekPencantumanGelarSiasnPersonal = () => {
   return api
-    .get(`/pns/pencantuman-gelar-ws?nip=${nip}`)
+    .get(`/pns/usulan-siasn/pencantuman-gelar-ws`)
     .then((res) => res?.data);
 };
 
 export const cekPencantumanGelarSiasnPersonalProfesi = () => {
-  return api.get(`/pns/pencantuman-gelar-profesi-ws`).then((res) => res?.data);
+  return api
+    .get(`/pns/usulan-siasn/pencantuman-gelar-profesi-ws`)
+    .then((res) => res?.data);
 };
 
 export const cekPencantumanGelarSiasnProfesiByNip = (nip) => {

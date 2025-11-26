@@ -1,7 +1,7 @@
-import { SettingOutlined } from "@ant-design/icons";
-import { Modal, Flex } from "antd";
+import { ReloadOutlined } from "@ant-design/icons";
+import { Button, Flex, Modal } from "antd";
 import { Badge, Tooltip } from "@mantine/core";
-import { IconInfoCircle } from "@tabler/icons-react";
+import { IconCertificate } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import {
@@ -14,12 +14,15 @@ const CekPencantumanGelar = ({ nip }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const { data, isLoading, refetch, isFetching } = useQuery({
-    queryKey: ["cek-pencantuman-gelar", nip],
+    queryKey: ["cek-pencantuman-gelar", nip || "personal"],
     queryFn: () =>
       nip
         ? cekPencantumanGelarSiasnByNip(nip)
         : cekPencantumanGelarSiasnPersonal(),
     refetchOnWindowFocus: false,
+    enabled: isModalOpen,
+    staleTime: 5 * 60 * 1000,
+    cacheTime: 10 * 60 * 1000,
   });
 
   const handleOpenModal = () => setIsModalOpen(true);
@@ -31,7 +34,7 @@ const CekPencantumanGelar = ({ nip }) => {
         <Badge
           color="teal"
           variant="light"
-          leftSection={<IconInfoCircle size={12} />}
+          leftSection={<IconCertificate size={12} />}
           style={{ cursor: "pointer" }}
           onClick={handleOpenModal}
         >
@@ -40,32 +43,24 @@ const CekPencantumanGelar = ({ nip }) => {
       </Tooltip>
 
       <Modal
-        title={
-          <Flex align="center" gap={8}>
-            <SettingOutlined style={{ color: "#FF4500" }} />
-            <span style={{ color: "#1A1A1B" }}>Cek Pencantuman Gelar</span>
-          </Flex>
-        }
+        title="Cek Pencantuman Gelar"
         open={isModalOpen}
         onCancel={handleCloseModal}
         footer={null}
         width={800}
-        styles={{
-          content: {
-            backgroundColor: "#DAE0E6",
-            padding: "0",
-          },
-          header: {
-            backgroundColor: "#F8F9FA",
-            borderBottom: "1px solid #EDEFF1",
-            margin: "0",
-            padding: "16px 24px",
-          },
-          body: {
-            padding: "16px",
-          },
-        }}
+        centered
       >
+        <Flex justify="flex-end" style={{ marginBottom: 12 }}>
+          <Button
+            type="default"
+            size="small"
+            icon={<ReloadOutlined />}
+            loading={isFetching}
+            onClick={() => refetch()}
+          >
+            Refresh
+          </Button>
+        </Flex>
         <TabelRiwayatUsulanPencantumanGelar
           data={data}
           isLoading={isLoading || isFetching}

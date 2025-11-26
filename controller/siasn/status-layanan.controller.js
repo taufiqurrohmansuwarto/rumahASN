@@ -21,7 +21,7 @@ export const cekLayananPencantumanGelarByNip = async (req, res) => {
 
 export const cekLayananPencantumanGelarPersonal = async (req, res) => {
   try {
-    const { employee_number: nip } = req?.query;
+    const { employee_number: nip } = req?.user;
     const { siasnRequest: fetcher } = req;
     const data = await cekPencantumanGelar(fetcher, nip);
     res.json(data);
@@ -32,7 +32,7 @@ export const cekLayananPencantumanGelarPersonal = async (req, res) => {
 
 export const cekLayananPencantumanGelarPersonalProfesi = async (req, res) => {
   try {
-    const { employee_number: nip } = req?.query;
+    const { employee_number: nip } = req?.user;
     const { siasnRequest: fetcher } = req;
     const data = await cekPencantumanGelarProfesi(fetcher, nip);
     console.log(data);

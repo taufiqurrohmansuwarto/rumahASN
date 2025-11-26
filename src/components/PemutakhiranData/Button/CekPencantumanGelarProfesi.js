@@ -1,13 +1,12 @@
-import TabelRiwayatUsulanPencantumanGelar from "@/components/PemutakhiranData/Tables/TabelRiwayatUsulanPencantumanGelar";
 import {
   cekPencantumanGelarSiasnPersonalProfesi,
   cekPencantumanGelarSiasnProfesiByNip,
 } from "@/services/siasn-services";
-import { SettingOutlined } from "@ant-design/icons";
+import { ReloadOutlined } from "@ant-design/icons";
 import { Badge, Tooltip } from "@mantine/core";
-import { IconInfoCircle } from "@tabler/icons-react";
+import { IconCertificate2 } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
-import { Flex, Modal } from "antd";
+import { Button, Flex, Modal } from "antd";
 import { useState } from "react";
 import TableRiwayatUsulanPencantumanGelarProfesi from "@/components/PemutakhiranData/Tables/TableRiwayatUsulanPencantumanGelarProfesi";
 
@@ -15,12 +14,15 @@ const CekPencantumanGelarProfesi = ({ nip }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const { data, isLoading, refetch, isFetching } = useQuery({
-    queryKey: ["cek-pencantuman-gelar-profesi", nip],
+    queryKey: ["cek-pencantuman-gelar-profesi", nip || "personal"],
     queryFn: () =>
       nip
         ? cekPencantumanGelarSiasnProfesiByNip(nip)
         : cekPencantumanGelarSiasnPersonalProfesi(),
     refetchOnWindowFocus: false,
+    enabled: isModalOpen,
+    staleTime: 5 * 60 * 1000,
+    cacheTime: 10 * 60 * 1000,
   });
 
   const handleOpenModal = () => setIsModalOpen(true);
@@ -28,11 +30,11 @@ const CekPencantumanGelarProfesi = ({ nip }) => {
 
   return (
     <>
-      <Tooltip label="Cek data pencantuman gelar di SIASN">
+      <Tooltip label="Cek data pencantuman gelar profesi di SIASN">
         <Badge
           color="orange"
           variant="light"
-          leftSection={<IconInfoCircle size={12} />}
+          leftSection={<IconCertificate2 size={12} />}
           style={{ cursor: "pointer" }}
           onClick={handleOpenModal}
         >
@@ -41,34 +43,24 @@ const CekPencantumanGelarProfesi = ({ nip }) => {
       </Tooltip>
 
       <Modal
-        title={
-          <Flex align="center" gap={8}>
-            <SettingOutlined style={{ color: "#FF4500" }} />
-            <span style={{ color: "#1A1A1B" }}>
-              Cek Pencantuman Gelar Profesi
-            </span>
-          </Flex>
-        }
+        title="Cek Pencantuman Gelar Profesi"
         open={isModalOpen}
         onCancel={handleCloseModal}
         footer={null}
         width={800}
-        styles={{
-          content: {
-            backgroundColor: "#DAE0E6",
-            padding: "0",
-          },
-          header: {
-            backgroundColor: "#F8F9FA",
-            borderBottom: "1px solid #EDEFF1",
-            margin: "0",
-            padding: "16px 24px",
-          },
-          body: {
-            padding: "16px",
-          },
-        }}
+        centered
       >
+        <Flex justify="flex-end" style={{ marginBottom: 12 }}>
+          <Button
+            type="default"
+            size="small"
+            icon={<ReloadOutlined />}
+            loading={isFetching}
+            onClick={() => refetch()}
+          >
+            Refresh
+          </Button>
+        </Flex>
         <TableRiwayatUsulanPencantumanGelarProfesi
           data={data}
           isLoading={isLoading || isFetching}

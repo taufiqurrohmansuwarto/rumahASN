@@ -2,7 +2,6 @@ import IPAsn from "@/components/LayananSIASN/IPAsn";
 import CekPencantumanGelar from "@/components/PemutakhiranData/Button/CekPencantumanGelar";
 import CekPencantumanGelarProfesi from "@/components/PemutakhiranData/Button/CekPencantumanGelarProfesi";
 import CheckFotoPersonal from "@/components/PemutakhiranData/OCR/CheckFotoPersonal";
-import { getDisparitas } from "@/services/master.services";
 import { updateFotoSiasn } from "@/services/siasn-services";
 import { mysapkMenu } from "@/utils/client-utils";
 import {
@@ -13,7 +12,7 @@ import {
   TagOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Avatar,
   Button,
@@ -30,7 +29,6 @@ import {
   Space,
 } from "antd";
 import { useRouter } from "next/router";
-import DisparitasData from "../LayananSIASN/DisparitasData";
 import GantiEmail from "../LayananSIASN/GantiEmail";
 import PengaturanGelar from "../LayananSIASN/PengaturanGelar";
 
@@ -127,24 +125,13 @@ const MenuButton = ({ item, onClick, isMobile }) => (
   </Card>
 );
 
-const useDisparitasPersonal = () => {
-  const { data, isLoading, refetch, isFetching } = useQuery(
-    ["disparitas-personal"],
-    () => getDisparitas(),
-    {
-      refetchOnWindowFocus: false,
-    }
-  );
-
-  return { disparitas: data, loading: isLoading, refetch, isFetching };
-};
-
 export function MenuMySAPK({
   dataUtama,
   foto,
   simaster,
   loadingDataUtamaSiasn,
   loadingDataUtamaMaster,
+  loadingFoto,
   refetchDataUtamaSiasn,
   refetchDataUtamaMaster,
   dataIPAsn,
@@ -155,7 +142,6 @@ export function MenuMySAPK({
   const router = useRouter();
   const { useBreakpoint } = Grid;
   const screens = useBreakpoint();
-  const { disparitas, loading, refetch, isFetching } = useDisparitasPersonal();
 
   const handleClick = (currentPath) => {
     const path = `/pemutakhiran-data${currentPath}`;
@@ -166,14 +152,10 @@ export function MenuMySAPK({
     refetchDataUtamaSiasn();
     refetchDataUtamaMaster();
     refetchDataIPAsn();
-    refetch();
   };
 
-  const isLoadingAny =
-    loading ||
-    loadingDataUtamaSiasn ||
-    loadingDataUtamaMaster ||
-    isLoadingDataIPAsn;
+  const isFetchingAny =
+    loadingDataUtamaSiasn || loadingDataUtamaMaster || isFetchingDataIPAsn;
 
   // Responsive variables using Antd breakpoints
   const isMobile = !screens.md;
@@ -265,7 +247,7 @@ export function MenuMySAPK({
                 <Button
                   type="text"
                   icon={<ReloadOutlined />}
-                  loading={isLoadingAny}
+                  loading={isFetchingAny}
                   onClick={handleRefresh}
                   size={isMobile ? "small" : "middle"}
                   style={{
@@ -274,7 +256,7 @@ export function MenuMySAPK({
                     borderRadius: "4px",
                   }}
                 >
-                  {isLoadingAny ? "Memuat..." : "Refresh Data"}
+                  {isFetchingAny ? "Memuat..." : "Refresh Data"}
                 </Button>
               </Tooltip>
             </Flex>
@@ -316,29 +298,45 @@ export function MenuMySAPK({
                           display: "inline-block",
                         }}
                       >
-                        <Avatar
-                          size={avatarSize}
-                          src={simaster?.foto}
-                          alt="Foto-SIMASTER"
-                          style={{
-                            border: `${isMobile ? "3px" : "4px"} solid #FF4500`,
-                            boxShadow: "0 4px 12px rgba(255, 69, 0, 0.2)",
-                          }}
-                        />
-                        {/* Online Indicator */}
-                        <div
-                          style={{
-                            position: "absolute",
-                            bottom: "3px",
-                            right: "3px",
-                            width: isMobile ? "16px" : "20px",
-                            height: isMobile ? "16px" : "20px",
-                            backgroundColor: "#52C41A",
-                            border: "3px solid #FFFFFF",
-                            borderRadius: "50%",
-                            boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
-                          }}
-                        />
+                        {loadingDataUtamaMaster ? (
+                          <Skeleton.Avatar
+                            size={avatarSize}
+                            active
+                            style={{
+                              border: `${
+                                isMobile ? "3px" : "4px"
+                              } solid #FF4500`,
+                            }}
+                          />
+                        ) : (
+                          <>
+                            <Avatar
+                              size={avatarSize}
+                              src={simaster?.foto}
+                              alt="Foto-SIMASTER"
+                              style={{
+                                border: `${
+                                  isMobile ? "3px" : "4px"
+                                } solid #FF4500`,
+                                boxShadow: "0 4px 12px rgba(255, 69, 0, 0.2)",
+                              }}
+                            />
+                            {/* Online Indicator */}
+                            <div
+                              style={{
+                                position: "absolute",
+                                bottom: "3px",
+                                right: "3px",
+                                width: isMobile ? "16px" : "20px",
+                                height: isMobile ? "16px" : "20px",
+                                backgroundColor: "#52C41A",
+                                border: "3px solid #FFFFFF",
+                                borderRadius: "50%",
+                                boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+                              }}
+                            />
+                          </>
+                        )}
                       </div>
                     </Tooltip>
                     <Text
@@ -363,29 +361,45 @@ export function MenuMySAPK({
                           display: "inline-block",
                         }}
                       >
-                        <Avatar
-                          size={avatarSize}
-                          src={foto?.data}
-                          alt="Foto-SIASN"
-                          style={{
-                            border: `${isMobile ? "3px" : "4px"} solid #1890FF`,
-                            boxShadow: "0 4px 12px rgba(24, 144, 255, 0.2)",
-                          }}
-                        />
-                        {/* Online Indicator */}
-                        <div
-                          style={{
-                            position: "absolute",
-                            bottom: "3px",
-                            right: "3px",
-                            width: isMobile ? "16px" : "20px",
-                            height: isMobile ? "16px" : "20px",
-                            backgroundColor: "#52C41A",
-                            border: "3px solid #FFFFFF",
-                            borderRadius: "50%",
-                            boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
-                          }}
-                        />
+                        {loadingFoto ? (
+                          <Skeleton.Avatar
+                            size={avatarSize}
+                            active
+                            style={{
+                              border: `${
+                                isMobile ? "3px" : "4px"
+                              } solid #1890FF`,
+                            }}
+                          />
+                        ) : (
+                          <>
+                            <Avatar
+                              size={avatarSize}
+                              src={foto?.data}
+                              alt="Foto-SIASN"
+                              style={{
+                                border: `${
+                                  isMobile ? "3px" : "4px"
+                                } solid #1890FF`,
+                                boxShadow: "0 4px 12px rgba(24, 144, 255, 0.2)",
+                              }}
+                            />
+                            {/* Online Indicator */}
+                            <div
+                              style={{
+                                position: "absolute",
+                                bottom: "3px",
+                                right: "3px",
+                                width: isMobile ? "16px" : "20px",
+                                height: isMobile ? "16px" : "20px",
+                                backgroundColor: "#52C41A",
+                                border: "3px solid #FFFFFF",
+                                borderRadius: "50%",
+                                boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+                              }}
+                            />
+                          </>
+                        )}
                       </div>
                     </Tooltip>
                     <Text
@@ -517,31 +531,7 @@ export function MenuMySAPK({
                   </Tooltip>
                 </Flex>
               </Flex>
-
-              {/* Disparitas Data - Stack on mobile */}
-              {!isMobile && (
-                <div style={{ minWidth: "120px" }}>
-                  <DisparitasData
-                    data={disparitas}
-                    isLoading={loading}
-                    refetch={refetch}
-                    isFetching={isFetching}
-                  />
-                </div>
-              )}
             </Flex>
-
-            {/* Disparitas Data for Mobile */}
-            {isMobile && (
-              <div style={{ marginBottom: "16px" }}>
-                <DisparitasData
-                  data={disparitas}
-                  isLoading={loading}
-                  refetch={refetch}
-                  isFetching={isFetching}
-                />
-              </div>
-            )}
 
             {/* Quick Actions */}
             <div

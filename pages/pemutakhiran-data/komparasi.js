@@ -220,6 +220,8 @@ const useDataUtamaMaster = () => {
     () => dataUtamaSimaster(),
     {
       refetchOnWindowFocus: false,
+      staleTime: 5 * 60 * 1000, // 5 menit
+      cacheTime: 10 * 60 * 1000, // 10 menit
     }
   );
 
@@ -238,6 +240,8 @@ function Komparasi() {
   } = useQuery(["data-utama-siasn"], () => dataUtamaSIASN(), {
     refetchOnWindowFocus: false,
     refetchOnMount: false,
+    staleTime: 5 * 60 * 1000, // 5 menit
+    cacheTime: 10 * 60 * 1000, // 10 menit
   });
 
   const {
@@ -248,6 +252,8 @@ function Komparasi() {
   } = useQuery(["ip-asn", 2024], () => dataIpAsn(2024), {
     enabled: !!2024,
     refetchOnWindowFocus: false,
+    staleTime: 5 * 60 * 1000,
+    cacheTime: 10 * 60 * 1000,
   });
 
   const { data: foto, isLoading: isLoadingFoto } = useQuery(
@@ -255,6 +261,8 @@ function Komparasi() {
     () => fotoSiasn(),
     {
       refetchOnWindowFocus: false,
+      staleTime: 10 * 60 * 1000, // 10 menit untuk foto
+      cacheTime: 15 * 60 * 1000,
     }
   );
 
@@ -263,6 +271,8 @@ function Komparasi() {
     () => dataNilaiIPASN(),
     {
       refetchOnWindowFocus: false,
+      staleTime: 5 * 60 * 1000,
+      cacheTime: 10 * 60 * 1000,
     }
   );
 
@@ -317,9 +327,6 @@ function Komparasi() {
     isFetching: isFetchingDataUtamaMaster,
   } = useDataUtamaMaster();
 
-  // Check if any data is loading
-  const isAnyLoading = isLoading || isLoadingFoto || isLoadingUtamaMaster;
-
   return (
     <>
       <Head>
@@ -346,14 +353,15 @@ function Komparasi() {
           <div>
             <Row gutter={[16, 16]}>
               <Col md={24} xs={24} sm={24}>
-                {isAnyLoading ? (
+                {isLoading ? (
                   <LoadingSkeleton />
                 ) : dataUtama ? (
                   <MenuMySAPK
-                    loadingDataUtamaSiasn={isLoading || isFetchingDataUtama}
+                    loadingDataUtamaSiasn={isFetchingDataUtama}
                     loadingDataUtamaMaster={
                       isLoadingUtamaMaster || isFetchingDataUtamaMaster
                     }
+                    loadingFoto={isLoadingFoto}
                     refetchDataUtamaSiasn={refetchDataUtama}
                     refetchDataUtamaMaster={refetchDataUtamaMaster}
                     simaster={dataUtamaMaster}
