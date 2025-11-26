@@ -57,7 +57,7 @@ const CekPencantumanGelar = ({ nip }) => {
             icon={<ReloadOutlined />}
             loading={isFetching}
             onClick={() => refetch()}
-          >
+      >
             Refresh
           </Button>
         </Flex>

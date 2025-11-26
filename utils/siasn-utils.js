@@ -608,3 +608,9 @@ module.exports.uploadDokumenSiasn = async (
     })
     .then((res) => res?.data);
 };
+
+module.exports.dataUtamaParuhWaktu = async (fetcher, nip) => {
+  return fetcher
+    .get(`/pns/data-utama/paruhwaktu/${nip}`)
+    .then((res) => res?.data?.data || null);
+};

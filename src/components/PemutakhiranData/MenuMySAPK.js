@@ -310,31 +310,31 @@ export function MenuMySAPK({
                           />
                         ) : (
                           <>
-                            <Avatar
-                              size={avatarSize}
-                              src={simaster?.foto}
-                              alt="Foto-SIMASTER"
-                              style={{
+                        <Avatar
+                          size={avatarSize}
+                          src={simaster?.foto}
+                          alt="Foto-SIMASTER"
+                          style={{
                                 border: `${
                                   isMobile ? "3px" : "4px"
                                 } solid #FF4500`,
-                                boxShadow: "0 4px 12px rgba(255, 69, 0, 0.2)",
-                              }}
-                            />
-                            {/* Online Indicator */}
-                            <div
-                              style={{
-                                position: "absolute",
-                                bottom: "3px",
-                                right: "3px",
-                                width: isMobile ? "16px" : "20px",
-                                height: isMobile ? "16px" : "20px",
-                                backgroundColor: "#52C41A",
-                                border: "3px solid #FFFFFF",
-                                borderRadius: "50%",
-                                boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
-                              }}
-                            />
+                            boxShadow: "0 4px 12px rgba(255, 69, 0, 0.2)",
+                          }}
+                        />
+                        {/* Online Indicator */}
+                        <div
+                          style={{
+                            position: "absolute",
+                            bottom: "3px",
+                            right: "3px",
+                            width: isMobile ? "16px" : "20px",
+                            height: isMobile ? "16px" : "20px",
+                            backgroundColor: "#52C41A",
+                            border: "3px solid #FFFFFF",
+                            borderRadius: "50%",
+                            boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+                          }}
+                        />
                           </>
                         )}
                       </div>
@@ -373,31 +373,31 @@ export function MenuMySAPK({
                           />
                         ) : (
                           <>
-                            <Avatar
-                              size={avatarSize}
-                              src={foto?.data}
-                              alt="Foto-SIASN"
-                              style={{
+                        <Avatar
+                          size={avatarSize}
+                          src={foto?.data}
+                          alt="Foto-SIASN"
+                          style={{
                                 border: `${
                                   isMobile ? "3px" : "4px"
                                 } solid #1890FF`,
-                                boxShadow: "0 4px 12px rgba(24, 144, 255, 0.2)",
-                              }}
-                            />
-                            {/* Online Indicator */}
-                            <div
-                              style={{
-                                position: "absolute",
-                                bottom: "3px",
-                                right: "3px",
-                                width: isMobile ? "16px" : "20px",
-                                height: isMobile ? "16px" : "20px",
-                                backgroundColor: "#52C41A",
-                                border: "3px solid #FFFFFF",
-                                borderRadius: "50%",
-                                boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
-                              }}
-                            />
+                            boxShadow: "0 4px 12px rgba(24, 144, 255, 0.2)",
+                          }}
+                        />
+                        {/* Online Indicator */}
+                        <div
+                          style={{
+                            position: "absolute",
+                            bottom: "3px",
+                            right: "3px",
+                            width: isMobile ? "16px" : "20px",
+                            height: isMobile ? "16px" : "20px",
+                            backgroundColor: "#52C41A",
+                            border: "3px solid #FFFFFF",
+                            borderRadius: "50%",
+                            boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+                          }}
+                        />
                           </>
                         )}
                       </div>

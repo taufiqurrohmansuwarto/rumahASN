@@ -13,6 +13,7 @@ import { useState } from "react";
 import { createColumns } from "./DaftarPegawaiParuhWaktuColumns";
 import DaftarPegawaiParuhWaktuFilter from "./DaftarPegawaiParuhWaktuFilter";
 import ModalDetailParuhWaktu from "./ModalDetailParuhWaktu";
+import ModalDetailSiasnParuhWaktu from "./ModalDetailSiasnParuhWaktu";
 import { useDownloadParuhWaktu } from "./useDownloadParuhWaktu";
 
 const { Title } = Typography;
@@ -36,6 +37,8 @@ const DaftarPegawaiParuhWaktu = () => {
 
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedData, setSelectedData] = useState(null);
+  const [siasnModalVisible, setSiasnModalVisible] = useState(false);
+  const [selectedNip, setSelectedNip] = useState(null);
 
   const handleShowDetail = (record) => {
     setSelectedData(record);
@@ -45,6 +48,16 @@ const DaftarPegawaiParuhWaktu = () => {
   const handleCloseModal = () => {
     setModalVisible(false);
     setSelectedData(null);
+  };
+
+  const handleShowSiasn = (nip) => {
+    setSelectedNip(nip);
+    setSiasnModalVisible(true);
+  };
+
+  const handleCloseSiasnModal = () => {
+    setSiasnModalVisible(false);
+    setSelectedNip(null);
   };
 
   const { data: unor, isLoading: isLoadingUnor } = useQuery(
@@ -147,7 +160,11 @@ const DaftarPegawaiParuhWaktu = () => {
     });
   };
 
-  const columns = createColumns(handleShowDetail, data?.has_action);
+  const columns = createColumns(
+    handleShowDetail,
+    data?.has_action,
+    handleShowSiasn
+  );
   const hasFilter =
     nama ||
     nip ||
@@ -457,6 +474,13 @@ const DaftarPegawaiParuhWaktu = () => {
         visible={modalVisible}
         onClose={handleCloseModal}
         data={selectedData}
+      />
+
+      {/* Modal Detail SIASN */}
+      <ModalDetailSiasnParuhWaktu
+        visible={siasnModalVisible}
+        onClose={handleCloseSiasnModal}
+        nip={selectedNip}
       />
     </div>
   );

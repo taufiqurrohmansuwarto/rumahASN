@@ -1,10 +1,24 @@
-import { log, logger } from "@/utils/logger";
+import { log } from "@/utils/logger";
 
 const { handleError } = require("@/utils/helper/controller-helper");
 const P3KParuhWaktu = require("@/models/pengadaan/p3k-paruh-waktu.model");
 const OperatorGajiPW = require("@/models/pengadaan/operator-gaji-pw.model");
 const AuditLog = require("@/models/pengadaan/audit-log.model");
 const { operatorVerifyMfa } = require("@/utils/master.utils");
+
+const { dataUtamaParuhWaktu } = require("@/utils/siasn-utils");
+
+export const getDataUtamaParuhWaktuByNip = async (req, res) => {
+  try {
+    const { nip } = req?.query;
+    const { siasnRequest } = req;
+    const result = await dataUtamaParuhWaktu(siasnRequest, nip);
+
+    res.json(result);
+  } catch (error) {
+    handleError(res, error);
+  }
+};
 
 export const getPengadaanParuhWaktu = async (req, res) => {
   try {

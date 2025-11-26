@@ -1111,3 +1111,13 @@ export const uploadDokumenSiasnBaru = async (data) => {
     })
     .then((res) => res.data);
 };
+
+export const getDataUtamaParuhWaktuByNip = async (nip) => {
+  return api
+    .get(`/admin/${nip}/data-utama-paruh-waktu`)
+    .then((res) => res.data);
+};
+
+export const getCVProxyByNip = async (nip) => {
+  return api.get(`/admin/${nip}/cv`).then((res) => res.data);
+};

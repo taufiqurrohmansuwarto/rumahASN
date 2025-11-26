@@ -1,5 +1,5 @@
 import { Badge, Text } from "@mantine/core";
-import { UserOutlined, SettingOutlined } from "@ant-design/icons";
+import { UserOutlined, SettingOutlined, InfoCircleOutlined } from "@ant-design/icons";
 import {
   IconDownload,
   IconX,
@@ -10,7 +10,7 @@ import {
 } from "@tabler/icons-react";
 import { Avatar, Button, Space, Tooltip } from "antd";
 
-export const createColumns = (handleShowDetail, hasAction = false) => {
+export const createColumns = (handleShowDetail, hasAction = false, handleShowSiasn) => {
   const columns = [
     {
       title: "Pegawai",
@@ -322,6 +322,23 @@ export const createColumns = (handleShowDetail, hasAction = false) => {
           </Tooltip>
         );
       },
+    },
+    {
+      title: "Detail",
+      key: "detail_siasn",
+      width: 70,
+      align: "center",
+      render: (_, record) => (
+        <Tooltip title="Lihat Detail SIASN">
+          <Button
+            type="text"
+            size="small"
+            icon={<InfoCircleOutlined />}
+            onClick={() => handleShowSiasn && handleShowSiasn(record?.nip)}
+            style={{ color: "#1890ff" }}
+          />
+        </Tooltip>
+      ),
     },
   ];
 

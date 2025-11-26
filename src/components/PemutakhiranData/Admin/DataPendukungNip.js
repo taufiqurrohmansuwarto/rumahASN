@@ -1,6 +1,7 @@
 import { getFileByNip, urlToPdf } from "@/services/master.services";
 import {
   dataUtamSIASNByNip,
+  getCVProxyByNip,
   uploadDokumenSiasnBaru,
 } from "@/services/siasn-services";
 import {
@@ -18,18 +19,19 @@ import {
   IconEye,
   IconExternalLink,
   IconUpload,
+  IconFileText,
 } from "@tabler/icons-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button, Modal, Spin, message, Tooltip, Upload } from "antd";
 import { useRouter } from "next/router";
-import { useState, useRef } from "react";
+import { useState } from "react";
 
 const dokumenPenting = [
   {
     key: "drh",
     label: "Daftar Riwayat Hidup",
     siasnCode: "24",
-    siasnOnly: true,
+    useCVProxy: true,
   },
   { key: "file_pns", label: "SK PNS", siasnCode: "887" },
   { key: "file_spmt_cpns", label: "SPMT", siasnCode: "888" },
@@ -38,8 +40,10 @@ const dokumenPenting = [
     key: "file_pertek",
     label: "Pertimbangan Teknis BKN",
     siasnCode: "2",
-    sourceKey: "file_nota_persetujuan_bkn",
-    confirmTransfer: true,
+    sourceOptions: [
+      { key: "file_nota_persetujuan_bkn", label: "Nota BKN" },
+      { key: "file_cpns", label: "SK CPNS" },
+    ],
   },
 ];
 
@@ -73,29 +77,25 @@ function DokumenPendukungNip() {
   const { data: siasn, isLoading: loadingSiasn } = useQuery(
     ["data-utama-siasn", nip],
     () => dataUtamSIASNByNip(nip),
-    {
-      enabled: !!nip,
-      refetchOnWindowFocus: false,
-      keepPreviousData: true,
-      staleTime: 500000,
-    }
+    { enabled: !!nip, refetchOnWindowFocus: false, staleTime: 500000 }
   );
 
   const { data, isLoading } = useQuery(
     ["dokumen-pendukung", nip],
     () => getFileByNip(nip),
-    {
-      refetchOnWindowFocus: false,
-      enabled: !!nip,
-      staleTime: 500000,
-      keepPreviousData: true,
-    }
+    { enabled: !!nip, refetchOnWindowFocus: false, staleTime: 500000 }
+  );
+
+  const { data: cvData } = useQuery(
+    ["cv-proxy", nip],
+    () => getCVProxyByNip(nip),
+    { enabled: !!nip, refetchOnWindowFocus: false, staleTime: 500000 }
   );
 
   const { mutate: transferDokumen } = useMutation(
     (data) => uploadDokumenSiasnBaru(data),
     {
-      onSuccess: (data, variables) => {
+      onSuccess: (_, variables) => {
         message.success("Berhasil upload ke SIASN");
         queryClient.invalidateQueries(["data-utama-siasn", nip]);
         setTransferringDocs((prev) => ({ ...prev, [variables.dokKey]: false }));
@@ -107,8 +107,11 @@ function DokumenPendukungNip() {
     }
   );
 
+  const getIdRiwayat = () =>
+    siasn?.data?.data?.id || siasn?.data?.id || siasn?.id;
+
   const handleUploadManual = async (file, dok) => {
-    const idRiwayat = siasn?.data?.data?.id || siasn?.data?.id || siasn?.id;
+    const idRiwayat = getIdRiwayat();
     if (!idRiwayat) {
       message.error("ID riwayat tidak ditemukan");
       return false;
@@ -123,11 +126,11 @@ function DokumenPendukungNip() {
     formData.dokKey = dok.key;
 
     transferDokumen(formData);
-    return false; // prevent default upload
+    return false;
   };
 
-  const handleTransfer = async (dok, fileUrl) => {
-    const idRiwayat = siasn?.data?.data?.id || siasn?.data?.id || siasn?.id;
+  const handleTransferFromUrl = async (dok, fileUrl) => {
+    const idRiwayat = getIdRiwayat();
     if (!idRiwayat) {
       message.error("ID riwayat tidak ditemukan");
       return;
@@ -154,10 +157,71 @@ function DokumenPendukungNip() {
     }
   };
 
+  const handleTransferCV = async (dok) => {
+    const idRiwayat = getIdRiwayat();
+    if (!idRiwayat) {
+      message.error("ID riwayat tidak ditemukan");
+      return;
+    }
+
+    if (!cvData?.data) {
+      message.error("CV SIASN tidak tersedia");
+      return;
+    }
+
+    Modal.confirm({
+      title: "Transfer DRH dari CV SIASN",
+      content:
+        "Pastikan data CV SIASN sudah benar dan sesuai. Jika belum benar, ubah data di SIASN terlebih dahulu sebelum transfer.",
+      okText: "Ya, Transfer",
+      cancelText: "Batal",
+      onOk: async () => {
+        setTransferringDocs((prev) => ({ ...prev, [dok.key]: true }));
+
+        try {
+          const base64Data = cvData.data.split(",")[1];
+          const byteCharacters = atob(base64Data);
+          const byteNumbers = new Array(byteCharacters.length);
+          for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+          }
+          const byteArray = new Uint8Array(byteNumbers);
+          const blob = new Blob([byteArray], { type: "application/pdf" });
+          const file = new File([blob], `${nip}_DRH.pdf`, {
+            type: "application/pdf",
+          });
+
+          const formData = new FormData();
+          formData.append("file", file);
+          formData.append("id_riwayat", idRiwayat);
+          formData.append("id_ref_dokumen", dok.siasnCode);
+          formData.dokKey = dok.key;
+
+          transferDokumen(formData);
+        } catch (error) {
+          message.error("Gagal transfer CV");
+          setTransferringDocs((prev) => ({ ...prev, [dok.key]: false }));
+        }
+      },
+    });
+  };
+
   const getFileUrl = (url) => {
     if (!url) return null;
     if (url.startsWith("http")) return url;
     return `https://master.bkd.jatimprov.go.id/files_jatimprov/${url}`;
+  };
+
+  const getPathData = () => {
+    let pathData = siasn?.data?.path || siasn?.path || siasn?.data?.data?.path;
+    if (typeof pathData === "string") {
+      try {
+        pathData = JSON.parse(pathData);
+      } catch {
+        pathData = null;
+      }
+    }
+    return pathData;
   };
 
   const isImage = (url) => /\.(jpg|jpeg|png|gif|webp)$/i.test(url || "");
@@ -174,51 +238,45 @@ function DokumenPendukungNip() {
     );
   }
 
-  const DokumenItem = ({ dok }) => {
-    // Gunakan sourceKey jika ada, jika tidak gunakan key biasa
-    const sourceKey = dok.sourceKey || dok.key;
-    const fileUrl = data?.[sourceKey];
-    const fullUrl = getFileUrl(fileUrl);
+  const pathData = getPathData();
 
-    let pathData = siasn?.data?.path || siasn?.path || siasn?.data?.data?.path;
-    if (typeof pathData === "string") {
-      try {
-        pathData = JSON.parse(pathData);
-      } catch {
-        pathData = null;
-      }
-    }
-
-    const siasnDoc = dok.siasnCode ? pathData?.[dok.siasnCode] : null;
+  // DRH Item Component
+  const DRHItem = ({ dok }) => {
+    const siasnDoc = pathData?.[dok.siasnCode];
     const siasnUrl = siasnDoc?.dok_uri
       ? `/helpdesk/api/siasn/ws/download?filePath=${siasnDoc.dok_uri}`
       : null;
+    const hasCVData = !!cvData?.data;
 
-    // Jika siasnOnly, hanya tampilkan status SIASN dan tombol lihat/upload SIASN
-    if (dok.siasnOnly) {
-      return (
+    return (
+      <Flex
+        direction={{ base: "column", sm: "row" }}
+        align={{ base: "stretch", sm: "center" }}
+        justify="space-between"
+        gap={8}
+        py={8}
+        px={10}
+        style={{
+          border: "1px solid #e9ecef",
+          borderRadius: 6,
+          backgroundColor: siasnDoc ? "#fff" : "#f8f9fa",
+        }}
+      >
         <Flex
-          direction={{ base: "column", sm: "row" }}
-          align={{ base: "stretch", sm: "center" }}
-          justify="space-between"
+          direction={{ base: "column", xs: "row" }}
+          align={{ base: "flex-start", xs: "center" }}
           gap={8}
-          py={8}
-          px={10}
-          style={{
-            border: "1px solid #e9ecef",
-            borderRadius: 6,
-            backgroundColor: siasnDoc ? "#fff" : "#f8f9fa",
-          }}
+          style={{ flex: 1, minWidth: 0 }}
         >
-          <Flex
-            direction={{ base: "column", xs: "row" }}
-            align={{ base: "flex-start", xs: "center" }}
-            gap={8}
-            style={{ flex: 1, minWidth: 0 }}
-          >
-            <Text size="xs" fw={500} style={{ minWidth: 100 }}>
-              {dok.label}
-            </Text>
+          <Text size="xs" fw={500} style={{ minWidth: 100 }}>
+            {dok.label}
+          </Text>
+          <Group gap={4}>
+            {hasCVData && (
+              <Badge size="xs" color="blue" variant="filled">
+                CV SIASN
+              </Badge>
+            )}
             <Badge
               size="xs"
               color={siasnDoc ? "green" : "gray"}
@@ -226,41 +284,178 @@ function DokumenPendukungNip() {
             >
               SIASN
             </Badge>
-          </Flex>
+          </Group>
+        </Flex>
 
-          <Group gap={4} wrap="nowrap">
-            {siasnDoc ? (
-              <Tooltip title="Lihat SIASN">
-                <Button
-                  size="small"
-                  type="text"
-                  href={siasnUrl}
-                  target="_blank"
-                  icon={<IconExternalLink size={14} />}
-                />
-              </Tooltip>
-            ) : (
-              <Upload
-                accept=".pdf"
-                showUploadList={false}
-                beforeUpload={(file) => handleUploadManual(file, dok)}
-              >
-                <Tooltip title="Upload Manual ke SIASN">
+        <Group gap={4} wrap="nowrap">
+          {hasCVData && (
+            <Tooltip title="Lihat CV SIASN">
+              <Button
+                size="small"
+                type="text"
+                icon={<IconFileText size={14} />}
+                onClick={() => {
+                  setSelectedFile({ label: "CV SIASN", url: cvData.data });
+                  setModalOpen(true);
+                }}
+              />
+            </Tooltip>
+          )}
+          {siasnDoc && (
+            <Tooltip title="Lihat SIASN">
+              <Button
+                size="small"
+                type="text"
+                href={siasnUrl}
+                target="_blank"
+                icon={<IconExternalLink size={14} />}
+              />
+            </Tooltip>
+          )}
+          {!siasnDoc && (
+            <>
+              {hasCVData ? (
+                <Tooltip title="Transfer CV ke SIASN">
                   <Button
                     size="small"
                     type="primary"
                     loading={transferringDocs[dok.key]}
-                    icon={<IconUpload size={14} />}
-                  >
-                    Upload
-                  </Button>
+                    icon={<IconArrowRight size={14} />}
+                    onClick={() => handleTransferCV(dok)}
+                  />
                 </Tooltip>
-              </Upload>
-            )}
+              ) : (
+                <Upload
+                  accept=".pdf"
+                  showUploadList={false}
+                  beforeUpload={(file) => handleUploadManual(file, dok)}
+                >
+                  <Tooltip title="Upload Manual">
+                    <Button
+                      size="small"
+                      type="primary"
+                      loading={transferringDocs[dok.key]}
+                      icon={<IconUpload size={14} />}
+                    />
+                  </Tooltip>
+                </Upload>
+              )}
+            </>
+          )}
+        </Group>
+      </Flex>
+    );
+  };
+
+  // Pertek Item Component
+  const PertekItem = ({ dok }) => {
+    const siasnDoc = pathData?.[dok.siasnCode];
+    const siasnUrl = siasnDoc?.dok_uri
+      ? `/helpdesk/api/siasn/ws/download?filePath=${siasnDoc.dok_uri}`
+      : null;
+
+    const handleTransferWithSource = (sourceKey, sourceLabel) => {
+      const fileUrl = data?.[sourceKey];
+      const fullUrl = getFileUrl(fileUrl);
+
+      if (!fileUrl) {
+        message.error(`File ${sourceLabel} tidak tersedia`);
+        return;
+      }
+
+      Modal.confirm({
+        title: `Transfer ${dok.label}`,
+        content: `Transfer dari ${sourceLabel} ke SIASN dengan kode dokumen ${dok.siasnCode}?`,
+        okText: "Ya, Transfer",
+        cancelText: "Batal",
+        onOk: () => handleTransferFromUrl(dok, fullUrl),
+      });
+    };
+
+    return (
+      <Flex
+        direction={{ base: "column", sm: "row" }}
+        align={{ base: "stretch", sm: "center" }}
+        justify="space-between"
+        gap={8}
+        py={8}
+        px={10}
+        style={{
+          border: "1px solid #e9ecef",
+          borderRadius: 6,
+          backgroundColor: siasnDoc ? "#fff" : "#f8f9fa",
+        }}
+      >
+        <Flex
+          direction={{ base: "column", xs: "row" }}
+          align={{ base: "flex-start", xs: "center" }}
+          gap={8}
+          style={{ flex: 1, minWidth: 0 }}
+        >
+          <Text size="xs" fw={500} style={{ minWidth: 100 }}>
+            {dok.label}
+          </Text>
+          <Group gap={4}>
+            {dok.sourceOptions?.map((src) => (
+              <Badge
+                key={src.key}
+                size="xs"
+                color={data?.[src.key] ? "green" : "gray"}
+                variant="light"
+              >
+                {src.label}
+              </Badge>
+            ))}
+            <Badge
+              size="xs"
+              color={siasnDoc ? "green" : "gray"}
+              variant="filled"
+            >
+              SIASN
+            </Badge>
           </Group>
         </Flex>
-      );
-    }
+
+        <Group gap={4} wrap="nowrap">
+          {siasnDoc ? (
+            <Tooltip title="Lihat SIASN">
+              <Button
+                size="small"
+                type="text"
+                href={siasnUrl}
+                target="_blank"
+                icon={<IconExternalLink size={14} />}
+              />
+            </Tooltip>
+          ) : (
+            <>
+              {dok.sourceOptions?.map((src) => (
+                <Tooltip key={src.key} title={`Transfer dari ${src.label}`}>
+                  <Button
+                    size="small"
+                    type={src.key === "file_cpns" ? "primary" : "default"}
+                    disabled={!data?.[src.key] || transferringDocs[dok.key]}
+                    loading={transferringDocs[dok.key]}
+                    icon={<IconArrowRight size={14} />}
+                    onClick={() => handleTransferWithSource(src.key, src.label)}
+                  />
+                </Tooltip>
+              ))}
+            </>
+          )}
+        </Group>
+      </Flex>
+    );
+  };
+
+  // Standard Document Item
+  const DokumenItem = ({ dok }) => {
+    const fileUrl = data?.[dok.key];
+    const fullUrl = getFileUrl(fileUrl);
+    const siasnDoc = dok.siasnCode ? pathData?.[dok.siasnCode] : null;
+    const siasnUrl = siasnDoc?.dok_uri
+      ? `/helpdesk/api/siasn/ws/download?filePath=${siasnDoc.dok_uri}`
+      : null;
 
     return (
       <Flex
@@ -330,7 +525,6 @@ function DokumenPendukungNip() {
                   icon={<IconExternalLink size={14} />}
                 />
               </Tooltip>
-              {/* Tombol transfer - tidak tampil jika SIASN sudah ada */}
               {!siasnDoc && (
                 <Tooltip title="Transfer ke SIASN">
                   <Button
@@ -338,19 +532,7 @@ function DokumenPendukungNip() {
                     type="primary"
                     disabled={!fileUrl || transferringDocs[dok.key]}
                     loading={transferringDocs[dok.key]}
-                    onClick={() => {
-                      if (dok.confirmTransfer) {
-                        Modal.confirm({
-                          title: "Konfirmasi Transfer",
-                          content: `Apakah Anda yakin ingin mentransfer "${dok.label}" dari file Nota BKN ke SIASN?`,
-                          okText: "Ya, Transfer",
-                          cancelText: "Batal",
-                          onOk: () => handleTransfer(dok, fullUrl),
-                        });
-                      } else {
-                        handleTransfer(dok, fullUrl);
-                      }
-                    }}
+                    onClick={() => handleTransferFromUrl(dok, fullUrl)}
                     icon={<IconArrowRight size={14} />}
                   />
                 </Tooltip>
@@ -360,6 +542,12 @@ function DokumenPendukungNip() {
         </Group>
       </Flex>
     );
+  };
+
+  const renderItem = (dok) => {
+    if (dok.useCVProxy) return <DRHItem key={dok.key} dok={dok} />;
+    if (dok.sourceOptions) return <PertekItem key={dok.key} dok={dok} />;
+    return <DokumenItem key={dok.key} dok={dok} />;
   };
 
   return (
@@ -372,8 +560,8 @@ function DokumenPendukungNip() {
         radius="sm"
       >
         <Text size="xs">
-          Gunakan fitur transfer dari SIMASTER untuk mempercepat sinkronisasi ke
-          SIASN
+          Transfer dokumen dari SIMASTER/CV SIASN ke dokumen SIASN untuk
+          sinkronisasi data
         </Text>
       </Alert>
 
@@ -382,9 +570,7 @@ function DokumenPendukungNip() {
           Dokumen Penting
         </Text>
         <SimpleGrid cols={{ base: 1, md: 2, lg: 3 }} spacing="xs">
-          {dokumenPenting.map((dok) => (
-            <DokumenItem key={dok.key} dok={dok} />
-          ))}
+          {dokumenPenting.map(renderItem)}
         </SimpleGrid>
       </div>
 
@@ -409,7 +595,13 @@ function DokumenPendukungNip() {
       >
         {selectedFile?.url && (
           <div style={{ textAlign: "center" }}>
-            {isImage(selectedFile.url) ? (
+            {selectedFile.url.startsWith("data:application/pdf") ? (
+              <iframe
+                src={selectedFile.url}
+                style={{ width: "100%", height: "70vh", border: "none" }}
+                title={selectedFile.label}
+              />
+            ) : isImage(selectedFile.url) ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={selectedFile.url}

@@ -204,3 +204,13 @@ module.exports.getSKKProxy = async (token, params = {}) => {
   const response = await fetcher.get(url);
   return response.data;
 };
+
+// https://api-siasn.bkn.go.id/profilasn/api/report/cetak-profile-pns-instansi/{id}
+module.exports.getCVProxyByPnsId = async (token, pnsId) => {
+  const fetcher = createFetcher(token);
+  const url = `/profilasn/api/report/cetak-profile-pns-instansi/${pnsId}`;
+  const response = await fetcher.get(url, {
+    responseType: "arraybuffer",
+  });
+  return response.data;
+};
