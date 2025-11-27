@@ -38,7 +38,7 @@ import {
   IconArrowLeft,
 } from "@tabler/icons-react";
 import dayjs from "dayjs";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 
 const ModalUbahPendidikan = ({
   usulanId,
@@ -167,6 +167,15 @@ const ModalUbahPendidikan = ({
       setSelectedMasterData(null); // Reset selected master data
       setSelectedMasterId(null); // Reset dropdown value
       
+      // Reset state pendidikan pertama dari row
+      setIsPendidikanPertama(formatBoolean(row?.isPendidikanPertama));
+      
+      // Reset uploaded files
+      setUploadedFiles({
+        ijazah: null,
+        transkrip: null,
+      });
+      
       // Hanya set field yang read-only (NIP dan Tingkat Pendidikan)
       // Field lain kosong, user harus pilih dari dropdown atau input manual
       const initialValues = {
@@ -239,9 +248,14 @@ const ModalUbahPendidikan = ({
   });
 
   // State untuk toggle pendidikan pertama
-  const [isPendidikanPertama, setIsPendidikanPertama] = useState(
-    formatBoolean(row?.isPendidikanPertama)
-  );
+  const [isPendidikanPertama, setIsPendidikanPertama] = useState(false);
+
+  // State untuk preview file dengan iframe
+  const [previewModal, setPreviewModal] = useState({
+    open: false,
+    url: null,
+    title: "",
+  });
 
   // Fungsi untuk handle upload file ijazah manual
   const handleUploadIjazah = (file) => {
@@ -493,8 +507,13 @@ const ModalUbahPendidikan = ({
                   size="small"
                   type="link"
                   icon={<IconFileCheck size={14} />}
-                  href={selectedMasterData.file_ijazah_url}
-                  target="_blank"
+                  onClick={() =>
+                    setPreviewModal({
+                      open: true,
+                      url: selectedMasterData.file_ijazah_url,
+                      title: "Preview Ijazah (SIMASTER)",
+                    })
+                  }
                 >
                   Ijazah
                 </Button>
@@ -504,8 +523,13 @@ const ModalUbahPendidikan = ({
                   size="small"
                   type="link"
                   icon={<IconFileText size={14} />}
-                  href={selectedMasterData.file_nilai_url}
-                  target="_blank"
+                  onClick={() =>
+                    setPreviewModal({
+                      open: true,
+                      url: selectedMasterData.file_nilai_url,
+                      title: "Preview Transkrip (SIMASTER)",
+                    })
+                  }
                 >
                   Transkrip
                 </Button>
@@ -651,8 +675,13 @@ const ModalUbahPendidikan = ({
                     size="small"
                     type="link"
                     block
-                    href={`/helpdesk/api/siasn/ws/download?filePath=${uploadedFiles.ijazah}`}
-                    target="_blank"
+                    onClick={() =>
+                      setPreviewModal({
+                        open: true,
+                        url: `/helpdesk/api/siasn/ws/download?filePath=${uploadedFiles.ijazah}`,
+                        title: "Preview Ijazah",
+                      })
+                    }
                     style={{ padding: "0 4px", height: 20 }}
                   >
                     <Text size="xs" c="blue">
@@ -706,8 +735,13 @@ const ModalUbahPendidikan = ({
                     size="small"
                     type="link"
                     block
-                    href={`/helpdesk/api/siasn/ws/download?filePath=${uploadedFiles.transkrip}`}
-                    target="_blank"
+                    onClick={() =>
+                      setPreviewModal({
+                        open: true,
+                        url: `/helpdesk/api/siasn/ws/download?filePath=${uploadedFiles.transkrip}`,
+                        title: "Preview Transkrip Nilai",
+                      })
+                    }
                     style={{ padding: "0 4px", height: 20 }}
                   >
                     <Text size="xs" c="blue">
@@ -904,6 +938,29 @@ const ModalUbahPendidikan = ({
           </>
         )}
       </Form>
+
+      {/* Modal Preview File dengan iframe */}
+      <Modal
+        open={previewModal.open}
+        title={previewModal.title}
+        onCancel={() => setPreviewModal({ open: false, url: null, title: "" })}
+        footer={null}
+        width={800}
+        centered
+        destroyOnClose
+      >
+        {previewModal.url && (
+          <iframe
+            src={previewModal.url}
+            style={{
+              width: "100%",
+              height: "70vh",
+              border: "none",
+            }}
+            title={previewModal.title}
+          />
+        )}
+      </Modal>
     </Modal>
   );
 };
