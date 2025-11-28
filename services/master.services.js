@@ -313,3 +313,32 @@ export const cekFasilitatorByOpdIdServices = (opdId) => {
 export const getFileByNip = (nip) => {
   return api.get(`/admin/${nip}/file`).then((res) => res.data);
 };
+
+// reference simaster
+export const refKedudukanHukumSimaster = () => {
+  return api.get("/ref/kedudukan-hukum").then((res) => res.data);
+};
+
+export const refJenjangSimaster = () => {
+  return api.get("/ref/jenjang").then((res) => res.data);
+};
+
+export const refJenisJabatanSimaster = () => {
+  return api.get("/ref/jenis-jabatan").then((res) => res.data);
+};
+
+export const refPangkatSimaster = () => {
+  return api.get("/ref/pangkat").then((res) => res.data);
+};
+
+export const refStatusKawinSimaster = () => {
+  return api.get("/ref/status-kawin").then((res) => res.data);
+};
+
+export const refAgamaSimaster = () => {
+  return api.get("/ref/agama").then((res) => res.data);
+};
+
+export const refStatusKepegawaianSimaster = () => {
+  return api.get("/ref/status-kepegawaian").then((res) => res.data);
+};

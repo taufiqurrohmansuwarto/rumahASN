@@ -12,6 +12,7 @@ import {
   Col,
   DatePicker,
   Divider,
+  Dropdown,
   Flex,
   Form,
   Input,
@@ -36,6 +37,8 @@ import {
   IconKey,
   IconLock,
   IconArrowLeft,
+  IconExternalLink,
+  IconEye,
 } from "@tabler/icons-react";
 import dayjs from "dayjs";
 import { useState, useEffect, useMemo } from "react";
@@ -166,16 +169,16 @@ const ModalUbahPendidikan = ({
       setStep(1); // Reset ke step 1
       setSelectedMasterData(null); // Reset selected master data
       setSelectedMasterId(null); // Reset dropdown value
-      
+
       // Reset state pendidikan pertama dari row
       setIsPendidikanPertama(formatBoolean(row?.isPendidikanPertama));
-      
+
       // Reset uploaded files
       setUploadedFiles({
         ijazah: null,
         transkrip: null,
       });
-      
+
       // Hanya set field yang read-only (NIP dan Tingkat Pendidikan)
       // Field lain kosong, user harus pilih dari dropdown atau input manual
       const initialValues = {
@@ -220,9 +223,13 @@ const ModalUbahPendidikan = ({
       // Langsung set tanpa setTimeout
       const newValues = {
         namaSekolah: selectedData.nama_sekolah || "",
-        tahunLulus: selectedData.tahun_lulus ? String(selectedData.tahun_lulus) : "",
+        tahunLulus: selectedData.tahun_lulus
+          ? String(selectedData.tahun_lulus)
+          : "",
         nomorIjasah: selectedData.no_ijazah || "",
-        tglLulus: selectedData.tgl_ijazah ? dayjs(selectedData.tgl_ijazah) : null,
+        tglLulus: selectedData.tgl_ijazah
+          ? dayjs(selectedData.tgl_ijazah)
+          : null,
         gelarDepan: selectedData.gelar_depan || "",
         gelarBelakang: selectedData.gelar_belakang || "",
       };
@@ -237,7 +244,7 @@ const ModalUbahPendidikan = ({
   // State untuk menyimpan data yang dipilih dari master
   const [selectedMasterData, setSelectedMasterData] = useState(null);
   const [selectedMasterId, setSelectedMasterId] = useState(null);
-  
+
   // State untuk menyimpan form values dari step 1
   const [step1Values, setStep1Values] = useState(null);
 
@@ -407,7 +414,10 @@ const ModalUbahPendidikan = ({
   // Handler untuk submit final
   const handleSubmit = async () => {
     try {
-      const step2Values = await form.validateFields(['passphrase', 'one_time_code']);
+      const step2Values = await form.validateFields([
+        "passphrase",
+        "one_time_code",
+      ]);
       const ijazah = uploadedFiles?.ijazah;
       const transkrip = uploadedFiles?.transkrip;
 
@@ -487,7 +497,7 @@ const ModalUbahPendidikan = ({
         )
       }
     >
-        <Stack spacing="xs" style={{ marginBottom: 16 }}>
+      <Stack spacing="xs" style={{ marginBottom: 16 }}>
         <Flex justify="space-between" align="center">
           <Text size="xs" c="dimmed">
             ID: {usulanId}
@@ -503,36 +513,78 @@ const ModalUbahPendidikan = ({
                 Refresh
               </Button>
               {selectedMasterData?.file_ijazah_url && (
-                <Button
-                  size="small"
-                  type="link"
-                  icon={<IconFileCheck size={14} />}
-                  onClick={() =>
-                    setPreviewModal({
-                      open: true,
-                      url: selectedMasterData.file_ijazah_url,
-                      title: "Preview Ijazah (SIMASTER)",
-                    })
-                  }
+                <Dropdown
+                  menu={{
+                    items: [
+                      {
+                        key: "modal",
+                        label: "Lihat di Modal",
+                        icon: <IconEye size={14} />,
+                        onClick: () =>
+                          setPreviewModal({
+                            open: true,
+                            url: selectedMasterData.file_ijazah_url,
+                            title: "Preview Ijazah (SIMASTER)",
+                          }),
+                      },
+                      {
+                        key: "newtab",
+                        label: "Buka di Tab Baru",
+                        icon: <IconExternalLink size={14} />,
+                        onClick: () =>
+                          window.open(
+                            selectedMasterData.file_ijazah_url,
+                            "_blank"
+                          ),
+                      },
+                    ],
+                  }}
                 >
-                  Ijazah
-                </Button>
+                  <Button
+                    size="small"
+                    type="link"
+                    icon={<IconFileCheck size={14} />}
+                  >
+                    Ijazah
+                  </Button>
+                </Dropdown>
               )}
               {selectedMasterData?.file_nilai_url && (
-                <Button
-                  size="small"
-                  type="link"
-                  icon={<IconFileText size={14} />}
-                  onClick={() =>
-                    setPreviewModal({
-                      open: true,
-                      url: selectedMasterData.file_nilai_url,
-                      title: "Preview Transkrip (SIMASTER)",
-                    })
-                  }
+                <Dropdown
+                  menu={{
+                    items: [
+                      {
+                        key: "modal",
+                        label: "Lihat di Modal",
+                        icon: <IconEye size={14} />,
+                        onClick: () =>
+                          setPreviewModal({
+                            open: true,
+                            url: selectedMasterData.file_nilai_url,
+                            title: "Preview Transkrip (SIMASTER)",
+                          }),
+                      },
+                      {
+                        key: "newtab",
+                        label: "Buka di Tab Baru",
+                        icon: <IconExternalLink size={14} />,
+                        onClick: () =>
+                          window.open(
+                            selectedMasterData.file_nilai_url,
+                            "_blank"
+                          ),
+                      },
+                    ],
+                  }}
                 >
-                  Transkrip
-                </Button>
+                  <Button
+                    size="small"
+                    type="link"
+                    icon={<IconFileText size={14} />}
+                  >
+                    Transkrip
+                  </Button>
+                </Dropdown>
               )}
             </Space>
           )}
@@ -547,338 +599,388 @@ const ModalUbahPendidikan = ({
       >
         {step === 1 ? (
           <>
-          <Row gutter={[12, 8]}>
-            <Col span={8}>
-              <Text
-                size="xs"
-                fw={500}
-                style={{ display: "block", marginBottom: 4 }}
-              >
-                NIP
-              </Text>
-              <Form.Item name="nipBaru" style={{ marginBottom: 0 }}>
-                <Input disabled size="small" prefix={<IconUser size={14} />} />
-              </Form.Item>
-            </Col>
-            <Col span={16}>
-              <Text
-                size="xs"
-                fw={500}
-                style={{ display: "block", marginBottom: 4 }}
-              >
-                Tingkat Pendidikan
-              </Text>
-              <Form.Item name="tkPendidikanNama" style={{ marginBottom: 0 }}>
-                <Input disabled size="small" prefix={<IconSchool size={14} />} />
-              </Form.Item>
-            </Col>
-          </Row>
+            <Row gutter={[12, 8]}>
+              <Col span={8}>
+                <Text
+                  size="xs"
+                  fw={500}
+                  style={{ display: "block", marginBottom: 4 }}
+                >
+                  NIP
+                </Text>
+                <Form.Item name="nipBaru" style={{ marginBottom: 0 }}>
+                  <Input
+                    disabled
+                    size="small"
+                    prefix={<IconUser size={14} />}
+                  />
+                </Form.Item>
+              </Col>
+              <Col span={16}>
+                <Text
+                  size="xs"
+                  fw={500}
+                  style={{ display: "block", marginBottom: 4 }}
+                >
+                  Tingkat Pendidikan
+                </Text>
+                <Form.Item name="tkPendidikanNama" style={{ marginBottom: 0 }}>
+                  <Input
+                    disabled
+                    size="small"
+                    prefix={<IconSchool size={14} />}
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
 
-          {initialPendidikan?.length > 0 && (
-            <div style={{ marginBottom: 8, marginTop: 8 }}>
-              <Text
-                size="xs"
-                fw={500}
-                style={{ display: "block", marginBottom: 4 }}
-              >
-                Pendidikan
-              </Text>
-              <Form.Item name="pendidikanId" style={{ marginBottom: 0 }}>
+            {initialPendidikan?.length > 0 && (
+              <div style={{ marginBottom: 8, marginTop: 8 }}>
+                <Text
+                  size="xs"
+                  fw={500}
+                  style={{ display: "block", marginBottom: 4 }}
+                >
+                  Pendidikan
+                </Text>
+                <Form.Item name="pendidikanId" style={{ marginBottom: 0 }}>
+                  <Select
+                    size="small"
+                    showSearch
+                    allowClear
+                    optionFilterProp="label"
+                    options={initialPendidikan?.map((item) => ({
+                      label: item.nama,
+                      value: item.id,
+                    }))}
+                  />
+                </Form.Item>
+              </div>
+            )}
+
+            {data?.length > 0 && (
+              <div style={{ marginBottom: 12 }}>
+                <Text
+                  size="xs"
+                  fw={500}
+                  style={{ display: "block", marginBottom: 4 }}
+                >
+                  Isi Otomatis dari Simaster
+                </Text>
                 <Select
                   size="small"
                   showSearch
                   allowClear
+                  placeholder="Pilih data dari Simaster untuk mengisi form otomatis"
                   optionFilterProp="label"
-                  options={initialPendidikan?.map((item) => ({
-                    label: item.nama,
+                  onChange={handleSelectPendidikanSimaster}
+                  value={selectedMasterId}
+                  style={{ width: "100%" }}
+                  options={data?.map((item) => ({
+                    label: `${item.prodi} - ${item.nama_sekolah} (${item.tahun_lulus})`,
                     value: item.id,
                   }))}
                 />
-              </Form.Item>
-            </div>
-          )}
+              </div>
+            )}
 
-          {data?.length > 0 && (
-            <div style={{ marginBottom: 12 }}>
-              <Text
-                size="xs"
-                fw={500}
-                style={{ display: "block", marginBottom: 4 }}
-              >
-                Isi Otomatis dari Simaster
+            <Divider style={{ margin: "12px 0" }}>
+              <Text size="xs" fw={500}>
+                Dokumen
               </Text>
-              <Select
-                size="small"
-                showSearch
-                allowClear
-                placeholder="Pilih data dari Simaster untuk mengisi form otomatis"
-                optionFilterProp="label"
-                onChange={handleSelectPendidikanSimaster}
-                value={selectedMasterId}
-                style={{ width: "100%" }}
-                options={data?.map((item) => ({
-                  label: `${item.prodi} - ${item.nama_sekolah} (${item.tahun_lulus})`,
-                  value: item.id,
-                }))}
-              />
-            </div>
-          )}
+            </Divider>
 
-          <Divider style={{ margin: "12px 0" }}>
-            <Text size="xs" fw={500}>
-              Dokumen
-            </Text>
-          </Divider>
-
-          <Row gutter={[16, 12]}>
-            <Col span={12}>
-              <Stack spacing={6}>
-                <Flex justify="space-between" align="center">
-                  <Text size="xs" fw={500}>
-                    Ijazah
-                  </Text>
+            <Row gutter={[16, 12]}>
+              <Col span={12}>
+                <Stack spacing={6}>
+                  <Flex justify="space-between" align="center">
+                    <Text size="xs" fw={500}>
+                      Ijazah
+                    </Text>
+                    {uploadedFiles.ijazah && (
+                      <Badge size="sm" variant="light" color="green">
+                        Uploaded
+                      </Badge>
+                    )}
+                  </Flex>
+                  <Space.Compact style={{ width: "100%" }}>
+                    <Button
+                      size="small"
+                      icon={<IconCloudDown size={14} />}
+                      onClick={handleSyncIjazahFromMaster}
+                      loading={loadingSync.ijazah}
+                      disabled={!selectedMasterData?.file_ijazah_url}
+                      style={{ flex: 1 }}
+                    >
+                      Sync
+                    </Button>
+                    <Upload
+                      accept=".pdf,.jpg,.jpeg,.png"
+                      beforeUpload={handleUploadIjazah}
+                      showUploadList={false}
+                    >
+                      <Button
+                        size="small"
+                        icon={<IconUpload size={14} />}
+                        style={{ flex: 1 }}
+                        loading={isUploading}
+                        disabled={isUploading}
+                      >
+                        Upload
+                      </Button>
+                    </Upload>
+                  </Space.Compact>
                   {uploadedFiles.ijazah && (
-                    <Badge size="sm" variant="light" color="green">
-                      Uploaded
-                    </Badge>
-                  )}
-                </Flex>
-                <Space.Compact style={{ width: "100%" }}>
-                  <Button
-                    size="small"
-                    icon={<IconCloudDown size={14} />}
-                    onClick={handleSyncIjazahFromMaster}
-                    loading={loadingSync.ijazah}
-                    disabled={!selectedMasterData?.file_ijazah_url}
-                    style={{ flex: 1 }}
-                  >
-                    Sync
-                  </Button>
-                  <Upload
-                    accept=".pdf,.jpg,.jpeg,.png"
-                    beforeUpload={handleUploadIjazah}
-                    showUploadList={false}
-                  >
-                    <Button 
-                      size="small" 
-                      icon={<IconUpload size={14} />} 
-                      style={{ flex: 1 }}
-                      loading={isUploading}
-                      disabled={isUploading}
+                    <Dropdown
+                      menu={{
+                        items: [
+                          {
+                            key: "modal",
+                            label: "Lihat di Modal",
+                            icon: <IconEye size={14} />,
+                            onClick: () =>
+                              setPreviewModal({
+                                open: true,
+                                url: `/helpdesk/api/siasn/ws/download?filePath=${uploadedFiles.ijazah}`,
+                                title: "Preview Ijazah",
+                              }),
+                          },
+                          {
+                            key: "newtab",
+                            label: "Buka di Tab Baru",
+                            icon: <IconExternalLink size={14} />,
+                            onClick: () =>
+                              window.open(
+                                `/helpdesk/api/siasn/ws/download?filePath=${uploadedFiles.ijazah}`,
+                                "_blank"
+                              ),
+                          },
+                        ],
+                      }}
                     >
-                      Upload
-                    </Button>
-                  </Upload>
-                </Space.Compact>
-                {uploadedFiles.ijazah && (
-                  <Button
-                    size="small"
-                    type="link"
-                    block
-                    onClick={() =>
-                      setPreviewModal({
-                        open: true,
-                        url: `/helpdesk/api/siasn/ws/download?filePath=${uploadedFiles.ijazah}`,
-                        title: "Preview Ijazah",
-                      })
-                    }
-                    style={{ padding: "0 4px", height: 20 }}
-                  >
-                    <Text size="xs" c="blue">
-                      Lihat File
+                      <Button
+                        size="small"
+                        type="link"
+                        block
+                        style={{ padding: "0 4px", height: 20 }}
+                      >
+                        <Text size="xs" c="blue">
+                          Lihat File
+                        </Text>
+                      </Button>
+                    </Dropdown>
+                  )}
+                </Stack>
+              </Col>
+              <Col span={12}>
+                <Stack spacing={6}>
+                  <Flex justify="space-between" align="center">
+                    <Text size="xs" fw={500}>
+                      Transkrip Nilai
                     </Text>
-                  </Button>
-                )}
-              </Stack>
-            </Col>
-            <Col span={12}>
-              <Stack spacing={6}>
-                <Flex justify="space-between" align="center">
-                  <Text size="xs" fw={500}>
-                    Transkrip Nilai
-                  </Text>
+                    {uploadedFiles.transkrip && (
+                      <Badge size="sm" variant="light" color="green">
+                        Uploaded
+                      </Badge>
+                    )}
+                  </Flex>
+                  <Space.Compact style={{ width: "100%" }}>
+                    <Button
+                      size="small"
+                      icon={<IconCloudDown size={14} />}
+                      onClick={handleSyncNilaiFromMaster}
+                      loading={loadingSync.transkrip}
+                      disabled={!selectedMasterData?.file_nilai_url}
+                      style={{ flex: 1 }}
+                    >
+                      Sync
+                    </Button>
+                    <Upload
+                      accept=".pdf,.jpg,.jpeg,.png"
+                      beforeUpload={handleUploadNilai}
+                      showUploadList={false}
+                    >
+                      <Button
+                        size="small"
+                        icon={<IconUpload size={14} />}
+                        style={{ flex: 1 }}
+                        loading={isUploading}
+                        disabled={isUploading}
+                      >
+                        Upload
+                      </Button>
+                    </Upload>
+                  </Space.Compact>
                   {uploadedFiles.transkrip && (
-                    <Badge size="sm" variant="light" color="green">
-                      Uploaded
-                    </Badge>
-                  )}
-                </Flex>
-                <Space.Compact style={{ width: "100%" }}>
-                  <Button
-                    size="small"
-                    icon={<IconCloudDown size={14} />}
-                    onClick={handleSyncNilaiFromMaster}
-                    loading={loadingSync.transkrip}
-                    disabled={!selectedMasterData?.file_nilai_url}
-                    style={{ flex: 1 }}
-                  >
-                    Sync
-                  </Button>
-                  <Upload
-                    accept=".pdf,.jpg,.jpeg,.png"
-                    beforeUpload={handleUploadNilai}
-                    showUploadList={false}
-                  >
-                    <Button 
-                      size="small" 
-                      icon={<IconUpload size={14} />} 
-                      style={{ flex: 1 }}
-                      loading={isUploading}
-                      disabled={isUploading}
+                    <Dropdown
+                      menu={{
+                        items: [
+                          {
+                            key: "modal",
+                            label: "Lihat di Modal",
+                            icon: <IconEye size={14} />,
+                            onClick: () =>
+                              setPreviewModal({
+                                open: true,
+                                url: `/helpdesk/api/siasn/ws/download?filePath=${uploadedFiles.transkrip}`,
+                                title: "Preview Transkrip Nilai",
+                              }),
+                          },
+                          {
+                            key: "newtab",
+                            label: "Buka di Tab Baru",
+                            icon: <IconExternalLink size={14} />,
+                            onClick: () =>
+                              window.open(
+                                `/helpdesk/api/siasn/ws/download?filePath=${uploadedFiles.transkrip}`,
+                                "_blank"
+                              ),
+                          },
+                        ],
+                      }}
                     >
-                      Upload
-                    </Button>
-                  </Upload>
-                </Space.Compact>
-                {uploadedFiles.transkrip && (
-                  <Button
+                      <Button
+                        size="small"
+                        type="link"
+                        block
+                        style={{ padding: "0 4px", height: 20 }}
+                      >
+                        <Text size="xs" c="blue">
+                          Lihat File
+                        </Text>
+                      </Button>
+                    </Dropdown>
+                  )}
+                </Stack>
+              </Col>
+            </Row>
+
+            <Divider style={{ margin: "12px 0" }}>
+              <Text size="xs" fw={500}>
+                Data Pendidikan
+              </Text>
+            </Divider>
+
+            <div style={{ marginBottom: 8 }}>
+              <Text
+                size="xs"
+                fw={500}
+                style={{ display: "block", marginBottom: 4 }}
+              >
+                Nama Sekolah/Universitas
+              </Text>
+              <Form.Item
+                name="namaSekolah"
+                rules={[{ required: true, message: "Wajib diisi" }]}
+                style={{ marginBottom: 0 }}
+              >
+                <Input
+                  size="small"
+                  placeholder="Contoh: Universitas Indonesia"
+                  prefix={<IconSchool size={14} />}
+                />
+              </Form.Item>
+            </div>
+
+            <Row gutter={[12, 8]}>
+              <Col span={8}>
+                <Text
+                  size="xs"
+                  fw={500}
+                  style={{ display: "block", marginBottom: 4 }}
+                >
+                  Tahun Lulus
+                </Text>
+                <Form.Item
+                  name="tahunLulus"
+                  rules={[{ required: true, message: "Wajib diisi" }]}
+                  style={{ marginBottom: 0 }}
+                >
+                  <Input
                     size="small"
-                    type="link"
-                    block
-                    onClick={() =>
-                      setPreviewModal({
-                        open: true,
-                        url: `/helpdesk/api/siasn/ws/download?filePath=${uploadedFiles.transkrip}`,
-                        title: "Preview Transkrip Nilai",
-                      })
-                    }
-                    style={{ padding: "0 4px", height: 20 }}
-                  >
-                    <Text size="xs" c="blue">
-                      Lihat File
-                    </Text>
-                  </Button>
-                )}
-              </Stack>
-            </Col>
-          </Row>
+                    placeholder="2020"
+                    prefix={<IconCalendar size={14} />}
+                  />
+                </Form.Item>
+              </Col>
+              <Col span={8}>
+                <Text
+                  size="xs"
+                  fw={500}
+                  style={{ display: "block", marginBottom: 4 }}
+                >
+                  Tgl Ijazah
+                </Text>
+                <Form.Item
+                  name="tglLulus"
+                  rules={[{ required: true, message: "Wajib diisi" }]}
+                  style={{ marginBottom: 0 }}
+                >
+                  <DatePicker
+                    size="small"
+                    format="DD-MM-YYYY"
+                    style={{ width: "100%" }}
+                    placeholder="Pilih tanggal"
+                  />
+                </Form.Item>
+              </Col>
+              <Col span={8}>
+                <Text
+                  size="xs"
+                  fw={500}
+                  style={{ display: "block", marginBottom: 4 }}
+                >
+                  No Ijazah
+                </Text>
+                <Form.Item
+                  name="nomorIjasah"
+                  rules={[{ required: true, message: "Wajib diisi" }]}
+                  style={{ marginBottom: 0 }}
+                >
+                  <Input size="small" placeholder="Nomor ijazah" />
+                </Form.Item>
+              </Col>
+            </Row>
 
-          <Divider style={{ margin: "12px 0" }}>
-            <Text size="xs" fw={500}>
-              Data Pendidikan
-            </Text>
-          </Divider>
+            <Row gutter={[12, 8]} style={{ marginTop: 8 }}>
+              <Col span={12}>
+                <Text
+                  size="xs"
+                  fw={500}
+                  style={{ display: "block", marginBottom: 4 }}
+                >
+                  Gelar Depan
+                </Text>
+                <Form.Item name="gelarDepan" style={{ marginBottom: 0 }}>
+                  <Input size="small" autoComplete="off" placeholder="Dr." />
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Text
+                  size="xs"
+                  fw={500}
+                  style={{ display: "block", marginBottom: 4 }}
+                >
+                  Gelar Belakang
+                </Text>
+                <Form.Item name="gelarBelakang" style={{ marginBottom: 0 }}>
+                  <Input
+                    size="small"
+                    autoComplete="off"
+                    placeholder="S.Kom, M.Kom"
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
 
-          <div style={{ marginBottom: 8 }}>
-            <Text
-              size="xs"
-              fw={500}
-              style={{ display: "block", marginBottom: 4 }}
-            >
-              Nama Sekolah/Universitas
-            </Text>
-            <Form.Item 
-              name="namaSekolah" 
-              rules={[{ required: true, message: "Wajib diisi" }]}
-              style={{ marginBottom: 0 }}
-            >
-              <Input
-                size="small"
-                placeholder="Contoh: Universitas Indonesia"
-                prefix={<IconSchool size={14} />}
-              />
+            <Form.Item style={{ marginBottom: 0, marginTop: 8 }}>
+              <Checkbox
+                checked={isPendidikanPertama}
+                onChange={(e) => setIsPendidikanPertama(e.target.checked)}
+              >
+                <Text size="xs">Pendidikan Pertama</Text>
+              </Checkbox>
             </Form.Item>
-          </div>
-
-          <Row gutter={[12, 8]}>
-            <Col span={8}>
-              <Text
-                size="xs"
-                fw={500}
-                style={{ display: "block", marginBottom: 4 }}
-              >
-                Tahun Lulus
-              </Text>
-              <Form.Item 
-                name="tahunLulus"
-                rules={[{ required: true, message: "Wajib diisi" }]}
-                style={{ marginBottom: 0 }}
-              >
-                <Input
-                  size="small"
-                  placeholder="2020"
-                  prefix={<IconCalendar size={14} />}
-                />
-              </Form.Item>
-            </Col>
-            <Col span={8}>
-              <Text
-                size="xs"
-                fw={500}
-                style={{ display: "block", marginBottom: 4 }}
-              >
-                Tgl Ijazah
-              </Text>
-              <Form.Item 
-                name="tglLulus"
-                rules={[{ required: true, message: "Wajib diisi" }]}
-                style={{ marginBottom: 0 }}
-              >
-                <DatePicker
-                  size="small"
-                  format="DD-MM-YYYY"
-                  style={{ width: "100%" }}
-                  placeholder="Pilih tanggal"
-                />
-              </Form.Item>
-            </Col>
-            <Col span={8}>
-              <Text
-                size="xs"
-                fw={500}
-                style={{ display: "block", marginBottom: 4 }}
-              >
-                No Ijazah
-              </Text>
-              <Form.Item 
-                name="nomorIjasah"
-                rules={[{ required: true, message: "Wajib diisi" }]}
-                style={{ marginBottom: 0 }}
-              >
-                <Input size="small" placeholder="Nomor ijazah" />
-              </Form.Item>
-            </Col>
-          </Row>
-
-          <Row gutter={[12, 8]} style={{ marginTop: 8 }}>
-            <Col span={12}>
-              <Text
-                size="xs"
-                fw={500}
-                style={{ display: "block", marginBottom: 4 }}
-              >
-                Gelar Depan
-              </Text>
-              <Form.Item name="gelarDepan" style={{ marginBottom: 0 }}>
-                <Input size="small" autoComplete="off" placeholder="Dr." />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Text
-                size="xs"
-                fw={500}
-                style={{ display: "block", marginBottom: 4 }}
-              >
-                Gelar Belakang
-              </Text>
-              <Form.Item name="gelarBelakang" style={{ marginBottom: 0 }}>
-                <Input
-                  size="small"
-                  autoComplete="off"
-                  placeholder="S.Kom, M.Kom"
-                />
-              </Form.Item>
-            </Col>
-          </Row>
-
-          <Form.Item style={{ marginBottom: 0, marginTop: 8 }}>
-            <Checkbox
-              checked={isPendidikanPertama}
-              onChange={(e) => setIsPendidikanPertama(e.target.checked)}
-            >
-              <Text size="xs">Pendidikan Pertama</Text>
-            </Checkbox>
-          </Form.Item>
           </>
         ) : (
           <>
@@ -966,4 +1068,3 @@ const ModalUbahPendidikan = ({
 };
 
 export default ModalUbahPendidikan;
-

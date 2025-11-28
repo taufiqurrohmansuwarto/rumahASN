@@ -130,7 +130,7 @@ const generateToken = async () => {
   const masterOAuth = new ClientOAuth2({
     clientId,
     clientSecret,
-    scopes: ["pemprov"],
+    scopes: ["pemprov refs"],
     accessTokenUri: "https://siasn.bkd.jatimprov.go.id/oidc-master/token",
   });
 

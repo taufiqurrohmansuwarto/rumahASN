@@ -499,6 +499,43 @@ const getAllEmployeesAnomali23Report = async (req, res) => {
   }
 };
 
+// Helper untuk membuat Redis key dari query params
+const buildRedisKey = (prefix, query) => {
+  const filterParams = [
+    "opd_id",
+    "search",
+    "page",
+    "limit",
+    "kedudukan_id",
+    "pangkat_id",
+    "pangkat_id_min",
+    "pangkat_id_max",
+    "jenjang_id",
+    "jenjang_id_min",
+    "jenjang_id_max",
+    "bup_min",
+    "bup_max",
+    "agama_id",
+    "status_kawin_id",
+    "jenis_kelamin",
+    "status_aktif",
+    "status_kepegawaian",
+    "usia_min",
+    "usia_max",
+  ];
+
+  const keyParts = filterParams
+    .map((param) => {
+      const value = query?.[param];
+      return value !== undefined && value !== null && value !== ""
+        ? `${param}:${value}`
+        : null;
+    })
+    .filter(Boolean);
+
+  return `${prefix}:${keyParts.join(":")}` || `${prefix}:default`;
+};
+
 const getAllEmployeesMasterPaging = async (req, res) => {
   try {
     const {
@@ -514,12 +551,13 @@ const getAllEmployeesMasterPaging = async (req, res) => {
     validateOpdId(opdId);
     const idOpd = determineOpdId(opd, opdId);
     const redis = await createRedisInstance();
-    const redisKey = `master-fasilitator:${opd}:${req?.query?.search}:${req?.query?.page}:${req?.query?.limit}`;
+
+    // Build Redis key dengan semua filter params
+    const redisKey = buildRedisKey(`employees-fasilitator:${opdId}`, query);
     const cachedData = await redis.get(redisKey);
 
     if (cachedData) {
-      const data = JSON.parse(cachedData);
-      res.json(data);
+      res.json(JSON.parse(cachedData));
     } else {
       const employeeData = await fetchEmployeeData(fetcher, idOpd, {
         ...query,
@@ -528,19 +566,6 @@ const getAllEmployeesMasterPaging = async (req, res) => {
 
       const data = employeeData?.data;
       await redis.set(redisKey, JSON.stringify(data), "EX", 300);
-
-      // const nips = employeeData?.data?.results?.map((item) => item?.nip_master);
-      // const detailedEmployeeData = await fetchDetailedEmployeeData(
-      //   siasnFetcher,
-      //   nips
-      // );
-
-      // const responsePayload = constructResponsePayload(
-      //   employeeData,
-      //   detailedEmployeeData
-      // );
-
-      // await redis.set(redisKey, JSON.stringify(responsePayload), "EX", 30);
 
       res.json(data);
     }
@@ -564,8 +589,9 @@ const getAllEmployeesMasterPagingAdmin = async (req, res) => {
     validateOpdId(opdId);
     const idOpd = determineOpdId(opd, opdId);
     const redis = await createRedisInstance();
-    // query ada search, page, limit. Jadikan key redis
-    const redisKey = `master-fasilitator:${opd}:${req?.query?.search}:${req?.query?.page}:${req?.query?.limit}`;
+
+    // Build Redis key dengan semua filter params
+    const redisKey = buildRedisKey("employees-admin", query);
     const cachedData = await redis.get(redisKey);
 
     if (cachedData) {
