@@ -7,7 +7,7 @@ import {
 import { Alert, Text, Stack, Flex, SimpleGrid } from "@mantine/core";
 import { IconInfoCircle, IconRefresh } from "@tabler/icons-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button, Modal, Spin, message, Tooltip } from "antd";
+import { Button, Modal, Spin, message, Tooltip, notification } from "antd";
 import { useRouter } from "next/router";
 import { useState } from "react";
 
@@ -22,7 +22,6 @@ import {
   DokumenItem,
   DRHItem,
   PertekItem,
-  SyncProgressModal,
   FilePreviewModal,
 } from "./DokumenPendukung";
 
@@ -37,8 +36,6 @@ function DokumenPendukungNip() {
   const [transferringDocs, setTransferringDocs] = useState({});
   const [isSyncingAll, setIsSyncingAll] = useState(false);
   const [syncProgress, setSyncProgress] = useState({ current: 0, total: 0 });
-  const [syncModalOpen, setSyncModalOpen] = useState(false);
-  const [syncResults, setSyncResults] = useState([]);
 
   // Queries
   const { data: siasn, isLoading: loadingSiasn } = useQuery(
@@ -216,29 +213,49 @@ function DokumenPendukungNip() {
           </Text>
           <Alert color="orange" variant="light" p="xs" mt="xs">
             <Text size="xs">
-              ⚠️ Pastikan semua data sudah benar sebelum transfer. Proses ini
-              akan berjalan secara berurutan.
+              ⚠️ Proses akan berjalan di background. Anda dapat meninggalkan
+              halaman ini dan kembali lagi nanti.
             </Text>
           </Alert>
         </Stack>
       ),
       okText: "Ya, Sinkronkan Semua",
       cancelText: "Batal",
-      onOk: () => runSyncAll(docsToSync, idRiwayat),
+      onOk: () => {
+        // Langsung jalankan sync tanpa menunggu, modal akan tertutup otomatis
+        runSyncAll(docsToSync, idRiwayat);
+      },
     });
   };
 
   const runSyncAll = async (docsToSync, idRiwayat) => {
     setIsSyncingAll(true);
-    setSyncModalOpen(true);
     setSyncProgress({ current: 0, total: docsToSync.length });
-    setSyncResults([]);
+
+    // Tampilkan notifikasi bahwa proses dimulai
+    const notificationKey = `sync-all-${Date.now()}`;
+    notification.info({
+      key: notificationKey,
+      message: "Sinkronisasi Dimulai",
+      description: `Menyinkronkan ${docsToSync.length} dokumen ke SIASN...`,
+      duration: 0, // Tidak auto close
+      placement: "bottomRight",
+    });
 
     const results = [];
 
     for (let i = 0; i < docsToSync.length; i++) {
       const dok = docsToSync[i];
       setSyncProgress({ current: i + 1, total: docsToSync.length });
+
+      // Update notifikasi dengan progress
+      notification.info({
+        key: notificationKey,
+        message: "Sinkronisasi Berjalan",
+        description: `Memproses ${i + 1}/${docsToSync.length}: ${dok.label}...`,
+        duration: 0,
+        placement: "bottomRight",
+      });
 
       try {
         let file;
@@ -289,31 +306,45 @@ function DokumenPendukungNip() {
           message: error?.message || "Gagal upload",
         });
       }
-
-      setSyncResults([...results]);
     }
 
     setIsSyncingAll(false);
+    setSyncProgress({ current: 0, total: 0 });
     queryClient.invalidateQueries(["data-utama-siasn", nip]);
 
     const successCount = results.filter((r) => r.status === "success").length;
     const failCount = results.filter((r) => r.status === "error").length;
 
+    // Tampilkan notifikasi hasil akhir
     if (successCount > 0 && failCount === 0) {
-      message.success(`Berhasil sinkronisasi ${successCount} dokumen`);
+      notification.success({
+        key: notificationKey,
+        message: "Sinkronisasi Selesai",
+        description: `✅ Berhasil menyinkronkan ${successCount} dokumen ke SIASN.`,
+        duration: 5,
+        placement: "bottomRight",
+      });
     } else if (successCount > 0 && failCount > 0) {
-      message.warning(
-        `${successCount} berhasil, ${failCount} gagal disinkronisasi`
-      );
+      const failedDocs = results
+        .filter((r) => r.status === "error")
+        .map((r) => r.label)
+        .join(", ");
+      notification.warning({
+        key: notificationKey,
+        message: "Sinkronisasi Selesai (Sebagian)",
+        description: `✅ ${successCount} berhasil, ❌ ${failCount} gagal: ${failedDocs}`,
+        duration: 10,
+        placement: "bottomRight",
+      });
     } else if (failCount > 0) {
-      message.error("Gagal menyinkronisasi dokumen");
+      notification.error({
+        key: notificationKey,
+        message: "Sinkronisasi Gagal",
+        description: "Semua dokumen gagal disinkronisasi. Silakan coba lagi.",
+        duration: 10,
+        placement: "bottomRight",
+      });
     }
-  };
-
-  const handleCloseSyncModal = () => {
-    setSyncModalOpen(false);
-    setSyncResults([]);
-    setSyncProgress({ current: 0, total: 0 });
   };
 
   // Loading state
@@ -467,15 +498,6 @@ function DokumenPendukungNip() {
           ))}
         </SimpleGrid>
       </div>
-
-      {/* Modal Progress Sync */}
-      <SyncProgressModal
-        open={syncModalOpen}
-        isSyncing={isSyncingAll}
-        progress={syncProgress}
-        results={syncResults}
-        onClose={handleCloseSyncModal}
-      />
 
       {/* Modal Preview File */}
       <FilePreviewModal
