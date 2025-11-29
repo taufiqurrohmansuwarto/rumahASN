@@ -1,8 +1,10 @@
 const { Model } = require("objection");
 const knex = require("../../db");
-const { nanoid } = require("nanoid");
+const { customAlphabet } = require("nanoid");
 
 Model.knex(knex);
+
+const nanoid = customAlphabet("1234567890abcdefghijklmnopqrstuvwxyz", 8);
 
 class Jadwal extends Model {
   static get tableName() {
@@ -10,7 +12,28 @@ class Jadwal extends Model {
   }
 
   $beforeInsert() {
-    this.id = nanoid(10);
+    this.id = `jdw-${nanoid()}`;
+    this.created_at = new Date().toISOString();
+    this.updated_at = new Date().toISOString();
+  }
+
+  $beforeUpdate() {
+    this.updated_at = new Date().toISOString();
+  }
+
+  static get relationMappings() {
+    const Advokasi = require("./sapa-asn.advokasi.model");
+
+    return {
+      advokasi_list: {
+        relation: Model.HasManyRelation,
+        modelClass: Advokasi,
+        join: {
+          from: "sapa_asn.jadwal.id",
+          to: "sapa_asn.advokasi.jadwal_id",
+        },
+      },
+    };
   }
 }
 

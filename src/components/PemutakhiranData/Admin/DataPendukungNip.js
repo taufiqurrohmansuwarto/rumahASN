@@ -56,17 +56,31 @@ function DokumenPendukungNip() {
     { enabled: !!nip, refetchOnWindowFocus: false, staleTime: 500000 }
   );
 
-  // Mutation
+  // Mutation dengan notification background
   const { mutate: transferDokumen } = useMutation(
     (formData) => uploadDokumenSiasnBaru(formData),
     {
       onSuccess: (_, variables) => {
-        message.success("Berhasil upload ke SIASN");
+        notification.success({
+          key: variables.notifKey,
+          message: "Transfer Berhasil",
+          description: `✅ ${variables.dokLabel} berhasil diupload ke SIASN.`,
+          duration: 4,
+          placement: "bottomRight",
+        });
         queryClient.invalidateQueries(["data-utama-siasn", nip]);
         setTransferringDocs((prev) => ({ ...prev, [variables.dokKey]: false }));
       },
       onError: (error, variables) => {
-        message.error(error?.response?.data?.message || "Gagal upload");
+        notification.error({
+          key: variables.notifKey,
+          message: "Transfer Gagal",
+          description: `❌ ${variables.dokLabel}: ${
+            error?.response?.data?.message || "Gagal upload"
+          }`,
+          duration: 6,
+          placement: "bottomRight",
+        });
         setTransferringDocs((prev) => ({ ...prev, [variables.dokKey]: false }));
       },
     }
@@ -89,13 +103,25 @@ function DokumenPendukungNip() {
       return false;
     }
 
+    const notifKey = `upload-${dok.key}-${Date.now()}`;
     setTransferringDocs((prev) => ({ ...prev, [dok.key]: true }));
+
+    // Tampilkan notifikasi proses
+    notification.info({
+      key: notifKey,
+      message: "Mengupload Dokumen",
+      description: `Sedang mengupload ${dok.label}...`,
+      duration: 0,
+      placement: "bottomRight",
+    });
 
     const formData = new FormData();
     formData.append("file", file);
     formData.append("id_riwayat", idRiwayat);
     formData.append("id_ref_dokumen", dok.siasnCode);
     formData.dokKey = dok.key;
+    formData.dokLabel = dok.label;
+    formData.notifKey = notifKey;
 
     transferDokumen(formData);
     return false;
@@ -109,7 +135,17 @@ function DokumenPendukungNip() {
     }
 
     const keyToUse = loadingKey || dok.key;
+    const notifKey = `transfer-${keyToUse}-${Date.now()}`;
     setTransferringDocs((prev) => ({ ...prev, [keyToUse]: true }));
+
+    // Tampilkan notifikasi proses - user bisa navigasi ke halaman lain
+    notification.info({
+      key: notifKey,
+      message: "Transfer Dokumen",
+      description: `Sedang mentransfer ${dok.label} ke SIASN...`,
+      duration: 0,
+      placement: "bottomRight",
+    });
 
     try {
       const response = await urlToPdf({ url: fileUrl });
@@ -122,10 +158,18 @@ function DokumenPendukungNip() {
       formData.append("id_riwayat", idRiwayat);
       formData.append("id_ref_dokumen", dok.siasnCode);
       formData.dokKey = keyToUse;
+      formData.dokLabel = dok.label;
+      formData.notifKey = notifKey;
 
       transferDokumen(formData);
     } catch (error) {
-      message.error(error?.message || "Gagal transfer");
+      notification.error({
+        key: notifKey,
+        message: "Transfer Gagal",
+        description: `❌ ${dok.label}: ${error?.message || "Gagal transfer"}`,
+        duration: 6,
+        placement: "bottomRight",
+      });
       setTransferringDocs((prev) => ({ ...prev, [keyToUse]: false }));
     }
   };
@@ -145,11 +189,22 @@ function DokumenPendukungNip() {
     Modal.confirm({
       title: "Transfer DRH dari CV SIASN",
       content:
-        "Pastikan data CV SIASN sudah benar dan sesuai. Jika belum benar, ubah data di SIASN terlebih dahulu sebelum transfer.",
+        "Pastikan data CV SIASN sudah benar dan sesuai. Proses akan berjalan di background.",
       okText: "Ya, Transfer",
       cancelText: "Batal",
-      onOk: async () => {
+      onOk: () => {
+        // Modal langsung tertutup, proses jalan di background
+        const notifKey = `transfer-cv-${dok.key}-${Date.now()}`;
         setTransferringDocs((prev) => ({ ...prev, [dok.key]: true }));
+
+        // Tampilkan notifikasi proses
+        notification.info({
+          key: notifKey,
+          message: "Transfer DRH",
+          description: `Sedang mentransfer ${dok.label} ke SIASN...`,
+          duration: 0,
+          placement: "bottomRight",
+        });
 
         try {
           const file = base64ToFile(cvData.data, `${nip}_DRH.pdf`);
@@ -162,10 +217,18 @@ function DokumenPendukungNip() {
           formData.append("id_riwayat", idRiwayat);
           formData.append("id_ref_dokumen", dok.siasnCode);
           formData.dokKey = dok.key;
+          formData.dokLabel = dok.label;
+          formData.notifKey = notifKey;
 
           transferDokumen(formData);
         } catch (error) {
-          message.error("Gagal transfer CV");
+          notification.error({
+            key: notifKey,
+            message: "Transfer Gagal",
+            description: `❌ ${dok.label}: Gagal transfer CV`,
+            duration: 6,
+            placement: "bottomRight",
+          });
           setTransferringDocs((prev) => ({ ...prev, [dok.key]: false }));
         }
       },
