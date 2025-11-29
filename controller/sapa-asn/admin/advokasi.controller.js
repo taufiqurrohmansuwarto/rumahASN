@@ -259,6 +259,26 @@ const upsertJadwal = async (req, res) => {
       req?.body;
 
     if (id) {
+      // Get current jadwal and count active registrations
+      const jadwal = await Jadwal.query().findById(id);
+      if (!jadwal) {
+        return res.status(404).json({ message: "Jadwal tidak ditemukan" });
+      }
+
+      // Count active advokasi for this jadwal
+      const activeCount = await Advokasi.query()
+        .where("jadwal_id", id)
+        .whereNotIn("status", ["Cancelled", "Ditolak", "Rejected"])
+        .resultSize();
+
+      // Validate: cannot set kuota below active registrations
+      if (kuota_maksimal && kuota_maksimal < activeCount) {
+        return res.status(400).json({
+          message: `Kuota tidak dapat diubah ke ${kuota_maksimal}. Saat ini sudah ada ${activeCount} pendaftar aktif.`,
+          active_count: activeCount,
+        });
+      }
+
       // Update existing
       await Jadwal.query().findById(id).patch({
         tanggal_konsultasi,
@@ -285,11 +305,81 @@ const upsertJadwal = async (req, res) => {
   }
 };
 
+// Update kuota for a specific jadwal
+const updateKuota = async (req, res) => {
+  try {
+    const { id } = req?.query;
+    const { kuota_maksimal } = req?.body;
+
+    if (!kuota_maksimal || kuota_maksimal < 1) {
+      return res.status(400).json({ message: "Kuota harus minimal 1" });
+    }
+
+    const jadwal = await Jadwal.query().findById(id);
+    if (!jadwal) {
+      return res.status(404).json({ message: "Jadwal tidak ditemukan" });
+    }
+
+    // Count active advokasi for this jadwal
+    const activeCount = await Advokasi.query()
+      .where("jadwal_id", id)
+      .whereNotIn("status", ["Cancelled", "Ditolak", "Rejected"])
+      .resultSize();
+
+    // Validate: cannot set kuota below active registrations
+    if (kuota_maksimal < activeCount) {
+      return res.status(400).json({
+        message: `Kuota tidak dapat diubah ke ${kuota_maksimal}. Saat ini sudah ada ${activeCount} pendaftar aktif.`,
+        active_count: activeCount,
+        current_kuota: jadwal.kuota_maksimal,
+      });
+    }
+
+    await Jadwal.query().findById(id).patch({ kuota_maksimal });
+
+    res.json({
+      message: "Kuota berhasil diperbarui",
+      kuota_maksimal,
+      active_count: activeCount,
+    });
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+// Get jadwal with active count
+const getJadwalDetail = async (req, res) => {
+  try {
+    const { id } = req?.query;
+
+    const jadwal = await Jadwal.query().findById(id);
+    if (!jadwal) {
+      return res.status(404).json({ message: "Jadwal tidak ditemukan" });
+    }
+
+    // Count active advokasi for this jadwal
+    const activeCount = await Advokasi.query()
+      .where("jadwal_id", id)
+      .whereNotIn("status", ["Cancelled", "Ditolak", "Rejected"])
+      .resultSize();
+
+    res.json({
+      ...jadwal,
+      active_count: activeCount,
+      available_slots: Math.max(0, jadwal.kuota_maksimal - activeCount),
+    });
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
 module.exports = {
   getAll,
   getById,
   updateStatus,
   getJadwal,
   upsertJadwal,
+  updateKuota,
+  getJadwalDetail,
 };
 

@@ -295,15 +295,18 @@ const ListKonsultasiHukumAdmin = ({ data = [], meta = {}, loading = false, query
 
   const columns = [
     { title: "No", key: "no", width: 50, align: "center", render: (_, __, idx) => (page - 1) * pageSize + idx + 1 },
-    { title: "ID", dataIndex: "id", key: "id", width: 140, render: (id) => <Text size="xs" fw={600}>{id}</Text> },
-    {
-      title: "",
-      key: "avatar",
-      width: 50,
-      render: (_, record) => (
-        <Avatar src={record.user?.image} size="sm" radius="xl" color="teal">
-          {record.user?.username?.charAt(0)?.toUpperCase()}
-        </Avatar>
+    { 
+      title: "ID", 
+      dataIndex: "id", 
+      key: "id", 
+      width: 140, 
+      render: (id, record) => (
+        <Group gap={6}>
+          <Text size="xs" fw={600}>{id}</Text>
+          {record.unread_count_admin > 0 && (
+            <Badge color="red" size="xs" circle>{record.unread_count_admin}</Badge>
+          )}
+        </Group>
       ),
     },
     {
@@ -311,10 +314,15 @@ const ListKonsultasiHukumAdmin = ({ data = [], meta = {}, loading = false, query
       key: "user",
       width: 200,
       render: (_, record) => (
-        <Stack gap={0}>
-          <Text size="xs" fw={500}>{record.user?.username || "-"}</Text>
-          <Text size="xs" c="dimmed" lineClamp={1}>{record.user?.perangkat_daerah_detail || "-"}</Text>
-        </Stack>
+        <Group gap={6} wrap="nowrap" align="center">
+          <Avatar src={record.user?.image} size={28} radius="xl" color="teal">
+            {record.user?.username?.charAt(0)?.toUpperCase()}
+          </Avatar>
+          <Stack gap={0} style={{ minWidth: 0 }}>
+            <Text size="xs" fw={500} lineClamp={1} style={{ lineHeight: 1.2 }}>{record.user?.username || "-"}</Text>
+            <Text size="10px" c="dimmed" lineClamp={1} style={{ lineHeight: 1.2 }}>{record.user?.perangkat_daerah_detail || "-"}</Text>
+          </Stack>
+        </Group>
       ),
     },
     {
@@ -351,10 +359,22 @@ const ListKonsultasiHukumAdmin = ({ data = [], meta = {}, loading = false, query
     {
       title: "Aksi",
       key: "aksi",
-      width: 70,
+      width: 100,
       align: "center",
       render: (_, record) => (
-        <Button type="primary" size="small" icon={<IconEdit size={14} />} onClick={() => handleView(record)} />
+        <Group gap={4} wrap="nowrap" justify="center">
+          <Button 
+            type="primary" 
+            size="small" 
+            icon={<IconMessageCircle size={14} />} 
+            onClick={() => router.push(`/sapa-asn/admin/konsultasi-hukum/threads/${record.id}`)}
+          />
+          <Button 
+            size="small" 
+            icon={<IconEdit size={14} />} 
+            onClick={() => handleView(record)} 
+          />
+        </Group>
       ),
     },
   ];

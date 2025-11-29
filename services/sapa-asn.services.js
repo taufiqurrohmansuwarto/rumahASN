@@ -290,6 +290,25 @@ export const upsertAdminJadwalAdvokasi = async (data) => {
 };
 
 /**
+ * Get jadwal detail (admin)
+ * @param {String} id - Jadwal ID
+ */
+export const getAdminJadwalDetail = async (id) => {
+  return api.get(`/admin/advokasi/jadwal/${id}`).then((res) => res?.data);
+};
+
+/**
+ * Update kuota jadwal (admin)
+ * @param {String} id - Jadwal ID
+ * @param {Object} data - { kuota_maksimal }
+ */
+export const updateAdminJadwalKuota = async (id, data) => {
+  return api
+    .patch(`/admin/advokasi/jadwal/${id}`, data)
+    .then((res) => res?.data);
+};
+
+/**
  * Export advokasi to Excel (admin)
  * @param {Object} params - { status, startDate, endDate }
  */

@@ -282,11 +282,16 @@ const ListKonsultasiHukum = ({ data = [], meta = {}, loading = false, query = {}
       title: "No. Konsultasi",
       dataIndex: "id",
       key: "id",
-      width: 140,
+      width: 160,
       sorter: true,
       sortOrder: sortField === "id" ? sortOrder : null,
       render: (id, record) => (
-        <Text size="xs" fw={600}>{record.nomor_konsultasi || id}</Text>
+        <Group gap={6}>
+          <Text size="xs" fw={600}>{record.nomor_konsultasi || id}</Text>
+          {record.unread_count_user > 0 && (
+            <Badge color="red" size="xs" circle>{record.unread_count_user}</Badge>
+          )}
+        </Group>
       ),
     },
     {

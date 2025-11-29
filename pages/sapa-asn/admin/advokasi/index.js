@@ -1,8 +1,10 @@
 import PageContainer from "@/components/PageContainer";
+import JadwalKuotaSettings from "@/components/SapaASN/Admin/JadwalKuotaSettings";
 import ListAdvokasiAdmin from "@/components/SapaASN/Admin/ListAdvokasiAdmin";
 import SapaASNLayout from "@/components/SapaASN/SapaASNLayout";
 import useScrollRestoration from "@/hooks/useScrollRestoration";
 import { getAdminAdvokasi } from "@/services/sapa-asn.services";
+import { Collapse } from "antd";
 import { useQuery } from "@tanstack/react-query";
 import { Breadcrumb, FloatButton } from "antd";
 import Head from "next/head";
@@ -35,6 +37,10 @@ const AdminAdvokasi = () => {
           </Breadcrumb>
         )}
       >
+        {/* Jadwal & Kuota Settings */}
+        <JadwalKuotaSettings />
+
+        {/* List Advokasi */}
         <ListAdvokasiAdmin
           data={data?.data || []}
           meta={data?.meta || {}}

@@ -221,10 +221,10 @@ const getThreads = async (req, res) => {
       return acc;
     }, {});
 
+    // Use sender_type from database, don't override
     const threadsWithUser = threads.map((thread) => ({
       ...thread,
-      sender_name: userMap[thread.user_id]?.name || "Admin",
-      sender_type: thread.user_id === customId ? "user" : "admin",
+      sender_name: thread.sender_type === "admin" ? "Admin" : userMap[thread.user_id]?.name,
     }));
 
     res.json({
@@ -265,14 +265,14 @@ const sendMessage = async (req, res) => {
       user_id: customId,
       message: message.trim(),
       sender_type: "user",
+      is_read_by_admin: false,
     });
 
-    // Update konsultasi status if needed
-    if (konsultasi.status === "Answered") {
-      await KonsultasiHukum.query().findById(id).patch({
-        status: "Waiting for Response",
-      });
-    }
+    // Update konsultasi status and increment admin unread count
+    await KonsultasiHukum.query().findById(id).patch({
+      status: konsultasi.status === "Answered" ? "Waiting for Response" : konsultasi.status,
+      unread_count_admin: (konsultasi.unread_count_admin || 0) + 1,
+    });
 
     res.json({
       message: "Pesan berhasil dikirim",
@@ -301,6 +301,24 @@ const getThreadDetail = async (req, res) => {
       return res.status(404).json({ message: "Data tidak ditemukan" });
     }
 
+    // Mark all admin messages as read by user
+    await KonsultasiHukumThread.query()
+      .where("konsultasi_hukum_id", id)
+      .where("sender_type", "admin")
+      .where("is_read_by_user", false)
+      .patch({
+        is_read_by_user: true,
+        read_at: new Date(),
+      });
+
+    // Reset user unread count and update last read time
+    await KonsultasiHukum.query()
+      .where({ id, user_id: customId })
+      .patch({
+        unread_count_user: 0,
+        user_last_read_at: new Date(),
+      });
+
     // Get all threads
     const threads = await KonsultasiHukumThread.query()
       .where("konsultasi_hukum_id", id)
@@ -318,10 +336,10 @@ const getThreadDetail = async (req, res) => {
       return acc;
     }, {});
 
+    // Use sender_type from database, don't override
     const threadsWithUser = threads.map((thread) => ({
       ...thread,
-      sender_name: userMap[thread.user_id]?.name || "Admin",
-      sender_type: thread.user_id === customId ? "user" : "admin",
+      sender_name: thread.sender_type === "admin" ? "Admin" : userMap[thread.user_id]?.name,
     }));
 
     res.json({

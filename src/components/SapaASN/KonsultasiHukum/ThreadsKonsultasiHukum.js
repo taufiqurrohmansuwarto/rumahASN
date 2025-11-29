@@ -14,47 +14,52 @@ import { Button, Input, Tag } from "antd";
 import dayjs from "dayjs";
 import { useEffect, useRef, useState } from "react";
 
-const MessageBubble = ({ message, isUser }) => {
-  const time = message.created_at
-    ? dayjs(message.created_at).format("HH:mm")
-    : message.time;
+// Message bubble - User's messages on RIGHT, Admin's messages on LEFT
+const MessageBubble = ({ msg, isMyMessage }) => {
+  const time = dayjs(msg.created_at).format("DD MMM, HH:mm");
 
   return (
     <Box
       style={{
         display: "flex",
-        flexDirection: isUser ? "row" : "row-reverse",
-        gap: 12,
-        width: "100%",
+        flexDirection: isMyMessage ? "row-reverse" : "row",
+        gap: 10,
+        marginBottom: 16,
       }}
     >
       <Avatar
+        size="sm"
         radius="xl"
-        color={isUser ? "blue" : "green"}
+        color={isMyMessage ? "blue" : "green"}
         style={{ flexShrink: 0 }}
       >
-        {isUser ? <IconUser size={18} /> : <IconUserShield size={18} />}
+        {isMyMessage ? <IconUser size={14} /> : <IconUserShield size={14} />}
       </Avatar>
       <Box style={{ maxWidth: "70%" }}>
-        <Text size="xs" fw={500} c={isUser ? "blue" : "green"} mb={4}>
-          {message.sender_name || message.senderName || (isUser ? "User" : "Admin")}
+        <Text size="xs" c="dimmed" mb={4} ta={isMyMessage ? "right" : "left"}>
+          {isMyMessage ? "Anda" : "Admin"}
         </Text>
         <Paper
           p="sm"
           radius="lg"
+          bg={isMyMessage ? "blue.6" : "gray.1"}
           style={{
-            backgroundColor: isUser ? "#e3f2fd" : "#e8f5e9",
-            borderTopLeftRadius: isUser ? 4 : 16,
-            borderTopRightRadius: isUser ? 16 : 4,
+            borderTopLeftRadius: isMyMessage ? 16 : 4,
+            borderTopRightRadius: isMyMessage ? 4 : 16,
           }}
         >
-          <Text size="sm" style={{ whiteSpace: "pre-wrap" }}>
-            {message.message || message.text}
+          <Text size="sm" c={isMyMessage ? "white" : "dark"} style={{ whiteSpace: "pre-wrap" }}>
+            {msg.message}
           </Text>
         </Paper>
-        <Text size="xs" c="dimmed" ta={isUser ? "left" : "right"} mt={4}>
-          {time}
-        </Text>
+        <Group gap={6} mt={4} justify={isMyMessage ? "flex-end" : "flex-start"}>
+          <Text size="xs" c="dimmed">{time}</Text>
+          {isMyMessage && (
+            <Text size="xs" c={msg.is_read_by_admin ? "blue" : "dimmed"}>
+              {msg.is_read_by_admin ? "✓✓" : "✓"}
+            </Text>
+          )}
+        </Group>
       </Box>
     </Box>
   );
@@ -62,10 +67,12 @@ const MessageBubble = ({ message, isUser }) => {
 
 const statusConfig = {
   "Waiting for Response": { color: "orange", label: "Menunggu Respon" },
-  Answered: { color: "blue", label: "Sudah Dijawab" },
+  "In Progress": { color: "blue", label: "Diproses" },
+  Answered: { color: "cyan", label: "Sudah Dijawab" },
   Pending: { color: "gray", label: "Pending" },
   Rejected: { color: "red", label: "Ditolak" },
   Closed: { color: "green", label: "Selesai" },
+  Completed: { color: "green", label: "Selesai" },
 };
 
 const ThreadsKonsultasiHukum = ({
@@ -93,6 +100,13 @@ const ThreadsKonsultasiHukum = ({
     setText("");
   };
 
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
+
   if (pageLoading) {
     return (
       <Paper p="md" radius="md" withBorder>
@@ -103,11 +117,16 @@ const ThreadsKonsultasiHukum = ({
     );
   }
 
+  const isClosed = konsultasi?.status === "Closed" || 
+                   konsultasi?.status === "Rejected" || 
+                   konsultasi?.status === "Completed";
+
   return (
     <Paper p="md" radius="md" withBorder>
+      {/* Header */}
       <Group gap="md" mb="sm" justify="space-between">
         <Group gap="xs">
-          <Text fw={600}>Konsultasi #{konsultasi?.nomor_konsultasi}</Text>
+          <Text fw={600}>Konsultasi #{konsultasi?.nomor_konsultasi || konsultasi?.id}</Text>
           <Tag color={statusConfig[konsultasi?.status]?.color}>
             {statusConfig[konsultasi?.status]?.label || konsultasi?.status}
           </Tag>
@@ -119,19 +138,11 @@ const ThreadsKonsultasiHukum = ({
         </Text>
       </Group>
 
-      {konsultasi?.ringkasan && (
-        <Paper p="xs" bg="gray.0" radius="sm" mb="md">
-          <Text size="xs" fw={500} c="dimmed" mb={4}>
-            Ringkasan Permasalahan:
-          </Text>
-          <Text size="sm">{konsultasi.ringkasan}</Text>
-        </Paper>
-      )}
-
       <Divider mb="md" />
 
+      {/* Chat Area */}
       <ScrollArea h={400} viewportRef={scrollRef} offsetScrollbars>
-        <Stack gap="lg" p="xs">
+        <Stack gap="sm" p="xs">
           {messages.length === 0 ? (
             <Text ta="center" c="dimmed" py="xl">
               Belum ada pesan. Mulai percakapan Anda.
@@ -140,8 +151,8 @@ const ThreadsKonsultasiHukum = ({
             messages.map((msg) => (
               <MessageBubble
                 key={msg.id}
-                message={msg}
-                isUser={msg.sender_type === "user"}
+                msg={msg}
+                isMyMessage={msg.sender_type === "user"}
               />
             ))
           )}
@@ -150,25 +161,33 @@ const ThreadsKonsultasiHukum = ({
 
       <Divider my="md" />
 
+      {/* Input Area */}
       <Group gap="sm">
-        <Input
+        <Input.TextArea
           placeholder="Ketik pesan Anda..."
           value={text}
           onChange={(e) => setText(e.target.value)}
-          onPressEnter={handleSend}
+          onKeyPress={handleKeyPress}
+          autoSize={{ minRows: 1, maxRows: 4 }}
           style={{ flex: 1 }}
-          disabled={konsultasi?.status === "Closed" || konsultasi?.status === "Rejected"}
+          disabled={isClosed}
         />
         <Button
           type="primary"
           icon={<IconSend size={16} />}
           onClick={handleSend}
           loading={loading}
-          disabled={konsultasi?.status === "Closed" || konsultasi?.status === "Rejected"}
+          disabled={isClosed || !text.trim()}
         >
           Kirim
         </Button>
       </Group>
+
+      {isClosed && (
+        <Text size="xs" c="dimmed" ta="center" mt="sm">
+          Konsultasi ini sudah ditutup. Anda tidak dapat mengirim pesan lagi.
+        </Text>
+      )}
     </Paper>
   );
 };

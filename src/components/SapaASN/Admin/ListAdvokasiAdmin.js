@@ -316,24 +316,19 @@ const ListAdvokasiAdmin = ({ data = [], meta = {}, loading = false, query = {}, 
       render: (id) => <Text size="xs" fw={600}>{id}</Text>,
     },
     {
-      title: "",
-      key: "avatar",
-      width: 50,
-      render: (_, record) => (
-        <Avatar src={record.user?.image} size="sm" radius="xl" color="blue">
-          {record.user?.username?.charAt(0)?.toUpperCase()}
-        </Avatar>
-      ),
-    },
-    {
       title: "Pemohon",
       key: "user",
       width: 200,
       render: (_, record) => (
-        <Stack gap={0}>
-          <Text size="xs" fw={500}>{record.user?.username || "-"}</Text>
-          <Text size="xs" c="dimmed" lineClamp={1}>{record.user?.perangkat_daerah_detail || "-"}</Text>
-        </Stack>
+        <Group gap={6} wrap="nowrap" align="center">
+          <Avatar src={record.user?.image} size={28} radius="xl" color="blue">
+            {record.user?.username?.charAt(0)?.toUpperCase()}
+          </Avatar>
+          <Stack gap={0} style={{ minWidth: 0 }}>
+            <Text size="xs" fw={500} lineClamp={1} style={{ lineHeight: 1.2 }}>{record.user?.username || "-"}</Text>
+            <Text size="10px" c="dimmed" lineClamp={1} style={{ lineHeight: 1.2 }}>{record.user?.perangkat_daerah_detail || "-"}</Text>
+          </Stack>
+        </Group>
       ),
     },
     {

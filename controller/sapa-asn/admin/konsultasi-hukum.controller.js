@@ -219,6 +219,22 @@ const getThreads = async (req, res) => {
       return res.status(404).json({ message: "Data tidak ditemukan" });
     }
 
+    // Mark all user messages as read by admin
+    await KonsultasiHukumThread.query()
+      .where("konsultasi_hukum_id", id)
+      .where("sender_type", "user")
+      .where("is_read_by_admin", false)
+      .patch({
+        is_read_by_admin: true,
+        read_at: new Date(),
+      });
+
+    // Reset admin unread count and update last read time
+    await KonsultasiHukum.query().findById(id).patch({
+      unread_count_admin: 0,
+      admin_last_read_at: new Date(),
+    });
+
     const threads = await KonsultasiHukumThread.query()
       .where("konsultasi_hukum_id", id)
       .orderBy("created_at", "asc");
@@ -251,15 +267,20 @@ const sendMessage = async (req, res) => {
       user_id: customId,
       message,
       sender_type: "admin",
+      is_read_by_user: false,
     });
 
-    // Update konsultasi status if still pending
+    // Update konsultasi status and increment user unread count
+    const updateData = {
+      unread_count_user: (konsultasi.unread_count_user || 0) + 1,
+    };
+    
     if (konsultasi.status === "Pending") {
-      await KonsultasiHukum.query().findById(id).patch({
-        status: "In Progress",
-        fasilitator_id: customId,
-      });
+      updateData.status = "In Progress";
+      updateData.fasilitator_id = customId;
     }
+    
+    await KonsultasiHukum.query().findById(id).patch(updateData);
 
     // Notify user
     await Notifikasi.query().insert({
