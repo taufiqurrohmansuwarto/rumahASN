@@ -21,6 +21,16 @@ export const appLists = [
   },
   {
     rightIcon: <IconHome />,
+    title: "Sapa ASN",
+    desc: "Sapa ASN",
+    color: "#1A73E8",
+    url: "/sapa-asn/dashboard",
+    icon: "https://siasn.bkd.jatimprov.go.id:9000/public/icon-sapa-asn.png",
+    userType: ["asn", "admin"],
+    target: "_blank",
+  },
+  {
+    rightIcon: <IconHome />,
     title: "Knowledge Base",
     desc: "Knowledge Base",
     color: "#1A73E8",
