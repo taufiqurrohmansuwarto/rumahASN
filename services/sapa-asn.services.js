@@ -224,3 +224,205 @@ export const markNotificationRead = async (id) => {
     .patch(`/users/dashboard/notifications?id=${id}`)
     .then((res) => res?.data);
 };
+
+// ==========================================
+// ADMIN - DASHBOARD
+// ==========================================
+
+/**
+ * Get admin dashboard summary
+ */
+export const getAdminDashboardSummary = async () => {
+  return api.get("/admin/dashboard").then((res) => res?.data);
+};
+
+// ==========================================
+// ADMIN - ADVOKASI
+// ==========================================
+
+/**
+ * Get all advokasi (admin)
+ * @param {Object} params - { page, limit, status, search, sortField, sortOrder, startDate, endDate }
+ */
+export const getAdminAdvokasi = async (params = {}) => {
+  const query = queryString.stringify(params, {
+    skipEmptyString: true,
+    skipNull: true,
+  });
+  return api.get(`/admin/advokasi?${query}`).then((res) => res?.data);
+};
+
+/**
+ * Get advokasi by ID (admin)
+ * @param {String} id - Advokasi ID
+ */
+export const getAdminAdvokasiById = async (id) => {
+  return api.get(`/admin/advokasi/${id}`).then((res) => res?.data);
+};
+
+/**
+ * Update advokasi status (admin)
+ * @param {String} id - Advokasi ID
+ * @param {Object} data - { status, alasan_tolak, catatan }
+ */
+export const updateAdminAdvokasiStatus = async (id, data) => {
+  return api.patch(`/admin/advokasi/${id}`, data).then((res) => res?.data);
+};
+
+/**
+ * Get jadwal advokasi (admin)
+ * @param {Object} params - { month, year }
+ */
+export const getAdminJadwalAdvokasi = async (params = {}) => {
+  const query = queryString.stringify(params, {
+    skipEmptyString: true,
+    skipNull: true,
+  });
+  return api.get(`/admin/advokasi/jadwal?${query}`).then((res) => res?.data);
+};
+
+/**
+ * Create or update jadwal advokasi (admin)
+ * @param {Object} data - { id?, tanggal_konsultasi, waktu_mulai, waktu_selesai, kuota_maksimal, status }
+ */
+export const upsertAdminJadwalAdvokasi = async (data) => {
+  return api.post("/admin/advokasi/jadwal", data).then((res) => res?.data);
+};
+
+/**
+ * Export advokasi to Excel (admin)
+ * @param {Object} params - { status, startDate, endDate }
+ */
+export const exportAdminAdvokasi = async (params = {}) => {
+  const query = queryString.stringify(
+    { ...params, limit: -1 },
+    {
+      skipEmptyString: true,
+      skipNull: true,
+    }
+  );
+  return api.get(`/admin/advokasi?${query}`, { responseType: "blob" });
+};
+
+// ==========================================
+// ADMIN - KONSULTASI HUKUM
+// ==========================================
+
+/**
+ * Get all konsultasi hukum (admin)
+ * @param {Object} params - { page, limit, status, jenis, search, sortField, sortOrder, startDate, endDate }
+ */
+export const getAdminKonsultasiHukum = async (params = {}) => {
+  const query = queryString.stringify(params, {
+    skipEmptyString: true,
+    skipNull: true,
+  });
+  return api.get(`/admin/konsultasi-hukum?${query}`).then((res) => res?.data);
+};
+
+/**
+ * Get konsultasi hukum by ID (admin)
+ * @param {String} id - Konsultasi ID
+ */
+export const getAdminKonsultasiHukumById = async (id) => {
+  return api.get(`/admin/konsultasi-hukum/${id}`).then((res) => res?.data);
+};
+
+/**
+ * Update konsultasi hukum status (admin)
+ * @param {String} id - Konsultasi ID
+ * @param {Object} data - { status, respon }
+ */
+export const updateAdminKonsultasiHukumStatus = async (id, data) => {
+  return api
+    .patch(`/admin/konsultasi-hukum/${id}`, data)
+    .then((res) => res?.data);
+};
+
+/**
+ * Get threads for a konsultasi (admin)
+ * @param {String} id - Konsultasi ID
+ */
+export const getAdminKonsultasiHukumThreads = async (id) => {
+  return api
+    .get(`/admin/konsultasi-hukum/${id}/threads`)
+    .then((res) => res?.data);
+};
+
+/**
+ * Send message to konsultasi thread (admin)
+ * @param {String} id - Konsultasi ID
+ * @param {Object} data - { message }
+ */
+export const sendAdminKonsultasiHukumMessage = async (id, data) => {
+  return api
+    .post(`/admin/konsultasi-hukum/${id}/threads`, data)
+    .then((res) => res?.data);
+};
+
+/**
+ * Export konsultasi hukum to Excel (admin)
+ * @param {Object} params - { status, jenis, startDate, endDate }
+ */
+export const exportAdminKonsultasiHukum = async (params = {}) => {
+  const query = queryString.stringify(
+    { ...params, limit: -1 },
+    {
+      skipEmptyString: true,
+      skipNull: true,
+    }
+  );
+  return api.get(`/admin/konsultasi-hukum?${query}`, { responseType: "blob" });
+};
+
+// ==========================================
+// ADMIN - PENDAMPINGAN HUKUM
+// ==========================================
+
+/**
+ * Get all pendampingan hukum (admin)
+ * @param {Object} params - { page, limit, status, jenisPerkara, bentuk, search, sortField, sortOrder, startDate, endDate }
+ */
+export const getAdminPendampinganHukum = async (params = {}) => {
+  const query = queryString.stringify(params, {
+    skipEmptyString: true,
+    skipNull: true,
+  });
+  return api.get(`/admin/pendampingan-hukum?${query}`).then((res) => res?.data);
+};
+
+/**
+ * Get pendampingan hukum by ID (admin)
+ * @param {String} id - Pendampingan ID
+ */
+export const getAdminPendampinganHukumById = async (id) => {
+  return api.get(`/admin/pendampingan-hukum/${id}`).then((res) => res?.data);
+};
+
+/**
+ * Update pendampingan hukum status (admin)
+ * @param {String} id - Pendampingan ID
+ * @param {Object} data - { status, catatan, alasan_tolak }
+ */
+export const updateAdminPendampinganHukumStatus = async (id, data) => {
+  return api
+    .patch(`/admin/pendampingan-hukum/${id}`, data)
+    .then((res) => res?.data);
+};
+
+/**
+ * Export pendampingan hukum to Excel (admin)
+ * @param {Object} params - { status, jenisPerkara, bentuk, startDate, endDate }
+ */
+export const exportAdminPendampinganHukum = async (params = {}) => {
+  const query = queryString.stringify(
+    { ...params, limit: -1 },
+    {
+      skipEmptyString: true,
+      skipNull: true,
+    }
+  );
+  return api.get(`/admin/pendampingan-hukum?${query}`, {
+    responseType: "blob",
+  });
+};

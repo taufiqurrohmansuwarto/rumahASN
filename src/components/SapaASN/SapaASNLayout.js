@@ -8,8 +8,11 @@ import { LogoutOutlined, UserOutlined } from "@ant-design/icons";
 import {
   IconDashboard,
   IconGavel,
+  IconLayoutDashboard,
   IconMessageQuestion,
+  IconScale,
   IconShieldCheck,
+  IconUsersGroup,
 } from "@tabler/icons-react";
 import { Dropdown, Space } from "antd";
 import { signOut, useSession } from "next-auth/react";
@@ -41,6 +44,30 @@ const menuItems = [
     icon: <IconShieldCheck size={16} />,
     label: "Pendampingan Hukum",
     role: ["asn"],
+  },
+  {
+    key: "/admin/dashboard",
+    icon: <IconLayoutDashboard size={16} />,
+    label: "Dashboard Admin",
+    role: ["admin"],
+  },
+  {
+    key: "/admin/advokasi",
+    icon: <IconScale size={16} />,
+    label: "Kelola Advokasi",
+    role: ["admin"],
+  },
+  {
+    key: "/admin/konsultasi-hukum",
+    icon: <IconUsersGroup size={16} />,
+    label: "Kelola Konsultasi",
+    role: ["admin"],
+  },
+  {
+    key: "/admin/pendampingan-hukum",
+    icon: <IconGavel size={16} />,
+    label: "Kelola Pendampingan",
+    role: ["admin"],
   },
 ];
 

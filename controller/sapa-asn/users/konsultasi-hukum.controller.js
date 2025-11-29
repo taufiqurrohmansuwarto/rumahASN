@@ -259,11 +259,12 @@ const sendMessage = async (req, res) => {
       return res.status(400).json({ message: "Pesan tidak boleh kosong" });
     }
 
-    // Create thread message
+    // Create thread message (as user)
     const result = await KonsultasiHukumThread.query().insert({
       konsultasi_hukum_id: id,
       user_id: customId,
       message: message.trim(),
+      sender_type: "user",
     });
 
     // Update konsultasi status if needed
