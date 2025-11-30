@@ -34,13 +34,11 @@ const KnowledgeLayout = ({
           >
             <Button
               type="primary"
+              shape="round"
               icon={<PlusOutlined />}
               onClick={() => router.push("/asn-connect/asn-knowledge/create")}
-              style={{
-                width: "100%",
-              }}
             >
-              Buat Pengetahuan
+              Pengetahuan
             </Button>
           </Col>
         )}

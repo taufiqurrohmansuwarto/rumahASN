@@ -30,6 +30,7 @@ import NotifikasiASNConnect from "./Notification/NotifikasiASNConnect";
 import NotifikasiForumKepegawaian from "./Notification/NotifikasiForumKepegawaian";
 import NotifikasiPrivateMessage from "./Notification/NotifikasiPrivateMessage";
 import { NotificationBellIcon } from "./KnowledgeManagements/notifications";
+import FloatingSurveyButton from "./Survey/FloatingSurveyButton";
 const ProLayout = dynamic(
   () => import("@ant-design/pro-components").then((mod) => mod?.ProLayout),
   {
@@ -671,6 +672,7 @@ function Layout({ children, active, collapsed = true }) {
       >
         {children}
       </ProLayout>
+      <FloatingSurveyButton />
     </div>
   );
 }

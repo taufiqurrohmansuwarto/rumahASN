@@ -1,6 +1,7 @@
 import BezzetingFungsional from "@/components/Bezzeting/BezzetingFungsional";
 import Features from "@/components/Features";
 import Footer from "@/components/Outer/Footer";
+import FloatingSurveyButton from "@/components/Survey/FloatingSurveyButton";
 import UserRating from "@/components/UserRating";
 import { GoogleOutlined, UserOutlined } from "@ant-design/icons";
 import { useSpring } from "@react-spring/web";
@@ -475,6 +476,7 @@ const SignIn = ({ providers }) => {
       </div>
 
       <FloatButton.BackTop />
+      <FloatingSurveyButton />
     </>
   );
 };

@@ -179,7 +179,7 @@ const AsnKnowledge = () => {
               />
             </div>
           </Col>
-          <Col lg={10} xs={24}>
+          <Col lg={12} xs={24}>
             <KnowledgeLayout
               currentPath="/asn-connect/asn-knowledge"
               showCreateButton={true}
