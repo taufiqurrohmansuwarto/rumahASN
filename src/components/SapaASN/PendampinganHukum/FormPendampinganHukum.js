@@ -37,7 +37,7 @@ import {
   Upload,
 } from "antd";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import UserInfoCard, { UserInfoCompact } from "../UserInfoCard";
 
 const jenisPerkaraOptions = [
@@ -64,6 +64,16 @@ const FormPendampinganHukum = ({ user, loading: userLoading, onSubmit, submitLoa
   // Watch form values
   const jenisPerkara = Form.useWatch("jenisPerkara", form);
   const bentukPendampingan = Form.useWatch("bentukPendampingan", form);
+
+  // Set default values from profile
+  useEffect(() => {
+    if (user?.noHp || user?.email) {
+      form.setFieldsValue({
+        noHp: user.noHp || "",
+        email: user.email || "",
+      });
+    }
+  }, [user, form]);
 
   const handleNext = async () => {
     if (current === 1) {
@@ -196,13 +206,25 @@ const FormPendampinganHukum = ({ user, loading: userLoading, onSubmit, submitLoa
             </div>
           )}
 
-          {/* Pengadilan & Jadwal Sidang */}
+          {/* Tempat Pengadilan */}
           <div style={{ marginTop: 16 }}>
-            <Text size="xs" fw={500} mb={4}>Pengadilan & Jadwal Sidang:</Text>
-            <Form.Item name="pengadilanJadwal" style={{ marginBottom: 0 }}>
+            <Text size="xs" fw={500} mb={4}>Tempat Pengadilan:</Text>
+            <Form.Item name="tempatPengadilan" style={{ marginBottom: 0 }}>
               <Input 
                 size="small" 
-                placeholder="Contoh: PN Surabaya, 15 Januari 2025 pukul 09.00 WIB" 
+                placeholder="Contoh: PN Surabaya, PTUN Jakarta, dll" 
+                prefix={<IconGavel size={14} />} 
+              />
+            </Form.Item>
+          </div>
+
+          {/* Jadwal Sidang Pengadilan */}
+          <div style={{ marginTop: 16 }}>
+            <Text size="xs" fw={500} mb={4}>Jadwal Sidang Pengadilan:</Text>
+            <Form.Item name="jadwalPengadilan" style={{ marginBottom: 0 }}>
+              <Input 
+                type="datetime-local"
+                size="small" 
                 prefix={<IconCalendar size={14} />} 
               />
             </Form.Item>
@@ -397,3 +419,4 @@ const FormPendampinganHukum = ({ user, loading: userLoading, onSubmit, submitLoa
 };
 
 export default FormPendampinganHukum;
+

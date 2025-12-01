@@ -445,3 +445,14 @@ export const exportAdminPendampinganHukum = async (params = {}) => {
     responseType: "blob",
   });
 };
+
+// ==========================================
+// USERS - PROFILE
+// ==========================================
+
+/**
+ * Get profile for current user
+ */
+export const getProfile = async () => {
+  return api.get("/users/profile").then((res) => res?.data);
+};

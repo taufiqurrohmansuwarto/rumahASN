@@ -152,8 +152,9 @@ const DetailModal = ({ open, onClose, data }) => {
                 <SimpleGrid cols={2} spacing="xs">
                   <InfoItem icon={IconHash} label="ID" value={data.id} />
                   <InfoItem icon={IconHash} label="No. Perkara" value={data.no_perkara} />
+                  <InfoItem icon={IconCategory} label="Tempat Pengadilan" value={data.tempat_pengadilan} />
+                  <InfoItem icon={IconCategory} label="Jadwal Sidang" value={data.jadwal_pengadilan ? dayjs(data.jadwal_pengadilan).format("DD MMM YYYY, HH:mm") : "-"} />
                 </SimpleGrid>
-                <InfoItem label="Pengadilan & Jadwal" value={data.pengadilan_jadwal} icon={IconCategory} />
                 <div>
                   <Text size="xs" c="dimmed" mb={4}>Jenis Perkara</Text>
                   <Group gap={4}>
@@ -248,6 +249,8 @@ const ListPendampinganHukumAdmin = ({ data = [], meta = {}, loading = false, que
   const jenisPerkara = query.jenisPerkara || "";
   const startDate = query.startDate || "";
   const endDate = query.endDate || "";
+  const sidangStartDate = query.sidangStartDate || "";
+  const sidangEndDate = query.sidangEndDate || "";
   const sortField = query.sortField || "";
   const sortOrder = query.sortOrder || "";
   const page = parseInt(query.page) || meta?.page || 1;
@@ -299,7 +302,7 @@ const ListPendampinganHukumAdmin = ({ data = [], meta = {}, loading = false, que
   const handleExport = async () => {
     try {
       setExporting(true);
-      const response = await exportAdminPendampinganHukum({ status, jenisPerkara, startDate, endDate });
+      const response = await exportAdminPendampinganHukum({ status, jenisPerkara, startDate, endDate, sidangStartDate, sidangEndDate });
       saveAs(response.data, `pendampingan-hukum-${dayjs().format("YYYYMMDD")}.xlsx`);
       message.success("Data berhasil diexport");
     } catch (err) {
@@ -346,12 +349,21 @@ const ListPendampinganHukumAdmin = ({ data = [], meta = {}, loading = false, que
       },
     },
     {
-      title: "Tanggal",
+      title: "Tgl Usul",
       dataIndex: "created_at",
       key: "created_at",
-      width: 100,
+      width: 90,
       sorter: true,
       sortOrder: sortField === "created_at" ? sortOrder : null,
+      render: (text) => <Text size="xs">{text ? dayjs(text).format("DD MMM YY") : "-"}</Text>,
+    },
+    {
+      title: "Tgl Sidang",
+      dataIndex: "jadwal_pengadilan",
+      key: "jadwal_pengadilan",
+      width: 90,
+      sorter: true,
+      sortOrder: sortField === "jadwal_pengadilan" ? sortOrder : null,
       render: (text) => <Text size="xs">{text ? dayjs(text).format("DD MMM YY") : "-"}</Text>,
     },
     {
@@ -416,6 +428,7 @@ const ListPendampinganHukumAdmin = ({ data = [], meta = {}, loading = false, que
             />
           </Col>
           <Col xs={24} sm={12} md={6}>
+            <Text size="xs" c="dimmed" mb={2}>Tanggal Usul</Text>
             <DatePicker.RangePicker
               style={{ width: "100%" }}
               placeholder={["Dari", "Sampai"]}
@@ -424,6 +437,21 @@ const ListPendampinganHukumAdmin = ({ data = [], meta = {}, loading = false, que
                 updateQuery({
                   startDate: dates?.[0]?.format("YYYY-MM-DD") || "",
                   endDate: dates?.[1]?.format("YYYY-MM-DD") || "",
+                  page: 1,
+                })
+              }
+            />
+          </Col>
+          <Col xs={24} sm={12} md={6}>
+            <Text size="xs" c="dimmed" mb={2}>Tanggal Sidang</Text>
+            <DatePicker.RangePicker
+              style={{ width: "100%" }}
+              placeholder={["Dari", "Sampai"]}
+              value={sidangStartDate && sidangEndDate ? [dayjs(sidangStartDate), dayjs(sidangEndDate)] : null}
+              onChange={(dates) =>
+                updateQuery({
+                  sidangStartDate: dates?.[0]?.format("YYYY-MM-DD") || "",
+                  sidangEndDate: dates?.[1]?.format("YYYY-MM-DD") || "",
                   page: 1,
                 })
               }

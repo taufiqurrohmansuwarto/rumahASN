@@ -2,10 +2,9 @@ import PageContainer from "@/components/PageContainer";
 import FormPendampinganHukum from "@/components/SapaASN/PendampinganHukum/FormPendampinganHukum";
 import SapaASNLayout from "@/components/SapaASN/SapaASNLayout";
 import useScrollRestoration from "@/hooks/useScrollRestoration";
-import { createPendampinganHukum } from "@/services/sapa-asn.services";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { createPendampinganHukum, getProfile } from "@/services/sapa-asn.services";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Breadcrumb, FloatButton, message } from "antd";
-import { useSession } from "next-auth/react";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -14,14 +13,23 @@ const CreatePendampinganHukum = () => {
   useScrollRestoration();
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { data: session } = useSession();
 
-  // Fetch user info from session
+  // Fetch profile
+  const { data: profile, isLoading: profileLoading } = useQuery({
+    queryKey: ["sapa-asn-profile"],
+    queryFn: getProfile,
+  });
+
+  // Map profile to user info
   const userInfo = {
-    name: session?.user?.name,
-    nip: session?.user?.nip,
-    jabatan: session?.user?.jabatan,
-    perangkatDaerah: session?.user?.perangkat_daerah?.detail,
+    image: profile?.image,
+    name: profile?.nama,
+    nip: profile?.nip,
+    jabatan: profile?.jabatan,
+    perangkatDaerah: profile?.perangkat_daerah,
+    statusKepegawaian: profile?.status_kepegawaian,
+    noHp: profile?.no_hp,
+    email: profile?.email,
   };
 
   // Submit mutation
@@ -51,10 +59,13 @@ const CreatePendampinganHukum = () => {
     if (values.jenisPerkaraLainnya) {
       formData.append("jenis_perkara_lainnya", values.jenisPerkaraLainnya);
     }
-    if (values.pengadilanJadwal) {
-      formData.append("pengadilan_jadwal", values.pengadilanJadwal);
+    if (values.tempatPengadilan) {
+      formData.append("tempat_pengadilan", values.tempatPengadilan);
     }
-    formData.append("ringkasan_pokok_perkara", values.ringkasan);
+    if (values.jadwalPengadilan) {
+      formData.append("jadwal_pengadilan", values.jadwalPengadilan);
+    }
+    formData.append("ringkasan_perkara", values.ringkasan_perkara);
     formData.append(
       "bentuk_pendampingan",
       JSON.stringify(values.bentukPendampingan || [])
@@ -99,7 +110,7 @@ const CreatePendampinganHukum = () => {
       >
         <FormPendampinganHukum
           user={userInfo}
-          loading={false}
+          loading={profileLoading}
           onSubmit={handleSubmit}
           submitLoading={submitLoading}
         />

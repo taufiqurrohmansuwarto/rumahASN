@@ -341,7 +341,7 @@ const ListKonsultasiHukumAdmin = ({ data = [], meta = {}, loading = false, query
       },
     },
     {
-      title: "Tanggal",
+      title: "Tgl Usul",
       dataIndex: "created_at",
       key: "created_at",
       width: 100,
@@ -423,6 +423,7 @@ const ListKonsultasiHukumAdmin = ({ data = [], meta = {}, loading = false, query
             />
           </Col>
           <Col xs={24} sm={12} md={6}>
+            <Text size="xs" c="dimmed" mb={2}>Tanggal Usul</Text>
             <DatePicker.RangePicker
               style={{ width: "100%" }}
               placeholder={["Dari", "Sampai"]}

@@ -21,6 +21,8 @@ const getAll = async (req, res) => {
       sortOrder = "desc",
       startDate,
       endDate,
+      sidangStartDate,
+      sidangEndDate,
     } = req?.query;
 
     let query = Pendampingan.query().withGraphFetched("[user(simpleWithImage)]");
@@ -44,9 +46,14 @@ const getAll = async (req, res) => {
       ]);
     }
 
-    // Filter by date range
+    // Filter by date range (tanggal usul/pengajuan)
     if (startDate && endDate) {
       query = query.whereBetween("created_at", [startDate, endDate]);
+    }
+
+    // Filter by jadwal sidang date range (tanggal sidang)
+    if (sidangStartDate && sidangEndDate) {
+      query = query.whereBetween("jadwal_pengadilan", [sidangStartDate, sidangEndDate]);
     }
 
     // Search
@@ -79,11 +86,12 @@ const getAll = async (req, res) => {
         { header: "Email", key: "email", width: 25 },
         { header: "No Perkara", key: "no_perkara", width: 20 },
         { header: "Jenis Perkara", key: "jenis_perkara", width: 30 },
-        { header: "Pengadilan & Jadwal", key: "pengadilan", width: 30 },
+        { header: "Tempat Pengadilan", key: "tempat_pengadilan", width: 25 },
+        { header: "Jadwal Sidang", key: "jadwal_pengadilan", width: 20 },
         { header: "Ringkasan Perkara", key: "ringkasan", width: 50 },
         { header: "Bentuk Pendampingan", key: "bentuk", width: 30 },
         { header: "Status", key: "status", width: 15 },
-        { header: "Tanggal Pengajuan", key: "created_at", width: 20 },
+        { header: "Tanggal Usul", key: "created_at", width: 20 },
       ];
 
       data.forEach((item, idx) => {
@@ -104,7 +112,8 @@ const getAll = async (req, res) => {
           email: item.email_user,
           no_perkara: item.no_perkara || "-",
           jenis_perkara: jenisPerkara,
-          pengadilan: item.pengadilan_jadwal || "-",
+          tempat_pengadilan: item.tempat_pengadilan || "-",
+          jadwal_pengadilan: item.jadwal_pengadilan ? dayjs(item.jadwal_pengadilan).format("DD/MM/YYYY HH:mm") : "-",
           ringkasan: item.ringkasan_perkara || "-",
           bentuk: bentukPendampingan,
           status: item.status,

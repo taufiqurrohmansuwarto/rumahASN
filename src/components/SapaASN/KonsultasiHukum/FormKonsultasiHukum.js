@@ -34,7 +34,7 @@ import {
   Upload,
 } from "antd";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import UserInfoCard, { UserInfoCompact } from "../UserInfoCard";
 
 const jenisPermasalahanOptions = [
@@ -53,6 +53,16 @@ const FormKonsultasiHukum = ({ user, loading: userLoading, onSubmit, submitLoadi
 
   // Watch form values
   const jenisPermasalahan = Form.useWatch("jenisPermasalahan", form);
+
+  // Set default values from profile
+  useEffect(() => {
+    if (user?.noHp || user?.email) {
+      form.setFieldsValue({
+        noHp: user.noHp || "",
+        email: user.email || "",
+      });
+    }
+  }, [user, form]);
 
   const handleNext = async () => {
     if (current === 1) {

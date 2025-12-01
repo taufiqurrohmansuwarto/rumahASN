@@ -343,10 +343,10 @@ const ListAdvokasiAdmin = ({ data = [], meta = {}, loading = false, query = {}, 
         ),
     },
     {
-      title: "Tanggal",
+      title: "Tgl Usul",
       dataIndex: "created_at",
       key: "created_at",
-      width: 120,
+      width: 100,
       sorter: true,
       sortOrder: sortField === "created_at" ? sortOrder : null,
       render: (text) => <Text size="xs">{text ? dayjs(text).format("DD MMM YY") : "-"}</Text>,
@@ -403,6 +403,7 @@ const ListAdvokasiAdmin = ({ data = [], meta = {}, loading = false, query = {}, 
             />
           </Col>
           <Col xs={24} sm={12} md={6}>
+            <Text size="xs" c="dimmed" mb={2}>Tanggal Usul</Text>
             <DatePicker.RangePicker
               style={{ width: "100%" }}
               placeholder={["Dari", "Sampai"]}

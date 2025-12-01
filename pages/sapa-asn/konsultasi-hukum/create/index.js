@@ -2,10 +2,9 @@ import PageContainer from "@/components/PageContainer";
 import FormKonsultasiHukum from "@/components/SapaASN/KonsultasiHukum/FormKonsultasiHukum";
 import SapaASNLayout from "@/components/SapaASN/SapaASNLayout";
 import useScrollRestoration from "@/hooks/useScrollRestoration";
-import { createKonsultasiHukum } from "@/services/sapa-asn.services";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { createKonsultasiHukum, getProfile } from "@/services/sapa-asn.services";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Breadcrumb, FloatButton, message } from "antd";
-import { useSession } from "next-auth/react";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -14,14 +13,23 @@ const CreateKonsultasiHukum = () => {
   useScrollRestoration();
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { data: session } = useSession();
 
-  // Fetch user info from session
+  // Fetch profile
+  const { data: profile, isLoading: profileLoading } = useQuery({
+    queryKey: ["sapa-asn-profile"],
+    queryFn: getProfile,
+  });
+
+  // Map profile to user info
   const userInfo = {
-    name: session?.user?.name,
-    nip: session?.user?.nip,
-    jabatan: session?.user?.jabatan,
-    perangkatDaerah: session?.user?.perangkat_daerah?.detail,
+    image: profile?.image,
+    name: profile?.nama,
+    nip: profile?.nip,
+    jabatan: profile?.jabatan,
+    perangkatDaerah: profile?.perangkat_daerah,
+    statusKepegawaian: profile?.status_kepegawaian,
+    noHp: profile?.no_hp,
+    email: profile?.email,
   };
 
   // Submit mutation
@@ -86,7 +94,7 @@ const CreateKonsultasiHukum = () => {
       >
         <FormKonsultasiHukum
           user={userInfo}
-          loading={false}
+          loading={profileLoading}
           onSubmit={handleSubmit}
           submitLoading={submitLoading}
         />

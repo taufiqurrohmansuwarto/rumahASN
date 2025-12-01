@@ -1,8 +1,6 @@
 import MegaMenuTop from "@/components/MegaMenu/MegaMenuTop";
 import NotifikasiASNConnect from "@/components/Notification/NotifikasiASNConnect";
 import NotifikasiForumKepegawaian from "@/components/Notification/NotifikasiForumKepegawaian";
-import NotifikasiKepegawaian from "@/components/Notification/NotifikasiKepegawaian";
-import NotifikasiPrivateMessage from "@/components/Notification/NotifikasiPrivateMessage";
 import { layoutToken } from "@/styles/rasn.theme";
 import { appList } from "@/utils/app-lists";
 import { getMenuItems, mappingItems } from "@/utils/appLists";
@@ -15,16 +13,16 @@ import {
 } from "@ant-design/icons";
 import {
   IconBuilding,
-  IconHistory,
   IconChartBar,
   IconClock,
   IconDatabase,
   IconEdit,
   IconFileText,
+  IconHistory,
   IconLayoutDashboard,
-  IconUsers,
   IconRefresh,
   IconSearch,
+  IconUsers,
 } from "@tabler/icons-react";
 import { Dropdown, Input, Space } from "antd";
 import { trim } from "lodash";
@@ -32,6 +30,7 @@ import { signOut, useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import { useState } from "react";
+import FloatingSurveyButton from "../Survey/FloatingSurveyButton";
 
 const menuItems = [
   {
@@ -284,6 +283,7 @@ function RekonLayout({ children, active = "rekon-unor" }) {
       appList={appList(data?.user)}
     >
       {children}
+      <FloatingSurveyButton />
     </ProLayout>
   );
 }

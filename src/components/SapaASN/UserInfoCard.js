@@ -1,9 +1,10 @@
-import { Group, Paper, SimpleGrid, Stack, Text } from "@mantine/core";
+import { Avatar, Group, Paper, SimpleGrid, Stack, Text } from "@mantine/core";
 import {
   IconBriefcase,
   IconBuilding,
   IconHash,
   IconUser,
+  IconBadge,
 } from "@tabler/icons-react";
 
 const InfoItem = ({ icon: Icon, label, value }) => (
@@ -22,9 +23,19 @@ const UserInfoCard = ({ user, title = "Data Pribadi", showTitle = true }) => {
       {showTitle && (
         <Text size="sm" fw={600} c="orange" mb="md">{title}</Text>
       )}
+      <Group gap="md" align="flex-start" mb="md">
+        <Avatar src={user?.image} size={64} radius="xl" color="blue">
+          {user?.name?.charAt(0)?.toUpperCase()}
+        </Avatar>
+        <Stack gap={2}>
+          <Text size="md" fw={600}>{user?.name || "-"}</Text>
+          <Text size="sm" c="dimmed">{user?.nip || "-"}</Text>
+          {user?.statusKepegawaian && (
+            <Text size="xs" c="blue">{user?.statusKepegawaian}</Text>
+          )}
+        </Stack>
+      </Group>
       <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
-        <InfoItem icon={IconUser} label="Nama" value={user?.name} />
-        <InfoItem icon={IconHash} label="NIP" value={user?.nip} />
         <InfoItem icon={IconBriefcase} label="Jabatan" value={user?.jabatan} />
         <InfoItem icon={IconBuilding} label="Perangkat Daerah" value={user?.perangkatDaerah} />
       </SimpleGrid>
@@ -34,12 +45,21 @@ const UserInfoCard = ({ user, title = "Data Pribadi", showTitle = true }) => {
 
 // Compact version for accordion
 export const UserInfoCompact = ({ user }) => (
-  <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="sm">
-    <InfoItem icon={IconUser} label="Nama" value={user?.name} />
-    <InfoItem icon={IconHash} label="NIP" value={user?.nip} />
-    <InfoItem icon={IconBriefcase} label="Jabatan" value={user?.jabatan} />
-    <InfoItem icon={IconBuilding} label="Perangkat Daerah" value={user?.perangkatDaerah} />
-  </SimpleGrid>
+  <Stack gap="sm">
+    <Group gap="sm" align="center">
+      <Avatar src={user?.image} size={40} radius="xl" color="blue">
+        {user?.name?.charAt(0)?.toUpperCase()}
+      </Avatar>
+      <Stack gap={0}>
+        <Text size="sm" fw={600}>{user?.name || "-"}</Text>
+        <Text size="xs" c="dimmed">{user?.nip || "-"}</Text>
+      </Stack>
+    </Group>
+    <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="xs">
+      <InfoItem icon={IconBriefcase} label="Jabatan" value={user?.jabatan} />
+      <InfoItem icon={IconBuilding} label="Perangkat Daerah" value={user?.perangkatDaerah} />
+    </SimpleGrid>
+  </Stack>
 );
 
 export default UserInfoCard;

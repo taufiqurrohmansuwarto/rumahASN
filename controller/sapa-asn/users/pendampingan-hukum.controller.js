@@ -127,7 +127,9 @@ const create = async (req, res) => {
       no_perkara,
       jenis_perkara,
       jenis_perkara_lainnya,
-      pengadilan_jadwal,
+      pengadilan_jadwal, // legacy field
+      tempat_pengadilan,
+      jadwal_pengadilan,
       ringkasan_perkara,
       bentuk_pendampingan,
       bentuk_pendampingan_lainnya,
@@ -177,7 +179,9 @@ const create = async (req, res) => {
       no_perkara: no_perkara || null,
       jenis_perkara: JSON.stringify(parsedJenisPerkara),
       jenis_perkara_lainnya: jenis_perkara_lainnya || null,
-      pengadilan_jadwal: pengadilan_jadwal || null,
+      pengadilan_jadwal: pengadilan_jadwal || null, // legacy
+      tempat_pengadilan: tempat_pengadilan || null,
+      jadwal_pengadilan: jadwal_pengadilan || null,
       ringkasan_perkara: ringkasan_perkara,
       lampiran_dokumen:
         uploadedFiles.length > 0 ? JSON.stringify(uploadedFiles) : null,
@@ -280,7 +284,9 @@ const update = async (req, res) => {
       no_perkara,
       jenis_perkara,
       jenis_perkara_lainnya,
-      pengadilan_jadwal,
+      pengadilan_jadwal, // legacy
+      tempat_pengadilan,
+      jadwal_pengadilan,
       ringkasan_perkara,
       bentuk_pendampingan,
       bentuk_pendampingan_lainnya,
@@ -334,7 +340,9 @@ const update = async (req, res) => {
         no_perkara: no_perkara || null,
         jenis_perkara: JSON.stringify(parsedJenisPerkara),
         jenis_perkara_lainnya: jenis_perkara_lainnya || null,
-        pengadilan_jadwal: pengadilan_jadwal || null,
+        pengadilan_jadwal: pengadilan_jadwal || null, // legacy
+        tempat_pengadilan: tempat_pengadilan || null,
+        jadwal_pengadilan: jadwal_pengadilan || null,
         ringkasan_perkara: ringkasan_perkara,
         lampiran_dokumen:
           uploadedFiles.length > 0 ? JSON.stringify(uploadedFiles) : null,
