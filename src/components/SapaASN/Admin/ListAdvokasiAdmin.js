@@ -382,8 +382,9 @@ const ListAdvokasiAdmin = ({ data = [], meta = {}, loading = false, query = {}, 
             <Button icon={<IconDownload size={16} />} onClick={handleExport} loading={exporting}>Export</Button>
           </Group>
         </Group>
-        <Row gutter={[12, 12]}>
+        <Row gutter={[12, 12]} align="bottom">
           <Col xs={24} sm={12} md={6}>
+            <Text size="xs" c="dimmed" mb={2}>Pencarian</Text>
             <Input
               placeholder="Cari ID / kategori..."
               prefix={<IconSearch size={16} />}
@@ -393,9 +394,10 @@ const ListAdvokasiAdmin = ({ data = [], meta = {}, loading = false, query = {}, 
             />
           </Col>
           <Col xs={24} sm={12} md={6}>
+            <Text size="xs" c="dimmed" mb={2}>Status</Text>
             <Select
               style={{ width: "100%" }}
-              placeholder="Status"
+              placeholder="Semua Status"
               options={statusOptions}
               value={status || undefined}
               onChange={(val) => updateQuery({ status: val, page: 1 })}

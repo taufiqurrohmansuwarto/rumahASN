@@ -286,7 +286,7 @@ const CreateTicket = ({ siteKey }) => {
   };
 
   return (
-    <div>
+    <div className="create-ticket-wrapper">
       <Bantuan open={open} onCancel={handleClose} isMobile={isMobile} />
       <Row gutter={[isMobile ? 12 : 16, isMobile ? 12 : 16]}>
         <Col md={16} xs={24}>
@@ -360,14 +360,6 @@ const CreateTicket = ({ siteKey }) => {
                       borderRadius: "6px",
                       fontWeight: 500,
                     }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = "#FF4500";
-                      e.currentTarget.style.color = "#FFFFFF";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = "#FFFFFF";
-                      e.currentTarget.style.color = "#FF4500";
-                    }}
                   >
                     Bantuan
                   </Button>
@@ -391,15 +383,6 @@ const CreateTicket = ({ siteKey }) => {
                       style={{
                         borderRadius: "6px",
                         fontSize: isMobile ? "13px" : "14px",
-                      }}
-                      onFocus={(e) => {
-                        e.target.style.borderColor = "#FF4500";
-                        e.target.style.boxShadow =
-                          "0 0 0 2px rgba(255, 69, 0, 0.2)";
-                      }}
-                      onBlur={(e) => {
-                        e.target.style.borderColor = "#d9d9d9";
-                        e.target.style.boxShadow = "none";
                       }}
                     />
                   </Form.Item>
@@ -514,52 +497,45 @@ const CreateTicket = ({ siteKey }) => {
       </Row>
 
       <style jsx global>{`
-        .ant-card {
+        .create-ticket-wrapper .ant-card {
           transition: all 0.3s ease !important;
           overflow: hidden !important;
           border-radius: 8px !important;
         }
 
-        .ant-card:hover {
-          border-color: #ff4500 !important;
-          box-shadow: 0 2px 8px rgba(255, 69, 0, 0.15) !important;
-        }
-
-        .ant-card .ant-card-body {
+        .create-ticket-wrapper .ant-card .ant-card-body {
           padding: 0 !important;
           border-radius: inherit !important;
         }
 
         /* Fix untuk icon section agar border radius konsisten */
-        .ant-card .ant-card-body > div:first-child {
+        .create-ticket-wrapper .ant-card .ant-card-body > div:first-child {
           border-top-left-radius: inherit !important;
           border-bottom-left-radius: inherit !important;
         }
 
         /* Fix untuk content section agar border radius konsisten */
-        .ant-card .ant-card-body > div:first-child > div:last-child {
+        .create-ticket-wrapper
+          .ant-card
+          .ant-card-body
+          > div:first-child
+          > div:last-child {
           border-top-right-radius: inherit !important;
           border-bottom-right-radius: inherit !important;
         }
 
-        .ant-input:focus,
-        .ant-input-focused {
+        .create-ticket-wrapper .ant-input:focus,
+        .create-ticket-wrapper .ant-input-focused {
           border-color: #ff4500 !important;
           box-shadow: 0 0 0 2px rgba(255, 69, 0, 0.2) !important;
         }
 
-        .ant-checkbox-wrapper:hover .ant-checkbox-inner,
-        .ant-checkbox:hover .ant-checkbox-inner,
-        .ant-checkbox-input:focus + .ant-checkbox-inner {
-          border-color: #ff4500 !important;
-        }
-
-        .ant-checkbox-checked .ant-checkbox-inner {
+        .create-ticket-wrapper .ant-checkbox-checked .ant-checkbox-inner {
           background-color: #ff4500 !important;
           border-color: #ff4500 !important;
         }
 
-        .ant-btn-primary {
+        .create-ticket-wrapper .ant-btn-primary {
           background: linear-gradient(
             135deg,
             #ff4500 0%,
@@ -569,25 +545,13 @@ const CreateTicket = ({ siteKey }) => {
           box-shadow: 0 2px 4px rgba(255, 69, 0, 0.3) !important;
         }
 
-        .ant-btn-primary:hover {
-          background: linear-gradient(
-            135deg,
-            #e53e00 0%,
-            #ff4500 100%
-          ) !important;
-          border-color: #e53e00 !important;
-          transform: translateY(-1px) !important;
-          box-shadow: 0 4px 8px rgba(255, 69, 0, 0.4) !important;
-          transition: all 0.2s ease !important;
-        }
-
-        .ant-form-item-label > label {
+        .create-ticket-wrapper .ant-form-item-label > label {
           font-weight: 500 !important;
           color: #1a1a1b !important;
         }
 
         @media (max-width: 768px) {
-          .ant-col {
+          .create-ticket-wrapper .ant-col {
             margin-bottom: 12px !important;
           }
         }

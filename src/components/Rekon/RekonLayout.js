@@ -1,4 +1,8 @@
 import MegaMenuTop from "@/components/MegaMenu/MegaMenuTop";
+import { QuestionCircleFilled } from "@ant-design/icons";
+import { Center } from "@mantine/core";
+import { Button } from "antd";
+
 import NotifikasiASNConnect from "@/components/Notification/NotifikasiASNConnect";
 import NotifikasiForumKepegawaian from "@/components/Notification/NotifikasiForumKepegawaian";
 import { layoutToken } from "@/styles/rasn.theme";
@@ -180,6 +184,10 @@ function RekonLayout({ children, active = "rekon-unor" }) {
     }
   };
 
+  const handlePertanyan = () => {
+    router.push(`/tickets/create`);
+  };
+
   return (
     <ProLayout
       title={"Rekon SIASN"}
@@ -190,6 +198,61 @@ function RekonLayout({ children, active = "rekon-unor" }) {
       logo={null}
       layout="mix"
       token={layoutToken}
+      menuExtraRender={({ collapsed, isMobile }) => {
+        if (!collapsed) {
+          if (isMobile)
+            return (
+              <Button
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  marginBottom: 8,
+                  marginTop: 8,
+                }}
+                onClick={handlePertanyan}
+                size="middle"
+                block
+                shape="round"
+                type="primary"
+                icon={<QuestionCircleFilled />}
+              >
+                Tanya BKD
+              </Button>
+            );
+          else {
+            return (
+              <Center>
+                <Button
+                  style={{
+                    marginBottom: 10,
+                    display: "flex",
+                    justifyContent: "center",
+                  }}
+                  onClick={handlePertanyan}
+                  shape="round"
+                  icon={<QuestionCircleFilled />}
+                  block
+                  type="primary"
+                >
+                  Tanya BKD
+                </Button>
+              </Center>
+            );
+          }
+        } else {
+          return (
+            <Center>
+              <Button
+                onClick={handlePertanyan}
+                shape="circle"
+                size="middle"
+                icon={<QuestionCircleFilled />}
+                type="primary"
+              />
+            </Center>
+          );
+        }
+      }}
       headerContentRender={(props) => {
         return (
           <div

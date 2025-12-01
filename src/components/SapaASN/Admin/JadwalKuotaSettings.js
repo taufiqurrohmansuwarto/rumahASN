@@ -1,8 +1,9 @@
-import { Badge, Group, Paper, SimpleGrid, Stack, Text, ThemeIcon } from "@mantine/core";
+import { Badge, Group, Paper, SimpleGrid, Stack, Text, ThemeIcon, Tooltip } from "@mantine/core";
 import {
   IconCalendar,
   IconSettings,
   IconUsers,
+  IconInfoCircle,
 } from "@tabler/icons-react";
 import { Button, InputNumber, message, Modal, Skeleton, Table, Tag } from "antd";
 import dayjs from "dayjs";
@@ -71,33 +72,66 @@ const JadwalKuotaSettings = () => {
     {
       title: "Kuota",
       key: "kuota",
-      width: 150,
+      width: 180,
       render: (_, record) => {
         const terisi = record.advokasi_list?.filter(
           (a) => !["Cancelled", "Ditolak", "Rejected"].includes(a.status)
         ).length || 0;
-        const tersedia = Math.max(0, (record.kuota_maksimal || 10) - terisi);
+        const maksimal = record.kuota_maksimal || 10;
+        const tersedia = Math.max(0, maksimal - terisi);
+        const isPenuh = tersedia === 0;
         
         return (
-          <Group gap={6}>
-            <Badge color={tersedia > 0 ? "green" : "red"} variant="light" size="sm">
-              {terisi} / {record.kuota_maksimal || 10}
-            </Badge>
-            <Text size="xs" c="dimmed">({tersedia} tersedia)</Text>
-          </Group>
+          <Stack gap={2}>
+            <Group gap={6}>
+              <Badge color={isPenuh ? "red" : "green"} variant="light" size="sm">
+                {terisi} / {maksimal}
+              </Badge>
+              {isPenuh ? (
+                <Tag color="red" style={{ fontSize: 10, margin: 0 }}>PENUH</Tag>
+              ) : (
+                <Text size="xs" c="dimmed">({tersedia} slot)</Text>
+              )}
+            </Group>
+          </Stack>
         );
       },
     },
     {
-      title: "Status",
+      title: () => (
+        <Group gap={4}>
+          <span>Status</span>
+          <Tooltip label="Aktif = Jadwal dapat didaftarkan oleh user. Nonaktif = Jadwal tidak muncul untuk pendaftaran." withArrow multiline w={220}>
+            <IconInfoCircle size={14} style={{ cursor: "help" }} />
+          </Tooltip>
+        </Group>
+      ),
       dataIndex: "status",
       key: "status",
-      width: 100,
-      render: (val) => (
-        <Tag color={val === "active" ? "green" : "gray"}>
-          {val === "active" ? "Aktif" : "Nonaktif"}
-        </Tag>
-      ),
+      width: 120,
+      render: (val, record) => {
+        const terisi = record.advokasi_list?.filter(
+          (a) => !["Cancelled", "Ditolak", "Rejected"].includes(a.status)
+        ).length || 0;
+        const maksimal = record.kuota_maksimal || 10;
+        const isPenuh = terisi >= maksimal;
+        
+        if (isPenuh) {
+          return (
+            <Tooltip label="Kuota sudah penuh, pendaftaran ditutup otomatis" withArrow>
+              <Tag color="red">Penuh</Tag>
+            </Tooltip>
+          );
+        }
+        
+        return (
+          <Tooltip label={val === "active" ? "Jadwal dapat didaftarkan" : "Jadwal tidak ditampilkan untuk pendaftaran"} withArrow>
+            <Tag color={val === "active" ? "green" : "gray"}>
+              {val === "active" ? "Buka" : "Tutup"}
+            </Tag>
+          </Tooltip>
+        );
+      },
     },
     {
       title: "Aksi",
@@ -140,8 +174,24 @@ const JadwalKuotaSettings = () => {
           rowKey="id"
           size="small"
           pagination={false}
-          scroll={{ x: 600 }}
+          scroll={{ x: 700 }}
         />
+        
+        {/* Legend */}
+        <Group gap="lg" mt="sm" pt="sm" style={{ borderTop: "1px solid #eee" }}>
+          <Group gap={4}>
+            <Tag color="green" style={{ fontSize: 10, margin: 0 }}>Buka</Tag>
+            <Text size="xs" c="dimmed">= Pendaftaran dibuka</Text>
+          </Group>
+          <Group gap={4}>
+            <Tag color="red" style={{ fontSize: 10, margin: 0 }}>Penuh</Tag>
+            <Text size="xs" c="dimmed">= Kuota habis</Text>
+          </Group>
+          <Group gap={4}>
+            <Tag color="gray" style={{ fontSize: 10, margin: 0 }}>Tutup</Tag>
+            <Text size="xs" c="dimmed">= Pendaftaran ditutup manual</Text>
+          </Group>
+        </Group>
       </Paper>
 
       {/* Edit Kuota Modal */}

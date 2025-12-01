@@ -186,46 +186,53 @@ function KnowledgeFormUserContents({
 
       if (initialData.attachments) {
         console.log("Raw attachment data:", initialData.attachments);
-        const mappedFiles = initialData.attachments.map(
-          (attachment, index) => {
-            // Log all available fields to understand the structure
-            console.log("Full attachment object:", attachment);
-            console.log("Available attachment keys:", Object.keys(attachment));
-            
-            // Try different possible ID field names - be more exhaustive
-            const attachmentId = attachment.id || 
-                                 attachment.uid || 
-                                 attachment.attachment_id || 
-                                 attachment._id ||
-                                 attachment.fileId ||
-                                 attachment.file_id;
-                                 
-            console.log("Processing attachment:", { 
-              attachment, 
-              attachmentId, 
-              index,
-              extractedId: attachmentId,
-              hasId: !!attachmentId
-            });
-            
-            return {
-              uid: attachmentId ? String(attachmentId) : `existing-${index}`,
-              name: attachment.filename || attachment.name || attachment.original_name || `File ${index + 1}`,
-              status: "done",
-              url: attachment.url,
-              response: {
-                data: { 
-                  url: attachment.url,
-                  uid: attachmentId ? String(attachmentId) : null,
-                  id: attachmentId ? String(attachmentId) : null,
-                  filename: attachment.filename || attachment.name || attachment.original_name || `File ${index + 1}`,
-                  isTemporary: false, // Mark as permanent since these are existing attachments
-                  originalAttachment: attachment, // Keep reference to original data
-                },
+        const mappedFiles = initialData.attachments.map((attachment, index) => {
+          // Log all available fields to understand the structure
+          console.log("Full attachment object:", attachment);
+          console.log("Available attachment keys:", Object.keys(attachment));
+
+          // Try different possible ID field names - be more exhaustive
+          const attachmentId =
+            attachment.id ||
+            attachment.uid ||
+            attachment.attachment_id ||
+            attachment._id ||
+            attachment.fileId ||
+            attachment.file_id;
+
+          console.log("Processing attachment:", {
+            attachment,
+            attachmentId,
+            index,
+            extractedId: attachmentId,
+            hasId: !!attachmentId,
+          });
+
+          return {
+            uid: attachmentId ? String(attachmentId) : `existing-${index}`,
+            name:
+              attachment.filename ||
+              attachment.name ||
+              attachment.original_name ||
+              `File ${index + 1}`,
+            status: "done",
+            url: attachment.url,
+            response: {
+              data: {
+                url: attachment.url,
+                uid: attachmentId ? String(attachmentId) : null,
+                id: attachmentId ? String(attachmentId) : null,
+                filename:
+                  attachment.filename ||
+                  attachment.name ||
+                  attachment.original_name ||
+                  `File ${index + 1}`,
+                isTemporary: false, // Mark as permanent since these are existing attachments
+                originalAttachment: attachment, // Keep reference to original data
               },
-            };
-          }
-        );
+            },
+          };
+        });
         console.log("Mapped attachments:", mappedFiles);
         setFileList(mappedFiles);
       }
@@ -255,18 +262,24 @@ function KnowledgeFormUserContents({
   // Delete attachment handler - only for edit mode
   const handleDeleteAttachment = async (attachmentId) => {
     if (!initialData || !currentContentId) {
-      message.error("Tidak dapat menghapus attachment: Content tidak ditemukan");
+      message.error(
+        "Tidak dapat menghapus attachment: Content tidak ditemukan"
+      );
       return;
     }
 
-    console.log("Delete attachment called with:", { 
-      attachmentId, 
+    console.log("Delete attachment called with:", {
+      attachmentId,
       contentId: currentContentId,
-      currentFileList: fileList
+      currentFileList: fileList,
     });
 
     // Validate attachmentId
-    if (!attachmentId || attachmentId === "-1" || String(attachmentId).startsWith("existing-")) {
+    if (
+      !attachmentId ||
+      attachmentId === "-1" ||
+      String(attachmentId).startsWith("existing-")
+    ) {
       console.error("Invalid attachmentId:", attachmentId);
       message.error("ID attachment tidak valid");
       return;
@@ -274,7 +287,7 @@ function KnowledgeFormUserContents({
 
     try {
       // Add to deleting set to show loading state
-      setDeletingAttachmentIds(prev => new Set(prev.add(attachmentId)));
+      setDeletingAttachmentIds((prev) => new Set(prev.add(attachmentId)));
 
       // Call delete service with proper object structure
       const response = await deleteMyContentAttachment({
@@ -285,10 +298,11 @@ function KnowledgeFormUserContents({
       console.log("Delete response:", response);
 
       // Remove from fileList
-      setFileList(prevFileList =>
-        prevFileList.filter(file => {
+      setFileList((prevFileList) =>
+        prevFileList.filter((file) => {
           // Prioritize 'id' field over 'uid' for consistency
-          const fileId = file.response?.data?.id || file.response?.data?.uid || file.uid;
+          const fileId =
+            file.response?.data?.id || file.response?.data?.uid || file.uid;
           return String(fileId) !== String(attachmentId);
         })
       );
@@ -299,7 +313,7 @@ function KnowledgeFormUserContents({
       message.error(`Gagal menghapus file: ${error.message}`);
     } finally {
       // Remove from deleting set
-      setDeletingAttachmentIds(prev => {
+      setDeletingAttachmentIds((prev) => {
         const newSet = new Set(prev);
         newSet.delete(attachmentId);
         return newSet;
@@ -556,7 +570,7 @@ function KnowledgeFormUserContents({
     createLoading || updateLoading || isSubmitting || hasUploadingFiles;
 
   return (
-    <div>
+    <div className="knowledge-form-wrapper">
       <Row gutter={[isMobile ? 12 : 16, isMobile ? 12 : 16]}>
         <Col span={24}>
           <Card
@@ -703,46 +717,45 @@ function KnowledgeFormUserContents({
       </Row>
 
       <style jsx global>{`
-        .ant-card {
+        .knowledge-form-wrapper .ant-card {
           transition: all 0.3s ease !important;
           overflow: hidden !important;
           border-radius: 8px !important;
         }
 
-        .ant-card:hover {
-          border-color: #ff4500 !important;
-          box-shadow: 0 2px 8px rgba(255, 69, 0, 0.15) !important;
-        }
-
-        .ant-card .ant-card-body {
+        .knowledge-form-wrapper .ant-card .ant-card-body {
           padding: 0 !important;
           border-radius: inherit !important;
         }
 
         /* Fix untuk icon section agar border radius konsisten */
-        .ant-card .ant-card-body > div:first-child {
+        .knowledge-form-wrapper .ant-card .ant-card-body > div:first-child {
           border-top-left-radius: inherit !important;
           border-bottom-left-radius: inherit !important;
         }
 
         /* Fix untuk content section agar border radius konsisten */
-        .ant-card .ant-card-body > div:first-child > div:last-child {
+        .knowledge-form-wrapper
+          .ant-card
+          .ant-card-body
+          > div:first-child
+          > div:last-child {
           border-top-right-radius: inherit !important;
           border-bottom-right-radius: inherit !important;
         }
 
-        .ant-input:focus,
-        .ant-input-focused,
-        .ant-select-focused .ant-select-selector {
+        .knowledge-form-wrapper .ant-input:focus,
+        .knowledge-form-wrapper .ant-input-focused,
+        .knowledge-form-wrapper .ant-select-focused .ant-select-selector {
           border-color: #ff4500 !important;
           box-shadow: 0 0 0 2px rgba(255, 69, 0, 0.2) !important;
         }
 
-        .ant-select:hover .ant-select-selector {
+        .knowledge-form-wrapper .ant-select:hover .ant-select-selector {
           border-color: #ff4500 !important;
         }
 
-        .ant-btn-primary {
+        .knowledge-form-wrapper .ant-btn-primary {
           background: linear-gradient(
             135deg,
             #ff4500 0%,
@@ -752,33 +765,17 @@ function KnowledgeFormUserContents({
           box-shadow: 0 2px 4px rgba(255, 69, 0, 0.3) !important;
         }
 
-        .ant-btn-primary:hover {
-          background: linear-gradient(
-            135deg,
-            #e53e00 0%,
-            #ff4500 100%
-          ) !important;
-          border-color: #e53e00 !important;
-          transform: translateY(-1px) !important;
-          box-shadow: 0 4px 8px rgba(255, 69, 0, 0.4) !important;
-          transition: all 0.2s ease !important;
-        }
-
-        .ant-form-item-label > label {
+        .knowledge-form-wrapper .ant-form-item-label > label {
           font-weight: 500 !important;
           color: #1a1a1b !important;
         }
 
-        .ant-tag {
+        .knowledge-form-wrapper .ant-tag {
           transition: all 0.2s ease !important;
         }
 
-        .ant-tag:hover {
-          transform: translateY(-1px) !important;
-        }
-
         @media (max-width: 768px) {
-          .ant-col {
+          .knowledge-form-wrapper .ant-col {
             margin-bottom: 12px !important;
           }
         }

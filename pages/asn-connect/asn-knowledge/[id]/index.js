@@ -57,7 +57,7 @@ const AsnKnowledgeDetail = () => {
         }}
       >
         <Row gutter={[16, 16]}>
-          <Col lg={14} xs={24}>
+          <Col lg={16} xs={24}>
             <KnowledgeUserContentDetail data={data} />
           </Col>
           <Col lg={6} xs={24}>

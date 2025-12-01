@@ -397,8 +397,9 @@ const ListPendampinganHukumAdmin = ({ data = [], meta = {}, loading = false, que
             <Button icon={<IconDownload size={16} />} onClick={handleExport} loading={exporting}>Export</Button>
           </Group>
         </Group>
-        <Row gutter={[12, 12]}>
+        <Row gutter={[12, 12]} align="bottom">
           <Col xs={24} sm={12} md={6}>
+            <Text size="xs" c="dimmed" mb={2}>Pencarian</Text>
             <Input
               placeholder="Cari ID / no. perkara..."
               prefix={<IconSearch size={16} />}
@@ -408,9 +409,10 @@ const ListPendampinganHukumAdmin = ({ data = [], meta = {}, loading = false, que
             />
           </Col>
           <Col xs={24} sm={12} md={6}>
+            <Text size="xs" c="dimmed" mb={2}>Jenis Perkara</Text>
             <Select
               style={{ width: "100%" }}
-              placeholder="Jenis Perkara"
+              placeholder="Semua Jenis"
               options={jenisPerkaraOptions}
               value={jenisPerkara || undefined}
               onChange={(val) => updateQuery({ jenisPerkara: val, page: 1 })}
@@ -418,9 +420,10 @@ const ListPendampinganHukumAdmin = ({ data = [], meta = {}, loading = false, que
             />
           </Col>
           <Col xs={24} sm={12} md={6}>
+            <Text size="xs" c="dimmed" mb={2}>Status</Text>
             <Select
               style={{ width: "100%" }}
-              placeholder="Status"
+              placeholder="Semua Status"
               options={statusOptions}
               value={status || undefined}
               onChange={(val) => updateQuery({ status: val, page: 1 })}
