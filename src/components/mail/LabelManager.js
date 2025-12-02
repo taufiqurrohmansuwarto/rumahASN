@@ -4,35 +4,26 @@ import {
   useUpdateLabel,
   useUserLabels,
 } from "@/hooks/useEmails";
-import {
-  DeleteOutlined,
-  EditOutlined,
-  PlusOutlined,
-  TagOutlined,
-} from "@ant-design/icons";
+import { Group, Paper, Stack, Text } from "@mantine/core";
+import { IconPencil, IconPlus, IconTag, IconTrash } from "@tabler/icons-react";
 import {
   Button,
   ColorPicker,
-  Empty,
   Form,
   Input,
-  List,
   Modal,
   Popconfirm,
   Space,
   Tag,
-  Typography,
+  Tooltip,
 } from "antd";
 import { useState } from "react";
-
-const { Text } = Typography;
 
 const LabelManager = ({ visible, onClose }) => {
   const [form] = Form.useForm();
   const [editingLabel, setEditingLabel] = useState(null);
   const [isCreating, setIsCreating] = useState(false);
 
-  // Hooks
   const { data: labelsData, isLoading } = useUserLabels();
   const createMutation = useCreateLabel();
   const updateMutation = useUpdateLabel();
@@ -43,38 +34,36 @@ const LabelManager = ({ visible, onClose }) => {
   const customLabels = labels.filter((label) => !label.is_system);
 
   const handleCreate = async (values) => {
+    const color = typeof values.color === "string" ? values.color : values.color?.toHexString?.() || "#1890ff";
     try {
-      await createMutation.mutateAsync(values);
+      await createMutation.mutateAsync({ ...values, color });
       form.resetFields();
       setIsCreating(false);
-    } catch (error) {
-      // Error handled by hook
-    }
+    } catch (error) {}
   };
 
   const handleUpdate = async (values) => {
+    const color = typeof values.color === "string" ? values.color : values.color?.toHexString?.() || "#1890ff";
     try {
       await updateMutation.mutateAsync({
         labelId: editingLabel.id,
         ...values,
+        color,
       });
       form.resetFields();
       setEditingLabel(null);
-    } catch (error) {
-      // Error handled by hook
-    }
+    } catch (error) {}
   };
 
   const handleDelete = async (labelId) => {
     try {
       await deleteMutation.mutateAsync(labelId);
-    } catch (error) {
-      // Error handled by hook
-    }
+    } catch (error) {}
   };
 
   const handleEdit = (label) => {
     setEditingLabel(label);
+    setIsCreating(true);
     form.setFieldsValue({
       name: label.name,
       color: label.color,
@@ -87,220 +76,176 @@ const LabelManager = ({ visible, onClose }) => {
     setIsCreating(false);
   };
 
-  const renderLabelItem = (label) => (
-    <List.Item
-      key={label.id}
-      actions={
-        !label.is_system
-          ? [
+  const LabelItem = ({ label }) => (
+    <Group
+      justify="space-between"
+      py={6}
+      px={8}
+      style={{
+        borderRadius: 4,
+        "&:hover": { backgroundColor: "#f8f9fa" },
+      }}
+    >
+      <Group gap={8}>
+        <IconTag size={14} style={{ color: label.color }} />
+        <Text size="xs">{label.name}</Text>
+        {label.is_system && (
+          <Tag color="default" style={{ fontSize: 10, padding: "0 4px", margin: 0 }}>
+            System
+          </Tag>
+        )}
+      </Group>
+      {!label.is_system && (
+        <Group gap={4}>
+          <Tooltip title="Edit">
+            <Button
+              type="text"
+              size="small"
+              icon={<IconPencil size={12} />}
+              onClick={() => handleEdit(label)}
+              style={{ padding: 4, height: 22, width: 22 }}
+            />
+          </Tooltip>
+          <Popconfirm
+            title="Hapus label?"
+            onConfirm={() => handleDelete(label.id)}
+            okText="Ya"
+            cancelText="Batal"
+          >
+            <Tooltip title="Hapus">
               <Button
-                key="edit"
                 type="text"
                 size="small"
-                icon={<EditOutlined />}
-                onClick={() => handleEdit(label)}
-                title="Edit label"
-              />,
-              <Popconfirm
-                key="delete"
-                title="Hapus label ini?"
-                description="Label akan dihapus dari semua email"
-                onConfirm={() => handleDelete(label.id)}
-                okText="Ya"
-                cancelText="Batal"
-              >
-                <Button
-                  type="text"
-                  size="small"
-                  icon={<DeleteOutlined />}
-                  danger
-                  title="Hapus label"
-                />
-              </Popconfirm>,
-            ]
-          : [
-              <Text key="system" type="secondary" style={{ fontSize: "12px" }}>
-                System
-              </Text>,
-            ]
-      }
-    >
-      <List.Item.Meta
-        avatar={
-          <TagOutlined style={{ color: label.color, fontSize: "16px" }} />
-        }
-        title={
-          <Space>
-            <Text strong>{label.name}</Text>
-            {label.is_system && (
-              <Tag size="small" color="blue">
-                System
-              </Tag>
-            )}
-          </Space>
-        }
-        description={
-          <Space>
-            <div
-              style={{
-                width: "16px",
-                height: "16px",
-                backgroundColor: label.color,
-                borderRadius: "3px",
-                border: "1px solid #d9d9d9",
-              }}
-            />
-            <Text type="secondary" style={{ fontSize: "12px" }}>
-              {label.color}
-            </Text>
-          </Space>
-        }
-      />
-    </List.Item>
+                danger
+                icon={<IconTrash size={12} />}
+                style={{ padding: 4, height: 22, width: 22 }}
+              />
+            </Tooltip>
+          </Popconfirm>
+        </Group>
+      )}
+    </Group>
   );
 
   return (
     <Modal
-      title="Kelola Label"
+      title={
+        <Space size={8}>
+          <IconTag size={16} />
+          <span>Kelola Label</span>
+        </Space>
+      }
       open={visible}
       onCancel={onClose}
-      width={600}
-      footer={[
-        <Button key="close" onClick={onClose}>
-          Tutup
-        </Button>,
-      ]}
+      width={400}
+      footer={
+        <Space>
+          <Button size="small" onClick={onClose}>
+            Tutup
+          </Button>
+        </Space>
+      }
     >
-      <div style={{ maxHeight: "60vh", overflowY: "auto" }}>
+      <Stack gap="sm">
         {/* Create/Edit Form */}
-        {(isCreating || editingLabel) && (
-          <div
-            style={{
-              padding: "16px",
-              backgroundColor: "#f8f9fa",
-              borderRadius: "8px",
-              marginBottom: "16px",
-            }}
-          >
-            <Text
-              strong
-              style={{
-                fontSize: "16px",
-                marginBottom: "12px",
-                display: "block",
-              }}
-            >
-              {editingLabel ? "Edit Label" : "Buat Label Baru"}
+        {isCreating ? (
+          <Paper p="sm" withBorder radius="sm" bg="gray.0">
+            <Text size="xs" fw={500} mb={8}>
+              {editingLabel ? "Edit Label" : "Buat Label"}
             </Text>
-
             <Form
               form={form}
               layout="vertical"
+              size="small"
               onFinish={editingLabel ? handleUpdate : handleCreate}
             >
-              <Form.Item
-                name="name"
-                label="Nama Label"
-                rules={[
-                  { required: true, message: "Nama label harus diisi" },
-                  { min: 2, message: "Nama label minimal 2 karakter" },
-                  { max: 50, message: "Nama label maksimal 50 karakter" },
-                ]}
-              >
-                <Input placeholder="Masukkan nama label..." />
-              </Form.Item>
-
-              <Form.Item
-                name="color"
-                label="Warna Label"
-                initialValue="#1890ff"
-              >
-                <ColorPicker
-                  showText
-                  format="hex"
-                  presets={[
-                    {
-                      label: "Recommended",
-                      colors: [
-                        "#ff4d4f", // Red
-                        "#fa8c16", // Orange
-                        "#faad14", // Gold
-                        "#52c41a", // Green
-                        "#1890ff", // Blue
-                        "#722ed1", // Purple
-                        "#eb2f96", // Magenta
-                        "#13c2c2", // Cyan
-                      ],
-                    },
-                  ]}
-                />
-              </Form.Item>
-
-              <Form.Item style={{ marginBottom: 0 }}>
-                <Space>
-                  <Button
-                    type="primary"
-                    htmlType="submit"
-                    loading={
-                      createMutation.isLoading || updateMutation.isLoading
-                    }
-                  >
-                    {editingLabel ? "Perbarui" : "Buat"}
-                  </Button>
-                  <Button onClick={handleCancel}>Batal</Button>
-                </Space>
-              </Form.Item>
+              <Group grow align="flex-start">
+                <Form.Item
+                  name="name"
+                  rules={[{ required: true, message: "Wajib" }]}
+                  style={{ marginBottom: 8 }}
+                >
+                  <Input placeholder="Nama label" />
+                </Form.Item>
+                <Form.Item
+                  name="color"
+                  initialValue="#1890ff"
+                  style={{ marginBottom: 8, maxWidth: 100 }}
+                >
+                  <ColorPicker
+                    size="small"
+                    format="hex"
+                    presets={[
+                      {
+                        label: "Warna",
+                        colors: [
+                          "#ff4d4f",
+                          "#fa8c16",
+                          "#52c41a",
+                          "#1890ff",
+                          "#722ed1",
+                          "#eb2f96",
+                        ],
+                      },
+                    ]}
+                  />
+                </Form.Item>
+              </Group>
+              <Space>
+                <Button
+                  size="small"
+                  type="primary"
+                  htmlType="submit"
+                  loading={createMutation.isLoading || updateMutation.isLoading}
+                >
+                  {editingLabel ? "Simpan" : "Buat"}
+                </Button>
+                <Button size="small" onClick={handleCancel}>
+                  Batal
+                </Button>
+              </Space>
             </Form>
-          </div>
-        )}
-
-        {/* Create Button */}
-        {!isCreating && !editingLabel && (
+          </Paper>
+        ) : (
           <Button
-            type="dashed"
-            icon={<PlusOutlined />}
+            size="small"
+            icon={<IconPlus size={14} />}
             onClick={() => setIsCreating(true)}
             block
-            style={{ marginBottom: "16px" }}
           >
-            Buat Label Baru
+            Buat Label
           </Button>
         )}
 
-        {/* System Labels */}
-        {systemLabels.length > 0 && (
-          <>
-            <Text strong style={{ fontSize: "14px", color: "#8c8c8c" }}>
-              LABEL SYSTEM
+        {/* Labels List */}
+        <Paper withBorder radius="sm" p={0} style={{ maxHeight: 300, overflowY: "auto" }}>
+          {systemLabels.length > 0 && (
+            <>
+              <Text size="xs" c="dimmed" px={8} pt={8} pb={4}>
+                SYSTEM
+              </Text>
+              {systemLabels.map((label) => (
+                <LabelItem key={label.id} label={label} />
+              ))}
+            </>
+          )}
+          {customLabels.length > 0 && (
+            <>
+              <Text size="xs" c="dimmed" px={8} pt={8} pb={4}>
+                CUSTOM
+              </Text>
+              {customLabels.map((label) => (
+                <LabelItem key={label.id} label={label} />
+              ))}
+            </>
+          )}
+          {customLabels.length === 0 && systemLabels.length === 0 && (
+            <Text size="xs" c="dimmed" ta="center" py="md">
+              Belum ada label
             </Text>
-            <List
-              size="small"
-              dataSource={systemLabels}
-              renderItem={renderLabelItem}
-              style={{ marginBottom: "16px" }}
-            />
-          </>
-        )}
-
-        {/* Custom Labels */}
-        <Text strong style={{ fontSize: "14px", color: "#8c8c8c" }}>
-          LABEL CUSTOM
-        </Text>
-        {customLabels.length > 0 ? (
-          <List
-            size="small"
-            dataSource={customLabels}
-            renderItem={renderLabelItem}
-            loading={isLoading}
-          />
-        ) : (
-          <Empty
-            image={Empty.PRESENTED_IMAGE_SIMPLE}
-            description="Belum ada label custom"
-            style={{ margin: "20px 0" }}
-          />
-        )}
-      </div>
+          )}
+        </Paper>
+      </Stack>
     </Modal>
   );
 };

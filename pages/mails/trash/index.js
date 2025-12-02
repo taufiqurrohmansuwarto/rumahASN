@@ -1,20 +1,31 @@
 import GmailLayout from "@/components/GmailLayout";
 import PageContainer from "@/components/PageContainer";
-import Head from "next/head";
 import EmailListComponent from "@/components/mail/EmailList/EmailListComponent";
-import { Grid } from "antd";
+import { Breadcrumb, Grid } from "antd";
+import Head from "next/head";
+import Link from "next/link";
 
 const Trash = () => {
   const breakPoint = Grid.useBreakpoint();
   return (
     <>
       <Head>
-        <title>Rumah ASN - Sampah Pesan</title>
+        <title>Rumah ASN - Sampah</title>
       </Head>
       <PageContainer
-        childrenContentStyle={{
-          padding: breakPoint.xs ? null : 0,
-        }}
+        title="Sampah"
+        subTitle="Pesan yang dihapus"
+        breadcrumbRender={() => (
+          <Breadcrumb>
+            <Breadcrumb.Item>
+              <Link href="/feeds">Beranda</Link>
+            </Breadcrumb.Item>
+            <Breadcrumb.Item>
+              <Link href="/mails">Pesan Pribadi</Link>
+            </Breadcrumb.Item>
+            <Breadcrumb.Item>Sampah</Breadcrumb.Item>
+          </Breadcrumb>
+        )}
       >
         <EmailListComponent folder="trash" />
       </PageContainer>

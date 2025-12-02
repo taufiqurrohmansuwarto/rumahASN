@@ -186,3 +186,8 @@ export const getFileIcon = (mimeType, fileName = "") => {
 export const isImageFile = (mimeType) => {
   return mimeType && mimeType.startsWith("image/");
 };
+
+// Search users for recipient selection
+export const searchUsers = async (q) => {
+  return api.get(`/search/users?q=${q}`).then((res) => res?.data);
+};

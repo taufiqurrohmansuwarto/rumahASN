@@ -1,12 +1,12 @@
 import PageContainer from "@/components/PageContainer";
 import { useGetEmailWithThread } from "@/hooks/useEmails";
-import { Empty, Spin } from "antd";
+import { Breadcrumb, Empty, Grid, Spin } from "antd";
 
 import GmailLayout from "@/components/GmailLayout";
 import EmailDetailComponent from "@/components/mail/Detail/EmailDetailComponent";
 import EmailThreadComponent from "@/components/mail/Detail/EmailThreadComponent";
+import Link from "next/link";
 import { useRouter } from "next/router";
-import { Grid } from "antd";
 
 const InboxMailDetail = () => {
   const router = useRouter();
@@ -41,10 +41,20 @@ const InboxMailDetail = () => {
 
   return (
     <PageContainer
+      title="Detail Pesan"
+      subTitle={email?.subject}
       onBack={() => router.back()}
-      childrenContentStyle={{
-        padding: breakPoint.xs ? null : 0,
-      }}
+      breadcrumbRender={() => (
+        <Breadcrumb>
+          <Breadcrumb.Item>
+            <Link href="/feeds">Beranda</Link>
+          </Breadcrumb.Item>
+          <Breadcrumb.Item>
+            <Link href="/mails/inbox">Kotak Masuk</Link>
+          </Breadcrumb.Item>
+          <Breadcrumb.Item>Detail</Breadcrumb.Item>
+        </Breadcrumb>
+      )}
     >
       {/* Email Thread Component */}
       {has_thread && (

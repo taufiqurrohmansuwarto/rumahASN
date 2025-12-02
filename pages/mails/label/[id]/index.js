@@ -1,10 +1,12 @@
 import GmailLayout from "@/components/GmailLayout";
+import PageContainer from "@/components/PageContainer";
 import EmailListComponent from "@/components/mail/EmailList/EmailListComponent";
 import { useUserLabels } from "@/hooks/useEmails";
-import { TagOutlined } from "@ant-design/icons";
+import { IconTag } from "@tabler/icons-react";
+import { Breadcrumb, Grid } from "antd";
 import Head from "next/head";
+import Link from "next/link";
 import { useRouter } from "next/router";
-import { Grid } from "antd";
 
 const LabelPage = () => {
   const router = useRouter();
@@ -28,21 +30,37 @@ const LabelPage = () => {
       <Head>
         <title>Rumah ASN - {label.name}</title>
       </Head>
-      <EmailListComponent
-        folder="label"
-        onEmailClick={(email) => {
-          router.push(`/mails/label/${id}/${email.id}`);
-        }}
-        customConfig={{
-          title: label.name,
-          subtitle: label.name,
-          icon: <TagOutlined style={{ color: label.color }} />,
-          primaryColor: label.color,
-          labelId: id, // Pass label ID untuk query
-          emptyTitle: `Belum ada email dengan label "${label.name}"`,
-          emptyDescription: "Email yang diberi label ini akan muncul di sini",
-        }}
-      />
+      <PageContainer
+        title={label.name}
+        subTitle="Pesan dengan label ini"
+        breadcrumbRender={() => (
+          <Breadcrumb>
+            <Breadcrumb.Item>
+              <Link href="/feeds">Beranda</Link>
+            </Breadcrumb.Item>
+            <Breadcrumb.Item>
+              <Link href="/mails">Pesan Pribadi</Link>
+            </Breadcrumb.Item>
+            <Breadcrumb.Item>Label: {label.name}</Breadcrumb.Item>
+          </Breadcrumb>
+        )}
+      >
+        <EmailListComponent
+          folder="label"
+          onEmailClick={(email) => {
+            router.push(`/mails/label/${id}/${email.id}`);
+          }}
+          customConfig={{
+            title: label.name,
+            subtitle: label.name,
+            icon: <IconTag size={16} style={{ color: label.color }} />,
+            primaryColor: label.color,
+            labelId: id,
+            emptyTitle: `Belum ada email dengan label "${label.name}"`,
+            emptyDescription: "Email yang diberi label ini akan muncul di sini",
+          }}
+        />
+      </PageContainer>
     </>
   );
 };

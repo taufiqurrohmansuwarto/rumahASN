@@ -13,8 +13,11 @@ const ComposeMail = () => {
   const [visible, setVisible] = useState(false);
 
   // Get query parameters
-  const { reply, forward, replyAll, draft } = router.query;
+  const { reply, forward, replyAll, draft, to, toName } = router.query;
   const originalEmailId = reply || forward || draft;
+
+  // Initial recipient dari query param (untuk japri dari profile)
+  const initialRecipient = to ? { value: to, label: toName || to } : null;
 
   // Fetch original email jika ada ID
   const {
@@ -90,6 +93,7 @@ const ComposeMail = () => {
         originalEmail={originalEmailData?.data || null}
         replyAll={replyAll === "true"}
         title={getTitle()}
+        initialRecipient={initialRecipient}
       />
     </>
   );

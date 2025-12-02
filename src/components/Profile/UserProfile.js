@@ -3,13 +3,13 @@ import { useState } from "react";
 import {
   BookOutlined,
   FireOutlined,
-  MessageOutlined,
   RiseOutlined,
   StarOutlined,
   TeamOutlined,
   TrophyOutlined,
   UserAddOutlined,
 } from "@ant-design/icons";
+import { IconMail } from "@tabler/icons-react";
 import {
   Avatar,
   Button,
@@ -27,6 +27,7 @@ import {
 import BKDRating from "./BKDRating";
 import { round } from "lodash";
 import { useRouter } from "next/router";
+import { useSession } from "next-auth/react";
 
 const { Title, Text } = Typography;
 
@@ -65,9 +66,20 @@ const ProfileHeader = ({ user, isAdmin = false, isPegawaiBKD = false }) => {
   const closeModal = () => setShowModalRating(false);
 
   const router = useRouter();
+  const { data: session } = useSession();
+  const currentUserId = session?.user?.id;
 
   const gotoDetailInformation = () => {
     router.push(`/rekon/pegawai/${user?.employee_number}/detail`);
+  };
+
+  // Navigate to compose page with recipient pre-filled
+  const handleSendMessage = () => {
+    const params = new URLSearchParams({
+      to: user?.custom_id,
+      toName: user?.username,
+    });
+    router.push(`/mails/compose?${params.toString()}`);
   };
 
   const userData = {
@@ -208,11 +220,18 @@ const ProfileHeader = ({ user, isAdmin = false, isPegawaiBKD = false }) => {
         </Row>
 
         <Space wrap style={{ marginTop: "16px" }}>
-          <Button icon={<MessageOutlined />}>Pesan Pribadi</Button>
+          {user?.custom_id !== currentUserId && (
+            <Button
+              onClick={handleSendMessage}
+              icon={<IconMail size={16} />}
+              type="primary"
+            >
+              Kirim Pesan
+            </Button>
+          )}
           {isAdmin && user?.group === "MASTER" && (
             <Button
               onClick={gotoDetailInformation}
-              type="primary"
               icon={<UserAddOutlined />}
             >
               Informasi

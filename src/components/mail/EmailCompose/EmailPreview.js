@@ -1,106 +1,62 @@
-import React from "react";
-import { Typography, Tag, Space, Avatar, Divider } from "antd";
-import { UserOutlined, PaperClipOutlined } from "@ant-design/icons";
-import ReactMarkdownCustom from "@/components/MarkdownEditor/ReactMarkdownCustom";
+import { Box, Divider, Group, Paper, Stack, Text } from "@mantine/core";
+import { IconPaperclip } from "@tabler/icons-react";
+import { Tag } from "antd";
 
-const { Text } = Typography;
-
-const EmailPreview = ({
-  subject,
-  recipients,
-  content,
-  attachments = [],
-  isMarkdown = false,
-}) => {
-  const renderRecipientTags = (recipientList) => {
-    return recipientList.map((r) => (
-      <Tag key={r.value} style={{ margin: "2px" }}>
-        <Space>
-          <Avatar src={r.user?.image} size="small" icon={<UserOutlined />} />
-          {r.label}
-        </Space>
-      </Tag>
-    ));
-  };
-
+const EmailPreview = ({ subject, recipients, content, attachments = [] }) => {
   return (
-    <div
-      style={{
-        minHeight: "400px",
-        padding: "24px",
-        border: "1px solid #d9d9d9",
-        borderRadius: "6px",
-        backgroundColor: "#fafafa",
-      }}
-    >
-      {/* Email Header */}
-      <div style={{ marginBottom: "16px" }}>
-        <Text strong>Subjek: </Text>
-        <Text>{subject || "Belum ada subjek"}</Text>
-      </div>
+    <Paper p="sm" withBorder radius="sm" bg="gray.0">
+      <Stack gap="xs">
+        <Group gap="xs">
+          <Text size="xs" fw={500} w={50}>Subjek:</Text>
+          <Text size="xs">{subject || "-"}</Text>
+        </Group>
 
-      <div style={{ marginBottom: "16px" }}>
-        <Text strong>Kepada: </Text>
-        {recipients.to.length > 0 ? (
-          renderRecipientTags(recipients.to)
-        ) : (
-          <Text type="secondary">Belum ada penerima</Text>
+        <Group gap="xs" align="flex-start">
+          <Text size="xs" fw={500} w={50}>Kepada:</Text>
+          <Group gap={4}>
+            {recipients?.to?.length > 0 ? (
+              recipients.to.map((r) => <Tag key={r.value}>{r.label}</Tag>)
+            ) : (
+              <Text size="xs" c="dimmed">-</Text>
+            )}
+          </Group>
+        </Group>
+
+        {recipients?.cc?.length > 0 && (
+          <Group gap="xs" align="flex-start">
+            <Text size="xs" fw={500} w={50}>CC:</Text>
+            <Group gap={4}>
+              {recipients.cc.map((r) => <Tag key={r.value}>{r.label}</Tag>)}
+            </Group>
+          </Group>
         )}
-      </div>
 
-      {recipients.cc && recipients.cc.length > 0 && (
-        <div style={{ marginBottom: "16px" }}>
-          <Text strong>CC: </Text>
-          {renderRecipientTags(recipients.cc)}
-        </div>
-      )}
+        <Divider my={4} />
 
-      {recipients.bcc && recipients.bcc.length > 0 && (
-        <div style={{ marginBottom: "16px" }}>
-          <Text strong>BCC: </Text>
-          {renderRecipientTags(recipients.bcc)}
-        </div>
-      )}
-
-      <Divider />
-
-      {/* Email Content */}
-      <div
-        style={{
-          backgroundColor: "white",
-          padding: "16px",
-          borderRadius: "4px",
-          border: "1px solid #e8e8e8",
-          minHeight: "200px",
-        }}
-      >
-        {content ? (
-          isMarkdown ? (
-            <ReactMarkdownCustom>{content}</ReactMarkdownCustom>
+        <Box
+          p="xs"
+          bg="white"
+          style={{ borderRadius: 4, minHeight: 100, border: "1px solid #e9ecef" }}
+        >
+          {content ? (
+            <Text size="sm" style={{ whiteSpace: "pre-wrap" }}>{content}</Text>
           ) : (
-            <div style={{ whiteSpace: "pre-wrap" }}>{content}</div>
-          )
-        ) : (
-          <Text type="secondary" style={{ fontStyle: "italic" }}>
-            Belum ada konten pesan
-          </Text>
-        )}
-      </div>
+            <Text size="sm" c="dimmed" fs="italic">
+              Belum ada pesan
+            </Text>
+          )}
+        </Box>
 
-      {/* Attachments */}
-      {attachments.length > 0 && (
-        <div style={{ marginTop: "16px" }}>
-          <Text strong>Lampiran: </Text>
-          <div style={{ marginTop: "8px" }}>
-            {attachments.map((file, index) => (
-              <Tag key={index} icon={<PaperClipOutlined />}>
-                {file.name}
-              </Tag>
+        {attachments?.length > 0 && (
+          <Group gap={4}>
+            <IconPaperclip size={12} />
+            {attachments.map((f, i) => (
+              <Tag key={i}>{f.filename || f.file_name || f.name}</Tag>
             ))}
-          </div>
-        </div>
-      )}
-    </div>
+          </Group>
+        )}
+      </Stack>
+    </Paper>
   );
 };
 

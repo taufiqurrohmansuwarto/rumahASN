@@ -1,8 +1,9 @@
 import GmailLayout from "@/components/GmailLayout";
 import PageContainer from "@/components/PageContainer";
-import Head from "next/head";
 import EmailListComponent from "@/components/mail/EmailList/EmailListComponent";
-import { Grid } from "antd";
+import { Breadcrumb, Grid } from "antd";
+import Head from "next/head";
+import Link from "next/link";
 
 const Starred = () => {
   const breakPoint = Grid.useBreakpoint();
@@ -12,9 +13,19 @@ const Starred = () => {
         <title>Rumah ASN - Pesan Ditandai</title>
       </Head>
       <PageContainer
-        childrenContentStyle={{
-          padding: breakPoint.xs ? null : 0,
-        }}
+        title="Ditandai"
+        subTitle="Pesan yang ditandai bintang"
+        breadcrumbRender={() => (
+          <Breadcrumb>
+            <Breadcrumb.Item>
+              <Link href="/feeds">Beranda</Link>
+            </Breadcrumb.Item>
+            <Breadcrumb.Item>
+              <Link href="/mails">Pesan Pribadi</Link>
+            </Breadcrumb.Item>
+            <Breadcrumb.Item>Ditandai</Breadcrumb.Item>
+          </Breadcrumb>
+        )}
       >
         <EmailListComponent folder="starred" />
       </PageContainer>

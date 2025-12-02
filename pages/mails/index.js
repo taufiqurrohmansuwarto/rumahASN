@@ -21,11 +21,7 @@ const Mail = () => {
       <Head>
         <title>Rumah ASN - Pesan Pribadi</title>
       </Head>
-      <PageContainer
-        childrenContentStyle={{
-          padding: breakPoint.xs ? null : 0,
-        }}
-      >
+      <PageContainer>
         <Button onClick={gotoCreate}>Buat Pesan</Button>
       </PageContainer>
     </>

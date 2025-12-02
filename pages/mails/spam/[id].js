@@ -2,9 +2,9 @@ import GmailLayout from "@/components/GmailLayout";
 import EmailDetailComponent from "@/components/mail/Detail/EmailDetailComponent";
 import PageContainer from "@/components/PageContainer";
 import { useEmailById } from "@/hooks/useEmails";
+import { Breadcrumb, Grid } from "antd";
 import Head from "next/head";
-import { Grid } from "antd";
-
+import Link from "next/link";
 import { useRouter } from "next/router";
 
 const SpamMailDetail = () => {
@@ -21,12 +21,20 @@ const SpamMailDetail = () => {
         <title>{email?.data?.subject} - Rumah ASN - Pesan Spam</title>
       </Head>
       <PageContainer
-        childrenContentStyle={{
-          padding: breakPoint.xs ? null : 0,
-        }}
         title="Pesan Spam"
         subTitle={email?.data?.subject}
         onBack={handleBack}
+        breadcrumbRender={() => (
+          <Breadcrumb>
+            <Breadcrumb.Item>
+              <Link href="/feeds">Beranda</Link>
+            </Breadcrumb.Item>
+            <Breadcrumb.Item>
+              <Link href="/mails/spam">Spam</Link>
+            </Breadcrumb.Item>
+            <Breadcrumb.Item>Detail</Breadcrumb.Item>
+          </Breadcrumb>
+        )}
       >
         <EmailDetailComponent
           email={email?.data}

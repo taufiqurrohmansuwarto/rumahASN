@@ -1,23 +1,4 @@
 // src/components/mail/Detail/EmailThreadComponent.js
-import { DownOutlined, UserOutlined } from "@ant-design/icons";
-import {
-  Avatar,
-  Badge,
-  Button,
-  Card,
-  Collapse,
-  message,
-  Tag,
-  Typography,
-} from "antd";
-import dayjs from "dayjs";
-import "dayjs/locale/id";
-import { useState } from "react";
-import EmailActionButtons from "./EmailActionButtons";
-import EmailAttachmentsDisplay from "./EmailAttachmentsDisplay";
-import EmailContentDisplay from "./EmailContentDisplay";
-import EmailDetailHeader from "./EmailDetailHeader";
-import useScrollRestoration from "@/hooks/useScrollRestoration";
 import {
   useDeleteEmail,
   useMarkAsRead,
@@ -26,9 +7,35 @@ import {
   useToggleStar,
   useUpdatePriority,
 } from "@/hooks/useEmails";
-
-const { Text, Title } = Typography;
-const { Panel } = Collapse;
+import useScrollRestoration from "@/hooks/useScrollRestoration";
+import {
+  Avatar,
+  Badge,
+  Box,
+  Chip,
+  Collapse,
+  Divider,
+  Group,
+  Paper,
+  Stack,
+  Text,
+  Title,
+  UnstyledButton,
+} from "@mantine/core";
+import {
+  IconChevronDown,
+  IconChevronUp,
+  IconMessages,
+  IconPaperclip,
+} from "@tabler/icons-react";
+import { message } from "antd";
+import dayjs from "dayjs";
+import "dayjs/locale/id";
+import { useState } from "react";
+import EmailActionButtons from "./EmailActionButtons";
+import EmailAttachmentsDisplay from "./EmailAttachmentsDisplay";
+import EmailContentDisplay from "./EmailContentDisplay";
+import EmailDetailHeader from "./EmailDetailHeader";
 
 // Single email in thread
 const ThreadEmailItem = ({
@@ -41,7 +48,6 @@ const ThreadEmailItem = ({
   threadEmails,
   currentIndex,
 }) => {
-  // action
   const toggleStarMutation = useToggleStar();
   const deleteEmailMutation = useDeleteEmail();
   const moveToFolderMutation = useMoveToFolder();
@@ -49,86 +55,48 @@ const ThreadEmailItem = ({
   const markAsReadMutation = useMarkAsRead();
   const updatePriorityMutation = useUpdatePriority();
 
-  const [expanded, setExpanded] = useState(true);
+  const [expanded, setExpanded] = useState(isLatest || isCurrentEmail);
 
-  const formatTime = (date) => {
-    return dayjs(date).format("DD MMM YYYY, HH:mm");
-  };
+  const formatTime = (date) => dayjs(date).format("D MMM YYYY, HH:mm");
 
   const getRecipientSummary = () => {
     const toCount = email.recipients?.to?.length || 0;
     const ccCount = email.recipients?.cc?.length || 0;
 
-    if (toCount === 0) return "No recipients";
+    if (toCount === 0) return "";
     if (toCount === 1 && ccCount === 0) {
-      return `to ${email.recipients.to[0]?.user?.username || "Unknown"}`;
+      return `ke ${email.recipients.to[0]?.user?.username || "Tidak dikenal"}`;
     }
-
-    let summary = `to ${toCount} recipient${toCount > 1 ? "s" : ""}`;
-    if (ccCount > 0) {
-      summary += `, cc ${ccCount}`;
-    }
+    let summary = `ke ${toCount} orang`;
+    if (ccCount > 0) summary += `, cc ${ccCount}`;
     return summary;
   };
 
-  // Function to check if current email is a reply
   const isReplyEmail = () => {
-    // Email dianggap reply jika:
-    // 1. Memiliki parent_id
-    // 2. Memiliki in_reply_to
-    // 3. Memiliki references
-    // 4. Subject dimulai dengan "Re:" atau "RE:"
-    // 5. Bukan email pertama dalam thread dan memiliki pattern quoted text
-
-    // 1. Cek parent_id
     if (email.parent_id) return true;
-
-    // 2. Cek in_reply_to
     if (email.in_reply_to) return true;
-
-    // 3. Cek references
+    if (email.references?.length) return true;
+    if ((email.subject || "").toLowerCase().includes("re:")) return true;
     if (
-      email.references &&
-      (Array.isArray(email.references)
-        ? email.references.length > 0
-        : email.references)
-    ) {
+      currentIndex > 0 &&
+      (email.content || "").match(/(Pada .+? menulis:|On .+? wrote:)/)
+    )
       return true;
-    }
-
-    // 4. Cek subject dengan "Re:"
-    const subject = email.subject || "";
-    if (subject.toLowerCase().includes("re:")) return true;
-
-    // 5. Cek content dengan quoted text pattern (hanya jika bukan email pertama)
-    if (currentIndex > 0) {
-      const content = email.content || "";
-      if (content.match(/(Pada .+? menulis:|On .+? wrote:)/)) return true;
-    }
-
     return false;
   };
 
-  // Function to get quoted content from previous messages
   const getQuotedContent = () => {
-    if (currentIndex === 0) return ""; // First email has no previous messages
+    if (currentIndex === 0) return "";
 
-    // Cari email parent berdasarkan parent_id, in_reply_to, atau references
     let parentEmail = null;
 
-    // 1. Coba cari berdasarkan parent_id jika ada
     if (email.parent_id) {
       parentEmail = threadEmails.find((e) => e.id === email.parent_id);
     }
-
-    // 2. Coba cari berdasarkan in_reply_to jika ada
     if (!parentEmail && email.in_reply_to) {
       parentEmail = threadEmails.find((e) => e.id === email.in_reply_to);
     }
-
-    // 3. Coba cari berdasarkan references jika ada
     if (!parentEmail && email.references) {
-      // references biasanya array atau string yang berisi ID email sebelumnya
       const refs = Array.isArray(email.references)
         ? email.references
         : [email.references];
@@ -137,93 +105,69 @@ const ThreadEmailItem = ({
         if (parentEmail) break;
       }
     }
-
-    // 4. Fallback: ambil email tepat sebelumnya dalam urutan kronologis
     if (!parentEmail && currentIndex > 0) {
       parentEmail = threadEmails[currentIndex - 1];
     }
 
     if (!parentEmail) return "";
 
-    const senderName = parentEmail.sender?.username || "Unknown Sender";
-    const senderEmail = parentEmail.sender?.email || "unknown@email.com";
-    // Format tanggal menggunakan locale Indonesia
+    const senderName = parentEmail.sender?.username || "Tidak dikenal";
     const formattedDate = dayjs(parentEmail.created_at)
       .locale("id")
-      .format("ddd, DD MMM YYYY [pukul] HH:mm");
+      .format("ddd, D MMM YYYY [pukul] HH:mm");
 
     return `Pada ${formattedDate} ${senderName} menulis:
 
 ${parentEmail.content || ""}`;
   };
 
-  // Combine current content with quoted content (only for replies)
   const getFullContent = () => {
     const currentContent = email.content || "";
-
-    // Hanya tampilkan quote jika email ini adalah balasan
-    if (!isReplyEmail()) {
-      return currentContent;
-    }
-
+    if (!isReplyEmail()) return currentContent;
     const quotedContent = getQuotedContent();
-
     if (!quotedContent) return currentContent;
-
     return `${currentContent}
 
 ${quotedContent}`;
   };
 
-  // Handlers untuk actions (placeholder - bisa disesuaikan dengan kebutuhan)
   const handleToggleStar = async () => {
     try {
       await toggleStarMutation.mutateAsync(email.id);
-      message.success("Berhasil mengubah status bintang");
-    } catch (error) {
-      message.error("Gagal mengubah status bintang");
+    } catch {
+      message.error("Gagal");
     }
   };
 
   const handleUpdatePriority = async (priority) => {
     try {
-      await updatePriorityMutation.mutateAsync({
-        emailId: email.id,
-        priority,
-      });
-      message.success("Berhasil mengubah prioritas email");
-    } catch (error) {
-      message.error("Gagal mengubah prioritas email");
+      await updatePriorityMutation.mutateAsync({ emailId: email.id, priority });
+    } catch {
+      message.error("Gagal");
     }
   };
 
   const handleMarkAsUnread = async () => {
     try {
       await markAsUnreadMutation.mutateAsync(email.id);
-      message.success("Berhasil mengubah status tidak terbaca");
-    } catch (error) {
-      message.error("Gagal mengubah status tidak terbaca");
+    } catch {
+      message.error("Gagal");
     }
   };
 
   const handleMarkAsRead = async () => {
     try {
       await markAsReadMutation.mutateAsync(email.id);
-      message.success("Berhasil mengubah status terbaca");
-    } catch (error) {
-      message.error("Gagal mengubah status terbaca");
+    } catch {
+      message.error("Gagal");
     }
   };
 
   const handleMoveToFolder = async (folder) => {
     try {
-      await moveToFolderMutation.mutateAsync({
-        emailId: email.id,
-        folder,
-      });
-      message.success("Berhasil memindahkan email ke folder");
-    } catch (error) {
-      message.error("Gagal memindahkan email ke folder");
+      await moveToFolderMutation.mutateAsync({ emailId: email.id, folder });
+    } catch {
+      message.error("Gagal");
     }
   };
 
@@ -235,177 +179,121 @@ ${quotedContent}`;
     }
   };
 
-  const handleForward = () => {
-    // Implement forward
-    onForward?.(email);
-  };
+  const handleForward = () => onForward?.(email);
 
-  const handleDelete = () => {
-    // Implement delete
-    console.log("Delete email:", email.id);
-  };
-
-  const handleArchive = () => {
-    // Implement archive
-    console.log("Archive email:", email.id);
-  };
-
-  const handleFlag = () => {
-    // Implement flag
-    console.log("Flag email:", email.id);
-  };
-
-  const handlePrint = () => {
-    window.print();
-  };
+  const senderName = email.sender?.username || "Tidak dikenal";
 
   return (
-    <Card
+    <Paper
+      withBorder
+      mb="sm"
+      radius="md"
       style={{
-        marginBottom: "16px",
-        border: isCurrentEmail ? "2px solid #1890ff" : "1px solid #f0f0f0",
-        borderRadius: "8px",
-        boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-        transition: "all 0.3s ease",
+        borderColor: isCurrentEmail ? "#228be6" : undefined,
+        borderWidth: isCurrentEmail ? 2 : 1,
       }}
     >
       {/* Collapsed Header */}
       {!expanded && (
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            cursor: "pointer",
-            padding: "12px 16px",
-            borderRadius: "8px",
-            transition: "background-color 0.2s ease",
-          }}
-          onMouseEnter={(e) => (e.target.style.backgroundColor = "#f8f9fa")}
-          onMouseLeave={(e) => (e.target.style.backgroundColor = "transparent")}
+        <UnstyledButton
+          w="100%"
+          p="sm"
           onClick={() => setExpanded(true)}
+          style={{ borderRadius: 8 }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-            <Avatar
-              src={email.sender?.image}
-              icon={<UserOutlined />}
-              size="default"
-            />
-
-            <div>
-              <div
-                style={{ display: "flex", alignItems: "center", gap: "8px" }}
+          <Group justify="space-between">
+            <Group gap="sm">
+              <Avatar
+                src={email.sender?.image}
+                radius="xl"
+                size="sm"
+                color="blue"
               >
-                <Text strong style={{ fontSize: "14px" }}>
-                  {email.sender?.username || "Unknown Sender"}
-                </Text>
-                {isCurrentEmail && (
-                  <Tag color="blue" size="small">
-                    Current
-                  </Tag>
-                )}
-                {!email.is_read && <Badge dot status="processing" />}
-              </div>
+                {senderName.charAt(0).toUpperCase()}
+              </Avatar>
+              <Box>
+                <Group gap="xs">
+                  <Text size="sm" fw={500}>
+                    {senderName}
+                  </Text>
+                  {isCurrentEmail && (
+                    <Chip size="xs" checked={false} color="blue">
+                      Saat ini
+                    </Chip>
+                  )}
+                  {!email.is_read && (
+                    <Badge size="xs" variant="dot" color="blue" />
+                  )}
+                </Group>
+                <Group gap="xs">
+                  <Text size="xs" c="dimmed">
+                    {getRecipientSummary()}
+                  </Text>
+                  <Text size="xs" c="dimmed">
+                    • {formatTime(email.created_at)}
+                  </Text>
+                </Group>
+              </Box>
+            </Group>
 
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  marginTop: "2px",
-                }}
-              >
-                <Text type="secondary" style={{ fontSize: "12px" }}>
-                  {getRecipientSummary()}
-                </Text>
-                <Text type="secondary" style={{ fontSize: "12px" }}>
-                  • {formatTime(email.created_at)}
-                </Text>
-              </div>
-            </div>
-          </div>
-
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            {email.attachments?.length > 0 && (
-              <Tag size="small">
-                {email.attachments.length} attachment
-                {email.attachments.length > 1 ? "s" : ""}
-              </Tag>
-            )}
-
-            <Button type="text" size="small" icon={<DownOutlined />} />
-          </div>
-        </div>
+            <Group gap="xs">
+              {email.attachments?.length > 0 && (
+                <Chip size="xs" checked={false} variant="light">
+                  <IconPaperclip size={12} />
+                  {email.attachments.length}
+                </Chip>
+              )}
+              <IconChevronDown size={16} style={{ color: "#868e96" }} />
+            </Group>
+          </Group>
+        </UnstyledButton>
       )}
 
       {/* Expanded Content */}
-      {expanded && (
-        <div style={{ padding: "0" }}>
-          {/* Email Header - menggunakan komponen yang sama dengan EmailDetailComponent */}
-          <div style={{ padding: "24px 24px 16px 24px" }}>
-            <EmailDetailHeader
-              email={email}
-              onToggleStar={handleToggleStar}
-              isStarLoading={false}
-              onToggleRead={handleMarkAsRead}
-              isReadLoading={false}
-              onToggleUnread={handleMarkAsUnread}
-              isUnreadLoading={false}
-              onMoveToFolder={handleMoveToFolder}
-              isMoveToFolderLoading={false}
-              recipients={email.recipients}
-              onRefresh={() => {}}
-              onUpdatePriority={handleUpdatePriority}
-              isUpdatePriorityLoading={false}
-              showCollapseButton={true}
-              onCollapse={() => setExpanded(false)}
-            />
-          </div>
+      <Collapse in={expanded}>
+        <Box p="md">
+          <Group justify="flex-end" mb="xs">
+            <UnstyledButton onClick={() => setExpanded(false)}>
+              <IconChevronUp size={16} style={{ color: "#868e96" }} />
+            </UnstyledButton>
+          </Group>
 
-          {/* Email Content tanpa scroll individual */}
-          <div style={{ padding: "0 24px 16px 24px" }}>
-            <div
-              style={{
-                border: "1px solid #f0f0f0",
-                borderRadius: "6px",
-                padding: "16px",
-                backgroundColor: "#fafafa",
-              }}
-            >
-              <EmailContentDisplay
-                content={getFullContent()}
-                isMarkdown={false}
-              />
-            </div>
-          </div>
+          <EmailDetailHeader
+            email={email}
+            onToggleStar={handleToggleStar}
+            isStarLoading={toggleStarMutation.isLoading}
+            onToggleRead={handleMarkAsRead}
+            isReadLoading={markAsReadMutation.isLoading}
+            onToggleUnread={handleMarkAsUnread}
+            isUnreadLoading={markAsUnreadMutation.isLoading}
+            onMoveToFolder={handleMoveToFolder}
+            isMoveToFolderLoading={moveToFolderMutation.isLoading}
+            recipients={email.recipients}
+            onRefresh={() => {}}
+            onUpdatePriority={handleUpdatePriority}
+            isUpdatePriorityLoading={updatePriorityMutation.isLoading}
+          />
 
-          {/* Attachments tanpa scroll individual */}
-          {email.attachments && email.attachments.length > 0 && (
-            <div style={{ padding: "0 24px 16px 24px" }}>
-              <EmailAttachmentsDisplay attachments={email.attachments} />
-            </div>
+          <Paper p="sm" bg="gray.0" radius="sm" mb="md">
+            <EmailContentDisplay content={getFullContent()} />
+          </Paper>
+
+          {email.attachments?.length > 0 && (
+            <EmailAttachmentsDisplay attachments={email.attachments} />
           )}
 
-          {/* Action Buttons - menggunakan komponen yang sama */}
-          <div style={{ padding: "0 24px 24px 24px" }}>
-            <EmailActionButtons
-              email={email}
-              onReply={handleReplyAction}
-              onReplyAll={() => handleReplyAction(true)}
-              onForward={handleForward}
-              onDelete={handleDelete}
-              onArchive={handleArchive}
-              onFlag={handleFlag}
-              onPrint={handlePrint}
-              loading={{
-                delete: false,
-                archive: false,
-              }}
-            />
-          </div>
-        </div>
-      )}
-    </Card>
+          <Divider my="sm" />
+
+          <EmailActionButtons
+            email={email}
+            onReply={handleReplyAction}
+            onReplyAll={() => handleReplyAction(true)}
+            onForward={handleForward}
+            loading={{}}
+          />
+        </Box>
+      </Collapse>
+    </Paper>
   );
 };
 
@@ -419,24 +307,19 @@ const EmailThreadComponent = ({
 }) => {
   useScrollRestoration();
 
-  if (!threadData || !threadData.thread_emails) {
-    return null;
-  }
+  if (!threadData || !threadData.thread_emails) return null;
 
   const { thread_emails, current_email_id, thread_count, thread_subject } =
     threadData;
 
-  // Flatten thread structure untuk display
   const flattenThread = (emails) => {
     const flattened = [];
-
     const processEmail = (email) => {
       flattened.push(email);
-      if (email.replies && email.replies.length > 0) {
+      if (email.replies?.length > 0) {
         email.replies.forEach(processEmail);
       }
     };
-
     emails.forEach(processEmail);
     return flattened.sort(
       (a, b) => new Date(a.created_at) - new Date(b.created_at)
@@ -446,120 +329,32 @@ const EmailThreadComponent = ({
   const flatEmails = flattenThread(thread_emails);
 
   return (
-    <div
-      style={{
-        marginBottom: "24px",
-        maxHeight: "calc(100vh - 200px)", // Beri tinggi maksimal berdasarkan viewport
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
+    <Stack gap="sm">
       {/* Thread Header */}
       {thread_count > 1 && (
-        <div
-          style={{
-            marginBottom: "16px",
-            padding: "16px 20px",
-            backgroundColor: "#f8f9fa",
-            borderRadius: "8px",
-            border: "1px solid #e8e8e8",
-            boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
-            flexShrink: 0, // Jangan biarkan header menyusut
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "12px",
-              marginBottom: "8px",
-            }}
-          >
-            <Title level={4} style={{ margin: 0, color: "#1890ff" }}>
-              💬 Percakapan ({thread_count} pesan)
+        <Paper p="sm" withBorder radius="md" bg="gray.0">
+          <Group gap="xs" mb={4}>
+            <IconMessages size={18} style={{ color: "#228be6" }} />
+            <Title order={5} c="blue">
+              Percakapan ({thread_count})
             </Title>
-            <Tag color="blue" size="default">
-              Thread
-            </Tag>
-          </div>
-
+          </Group>
           {thread_subject && (
-            <Text
-              type="secondary"
-              style={{ fontSize: "13px", lineHeight: 1.4 }}
-            >
-              <strong>Subjek:</strong> {thread_subject}
+            <Text size="xs" c="dimmed">
+              {thread_subject}
             </Text>
           )}
-        </div>
+        </Paper>
       )}
 
-      {/* Thread Emails Container dengan satu scrolling utama yang dipercantik */}
-      <div
+      {/* Thread Emails */}
+      <Box
         style={{
-          flex: 1,
-          height: "calc(100vh - 300px)", // Tinggi tetap agar scrolling konsisten
+          maxHeight: "calc(100vh - 280px)",
           overflowY: "auto",
-          overflowX: "hidden",
-          paddingRight: "12px",
-          paddingLeft: "4px",
-          // Smooth scrolling
-          scrollBehavior: "smooth",
-          // Firefox scrollbar
-          scrollbarWidth: "thin",
-          scrollbarColor: "#d4d4d4 #f8f9fa",
+          paddingRight: 8,
         }}
-        className="email-thread-container"
       >
-        {/* CSS untuk styling scrollbar yang lebih cantik */}
-        <style jsx>{`
-          .email-thread-container::-webkit-scrollbar {
-            width: 10px;
-          }
-
-          .email-thread-container::-webkit-scrollbar-track {
-            background: #f8f9fa;
-            border-radius: 12px;
-            margin: 8px 0;
-          }
-
-          .email-thread-container::-webkit-scrollbar-thumb {
-            background: linear-gradient(180deg, #d4d4d4 0%, #bfbfbf 100%);
-            border-radius: 12px;
-            border: 2px solid #f8f9fa;
-            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-          }
-
-          .email-thread-container::-webkit-scrollbar-thumb:hover {
-            background: linear-gradient(180deg, #bfbfbf 0%, #8c8c8c 100%);
-            transform: scale(1.1);
-          }
-
-          .email-thread-container::-webkit-scrollbar-thumb:active {
-            background: linear-gradient(180deg, #8c8c8c 0%, #595959 100%);
-          }
-
-          .email-thread-container::-webkit-scrollbar-corner {
-            background: #f8f9fa;
-          }
-
-          /* Smooth scroll behavior untuk seluruh container */
-          .email-thread-container {
-            scroll-behavior: smooth;
-          }
-
-          /* Efek hover untuk cards saat scrolling */
-          .email-thread-container .ant-card {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-          }
-
-          .email-thread-container .ant-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-          }
-        `}</style>
-
         {flatEmails.map((email, index) => (
           <ThreadEmailItem
             key={email.id}
@@ -573,8 +368,8 @@ const EmailThreadComponent = ({
             currentIndex={index}
           />
         ))}
-      </div>
-    </div>
+      </Box>
+    </Stack>
   );
 };
 

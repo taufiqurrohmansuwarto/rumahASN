@@ -1,206 +1,441 @@
 import { useReplyToEmail, useSaveDraft, useSendEmail } from "@/hooks/useEmails";
-import { debugUploadState, extractAttachmentIds } from "@/utils/debugUpload";
-import { EyeOutlined, SaveOutlined, SendOutlined } from "@ant-design/icons";
+import { extractAttachmentIds } from "@/utils/debugUpload";
+import { Box, Group, Stack, Text } from "@mantine/core";
 import {
-  Badge,
+  IconBold,
+  IconEye,
+  IconItalic,
+  IconList,
+  IconMail,
+  IconMailForward,
+  IconMailReply,
+  IconNote,
+  IconPencil,
+} from "@tabler/icons-react";
+import {
   Button,
-  Card,
-  Col,
-  Divider,
   Form,
   Input,
   Modal,
-  Row,
   Select,
   Space,
-  Tabs,
+  Tag,
+  Tooltip,
   message,
 } from "antd";
 import dayjs from "dayjs";
+import dynamic from "next/dynamic";
 import { useSession } from "next-auth/react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import AttachmentUploader from "./AttachmentUploader";
-import EmailEditor from "./EmailEditor";
-import EmailPreview from "./EmailPreview";
-import RecipientSelector from "./RecipientSelector";
+
+// Dynamic import untuk markdown preview (SSR safe)
+const ReactMarkdownCustom = dynamic(
+  () => import("@/components/MarkdownEditor/ReactMarkdownCustom"),
+  {
+    ssr: false,
+    loading: () => (
+      <Text size="sm" c="dimmed">
+        Loading preview...
+      </Text>
+    ),
+  }
+);
+
+// Simple Markdown Editor dengan toolbar dan preview
+const SimpleMarkdownEditor = ({ value, onChange, placeholder, rows = 8 }) => {
+  const textareaRef = useRef(null);
+  const [showPreview, setShowPreview] = useState(false);
+
+  const getTextarea = () => {
+    // Ant Design Input.TextArea wraps native textarea
+    const el = textareaRef.current;
+    if (!el) return null;
+    // Access native textarea
+    return el.resizableTextArea?.textArea || el;
+  };
+
+  const insertMarkdown = (prefix, suffix = "") => {
+    const textarea = getTextarea();
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const text = value || "";
+    const selectedText = text.substring(start, end);
+
+    let newText;
+    let newCursorPos;
+
+    if (selectedText) {
+      newText =
+        text.substring(0, start) +
+        prefix +
+        selectedText +
+        suffix +
+        text.substring(end);
+      newCursorPos =
+        start + prefix.length + selectedText.length + suffix.length;
+    } else {
+      newText =
+        text.substring(0, start) + prefix + suffix + text.substring(end);
+      newCursorPos = start + prefix.length;
+    }
+
+    onChange(newText);
+
+    setTimeout(() => {
+      const ta = getTextarea();
+      if (ta) {
+        ta.focus();
+        ta.setSelectionRange(newCursorPos, newCursorPos);
+      }
+    }, 10);
+  };
+
+  const handleBold = () => insertMarkdown("**", "**");
+  const handleItalic = () => insertMarkdown("*", "*");
+  const handleList = () => {
+    const textarea = getTextarea();
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const text = value || "";
+
+    let lineStart = start;
+    while (lineStart > 0 && text[lineStart - 1] !== "\n") {
+      lineStart--;
+    }
+
+    const newText =
+      text.substring(0, lineStart) + "- " + text.substring(lineStart);
+    onChange(newText);
+
+    setTimeout(() => {
+      const ta = getTextarea();
+      if (ta) {
+        ta.focus();
+        ta.setSelectionRange(lineStart + 2, lineStart + 2);
+      }
+    }, 10);
+  };
+
+  return (
+    <div>
+      <Group gap={4} mb={4} justify="space-between">
+        <Group gap={4}>
+          <Tooltip title="Tebal">
+            <Button
+              size="small"
+              type="text"
+              icon={<IconBold size={14} />}
+              onClick={handleBold}
+              disabled={showPreview}
+            />
+          </Tooltip>
+          <Tooltip title="Miring">
+            <Button
+              size="small"
+              type="text"
+              icon={<IconItalic size={14} />}
+              onClick={handleItalic}
+              disabled={showPreview}
+            />
+          </Tooltip>
+          <Tooltip title="List">
+            <Button
+              size="small"
+              type="text"
+              icon={<IconList size={14} />}
+              onClick={handleList}
+              disabled={showPreview}
+            />
+          </Tooltip>
+          <Text size="xs" c="dimmed" ml={4}>
+            **tebal** *miring*
+          </Text>
+        </Group>
+        <Button
+          size="small"
+          type={showPreview ? "primary" : "text"}
+          icon={showPreview ? <IconPencil size={14} /> : <IconEye size={14} />}
+          onClick={() => setShowPreview(!showPreview)}
+        >
+          {showPreview ? "Edit" : "Preview"}
+        </Button>
+      </Group>
+
+      {showPreview ? (
+        <Box
+          p="sm"
+          style={{
+            border: "1px solid #d9d9d9",
+            borderRadius: 6,
+            minHeight: rows * 22,
+            maxHeight: rows * 22,
+            overflow: "auto",
+            backgroundColor: "#fafafa",
+          }}
+        >
+          {value ? (
+            <ReactMarkdownCustom>{value}</ReactMarkdownCustom>
+          ) : (
+            <Text size="sm" c="dimmed">
+              Tidak ada konten
+            </Text>
+          )}
+        </Box>
+      ) : (
+        <Input.TextArea
+          ref={textareaRef}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          rows={rows}
+          style={{ resize: "none" }}
+          onKeyDown={(e) => {
+            if (e.ctrlKey || e.metaKey) {
+              if (e.key === "b") {
+                e.preventDefault();
+                handleBold();
+              } else if (e.key === "i") {
+                e.preventDefault();
+                handleItalic();
+              }
+            }
+          }}
+        />
+      )}
+    </div>
+  );
+};
+
+// Inline RecipientSelector to avoid import issues
+const RecipientSelector = ({
+  recipients,
+  onChange,
+  showCc,
+  showBcc,
+  onToggleCc,
+  onToggleBcc,
+}) => {
+  const [options, setOptions] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const handleSearch = async (text) => {
+    if (!text || text.length < 2) {
+      setOptions([]);
+      return;
+    }
+    setLoading(true);
+    try {
+      const res = await fetch(`/helpdesk/api/rasn-mail/search/users?q=${text}`);
+      const data = await res.json();
+      if (data.success) {
+        setOptions(data.data.map((u) => ({ label: u.username, value: u.id })));
+      }
+    } catch {
+      // ignore
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleChange = (type, val) => {
+    onChange({ ...recipients, [type]: val || [] });
+  };
+
+  const selectProps = {
+    mode: "multiple",
+    labelInValue: true,
+    onSearch: handleSearch,
+    loading,
+    showSearch: true,
+    filterOption: false,
+    notFoundContent: loading ? "Mencari..." : "Ketik 2+ karakter",
+    style: { width: "100%" },
+    size: "small",
+    options,
+  };
+
+  return (
+    <Stack gap={6}>
+      <div style={{ display: "flex", alignItems: "flex-end", gap: 8 }}>
+        <div style={{ flex: 1 }}>
+          <Text size="xs" fw={500} mb={2}>
+            Kepada
+          </Text>
+          <Select
+            {...selectProps}
+            placeholder="Cari..."
+            value={recipients.to}
+            onChange={(val) => handleChange("to", val)}
+          />
+        </div>
+        {!showCc && (
+          <Text
+            size="xs"
+            c="blue"
+            style={{ cursor: "pointer" }}
+            onClick={onToggleCc}
+          >
+            +CC
+          </Text>
+        )}
+        {!showBcc && (
+          <Text
+            size="xs"
+            c="blue"
+            style={{ cursor: "pointer" }}
+            onClick={onToggleBcc}
+          >
+            +BCC
+          </Text>
+        )}
+      </div>
+      {showCc && (
+        <div>
+          <Text size="xs" fw={500} mb={2}>
+            CC
+          </Text>
+          <Select
+            {...selectProps}
+            placeholder="CC..."
+            value={recipients.cc}
+            onChange={(val) => handleChange("cc", val)}
+          />
+        </div>
+      )}
+      {showBcc && (
+        <div>
+          <Text size="xs" fw={500} mb={2}>
+            BCC
+          </Text>
+          <Select
+            {...selectProps}
+            placeholder="BCC..."
+            value={recipients.bcc}
+            onChange={(val) => handleChange("bcc", val)}
+          />
+        </div>
+      )}
+    </Stack>
+  );
+};
 
 const ComposeModal = ({
   visible = false,
   onClose,
   onSent,
-  mode = "compose", // compose, reply, forward
+  mode = "compose",
   originalEmail = null,
   replyAll = false,
-  title = "Tulis Email Baru",
+  title = "Tulis Email",
+  initialRecipient = null, // { value: userId, label: username }
 }) => {
   const [form] = Form.useForm();
-  const [activeTab, setActiveTab] = useState("compose");
   const [recipients, setRecipients] = useState({ to: [], cc: [], bcc: [] });
   const [showCc, setShowCc] = useState(false);
   const [showBcc, setShowBcc] = useState(false);
   const [attachments, setAttachments] = useState([]);
   const [messageContent, setMessageContent] = useState("");
-  const [isMarkdown, setIsMarkdown] = useState(false);
 
-  const {
-    data: { user },
-  } = useSession();
+  const { data: sessionData } = useSession();
+  const user = sessionData?.user;
 
   const sendEmail = useSendEmail();
   const saveDraft = useSaveDraft();
   const replyToEmail = useReplyToEmail();
 
-  // ✅ FIXED: Initialize form based on mode
+  // Handle initialRecipient untuk japri dari profile
+  useEffect(() => {
+    if (mode === "compose" && initialRecipient && visible) {
+      setRecipients({ to: [initialRecipient], cc: [], bcc: [] });
+    }
+  }, [mode, initialRecipient, visible]);
+
   useEffect(() => {
     if (mode === "reply" && originalEmail) {
-      // Tentukan penerima berdasarkan mode reply
-      let toRecipients = [];
+      const senderId =
+        originalEmail.sender_id || originalEmail.sender?.custom_id;
+      const myId = user?.id;
+      const iAmSender = senderId === myId;
 
+      let toRecipients = [];
       if (replyAll) {
-        // Jika reply all, sertakan semua penerima asli (to + cc) kecuali pengirim saat ini
-        const allOriginalRecipients = [
+        const allRecipients = [
           ...(originalEmail.recipients?.to || []),
           ...(originalEmail.recipients?.cc || []),
         ]
-          ?.map((r) => ({
-            label: r.user?.username || r.recipient_name || "Unknown",
-            value: r.user?.custom_id || r.recipient_id,
+          .map((r) => ({
+            label: r.user?.username || r.name || "Unknown",
+            value: r.user?.custom_id || r.recipient_id || r.id,
           }))
-          .filter((r) => r.value !== user?.id);
-
-        // Tambahkan pengirim asli ke daftar penerima
+          .filter((r) => r.value !== myId);
+        toRecipients = [
+          { label: originalEmail.sender?.username, value: senderId },
+          ...allRecipients,
+        ];
+      } else if (iAmSender && originalEmail.recipients?.to?.length > 0) {
+        const first = originalEmail.recipients.to[0];
         toRecipients = [
           {
-            label:
-              originalEmail.sender?.username || originalEmail.sender?.email,
-            value: originalEmail.sender_id,
+            label: first.user?.username || first.name || "Unknown",
+            value: first.user?.custom_id || first.recipient_id || first.id,
           },
-          ...allOriginalRecipients,
         ];
       } else {
-        // jika terdapat 1 pengirim email
-        const toRecipientsTotal = originalEmail.recipients?.to?.length;
-
-        // kalau total penerima 1 maka kirim ke pengirim asli
-        if (toRecipientsTotal === 1) {
-          if (originalEmail.sender_id === user?.id) {
-            toRecipients = [
-              {
-                label: originalEmail.recipients?.to[0].user?.username,
-                value: originalEmail.recipients?.to[0].user?.custom_id,
-              },
-            ];
-          } else {
-            toRecipients = [
-              {
-                label: originalEmail.sender?.username,
-                value: originalEmail.sender?.custom_id,
-              },
-            ];
-          }
-        } else {
-          toRecipients = originalEmail.recipients?.to?.map((r) => ({
-            label: r.user?.username || r.recipient_name || "Unknown",
-            value: r.user?.custom_id || r.recipient_id,
-          }));
-        }
+        toRecipients = [
+          { label: originalEmail.sender?.username, value: senderId },
+        ];
       }
 
-      // Set penerima email
-      setRecipients({
-        to: toRecipients,
-        cc: [],
-        bcc: [],
-      });
-
-      // Set subjek email dengan prefix "Re:" jika belum ada
+      setRecipients({ to: toRecipients, cc: [], bcc: [] });
       form.setFieldsValue({
-        subject: originalEmail.subject.startsWith("Re: ")
+        subject: originalEmail.subject?.startsWith("Re: ")
           ? originalEmail.subject
-          : `Re: ${originalEmail.subject}`,
+          : `Re: ${originalEmail.subject || ""}`,
       });
     } else if (mode === "forward" && originalEmail) {
       form.setFieldsValue({
-        subject: originalEmail.subject.startsWith("Fwd: ")
+        subject: originalEmail.subject?.startsWith("Fwd: ")
           ? originalEmail.subject
-          : `Fwd: ${originalEmail.subject}`,
+          : `Fwd: ${originalEmail.subject || ""}`,
       });
-
       setMessageContent(
-        `\n\n--- Pesan Diteruskan ---\nDari: ${
+        `\n\n--- Diteruskan ---\nDari: ${
           originalEmail.sender?.username
         }\nTanggal: ${dayjs(originalEmail.created_at).format(
-          "DD MMMM YYYY HH:mm"
-        )}\nSubjek: ${originalEmail.subject}\n\n${originalEmail.content}`
+          "D MMM YYYY HH:mm"
+        )}\n\n${originalEmail.content || ""}`
       );
-
-      // ✅ FIXED: Set attachments dengan format yang benar
-      if (originalEmail.attachments && originalEmail.attachments.length > 0) {
+      if (originalEmail.attachments?.length > 0)
         setAttachments([...originalEmail.attachments]);
-      }
     } else if (mode === "draft" && originalEmail) {
       const toRecipient =
         originalEmail.recipients?.to?.map((r) => ({
-          label: r.user?.username || r.recipient_name || "Unknown",
-          value: r.user?.custom_id || r.recipient_id,
+          label: r.user?.username || r.name || "Unknown",
+          value: r.user?.custom_id || r.recipient_id || r.id,
         })) || [];
-
-      const ccRecipient =
-        originalEmail.recipients?.cc?.map((r) => ({
-          label: r.user?.username || r.recipient_name || "Unknown",
-          value: r.user?.custom_id || r.recipient_id,
-        })) || [];
-
-      const bccRecipient =
-        originalEmail.recipients?.bcc?.map((r) => ({
-          label: r.user?.username || r.recipient_name || "Unknown",
-          value: r.user?.custom_id || r.recipient_id,
-        })) || [];
-
-      setRecipients({
-        to: toRecipient,
-        cc: ccRecipient,
-        bcc: bccRecipient,
-      });
-
+      setRecipients({ to: toRecipient, cc: [], bcc: [] });
       form.setFieldsValue({
         subject: originalEmail.subject,
-        content: originalEmail.content,
         priority: originalEmail.priority,
       });
-
-      // ✅ FIXED: Set content dan attachments
       setMessageContent(originalEmail.content || "");
-      if (originalEmail.attachments && originalEmail.attachments.length > 0) {
+      if (originalEmail.attachments?.length > 0)
         setAttachments([...originalEmail.attachments]);
-      }
     }
-  }, [mode, originalEmail, replyAll, form, user?.id]);
+  }, [mode, originalEmail, replyAll, form, user]);
 
-  // ✅ FIXED: Handle attachments change dengan logging yang lebih detail
-  const handleAttachmentsChange = (newAttachments) => {
-    console.group("📎 COMPOSE_MODAL - Attachments Changed");
-    console.log("Previous count:", attachments.length);
-    console.log("New count:", newAttachments.length);
-    console.log("Previous attachments:", attachments);
-    console.log("New attachments:", newAttachments);
-    console.groupEnd();
-
-    // ✅ SAFETY: Ensure we always have an array
-    const safeAttachments = Array.isArray(newAttachments) ? newAttachments : [];
-    setAttachments(safeAttachments);
-  };
-
-  const handleSend = async (values) => {
+  const handleSend = async () => {
     if (recipients.to.length === 0) {
-      message.error("Mohon tambahkan minimal satu penerima");
+      message.error("Tambahkan penerima");
       return;
     }
-
     try {
-      // ✅ FIXED: Use the safe attachment ID extractor
-      const attachmentIds = extractAttachmentIds(attachments);
-
+      await form.validateFields();
+      const values = form.getFieldsValue();
       const payload = {
         ...values,
         content: messageContent,
@@ -209,13 +444,10 @@ const ComposeModal = ({
           cc: recipients.cc.map((r) => r.value),
           bcc: recipients.bcc.map((r) => r.value),
         },
-        attachments: attachmentIds,
+        attachments: extractAttachmentIds(attachments),
         type: "personal",
         originalEmailId: originalEmail?.id,
       };
-
-      debugUploadState.logFormSubmit(payload);
-
       if (mode === "reply") {
         await replyToEmail.mutateAsync({
           originalEmailId: originalEmail?.id,
@@ -224,24 +456,19 @@ const ComposeModal = ({
       } else {
         await sendEmail.mutateAsync(payload);
       }
-
-      message.success("Email berhasil dikirim!");
+      message.success("Terkirim");
       handleClose();
       onSent?.();
     } catch (error) {
-      console.error("Send email error:", error);
-      message.error("Gagal mengirim email");
+      if (error?.errorFields) return;
+      message.error("Gagal");
     }
   };
 
   const handleSaveDraft = async () => {
     const values = form.getFieldsValue();
-
     try {
-      // ✅ FIXED: Use the safe attachment ID extractor
-      const attachmentIds = extractAttachmentIds(attachments);
-
-      const payload = {
+      await saveDraft.mutateAsync({
         id: originalEmail?.id || null,
         ...values,
         content: messageContent,
@@ -250,437 +477,132 @@ const ComposeModal = ({
           cc: recipients.cc.map((r) => r.value),
           bcc: recipients.bcc.map((r) => r.value),
         },
-        attachments: attachmentIds,
-      };
-
-      debugUploadState.logFormSubmit(payload);
-
-      await saveDraft.mutateAsync(payload);
-      onClose?.();
+        attachments: extractAttachmentIds(attachments),
+      });
       message.success("Draft tersimpan");
-    } catch (error) {
-      console.error("Save draft error:", error);
-      message.error("Gagal menyimpan draft");
+      onClose?.();
+    } catch {
+      message.error("Gagal");
     }
   };
 
-  // ✅ FIXED: Handle close dengan reset yang lebih robust
   const handleClose = () => {
-    console.group("📎 COMPOSE_MODAL - Closing and Resetting");
-    console.log("Resetting attachments from:", attachments.length);
-    console.groupEnd();
-
     form.resetFields();
     setRecipients({ to: [], cc: [], bcc: [] });
-    setAttachments([]); // ✅ Force reset to empty array
+    setAttachments([]);
     setMessageContent("");
-    setActiveTab("compose");
     setShowCc(false);
     setShowBcc(false);
-    setIsMarkdown(false);
     onClose?.();
   };
 
-  // Modern modal title with status indicators
-  const modalTitle = (
-    <div style={{ padding: "0 4px" }}>
-      {/* Main Title Row */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: "8px",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-          <span style={{ fontSize: "16px", fontWeight: 600, color: "#262626" }}>
-            {title}
-          </span>
-          {mode !== "compose" && (
-            <Badge
-              count={
-                mode === "reply"
-                  ? "Reply"
-                  : mode === "forward"
-                  ? "Forward"
-                  : "Draft"
-              }
-              style={{
-                backgroundColor:
-                  mode === "reply"
-                    ? "#52c41a"
-                    : mode === "forward"
-                    ? "#1677ff"
-                    : "#faad14",
-                fontSize: "10px",
-                fontWeight: 500,
-                borderRadius: "8px",
-              }}
-            />
-          )}
-        </div>
-      </div>
-
-      {/* Attachment Badge Row */}
-      {attachments.length > 0 && (
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <Badge
-            count={attachments.length}
-            style={{
-              backgroundColor: "#1677ff",
-              fontSize: "10px",
-              fontWeight: 500,
-            }}
-          >
-            <span
-              style={{ fontSize: "12px", color: "#8c8c8c", fontWeight: 500 }}
-            >
-              📎 {attachments.length} file terlampir
-            </span>
-          </Badge>
-        </div>
-      )}
-    </div>
-  );
-
-  // Modern compose content with better spacing
-  const composeContent = (
-    <div style={{ padding: "8px 0", minHeight: "50vh" }}>
-      <Card
-        size="small"
-        style={{
-          borderRadius: "12px",
-          border: "1px solid #e8e8e8",
-          boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
-          height: "100%",
-        }}
-        bodyStyle={{
-          padding: "24px",
-          background: "#ffffff",
-          height: "100%",
-          overflow: "visible",
-        }}
-      >
-        <Form
-          form={form}
-          layout="vertical"
-          onFinish={handleSend}
-          initialValues={{
-            priority: "normal",
-          }}
-          style={{ height: "100%" }}
-        >
-          {/* Recipients Section */}
-          <div style={{ marginBottom: "24px" }}>
-            <RecipientSelector
-              recipients={recipients}
-              onChange={setRecipients}
-              showCc={showCc}
-              showBcc={showBcc}
-              onToggleCc={() => setShowCc(true)}
-              onToggleBcc={() => setShowBcc(true)}
-            />
-          </div>
-
-          <Divider style={{ margin: "24px 0", borderColor: "#f0f0f0" }} />
-
-          {/* Subject and Priority Section */}
-          <div style={{ marginBottom: "24px" }}>
-            <Row gutter={16}>
-              <Col xs={24} md={18}>
-                <Form.Item
-                  name="subject"
-                  label={
-                    <span
-                      style={{
-                        fontWeight: 500,
-                        color: "#262626",
-                        fontSize: "14px",
-                      }}
-                    >
-                      Subjek
-                    </span>
-                  }
-                  rules={[
-                    { required: true, message: "Mohon isi subjek email" },
-                  ]}
-                  style={{ marginBottom: 0 }}
-                >
-                  <Input
-                    placeholder="Tulis subjek email..."
-                    size="large"
-                    style={{
-                      borderRadius: "8px",
-                      border: "1px solid #e8e8e8",
-                      fontSize: "15px",
-                    }}
-                  />
-                </Form.Item>
-              </Col>
-              <Col xs={24} md={6}>
-                <Form.Item
-                  name="priority"
-                  label={
-                    <span
-                      style={{
-                        fontWeight: 500,
-                        color: "#262626",
-                        fontSize: "14px",
-                      }}
-                    >
-                      Prioritas
-                    </span>
-                  }
-                  style={{ marginBottom: 0 }}
-                >
-                  <Select size="large" style={{ borderRadius: "8px" }}>
-                    <Select.Option value="low">🟢 Rendah</Select.Option>
-                    <Select.Option value="normal">🟡 Normal</Select.Option>
-                    <Select.Option value="high">🔴 Tinggi</Select.Option>
-                  </Select>
-                </Form.Item>
-              </Col>
-            </Row>
-          </div>
-
-          <Divider style={{ margin: "24px 0", borderColor: "#f0f0f0" }} />
-
-          {/* Message Content Section */}
-          <div style={{ marginBottom: "24px", flex: 1 }}>
-            <div style={{ marginBottom: "12px" }}>
-              <span
-                style={{ fontSize: "14px", fontWeight: 500, color: "#262626" }}
-              >
-                Isi Pesan
-              </span>
-            </div>
-            <EmailEditor
-              content={messageContent}
-              onChange={setMessageContent}
-              isMarkdown={isMarkdown}
-              onToggleMarkdown={setIsMarkdown}
-              rows={10}
-            />
-          </div>
-
-          {/* Attachments Section */}
-          <Divider style={{ margin: "24px 0", borderColor: "#f0f0f0" }} />
-          <div style={{ paddingBottom: "16px" }}>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                marginBottom: "16px",
-              }}
-            >
-              <span
-                style={{ fontSize: "14px", fontWeight: 500, color: "#262626" }}
-              >
-                📎 Lampiran
-              </span>
-              {attachments.length > 0 && (
-                <Badge
-                  count={attachments.length}
-                  style={{
-                    backgroundColor: "#1677ff",
-                    fontSize: "10px",
-                    fontWeight: 500,
-                  }}
-                />
-              )}
-            </div>
-            <AttachmentUploader
-              attachments={attachments}
-              onChange={handleAttachmentsChange}
-              maxFiles={10}
-              maxSize={25}
-              multiple={true}
-              disabled={sendEmail.isLoading || saveDraft.isLoading}
-            />
-          </div>
-        </Form>
-      </Card>
-    </div>
-  );
-
-  // Modern tab items with better icons and styling
-  const tabItems = [
-    {
-      key: "compose",
-      label: (
-        <Space>
-          <span>✍️</span>
-          <span style={{ fontWeight: 500 }}>Tulis</span>
-        </Space>
-      ),
-      children: composeContent,
-    },
-    {
-      key: "preview",
-      label: (
-        <Space>
-          <EyeOutlined />
-          <span style={{ fontWeight: 500 }}>Preview</span>
-        </Space>
-      ),
-      children: (
-        <div
-          style={{
-            padding: "8px 0",
-            minHeight: "50vh",
-            display: "flex",
-            flexDirection: "column",
-          }}
-        >
-          <EmailPreview
-            subject={form.getFieldValue("subject")}
-            recipients={recipients}
-            content={messageContent}
-            attachments={attachments}
-            isMarkdown={isMarkdown}
-          />
-        </div>
-      ),
-    },
-  ];
-
-  // Modern footer buttons
-  const footerButtons = [
-    <Button
-      key="draft"
-      icon={<SaveOutlined />}
-      onClick={handleSaveDraft}
-      loading={saveDraft.isLoading}
-      disabled={sendEmail.isLoading}
-      style={{
-        borderRadius: "8px",
-        height: "36px",
-        fontWeight: 500,
-        border: "1px solid #e8e8e8",
-      }}
-    >
-      Simpan Draft
-    </Button>,
-    <Button
-      key="cancel"
-      onClick={handleClose}
-      disabled={sendEmail.isLoading || saveDraft.isLoading}
-      style={{
-        borderRadius: "8px",
-        height: "36px",
-        fontWeight: 500,
-        border: "1px solid #e8e8e8",
-      }}
-    >
-      Batal
-    </Button>,
-    <Button
-      key="send"
-      type="primary"
-      icon={<SendOutlined />}
-      onClick={() => form.submit()}
-      loading={sendEmail.isLoading}
-      disabled={saveDraft.isLoading}
-      style={{
-        borderRadius: "8px",
-        height: "36px",
-        fontWeight: 500,
-        background: "linear-gradient(135deg, #1677ff 0%, #69c0ff 100%)",
-        border: "none",
-        boxShadow: "0 2px 8px rgba(22, 119, 255, 0.3)",
-      }}
-    >
-      Kirim Email
-    </Button>,
-  ];
+  const icons = {
+    compose: IconMail,
+    reply: IconMailReply,
+    forward: IconMailForward,
+    draft: IconNote,
+  };
+  const TitleIcon = icons[mode] || IconMail;
+  const modeConfig = {
+    reply: { label: "Balas", color: "green" },
+    forward: { label: "Teruskan", color: "blue" },
+    draft: { label: "Draft", color: "orange" },
+  };
 
   return (
     <Modal
-      title={modalTitle}
+      title={
+        <Space size={8}>
+          <TitleIcon size={16} />
+          <span>{title}</span>
+          {mode !== "compose" && modeConfig[mode] && (
+            <Tag color={modeConfig[mode].color}>{modeConfig[mode].label}</Tag>
+          )}
+        </Space>
+      }
       open={visible}
       onCancel={handleClose}
-      width={900}
-      destroyOnClose={true}
+      width={650}
+      destroyOnClose
       maskClosable={false}
-      style={{
-        top: 20,
-        paddingBottom: 20,
-      }}
-      styles={{
-        header: {
-          borderBottom: "1px solid #f0f0f0",
-          paddingBottom: "16px",
-          paddingTop: "16px",
-          background: "#ffffff",
-          borderRadius: "12px 12px 0 0",
-        },
-        body: {
-          padding: "24px",
-          maxHeight: "calc(100vh - 300px)",
-          minHeight: "50vh",
-          overflowY: "auto",
-          background: "#ffffff",
-          // Custom scrollbar styling
-          scrollbarWidth: "thin",
-          scrollbarColor: "#d4d4d4 #f8f8f8",
-        },
-        footer: {
-          borderTop: "1px solid #f0f0f0",
-          paddingTop: "16px",
-          background: "#ffffff",
-          borderRadius: "0 0 12px 12px",
-        },
-        // Custom webkit scrollbar for better browsers
-        content: {
-          borderRadius: "12px",
-          boxShadow: "0 10px 40px rgba(0, 0, 0, 0.15)",
-        },
-      }}
-      footer={footerButtons}
+      footer={
+        <Space>
+          <Button
+            size="small"
+            onClick={handleSaveDraft}
+            loading={saveDraft.isLoading}
+          >
+            Draft
+          </Button>
+          <Button size="small" onClick={handleClose}>
+            Batal
+          </Button>
+          <Button
+            size="small"
+            type="primary"
+            onClick={handleSend}
+            loading={sendEmail.isLoading}
+          >
+            Kirim
+          </Button>
+        </Space>
+      }
     >
-      <style jsx>{`
-        .ant-modal-body::-webkit-scrollbar {
-          width: 8px;
-        }
-        .ant-modal-body::-webkit-scrollbar-track {
-          background: #f8f8f8;
-          border-radius: 4px;
-        }
-        .ant-modal-body::-webkit-scrollbar-thumb {
-          background: #d4d4d4;
-          border-radius: 4px;
-          transition: background 0.2s ease;
-        }
-        .ant-modal-body::-webkit-scrollbar-thumb:hover {
-          background: #b8b8b8;
-        }
-        .ant-modal-body {
-          scroll-behavior: smooth;
-        }
-      `}</style>
-      <Tabs
-        activeKey={activeTab}
-        onChange={setActiveTab}
-        items={tabItems}
-        style={{
-          background: "#ffffff",
-          borderRadius: "12px",
-          padding: "0",
-          border: "none",
-          minHeight: "calc(60vh - 100px)",
-        }}
-        tabBarStyle={{
-          borderBottom: "1px solid #f0f0f0",
-          marginBottom: "0",
-          paddingBottom: "12px",
-          paddingLeft: "4px",
-          paddingRight: "4px",
-          background: "#ffffff",
-          borderRadius: "12px 12px 0 0",
-        }}
-      />
+      <Stack gap="sm">
+        <RecipientSelector
+          recipients={recipients}
+          onChange={setRecipients}
+          showCc={showCc}
+          showBcc={showBcc}
+          onToggleCc={() => setShowCc(true)}
+          onToggleBcc={() => setShowBcc(true)}
+        />
+        <Form
+          form={form}
+          layout="vertical"
+          size="small"
+          initialValues={{ priority: "normal" }}
+        >
+          <div style={{ display: "flex", gap: 8 }}>
+            <Form.Item
+              name="subject"
+              label="Subjek"
+              rules={[{ required: true, message: "Wajib" }]}
+              style={{ marginBottom: 8, flex: 1 }}
+            >
+              <Input placeholder="Subjek" />
+            </Form.Item>
+            <Form.Item
+              name="priority"
+              label="Prioritas"
+              style={{ marginBottom: 8, width: 100 }}
+            >
+              <Select>
+                <Select.Option value="low">Rendah</Select.Option>
+                <Select.Option value="normal">Normal</Select.Option>
+                <Select.Option value="high">Tinggi</Select.Option>
+              </Select>
+            </Form.Item>
+          </div>
+        </Form>
+        <div>
+          <Text size="xs" fw={500} mb={4}>
+            Pesan
+          </Text>
+          <SimpleMarkdownEditor
+            value={messageContent}
+            onChange={setMessageContent}
+            placeholder="Tulis pesan... (mendukung markdown)"
+            rows={8}
+          />
+        </div>
+        <AttachmentUploader
+          attachments={attachments}
+          onChange={setAttachments}
+          maxFiles={10}
+          maxSize={25}
+        />
+      </Stack>
     </Modal>
   );
 };

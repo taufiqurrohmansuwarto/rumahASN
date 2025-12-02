@@ -1,9 +1,7 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
-import { Select, Button, Space, Avatar, Typography } from "antd";
-import { UserAddOutlined, UserOutlined } from "@ant-design/icons";
 import { searchUsers } from "@/services/rasn-mail.services";
-
-const { Text } = Typography;
+import { Group, Stack, Text } from "@mantine/core";
+import { Select } from "antd";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 const RecipientSelector = ({
   recipients,
@@ -14,174 +12,129 @@ const RecipientSelector = ({
   onToggleBcc,
 }) => {
   const [userSearchResults, setUserSearchResults] = useState([]);
-  const [isSearchingUsers, setIsSearchingUsers] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
   const debounceRef = useRef(null);
 
-  const debouncedUserSearch = useCallback(async (searchText) => {
-    if (debounceRef.current) {
-      clearTimeout(debounceRef.current);
-    }
+  const debouncedSearch = useCallback(async (text) => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
 
     debounceRef.current = setTimeout(async () => {
-      if (!searchText || searchText.length < 2) {
+      if (!text || text.length < 2) {
         setUserSearchResults([]);
-        setIsSearchingUsers(false);
+        setIsSearching(false);
         return;
       }
 
-      setIsSearchingUsers(true);
+      setIsSearching(true);
       try {
-        const response = await searchUsers(searchText);
+        const response = await searchUsers(text);
         if (response.success) {
-          const formattedUsers = response.data.map((user) => ({
-            label: user.username,
-            value: user.id,
-            user: user,
-          }));
-          setUserSearchResults(formattedUsers);
+          setUserSearchResults(
+            response.data.map((u) => ({
+              label: u.username,
+              value: u.id,
+              user: u,
+            }))
+          );
         }
-      } catch (error) {
-        console.error("Search users error:", error);
+      } catch {
+        // ignore
       } finally {
-        setIsSearchingUsers(false);
+        setIsSearching(false);
       }
     }, 300);
   }, []);
 
-  useEffect(() => {
-    return () => {
-      if (debounceRef.current) {
-        clearTimeout(debounceRef.current);
-      }
-    };
-  }, []);
-
-  const handleUserSearch = (searchText) => {
-    debouncedUserSearch(searchText);
-  };
-
-  const handleRecipientChange = (type, selectedOptions) => {
-    onChange({
-      ...recipients,
-      [type]: selectedOptions || [],
-    });
-  };
-
-  const renderUserOption = (user) => (
-    <div style={{ display: "flex", alignItems: "center", padding: "4px 0" }}>
-      <Avatar
-        src={user.user?.image}
-        size="small"
-        icon={<UserOutlined />}
-        style={{ marginRight: "8px" }}
-      />
-      <div style={{ flex: 1 }}>
-        <div style={{ fontWeight: "500" }}>{user.user?.username}</div>
-        <div style={{ fontSize: "12px", color: "#666" }}>
-          {user.user?.org_id || "No Organization"}
-        </div>
-      </div>
-    </div>
+  useEffect(
+    () => () => debounceRef.current && clearTimeout(debounceRef.current),
+    []
   );
+
+  const handleChange = (type, options) => {
+    onChange({ ...recipients, [type]: options || [] });
+  };
 
   const selectProps = {
     mode: "multiple",
-    onSearch: handleUserSearch,
-    loading: isSearchingUsers,
+    labelInValue: true,
+    onSearch: debouncedSearch,
+    loading: isSearching,
     showSearch: true,
     filterOption: false,
-    notFoundContent: isSearchingUsers
-      ? "Mencari pengguna..."
-      : userSearchResults.length === 0
-      ? "Ketik minimal 2 karakter untuk mencari"
-      : "Tidak ada pengguna ditemukan",
+    notFoundContent: isSearching ? "Mencari..." : "Ketik 2+ karakter",
     style: { width: "100%" },
+    size: "small",
     optionLabelProp: "label",
-    children: userSearchResults.map((user) => (
-      <Select.Option
-        key={user.value}
-        value={user.value}
-        label={user.label}
-      >
-        {renderUserOption(user)}
-      </Select.Option>
-    )),
+    options: userSearchResults.map((u) => ({
+      label: u.label,
+      value: u.value,
+    })),
   };
 
   return (
-    <div
-      style={{
-        border: "1px solid #d9d9d9",
-        borderRadius: "6px",
-        padding: "16px",
-        marginBottom: "16px",
-        backgroundColor: "#fafafa",
-      }}
-    >
-      {/* To Field */}
-      <div style={{ marginBottom: "12px" }}>
-        <Text strong style={{ marginBottom: "8px", display: "block" }}>
-          Kepada *
-        </Text>
-        <Select
-          {...selectProps}
-          placeholder="Ketik nama pengguna untuk mencari..."
-          value={recipients.to}
-          onChange={(value, options) =>
-            handleRecipientChange("to", options)
-          }
-          suffixIcon={<UserAddOutlined />}
-        />
-      </div>
+    <Stack gap={6}>
+      <Group align="flex-end" gap="xs">
+        <div style={{ flex: 1 }}>
+          <Text size="xs" fw={500} mb={2}>
+            Kepada
+          </Text>
+          <Select
+            {...selectProps}
+            placeholder="Cari..."
+            value={recipients.to}
+            onChange={(val) => handleChange("to", val)}
+          />
+        </div>
+        {!showCc && (
+          <Text
+            size="xs"
+            c="blue"
+            style={{ cursor: "pointer" }}
+            onClick={onToggleCc}
+          >
+            +CC
+          </Text>
+        )}
+        {!showBcc && (
+          <Text
+            size="xs"
+            c="blue"
+            style={{ cursor: "pointer" }}
+            onClick={onToggleBcc}
+          >
+            +BCC
+          </Text>
+        )}
+      </Group>
 
-      {/* CC Field */}
       {showCc && (
-        <div style={{ marginBottom: "12px" }}>
-          <Text strong style={{ marginBottom: "8px", display: "block" }}>
+        <div>
+          <Text size="xs" fw={500} mb={2}>
             CC
           </Text>
           <Select
             {...selectProps}
-            placeholder="Ketik nama pengguna untuk menambah CC..."
+            placeholder="CC..."
             value={recipients.cc}
-            onChange={(value, options) =>
-              handleRecipientChange("cc", options)
-            }
+            onChange={(val) => handleChange("cc", val)}
           />
         </div>
       )}
 
-      {/* BCC Field */}
       {showBcc && (
-        <div style={{ marginBottom: "12px" }}>
-          <Text strong style={{ marginBottom: "8px", display: "block" }}>
+        <div>
+          <Text size="xs" fw={500} mb={2}>
             BCC
           </Text>
           <Select
             {...selectProps}
-            placeholder="Ketik nama pengguna untuk menambah BCC..."
+            placeholder="BCC..."
             value={recipients.bcc}
-            onChange={(value, options) =>
-              handleRecipientChange("bcc", options)
-            }
+            onChange={(val) => handleChange("bcc", val)}
           />
         </div>
       )}
-
-      {/* CC/BCC Toggle Buttons */}
-      <Space style={{ marginTop: "8px" }}>
-        {!showCc && (
-          <Button type="link" size="small" onClick={onToggleCc}>
-            + CC
-          </Button>
-        )}
-        {!showBcc && (
-          <Button type="link" size="small" onClick={onToggleBcc}>
-            + BCC
-          </Button>
-        )}
-      </Space>
-    </div>
+    </Stack>
   );
 };
 

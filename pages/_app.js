@@ -82,7 +82,7 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }) {
 
   const getThemeConfig = () => {
     if (router.pathname.includes("/mail")) {
-      return gmailConfig;
+      return antdConfig;
     } else if (router.pathname.includes("/layanan-keuangan")) {
       return layananKeuanganConfig;
     } else if (router.pathname.includes("/logs")) {

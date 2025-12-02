@@ -1,8 +1,9 @@
 import GmailLayout from "@/components/GmailLayout";
 import PageContainer from "@/components/PageContainer";
 import EmailListComponent from "@/components/mail/EmailList/EmailListComponent";
+import { Breadcrumb, Grid } from "antd";
 import Head from "next/head";
-import { Grid } from "antd";
+import Link from "next/link";
 
 const Sent = () => {
   const breakPoint = Grid.useBreakpoint();
@@ -12,9 +13,19 @@ const Sent = () => {
         <title>Rumah ASN - Pesan Terkirim</title>
       </Head>
       <PageContainer
-        childrenContentStyle={{
-          padding: breakPoint.xs ? null : 0,
-        }}
+        title="Terkirim"
+        subTitle="Pesan yang sudah dikirim"
+        breadcrumbRender={() => (
+          <Breadcrumb>
+            <Breadcrumb.Item>
+              <Link href="/feeds">Beranda</Link>
+            </Breadcrumb.Item>
+            <Breadcrumb.Item>
+              <Link href="/mails">Pesan Pribadi</Link>
+            </Breadcrumb.Item>
+            <Breadcrumb.Item>Terkirim</Breadcrumb.Item>
+          </Breadcrumb>
+        )}
       >
         <EmailListComponent folder="sent" />
       </PageContainer>

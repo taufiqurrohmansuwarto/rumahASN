@@ -1,16 +1,10 @@
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
-import { getProfile, sendPrivateMessage } from "@/services/index";
-import {
-  renderMarkdown,
-  stringToNumber,
-  uploadFile,
-} from "@/utils/client-utils";
+import { getProfile } from "@/services/index";
+import { stringToNumber } from "@/utils/client-utils";
 import { Comment } from "@ant-design/compatible";
-import { MailOutlined } from "@ant-design/icons";
-import { Stack } from "@mantine/core";
-import { MarkdownEditor } from "@primer/react/drafts";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { IconMail } from "@tabler/icons-react";
+import { useQuery } from "@tanstack/react-query";
 import {
   Breadcrumb,
   Button,
@@ -19,19 +13,15 @@ import {
   Divider,
   Grid,
   Image,
-  Input,
   List,
-  Modal,
   Rate,
   Row,
   Space,
-  message as messageantd,
 } from "antd";
 import { useSession } from "next-auth/react";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useState } from "react";
 
 import UserProfile from "@/components/Profile/UserProfile";
 import dayjs from "dayjs";
@@ -41,92 +31,26 @@ import UserTickets from "@/components/Ticket/UserTickets";
 dayjs.locale("id");
 dayjs.extend(relativeTime);
 
-const CreateModal = ({ open, onCancel, receiver }) => {
-  const router = useRouter();
-  const queryClient = useQueryClient();
-  const [title, setTitle] = useState();
-  const [message, setMessage] = useState();
-
-  const { mutate: sendMessgae, isLoading } = useMutation(
-    (data) => sendPrivateMessage(data),
-    {
-      onSuccess: () => {
-        onCancel();
-        queryClient.invalidateQueries(["private-messages"]);
-        messageantd.success("Pesan berhasil dikirim");
-        router.push("/mails/sent");
-      },
-    }
-  );
-
-  const handleSendMessage = () => {
-    if (!title || !message) return message.error("Judul dan pesan harus diisi");
-    else {
-      const receiverId = receiver?.custom_id;
-      const data = {
-        title,
-        message,
-        receiverId,
-      };
-      sendMessgae(data);
-    }
-  };
-
-  return (
-    <Modal
-      centered
-      onOk={handleSendMessage}
-      width={800}
-      title={`Kirim Pesan ke ${receiver?.username}`}
-      open={open}
-      onCancel={onCancel}
-      confirmLoading={isLoading}
-    >
-      <Stack>
-        <Input
-          value={title}
-          placeholder="Judul"
-          onChange={(e) => setTitle(e?.target?.value)}
-        />
-        <MarkdownEditor
-          value={message}
-          acceptedFileTypes={[
-            "image/*",
-            // word, excel, txt, pdf
-            ".doc",
-            ".docx",
-            ".xls",
-            ".xlsx",
-            ".txt",
-            ".pdf",
-          ]}
-          onChange={setMessage}
-          placeholder="Pesan"
-          onRenderPreview={renderMarkdown}
-          onUploadFile={uploadFile}
-          mentionSuggestions={null}
-        />
-      </Stack>
-    </Modal>
-  );
-};
-
 const DetailInformation = ({ user }) => {
   const router = useRouter();
-  const { data, status } = useSession();
-
-  const [open, setOpen] = useState();
-  const handleCancel = () => setOpen(false);
-  const handleOpen = () => setOpen(true);
+  const { data } = useSession();
 
   const gotoDetailPegawai = () => {
     router.push(`/apps-managements/integrasi/siasn/${user?.employee_number}`);
   };
 
+  // Navigate to compose page with recipient pre-filled
+  const handleSendMessage = () => {
+    const params = new URLSearchParams({
+      to: user?.custom_id,
+      toName: user?.username,
+    });
+    router.push(`/mails/compose?${params.toString()}`);
+  };
+
   if (user?.group !== "GOOGLE") {
     return (
       <div>
-        <CreateModal receiver={user} open={open} onCancel={handleCancel} />
         <Image height={100} src={user?.image} alt="User Photo" />
         <Descriptions layout="vertical">
           <Descriptions.Item label="Nama">{user?.username}</Descriptions.Item>
@@ -151,27 +75,21 @@ const DetailInformation = ({ user }) => {
         </Descriptions>
         <Space>
           {user?.custom_id !== data?.user?.id && (
-            <>
-              <Button
-                onClick={handleOpen}
-                icon={<MailOutlined />}
-                type="primary"
-              >
-                Kirim Pesan
-              </Button>
-            </>
+            <Button
+              onClick={handleSendMessage}
+              icon={<IconMail size={16} />}
+              type="primary"
+            >
+              Kirim Pesan
+            </Button>
           )}
-          <>
-            {(data?.user?.current_role === "admin" ||
-              (data?.user?.current_role === "agent" &&
-                user?.group === "MASTER")) && (
-              <>
-                <Button onClick={gotoDetailPegawai} type="primary">
-                  Data Pegawai
-                </Button>
-              </>
-            )}
-          </>
+          {(data?.user?.current_role === "admin" ||
+            (data?.user?.current_role === "agent" &&
+              user?.group === "MASTER")) && (
+            <Button onClick={gotoDetailPegawai} type="primary">
+              Data Pegawai
+            </Button>
+          )}
         </Space>
         {(user?.current_role === "admin" || user?.current_role === "agent") && (
           <>
