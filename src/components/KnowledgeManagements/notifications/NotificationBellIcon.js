@@ -1,7 +1,13 @@
 import React, { useState } from "react";
 import { Badge, Dropdown, Empty, Button, Typography, Flex, Spin } from "antd";
-import { MessageOutlined, EyeOutlined, SettingOutlined } from "@ant-design/icons";
+import {
+  EyeOutlined,
+  SettingOutlined,
+  MessageOutlined,
+} from "@ant-design/icons";
+import { IconBellRinging } from "@tabler/icons-react";
 import { useRouter } from "next/router";
+import { NOTIFICATION_ATTR } from "@/utils/client-utils";
 import {
   useUnreadNotificationsCount,
   useUserNotifications,
@@ -25,14 +31,15 @@ const NotificationBellIcon = ({
     const checkMobile = () => {
       setIsMobile(window.innerWidth <= 768);
     };
-    
+
     checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
   // Hooks
-  const { data: unreadData, refetch: refetchUnreadCount } = useUnreadNotificationsCount();
+  const { data: unreadData, refetch: refetchUnreadCount } =
+    useUnreadNotificationsCount();
   const { data: recentNotifications, isLoading } = useUserNotifications({
     page: 1,
     limit: 5, // Only show 5 recent in dropdown
@@ -52,26 +59,28 @@ const NotificationBellIcon = ({
         console.error("Failed to mark as read:", error);
       }
     }
-    
+
     // Close dropdown
     setDropdownOpen(false);
-    
+
     // Navigate to notifications page with specific filter if needed
     if (notification.content_id) {
-      router.push(`/asn-connect/asn-knowledge/my-knowledge/notifications?content_id=${notification.content_id}`);
+      router.push(
+        `/asn-connect/asn-knowledge/my-knowledge/notifications?content_id=${notification.content_id}`
+      );
     } else {
-      router.push('/asn-connect/asn-knowledge/my-knowledge/notifications');
+      router.push("/asn-connect/asn-knowledge/my-knowledge/notifications");
     }
   };
 
   const handleSeeAllClick = () => {
     setDropdownOpen(false);
-    router.push('/asn-connect/asn-knowledge/my-knowledge/notifications');
+    router.push("/asn-connect/asn-knowledge/my-knowledge/notifications");
   };
 
   const renderNotificationItem = (notification) => {
     const { id, type, title, message, is_read, timeAgo } = notification;
-    
+
     return (
       <div
         key={id}
@@ -90,7 +99,11 @@ const NotificationBellIcon = ({
 
           {/* Content */}
           <div style={{ flex: 1, minWidth: 0 }}>
-            <Flex justify="space-between" align="flex-start" style={{ marginBottom: "4px" }}>
+            <Flex
+              justify="space-between"
+              align="flex-start"
+              style={{ marginBottom: "4px" }}
+            >
               <Text
                 strong={!is_read}
                 style={{
@@ -150,16 +163,18 @@ const NotificationBellIcon = ({
   const renderDropdownContent = () => {
     if (isLoading) {
       return (
-        <div 
-          style={{ 
-            padding: isMobile ? "16px" : "20px", 
-            textAlign: "center", 
+        <div
+          style={{
+            padding: isMobile ? "16px" : "20px",
+            textAlign: "center",
             width: isMobile ? "280px" : "350px",
-            backgroundColor: "white"
+            backgroundColor: "white",
           }}
         >
           <Spin size="small" />
-          <Text style={{ color: "#8c8c8c", fontSize: "12px", marginLeft: "8px" }}>
+          <Text
+            style={{ color: "#8c8c8c", fontSize: "12px", marginLeft: "8px" }}
+          >
             Memuat notifikasi...
           </Text>
         </div>
@@ -168,15 +183,17 @@ const NotificationBellIcon = ({
 
     if (notifications.length === 0) {
       return (
-        <div 
-          style={{ 
-            padding: isMobile ? "16px" : "20px", 
+        <div
+          style={{
+            padding: isMobile ? "16px" : "20px",
             width: isMobile ? "280px" : "350px",
-            backgroundColor: "white"
+            backgroundColor: "white",
           }}
         >
           <Empty
-            image={<MessageOutlined style={{ fontSize: "32px", color: "#d9d9d9" }} />}
+            image={
+              <MessageOutlined style={{ fontSize: "32px", color: "#d9d9d9" }} />
+            }
             style={{ height: "50px" }}
             description={
               <Text style={{ color: "#8c8c8c", fontSize: "13px" }}>
@@ -189,28 +206,31 @@ const NotificationBellIcon = ({
     }
 
     return (
-      <div 
-        style={{ 
-          width: isMobile ? "280px" : "350px", 
-          maxHeight: isMobile ? "350px" : "400px", 
+      <div
+        style={{
+          width: isMobile ? "280px" : "350px",
+          maxHeight: isMobile ? "350px" : "400px",
           overflowY: "auto",
-          backgroundColor: "white"
+          backgroundColor: "white",
         }}
       >
         {/* Header */}
-        <div 
-          style={{ 
-            padding: isMobile ? "8px 12px" : "12px 16px", 
-            backgroundColor: "white"
+        <div
+          style={{
+            padding: isMobile ? "8px 12px" : "12px 16px",
+            backgroundColor: "white",
           }}
         >
           <Flex justify="space-between" align="center">
-            <Title level={5} style={{ margin: 0, fontSize: "14px", fontWeight: 600 }}>
+            <Title
+              level={5}
+              style={{ margin: 0, fontSize: "14px", fontWeight: 600 }}
+            >
               Notifikasi
             </Title>
             {unreadCount > 0 && (
-              <Badge 
-                count={unreadCount} 
+              <Badge
+                count={unreadCount}
                 size="small"
                 style={{ backgroundColor: "#FF4500" }}
               />
@@ -219,19 +239,21 @@ const NotificationBellIcon = ({
         </div>
 
         {/* Recent Notifications */}
-        <div style={{ 
-          maxHeight: isMobile ? "250px" : "300px", 
-          overflowY: "auto", 
-          backgroundColor: "white" 
-        }}>
+        <div
+          style={{
+            maxHeight: isMobile ? "250px" : "300px",
+            overflowY: "auto",
+            backgroundColor: "white",
+          }}
+        >
           {notifications.map(renderNotificationItem)}
         </div>
 
         {/* Footer Actions */}
-        <div 
-          style={{ 
-            padding: isMobile ? "8px 12px" : "12px 16px", 
-            backgroundColor: "white"
+        <div
+          style={{
+            padding: isMobile ? "8px 12px" : "12px 16px",
+            backgroundColor: "white",
           }}
         >
           <Flex gap="8px">
@@ -256,7 +278,9 @@ const NotificationBellIcon = ({
               icon={<SettingOutlined />}
               onClick={() => {
                 setDropdownOpen(false);
-                router.push('/asn-connect/asn-knowledge/my-knowledge/notifications?settings=true');
+                router.push(
+                  "/asn-connect/asn-knowledge/my-knowledge/notifications?settings=true"
+                );
               }}
               style={{
                 fontSize: isMobile ? "11px" : "12px",
@@ -276,9 +300,9 @@ const NotificationBellIcon = ({
       open={dropdownOpen}
       onOpenChange={setDropdownOpen}
       placement={placement}
-      trigger={['click']}
+      trigger={["click"]}
       menu={{
-        items: [{ key: 'content', label: renderDropdownContent() }]
+        items: [{ key: "content", label: renderDropdownContent() }],
       }}
       overlayStyle={{
         padding: 0,
@@ -294,11 +318,11 @@ const NotificationBellIcon = ({
           ...style,
         }}
       >
-        <Badge 
-          count={unreadCount} 
+        <Badge
+          count={unreadCount}
           size="small"
           offset={[-2, 2]}
-          style={{ 
+          style={{
             backgroundColor: "#FF4500",
             fontSize: "10px",
             minWidth: "16px",
@@ -306,10 +330,11 @@ const NotificationBellIcon = ({
             lineHeight: "16px",
           }}
         >
-          <MessageOutlined
+          <IconBellRinging
+            size={NOTIFICATION_ATTR.size}
+            color={unreadCount > 0 ? "#FF4500" : NOTIFICATION_ATTR.color}
             style={{
-              fontSize: size,
-              color: unreadCount > 0 ? "#FF4500" : "#8c8c8c",
+              cursor: "pointer",
               transition: "color 0.2s ease",
             }}
           />

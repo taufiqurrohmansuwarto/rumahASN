@@ -4,72 +4,62 @@ import {
   clearChatsNotificatoins,
 } from "@/services/index";
 import { formatDateFromNow } from "@/utils/client-utils";
-import { formatDate } from "@/utils/index";
-import { BellOutlined, EyeOutlined, DeleteOutlined } from "@ant-design/icons";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  Alert,
+  IconBell,
+  IconCheck,
+  IconClock,
+  IconInbox,
+  IconMessage,
+  IconQuestionMark,
+  IconStar,
+} from "@tabler/icons-react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Button, Card, List, message } from "antd";
+import {
   Avatar,
-  Button,
-  Card,
-  Col,
+  Badge,
+  Box,
+  Center,
   Flex,
-  FloatButton,
-  Grid,
-  List,
-  Row,
-  Tag,
-  Tooltip,
-  Typography,
-  message,
-} from "antd";
+  Group,
+  Indicator,
+  Stack,
+  Text,
+} from "@mantine/core";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useCallback, useMemo } from "react";
 
-const { useBreakpoint } = Grid;
-const { Text, Title } = Typography;
-
-// Custom hook untuk notification logic
+// Hooks
 const useNotifications = (query) => {
   const queryClient = useQueryClient();
 
   const { data, isLoading, isFetching, error, refetch } = useQuery({
     queryKey: ["notifications", query],
-    queryFn: () =>
-      listNotifications({
-        ...query,
-        symbol: "no",
-      }),
-    keepPreviousData: true,
+    queryFn: () => listNotifications({ ...query, symbol: "no" }),
     enabled: !!query,
-    retry: 2,
+    staleTime: 30000,
+    cacheTime: 300000,
+    refetchOnWindowFocus: false,
+    keepPreviousData: true,
   });
 
-  const { mutateAsync: removeNotificationMutation, isLoading: isRemoving } =
-    useMutation({
-      mutationFn: (notificationId) => removeNotification(notificationId),
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ["notifications"] });
-        message.success("Notifikasi berhasil ditandai sebagai dibaca");
-      },
-      onError: (error) => {
-        message.error("Gagal menandai notifikasi sebagai dibaca");
-        console.error("Remove notification error:", error);
-      },
-    });
-
-  const { mutate: clearAllNotifications, isLoading: isClearing } = useMutation({
-    mutationFn: () => clearChatsNotificatoins(),
+  const { mutateAsync: markAsRead, isLoading: isRemoving } = useMutation({
+    mutationFn: removeNotification,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["notifications"] });
-      queryClient.invalidateQueries({ queryKey: ["notifications-total"] });
-      message.success("Berhasil menghapus semua notifikasi");
+      message.success("Berhasil ditandai");
     },
-    onError: (error) => {
-      message.error("Gagal menghapus notifikasi");
-      console.error("Clear notifications error:", error);
+    onError: () => message.error("Terjadi kesalahan"),
+  });
+
+  const { mutate: clearAll, isLoading: isClearing } = useMutation({
+    mutationFn: clearChatsNotificatoins,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      message.success("Berhasil dibersihkan");
     },
+    onError: () => message.error("Terjadi kesalahan"),
   });
 
   return {
@@ -78,156 +68,136 @@ const useNotifications = (query) => {
     isFetching,
     error,
     refetch,
-    removeNotificationMutation,
+    markAsRead,
     isRemoving,
-    clearAllNotifications,
+    clearAll,
     isClearing,
   };
 };
 
-// Custom hook untuk routing logic
-const useNotificationRouting = () => {
+const useRouting = () => {
   const router = useRouter();
+  const handleRoute = useCallback(
+    async (item, role, markAsRead) => {
+      if (!item?.read_at) await markAsRead(item?.id);
+      if (!item?.ticket) return message.warning("Tiket tidak ditemukan");
 
-  const handleRouting = useCallback(
-    async (item, userRole, removeNotification) => {
-      try {
-        const { ticket_id } = item;
-
-        // Mark as read if unread
-        if (item?.read_at === null) {
-          await removeNotification(item?.id);
-        }
-
-        // Handle routing based on ticket status and user role
-        if (item?.ticket === null) {
-          message.warning("Tiket terkait tidak ditemukan");
-          return;
-        }
-
-        if (item?.ticket?.is_published) {
-          router.push(`/customers-tickets/${ticket_id}`);
-        } else {
-          const roleRoutes = {
+      const { ticket_id } = item;
+      const path = item?.ticket?.is_published
+        ? `/customers-tickets/${ticket_id}`
+        : {
             admin: `/customers-tickets/${ticket_id}`,
             user: `/tickets/${ticket_id}/detail`,
             agent: `/agent/tickets/${ticket_id}/detail`,
-          };
-
-          const targetRoute = roleRoutes[userRole];
-          if (targetRoute) {
-            router.push(targetRoute);
-          } else {
-            message.error("Role tidak dikenali");
-          }
-        }
-      } catch (error) {
-        message.error("Gagal membuka notifikasi");
-        console.error("Routing error:", error);
-      }
+          }[role];
+      path && router.push(path);
     },
     [router]
   );
-
-  return { handleRouting };
+  return { handleRoute };
 };
 
-// Komponen untuk item notifikasi
-const NotificationItem = ({ item, onView, isLoading }) => {
-  const screens = useBreakpoint();
-  const isMobile = !screens.md;
+// Get notification type based on content
+const getNotifType = (content) => {
+  const text = content?.toLowerCase() || "";
+  if (text.includes("rating") || text.includes("bintang")) {
+    return { icon: IconStar, color: "#faad14", bg: "#fffbe6", label: "Rating" };
+  }
+  if (text.includes("pertanyaan") || text.includes("bertanya")) {
+    return {
+      icon: IconQuestionMark,
+      color: "#722ed1",
+      bg: "#f9f0ff",
+      label: "Pertanyaan",
+    };
+  }
+  return {
+    icon: IconMessage,
+    color: "#1890ff",
+    bg: "#e6f7ff",
+    label: "Komentar",
+  };
+};
+
+// Notification Item
+const NotifItem = ({ item, onView }) => {
+  const unread = !item?.read_at;
+  const notifType = getNotifType(item?.content);
+  const TypeIcon = notifType.icon;
 
   return (
-    <List.Item
-      style={{
-        opacity: isLoading ? 0.6 : 1,
-        padding: isMobile ? "12px 16px" : "16px 24px",
-        cursor: "pointer",
-        transition: "all 0.3s ease",
-        borderBottom: "1px solid #f0f0f0",
-        backgroundColor: item?.read_at === null ? "#fff7e6" : "#ffffff",
-      }}
+    <Flex
+      gap={10}
+      p={10}
       onClick={() => onView(item)}
-      actions={[
-        <Tooltip key="lihat" title="Lihat Detail">
-          <Button
-            type="text"
-            icon={<EyeOutlined />}
-            onClick={(e) => {
-              e.stopPropagation();
-              onView(item);
-            }}
-            style={{
-              color: "#FF4500",
-              border: "none",
-              padding: "4px 8px",
-            }}
-          />
-        </Tooltip>,
-        <div key="status">
-          {item?.read_at === null && (
-            <Tag
-              color="red"
-              style={{
-                fontSize: isMobile ? "10px" : "11px",
-                padding: isMobile ? "2px 6px" : "4px 8px",
-                borderRadius: "12px",
-                fontWeight: 500,
-                backgroundColor: "#fff2f0",
-                borderColor: "#ffccc7",
-              }}
-            >
-              🔔 Baru
-            </Tag>
-          )}
-        </div>,
-      ]}
+      align="flex-start"
+      style={{
+        cursor: "pointer",
+        borderRadius: 6,
+        marginBottom: 4,
+        borderLeft: unread
+          ? `3px solid ${notifType.color}`
+          : "3px solid transparent",
+        backgroundColor: unread ? notifType.bg : "transparent",
+      }}
+      className="notif-item"
     >
-      <List.Item.Meta
-        avatar={
-          <Avatar
-            src={item?.from_user?.image}
-            size={isMobile ? 40 : 48}
-            style={{ backgroundColor: "#FF4500" }}
-            icon={<BellOutlined />}
-          />
-        }
-        title={
-          <Flex vertical gap={4}>
-            <Text
-              strong={item?.read_at === null}
-              style={{
-                fontSize: isMobile ? "14px" : "16px",
-                color: item?.read_at === null ? "#FF4500" : "#1a1a1a",
-                lineHeight: 1.4,
-              }}
-            >
-              {item?.from_user?.username} {item?.content}
-            </Text>
-            <Text
-              type="secondary"
-              style={{
-                fontSize: isMobile ? "11px" : "12px",
-                color: "#999",
-              }}
-            >
-              <Tooltip title={formatDate(item?.created_at)}>
-                📅 {formatDateFromNow(item?.created_at)}
-              </Tooltip>
-            </Text>
-          </Flex>
-        }
-      />
-    </List.Item>
+      <Box pos="relative">
+        <Avatar
+          src={item?.from_user?.image}
+          size={34}
+          radius="xl"
+          color="gray"
+          style={{
+            border: "2px solid #fff",
+            boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
+          }}
+        >
+          {item?.from_user?.username?.[0]?.toUpperCase()}
+        </Avatar>
+        <Box
+          style={{
+            position: "absolute",
+            bottom: -2,
+            right: -2,
+            backgroundColor: notifType.color,
+            borderRadius: "50%",
+            width: 16,
+            height: 16,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            border: "2px solid #fff",
+          }}
+        >
+          <TypeIcon size={9} color="#fff" />
+        </Box>
+      </Box>
+      <Box style={{ flex: 1, minWidth: 0 }}>
+        <Group gap={6} wrap="nowrap" mb={2}>
+          <Text size="xs" fw={unread ? 600 : 400} truncate>
+            {item?.from_user?.username}
+          </Text>
+          <Text size="10px" c="dimmed" ml="auto" style={{ flexShrink: 0 }}>
+            <IconClock
+              size={10}
+              style={{ marginRight: 2, verticalAlign: "middle" }}
+            />
+            {formatDateFromNow(item?.created_at)}
+          </Text>
+        </Group>
+        <Text size="xs" c={unread ? "dark" : "dimmed"} lineClamp={1}>
+          {item?.content}
+        </Text>
+      </Box>
+    </Flex>
   );
 };
 
 function ListNotifications() {
-  const { data: userData, status } = useSession();
+  const { data: session, status } = useSession();
   const router = useRouter();
   const query = router?.query;
-  const screens = useBreakpoint();
-  const isMobile = !screens.md;
 
   const {
     data,
@@ -235,381 +205,122 @@ function ListNotifications() {
     isFetching,
     error,
     refetch,
-    removeNotificationMutation,
+    markAsRead,
     isRemoving,
-    clearAllNotifications,
+    clearAll,
     isClearing,
   } = useNotifications(query);
+  const { handleRoute } = useRouting();
 
-  const { handleRouting } = useNotificationRouting();
+  const onView = useCallback(
+    (item) => handleRoute(item, session?.user?.current_role, markAsRead),
+    [handleRoute, session?.user?.current_role, markAsRead]
+  );
 
-  const handlePageChange = useCallback(
-    (page) => {
+  const onPageChange = useCallback(
+    (page, limit) =>
       router.push({
         pathname: router.pathname,
-        query: {
-          ...router.query,
-          page,
-        },
-      });
-    },
+        query: { ...router.query, page, limit },
+      }),
     [router]
   );
 
-  const handleNotificationView = useCallback(
-    async (item) => {
-      await handleRouting(
-        item,
-        userData?.user?.current_role,
-        removeNotificationMutation
-      );
-    },
-    [handleRouting, userData?.user?.current_role, removeNotificationMutation]
-  );
+  const stats = useMemo(() => {
+    const r = data?.results || [];
+    const unread = r.filter((i) => !i?.read_at).length;
+    return { total: data?.total || 0, unread };
+  }, [data]);
 
-  const handleClearAllNotifications = useCallback(() => {
-    clearAllNotifications();
-  }, [clearAllNotifications]);
-
-  const paginationConfig = useMemo(
-    () => ({
-      showSizeChanger: !isMobile,
-      size: isMobile ? "small" : "default",
-      position: "both",
-      onChange: handlePageChange,
-      current: parseInt(query?.page) || 1,
-      pageSize: parseInt(query?.limit) || 50,
-      total: data?.total || 0,
-      showTotal: (total, range) => (
-        <Text style={{ color: "#666", fontSize: isMobile ? "11px" : "14px" }}>
-          {isMobile ? (
-            `${range[0]}-${range[1]} / ${total.toLocaleString()}`
-          ) : (
-            <>
-              Menampilkan{" "}
-              <Text strong style={{ color: "#FF4500" }}>
-                {range[0]}-{range[1]}
-              </Text>{" "}
-              dari{" "}
-              <Text strong style={{ color: "#FF4500" }}>
-                {total.toLocaleString()}
-              </Text>{" "}
-              notifikasi
-            </>
-          )}
-        </Text>
-      ),
-      simple: isMobile,
-      responsive: true,
-    }),
-    [query, data?.total, handlePageChange, isMobile]
-  );
-
-  const isLoadingState =
+  const loading =
     isLoading || status === "loading" || isFetching || isRemoving || isClearing;
-
-  // Stats untuk notifikasi
-  const unreadCount =
-    data?.results?.filter((item) => item?.read_at === null).length || 0;
-  const readCount = (data?.results?.length || 0) - unreadCount;
 
   if (error) {
     return (
-      <Card
-        style={{
-          borderRadius: isMobile ? "8px" : "12px",
-          border: "1px solid #e8e8e8",
-        }}
-      >
-        <Alert
-          message="Gagal memuat notifikasi"
-          description="Terjadi kesalahan saat memuat data notifikasi. Silakan coba lagi."
-          type="error"
-          action={
-            <Button
-              onClick={() => refetch()}
-              style={{ borderColor: "#FF4500", color: "#FF4500" }}
-            >
-              Coba Lagi
+      <Card size="small">
+        <Center p="md">
+          <Stack align="center" gap={6}>
+            <Text size="xs" c="red">
+              Gagal memuat data
+            </Text>
+            <Button size="small" onClick={refetch}>
+              Muat Ulang
             </Button>
-          }
-          showIcon
-        />
+          </Stack>
+        </Center>
       </Card>
     );
   }
 
   return (
-    <div>
-      {/* Header */}
-      <Card
-        style={{
-          marginBottom: isMobile ? "12px" : "20px",
-          borderRadius: isMobile ? "8px" : "12px",
-          border: "1px solid #e8e8e8",
-        }}
-      >
-        <Flex align="center" gap={isMobile ? 12 : 16} wrap>
-          <div
-            style={{
-              width: isMobile ? "40px" : "48px",
-              height: isMobile ? "40px" : "48px",
-              backgroundColor: "#FF4500",
-              borderRadius: isMobile ? "8px" : "12px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <BellOutlined
-              style={{
-                color: "white",
-                fontSize: isMobile ? "16px" : "20px",
-              }}
-            />
-          </div>
-          <div style={{ flex: 1 }}>
-            <Title
-              level={isMobile ? 4 : 3}
-              style={{ margin: 0, color: "#1a1a1a" }}
-            >
-              🔔 Notifikasi
-            </Title>
-            <Text
-              type="secondary"
-              style={{ fontSize: isMobile ? "12px" : "14px" }}
-            >
-              Daftar notifikasi dan pemberitahuan sistem
+    <Card
+      size="small"
+      title={
+        <Flex justify="space-between" align="center">
+          <Group gap={8}>
+            <IconBell size={16} color="#1890ff" />
+            <Text size="xs" fw={600}>
+              Notifikasi
             </Text>
-          </div>
-          <Flex align="center" gap={8}>
-            {data?.total > 0 && (
-              <Tag
-                color="orange"
-                style={{
-                  borderRadius: "12px",
-                  fontSize: isMobile ? "10px" : "12px",
-                  padding: "4px 12px",
-                  fontWeight: 500,
-                }}
-              >
-                {data.total} Total
-              </Tag>
+            {stats.unread > 0 && (
+              <Badge size="xs" color="blue" variant="light" radius="sm">
+                {stats.unread} belum dibaca
+              </Badge>
             )}
-            {data?.total > 0 && (
-              <Button
-                type="text"
-                danger
-                icon={<DeleteOutlined />}
-                onClick={handleClearAllNotifications}
-                loading={isClearing}
-                style={{
-                  fontSize: isMobile ? "11px" : "12px",
-                  padding: isMobile ? "4px 8px" : "6px 12px",
-                  height: "auto",
-                }}
-              >
-                {!isMobile && "Hapus Semua"}
-              </Button>
-            )}
-          </Flex>
+          </Group>
+          {stats.total > 0 && (
+            <Button
+              type="default"
+              size="small"
+              icon={<IconCheck size={14} />}
+              onClick={clearAll}
+              loading={isClearing}
+            >
+              Tandai Dibaca
+            </Button>
+          )}
         </Flex>
-      </Card>
-
-      {/* Stats Card */}
-      {data && data?.results?.length > 0 && (
-        <Card
-          style={{
-            marginBottom: isMobile ? "12px" : "20px",
-            borderRadius: isMobile ? "8px" : "12px",
-            border: "1px solid #e8e8e8",
+      }
+      styles={{
+        header: { padding: "12px 16px" },
+        body: { padding: "8px 12px" },
+      }}
+    >
+      {data?.results?.length === 0 && !loading ? (
+        <Center py="lg">
+          <Stack align="center" gap={6}>
+            <IconInbox size={28} color="#adb5bd" />
+            <Text size="xs" c="dimmed">
+              Belum ada notifikasi
+            </Text>
+          </Stack>
+        </Center>
+      ) : (
+        <List
+          dataSource={data?.results || []}
+          loading={loading}
+          size="small"
+          split={false}
+          pagination={{
+            current: parseInt(query?.page) || 1,
+            pageSize: parseInt(query?.limit) || 25,
+            total: data?.total || 0,
+            size: "small",
+            simple: true,
+            onChange: onPageChange,
           }}
-        >
-          <Row gutter={[16, 16]} justify="space-around" align="middle">
-            <Col xs={8} sm={8} md={8}>
-              <Flex vertical align="center">
-                <Text
-                  style={{
-                    fontSize: isMobile ? "18px" : "24px",
-                    fontWeight: 600,
-                    color: "#FF4500",
-                  }}
-                >
-                  {data.total?.toLocaleString()}
-                </Text>
-                <Text
-                  type="secondary"
-                  style={{
-                    fontSize: isMobile ? "10px" : "12px",
-                    textAlign: "center",
-                  }}
-                >
-                  Total
-                </Text>
-              </Flex>
-            </Col>
-            <Col xs={8} sm={8} md={8}>
-              <Flex vertical align="center">
-                <Text
-                  style={{
-                    fontSize: isMobile ? "18px" : "24px",
-                    fontWeight: 600,
-                    color: "#ff4d4f",
-                  }}
-                >
-                  {unreadCount}
-                </Text>
-                <Text
-                  type="secondary"
-                  style={{
-                    fontSize: isMobile ? "10px" : "12px",
-                    textAlign: "center",
-                  }}
-                >
-                  Belum Dibaca
-                </Text>
-              </Flex>
-            </Col>
-            <Col xs={8} sm={8} md={8}>
-              <Flex vertical align="center">
-                <Text
-                  style={{
-                    fontSize: isMobile ? "18px" : "24px",
-                    fontWeight: 600,
-                    color: "#52c41a",
-                  }}
-                >
-                  {readCount}
-                </Text>
-                <Text
-                  type="secondary"
-                  style={{
-                    fontSize: isMobile ? "10px" : "12px",
-                    textAlign: "center",
-                  }}
-                >
-                  Sudah Dibaca
-                </Text>
-              </Flex>
-            </Col>
-          </Row>
-        </Card>
+          renderItem={(item) => (
+            <NotifItem key={item.id} item={item} onView={onView} />
+          )}
+        />
       )}
 
-      {/* Main Content */}
-      <Card
-        style={{
-          borderRadius: isMobile ? "8px" : "12px",
-          border: "1px solid #e8e8e8",
-        }}
-      >
-        <FloatButton.BackTop visibilityHeight={100} />
-
-        {data?.results?.length === 0 && !isLoadingState ? (
-          <Flex
-            vertical
-            align="center"
-            justify="center"
-            style={{
-              padding: "60px 20px",
-              color: "#999",
-            }}
-          >
-            <BellOutlined
-              style={{
-                fontSize: "64px",
-                marginBottom: "16px",
-                color: "#d9d9d9",
-              }}
-            />
-            <Title level={4} style={{ color: "#999", margin: "0 0 8px 0" }}>
-              Tidak ada notifikasi
-            </Title>
-            <Text type="secondary">
-              Belum ada notifikasi yang tersedia saat ini
-            </Text>
-          </Flex>
-        ) : (
-          <List
-            itemLayout="horizontal"
-            dataSource={data?.results || []}
-            loading={isLoadingState}
-            pagination={paginationConfig}
-            renderItem={(item) => (
-              <NotificationItem
-                key={item.id}
-                item={item}
-                onView={handleNotificationView}
-                isLoading={isRemoving}
-              />
-            )}
-            style={{
-              backgroundColor: "transparent",
-            }}
-          />
-        )}
-      </Card>
-
       <style jsx global>{`
-        .ant-list-item:hover {
-          background-color: #fff7e6 !important;
-          transform: translateY(-1px) !important;
-          box-shadow: 0 2px 8px rgba(255, 69, 0, 0.15) !important;
-          transition: all 0.3s ease !important;
-        }
-
-        .ant-pagination-item-active {
-          background: linear-gradient(
-            135deg,
-            #ff4500 0%,
-            #ff6b35 100%
-          ) !important;
-          border-color: #ff4500 !important;
-          box-shadow: 0 2px 4px rgba(255, 69, 0, 0.3) !important;
-        }
-
-        .ant-pagination-item-active a {
-          color: white !important;
-          font-weight: 600 !important;
-        }
-
-        .ant-pagination-item:hover {
-          border-color: #ff4500 !important;
-          transform: translateY(-1px) !important;
-          box-shadow: 0 2px 4px rgba(255, 69, 0, 0.2) !important;
-          transition: all 0.2s ease !important;
-        }
-
-        .ant-pagination-item:hover a {
-          color: #ff4500 !important;
-        }
-
-        .ant-card {
-          transition: all 0.3s ease !important;
-        }
-
-        .ant-card:hover {
-          border-color: #ff4500 !important;
-        }
-
-        .ant-list-item {
-          border-radius: 8px !important;
-          margin-bottom: 4px !important;
-        }
-
-        .ant-avatar {
-          border: 2px solid #fff !important;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
-        }
-
-        @media (max-width: 768px) {
-          .ant-list-pagination {
-            text-align: center !important;
-            margin-top: 16px !important;
-          }
+        .notif-item:hover {
+          background-color: #f8f9fa !important;
         }
       `}</style>
-    </div>
+    </Card>
   );
 }
 

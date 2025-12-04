@@ -1,6 +1,6 @@
 import { listNotifications } from "@/services/index";
 import { NOTIFICATION_ATTR } from "@/utils/client-utils";
-import { IconBell } from "@tabler/icons";
+import { IconMessages } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
 import { Badge, Tooltip } from "antd";
 import { useRouter } from "next/router";
@@ -19,12 +19,13 @@ function NotifikasiForumKepegawaian({ url, title }) {
   };
 
   return (
-    <Badge count={isLoading ? null : data?.count}>
+    <Badge count={isLoading ? null : data?.count} size="small">
       <Tooltip title={title}>
-        <IconBell
+        <IconMessages
           onClick={changePageNotification}
           color={NOTIFICATION_ATTR.color}
           size={NOTIFICATION_ATTR.size}
+          style={{ cursor: "pointer" }}
         />
       </Tooltip>
     </Badge>

@@ -1,7 +1,6 @@
 import { getNotifactionsAsnConnect } from "@/services/notifications.services";
 import { NOTIFICATION_ATTR } from "@/utils/client-utils";
-import { CommentOutlined, LikeOutlined, UserOutlined } from "@ant-design/icons";
-import { IconMessageCircle } from "@tabler/icons";
+import { IconHeartHandshake } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
 import { Badge, Tooltip } from "antd";
 import { useRouter } from "next/router";
@@ -22,12 +21,13 @@ function NotifikasiASNConnect({ url, title }) {
   };
 
   return (
-    <Badge count={data?.total}>
+    <Badge count={data?.total} size="small">
       <Tooltip title={title}>
-        <IconMessageCircle
+        <IconHeartHandshake
           onClick={changePageNotification}
           color={NOTIFICATION_ATTR.color}
           size={NOTIFICATION_ATTR.size}
+          style={{ cursor: "pointer" }}
         />
       </Tooltip>
     </Badge>
