@@ -25,7 +25,9 @@ const getTasks = async (req, res) => {
         const tasks = await KanbanTask.query()
           .where("column_id", column.id)
           .modify("withCounts")
-          .withGraphFetched("[assignee(simpleWithImage), assignees(simpleWithImage), labels]")
+          .withGraphFetched(
+            "[assignee(simpleWithImage), assignees(simpleWithImage), labels]"
+          )
           .orderBy("position", "asc");
 
         return {
@@ -50,7 +52,8 @@ const getTask = async (req, res) => {
 
     const task = await KanbanTask.query()
       .findById(taskId)
-      .withGraphFetched(`[
+      .withGraphFetched(
+        `[
         project(simpleSelect),
         column,
         assignee(simpleWithImage),
@@ -60,8 +63,10 @@ const getTask = async (req, res) => {
         subtasks,
         attachments.[uploader(simpleWithImage)],
         comments.[user(simpleWithImage)],
-        time_entries.[user(simpleWithImage)]
-      ]`)
+        time_entries.[user(simpleWithImage)],
+        activities.[user(simpleWithImage)]
+      ]`
+      )
       .modifiers({
         simpleSelect(builder) {
           builder.select("id", "name", "icon", "color");
@@ -108,7 +113,9 @@ const createTask = async (req, res) => {
     // Check if user is member
     const isMember = await KanbanProjectMember.isMember(projectId, userId);
     if (!isMember) {
-      return res.status(403).json({ message: "Anda tidak memiliki akses untuk membuat task" });
+      return res
+        .status(403)
+        .json({ message: "Anda tidak memiliki akses untuk membuat task" });
     }
 
     if (!title) {
@@ -130,7 +137,8 @@ const createTask = async (req, res) => {
       start_date,
       due_date,
       estimated_hours,
-      assigned_to: assigned_to || (assignee_ids.length === 1 ? assignee_ids[0] : null),
+      assigned_to:
+        assigned_to || (assignee_ids.length === 1 ? assignee_ids[0] : null),
       created_by: userId,
       position: (maxPosition?.max || 0) + 1,
     });
@@ -177,7 +185,9 @@ const createTask = async (req, res) => {
 
     const result = await KanbanTask.query()
       .findById(task.id)
-      .withGraphFetched("[assignee(simpleWithImage), assignees(simpleWithImage), labels]");
+      .withGraphFetched(
+        "[assignee(simpleWithImage), assignees(simpleWithImage), labels]"
+      );
 
     res.json(result);
   } catch (error) {
@@ -210,7 +220,10 @@ const updateTask = async (req, res) => {
     }
 
     // Check permission
-    const isMember = await KanbanProjectMember.isMember(task.project_id, userId);
+    const isMember = await KanbanProjectMember.isMember(
+      task.project_id,
+      userId
+    );
     if (!isMember) {
       return res.status(403).json({ message: "Anda tidak memiliki akses" });
     }
@@ -286,7 +299,9 @@ const updateTask = async (req, res) => {
 
     const result = await KanbanTask.query()
       .findById(taskId)
-      .withGraphFetched("[assignee(simpleWithImage), assignees(simpleWithImage), labels]");
+      .withGraphFetched(
+        "[assignee(simpleWithImage), assignees(simpleWithImage), labels]"
+      );
 
     res.json(result);
   } catch (error) {
@@ -308,9 +323,16 @@ const deleteTask = async (req, res) => {
     }
 
     // Check permission (admin/owner or task creator)
-    const isAdminOrOwner = await KanbanProjectMember.isAdminOrOwner(task.project_id, userId);
+    const isAdminOrOwner = await KanbanProjectMember.isAdminOrOwner(
+      task.project_id,
+      userId
+    );
     if (!isAdminOrOwner && task.created_by !== userId) {
-      return res.status(403).json({ message: "Anda tidak memiliki akses untuk menghapus task ini" });
+      return res
+        .status(403)
+        .json({
+          message: "Anda tidak memiliki akses untuk menghapus task ini",
+        });
     }
 
     await KanbanTask.query().deleteById(taskId);
@@ -336,7 +358,10 @@ const moveTask = async (req, res) => {
     }
 
     // Check permission
-    const isMember = await KanbanProjectMember.isMember(task.project_id, userId);
+    const isMember = await KanbanProjectMember.isMember(
+      task.project_id,
+      userId
+    );
     if (!isMember) {
       return res.status(403).json({ message: "Anda tidak memiliki akses" });
     }
@@ -381,7 +406,9 @@ const getMyTasks = async (req, res) => {
           .where("user_id", userId)
       )
       .whereNull("completed_at")
-      .withGraphFetched("[project(simpleSelect), column, labels, assignees(simpleWithImage)]")
+      .withGraphFetched(
+        "[project(simpleSelect), column, labels, assignees(simpleWithImage)]"
+      )
       .orderBy("due_date", "asc");
 
     if (projectId) {
@@ -430,9 +457,15 @@ const createSubtask = async (req, res) => {
     }
 
     // Check permission
-    const isMember = await KanbanProjectMember.isMember(task.project_id, userId);
-    const canComment = await KanbanProjectWatcher.canComment(task.project_id, userId);
-    
+    const isMember = await KanbanProjectMember.isMember(
+      task.project_id,
+      userId
+    );
+    const canComment = await KanbanProjectWatcher.canComment(
+      task.project_id,
+      userId
+    );
+
     if (!isMember && !canComment) {
       return res.status(403).json({ message: "Anda tidak memiliki akses" });
     }
@@ -496,8 +529,9 @@ const updateSubtask = async (req, res) => {
     const { subtaskId } = req?.query;
     const { title } = req?.body;
 
-    const subtask = await KanbanSubtask.query()
-      .patchAndFetchById(subtaskId, { title });
+    const subtask = await KanbanSubtask.query().patchAndFetchById(subtaskId, {
+      title,
+    });
 
     res.json(subtask);
   } catch (error) {
@@ -557,4 +591,3 @@ module.exports = {
   deleteSubtask,
   reorderSubtasks,
 };
-

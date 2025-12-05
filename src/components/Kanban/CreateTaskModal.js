@@ -53,7 +53,9 @@ function CreateTaskModal({
     }
     if (aiResult.subtasks?.length > 0) {
       setAiSubtasks(aiResult.subtasks);
-      message.success(`${aiResult.subtasks.length} subtask akan ditambahkan setelah task dibuat`);
+      message.success(
+        `${aiResult.subtasks.length} subtask akan ditambahkan setelah task dibuat`
+      );
     }
   };
 
@@ -136,7 +138,11 @@ function CreateTaskModal({
         <Form.Item
           name="title"
           label={
-            <Flex justify="space-between" align="center" style={{ width: "100%" }}>
+            <Flex
+              justify="space-between"
+              align="center"
+              style={{ width: "100%" }}
+            >
               <Space size={4}>
                 <IconClipboardList size={14} color="#fa541c" />
                 <span>Judul Task</span>
@@ -255,8 +261,15 @@ function CreateTaskModal({
             <Select
               mode="multiple"
               allowClear
+              showSearch
               placeholder="Pilih anggota"
               maxTagCount={2}
+              optionFilterProp="label"
+              filterOption={(input, option) =>
+                (option?.label ?? "")
+                  .toLowerCase()
+                  .includes(input.toLowerCase())
+              }
               options={members?.map((m) => ({
                 value: m.user?.custom_id,
                 label: m.user?.username,
@@ -324,7 +337,11 @@ function CreateTaskModal({
               border: "1px dashed #ffd591",
             }}
           >
-            <Flex justify="space-between" align="center" style={{ marginBottom: 8 }}>
+            <Flex
+              justify="space-between"
+              align="center"
+              style={{ marginBottom: 8 }}
+            >
               <Space size={4}>
                 <IconClipboardList size={14} color="#fa541c" />
                 <span style={{ fontSize: 12, fontWeight: 500 }}>
@@ -343,10 +360,16 @@ function CreateTaskModal({
             </Flex>
             <Flex gap={4} wrap="wrap">
               {aiSubtasks.map((subtask, i) => (
-                <Tag key={i} closable onClose={() => {
-                  setAiSubtasks(prev => prev.filter((_, idx) => idx !== i));
-                }}>
-                  {subtask.length > 30 ? subtask.substring(0, 30) + "..." : subtask}
+                <Tag
+                  key={i}
+                  closable
+                  onClose={() => {
+                    setAiSubtasks((prev) => prev.filter((_, idx) => idx !== i));
+                  }}
+                >
+                  {subtask.length > 30
+                    ? subtask.substring(0, 30) + "..."
+                    : subtask}
                 </Tag>
               ))}
             </Flex>

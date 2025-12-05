@@ -1,10 +1,27 @@
-import { useState } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Select, Avatar, Typography, Space, Spin, Flex } from "antd";
 import { IconUser, IconSearch } from "@tabler/icons-react";
 import { searchUsers } from "../../../services/users.services";
 
 const { Text } = Typography;
+
+// Custom hook for debounce
+function useDebounce(value, delay) {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+}
 
 function MemberSelector({
   value,
@@ -15,11 +32,12 @@ function MemberSelector({
   style = {},
 }) {
   const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search, 300);
 
   const { data, isLoading } = useQuery(
-    ["search-users", search],
-    () => searchUsers({ search, limit: 20 }),
-    { enabled: search.length >= 2 }
+    ["search-users", debouncedSearch],
+    () => searchUsers({ search: debouncedSearch, limit: 20 }),
+    { enabled: debouncedSearch.length >= 2 }
   );
 
   const users = data?.filter((u) => !excludeIds.includes(u.custom_id)) || [];
@@ -32,7 +50,9 @@ function MemberSelector({
           {user.username?.charAt(0)?.toUpperCase()}
         </Avatar>
         <div>
-          <Text style={{ fontSize: 13, display: "block" }}>{user.username}</Text>
+          <Text style={{ fontSize: 13, display: "block" }}>
+            {user.username}
+          </Text>
           {user.info?.jabatan?.jabatan && (
             <Text type="secondary" style={{ fontSize: 11 }}>
               {user.info.jabatan.jabatan}

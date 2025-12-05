@@ -32,6 +32,7 @@ import {
   IconClock,
   IconEdit,
   IconCheck,
+  IconHistory,
 } from "@tabler/icons-react";
 import dayjs from "dayjs";
 import {
@@ -47,6 +48,7 @@ import TaskSubtasks from "./TaskSubtasks";
 import TaskComments from "./TaskComments";
 import TaskAttachments from "./TaskAttachments";
 import TaskTimeEntries from "./TaskTimeEntries";
+import TaskActivities from "./TaskActivities";
 
 const { TextArea } = Input;
 const { Text, Title } = Typography;
@@ -171,6 +173,18 @@ function TaskDetailDrawer({ taskId, projectId, open, onClose, members }) {
           estimatedHours={task?.estimated_hours}
           actualHours={task?.actual_hours}
         />
+      ),
+    },
+    {
+      key: "activities",
+      label: (
+        <Space size={4}>
+          <IconHistory size={14} />
+          <span>Aktivitas</span>
+        </Space>
+      ),
+      children: (
+        <TaskActivities taskId={taskId} activities={task?.activities || []} />
       ),
     },
   ];
@@ -340,7 +354,10 @@ function TaskDetailDrawer({ taskId, projectId, open, onClose, members }) {
                       htmlType="submit"
                       loading={isUpdating}
                       icon={<IconCheck size={14} />}
-                      style={{ backgroundColor: "#fa541c", borderColor: "#fa541c" }}
+                      style={{
+                        backgroundColor: "#fa541c",
+                        borderColor: "#fa541c",
+                      }}
                     >
                       Simpan
                     </Button>
@@ -393,7 +410,10 @@ function TaskDetailDrawer({ taskId, projectId, open, onClose, members }) {
                     {/* Priority */}
                     <Flex align="center" gap={8}>
                       <IconFlag size={14} color="#8c8c8c" />
-                      <Text type="secondary" style={{ fontSize: 12, minWidth: 60 }}>
+                      <Text
+                        type="secondary"
+                        style={{ fontSize: 12, minWidth: 60 }}
+                      >
                         Prioritas
                       </Text>
                       <PriorityBadge priority={task?.priority} />
@@ -402,7 +422,10 @@ function TaskDetailDrawer({ taskId, projectId, open, onClose, members }) {
                     {/* Due Date */}
                     <Flex align="center" gap={8}>
                       <IconCalendar size={14} color="#8c8c8c" />
-                      <Text type="secondary" style={{ fontSize: 12, minWidth: 60 }}>
+                      <Text
+                        type="secondary"
+                        style={{ fontSize: 12, minWidth: 60 }}
+                      >
                         Deadline
                       </Text>
                       {task?.due_date ? (
@@ -418,18 +441,25 @@ function TaskDetailDrawer({ taskId, projectId, open, onClose, members }) {
                     </Flex>
 
                     {/* Assignees */}
-                    <Flex align="center" gap={8} style={{ gridColumn: "span 2" }}>
+                    <Flex
+                      align="center"
+                      gap={8}
+                      style={{ gridColumn: "span 2" }}
+                    >
                       <IconUser size={14} color="#8c8c8c" />
-                      <Text type="secondary" style={{ fontSize: 12, minWidth: 60 }}>
+                      <Text
+                        type="secondary"
+                        style={{ fontSize: 12, minWidth: 60 }}
+                      >
                         Ditugaskan
                       </Text>
                       {task?.assignees?.length > 0 ? (
-                        <Avatar.Group
-                          max={{ count: 5 }}
-                          size={24}
-                        >
+                        <Avatar.Group max={{ count: 5 }} size={24}>
                           {task.assignees.map((assignee) => (
-                            <Tooltip key={assignee.custom_id} title={assignee.username}>
+                            <Tooltip
+                              key={assignee.custom_id}
+                              title={assignee.username}
+                            >
                               <Avatar src={assignee.image} size={24}>
                                 {assignee.username?.charAt(0)?.toUpperCase()}
                               </Avatar>

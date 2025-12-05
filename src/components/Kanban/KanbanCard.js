@@ -1,6 +1,11 @@
-import { Card, Avatar, Typography, Tooltip, Flex, Progress } from "antd";
-import { IconPaperclip, IconMessage } from "@tabler/icons-react";
+import { Card, Avatar, Typography, Tooltip, Flex, Progress, Tag } from "antd";
+import {
+  IconPaperclip,
+  IconMessage,
+  IconAlertTriangle,
+} from "@tabler/icons-react";
 import { useDraggable } from "@dnd-kit/core";
+import dayjs from "dayjs";
 import PriorityBadge from "./PriorityBadge";
 import LabelBadge from "./LabelBadge";
 import DueDateBadge from "./DueDateBadge";
@@ -42,6 +47,15 @@ function KanbanCard({ task, index, onClick, isDragging }) {
   // Support multiple assignees
   const assignees = task.assignees || (task.assignee ? [task.assignee] : []);
 
+  // Check if task is overdue (has due_date, not completed, and due_date is past)
+  const isOverdue =
+    task.due_date &&
+    !task.completed_at &&
+    dayjs(task.due_date).isBefore(dayjs(), "day");
+
+  // Calculate days overdue
+  const daysOverdue = isOverdue ? dayjs().diff(dayjs(task.due_date), "day") : 0;
+
   return (
     <div ref={setNodeRef} style={style} {...listeners} {...attributes}>
       <Card
@@ -53,19 +67,45 @@ function KanbanCard({ task, index, onClick, isDragging }) {
           border:
             isDragging || isDraggingNow
               ? "2px solid #fa541c"
+              : isOverdue
+              ? "1px solid #ff4d4f"
               : "1px solid #f0f0f0",
           boxShadow:
             isDragging || isDraggingNow
               ? "0 8px 16px rgba(250, 84, 28, 0.15)"
+              : isOverdue
+              ? "0 2px 8px rgba(255, 77, 79, 0.15)"
               : "0 1px 2px rgba(0,0,0,0.03)",
           cursor: "pointer",
-          backgroundColor: "#fff",
+          backgroundColor: isOverdue ? "#fff2f0" : "#fff",
           transition: "all 0.2s ease",
         }}
         styles={{
           body: { padding: 12 },
         }}
       >
+        {/* Overdue Warning */}
+        {isOverdue && (
+          <Flex
+            gap={6}
+            align="center"
+            style={{
+              marginBottom: 8,
+              padding: "4px 8px",
+              backgroundColor: "#ff4d4f",
+              borderRadius: 4,
+              marginTop: -4,
+              marginLeft: -4,
+              marginRight: -4,
+            }}
+          >
+            <IconAlertTriangle size={12} color="#fff" />
+            <Text style={{ fontSize: 11, color: "#fff", fontWeight: 500 }}>
+              Terlambat {daysOverdue} hari
+            </Text>
+          </Flex>
+        )}
+
         {/* Labels */}
         {task.labels?.length > 0 && (
           <Flex gap={4} wrap="wrap" style={{ marginBottom: 8 }}>

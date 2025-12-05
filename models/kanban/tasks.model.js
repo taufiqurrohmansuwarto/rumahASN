@@ -47,7 +47,9 @@ class KanbanTask extends Model {
             KanbanTask.relatedQuery("comments").count().as("comment_count")
           )
           .select(
-            KanbanTask.relatedQuery("attachments").count().as("attachment_count")
+            KanbanTask.relatedQuery("attachments")
+              .count()
+              .as("attachment_count")
           );
       },
     };
@@ -184,6 +186,9 @@ class KanbanTask extends Model {
 
   // Move task to different column and/or position
   static async moveTask(taskId, { columnId, position, userId }) {
+    const KanbanColumn = require("@/models/kanban/columns.model");
+    const KanbanTaskActivity = require("@/models/kanban/task-activities.model");
+
     const trx = await KanbanTask.startTransaction();
     try {
       const task = await KanbanTask.query(trx).findById(taskId);
@@ -200,15 +205,26 @@ class KanbanTask extends Model {
         })
         .where("id", taskId);
 
-      // Log activity
-      const KanbanTaskActivity = require("@/models/kanban/task-activities.model");
+      // Log activity with column names
       if (oldColumnId !== columnId) {
+        // Get column names for better activity log
+        const [oldColumn, newColumn] = await Promise.all([
+          KanbanColumn.query(trx).findById(oldColumnId).select("name"),
+          KanbanColumn.query(trx).findById(columnId).select("name"),
+        ]);
+
         await KanbanTaskActivity.query(trx).insert({
           task_id: taskId,
           user_id: userId,
           action: "moved",
-          old_value: { column_id: oldColumnId },
-          new_value: { column_id: columnId },
+          old_value: JSON.stringify({
+            column_id: oldColumnId,
+            column_name: oldColumn?.name || "Unknown",
+          }),
+          new_value: JSON.stringify({
+            column_id: columnId,
+            column_name: newColumn?.name || "Unknown",
+          }),
         });
       }
 
@@ -237,6 +253,11 @@ class KanbanTask extends Model {
 
       const oldColumnId = this.column_id;
 
+      // Get old column name
+      const oldColumn = await KanbanColumn.query(trx)
+        .findById(oldColumnId)
+        .select("name");
+
       await this.$query(trx).patch({
         column_id: doneColumn.id,
         completed_at: new Date().toISOString(),
@@ -246,8 +267,14 @@ class KanbanTask extends Model {
         task_id: this.id,
         user_id: userId,
         action: "completed",
-        old_value: { column_id: oldColumnId },
-        new_value: { column_id: doneColumn.id },
+        old_value: JSON.stringify({
+          column_id: oldColumnId,
+          column_name: oldColumn?.name || "Unknown",
+        }),
+        new_value: JSON.stringify({
+          column_id: doneColumn.id,
+          column_name: doneColumn.name,
+        }),
       });
 
       await trx.commit();
@@ -294,4 +321,3 @@ class KanbanTask extends Model {
 }
 
 module.exports = KanbanTask;
-
