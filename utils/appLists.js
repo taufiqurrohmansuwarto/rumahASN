@@ -41,6 +41,16 @@ export const appLists = [
   },
   {
     rightIcon: <IconHome />,
+    title: "Kanban",
+    desc: "Kanban",
+    color: "#1A73E8",
+    url: "/kanban",
+    icon: "https://siasn.bkd.jatimprov.go.id:9000/public/icon-beranda.png",
+    userType: ["asn", "non_asn"],
+    target: "_blank",
+  },
+  {
+    rightIcon: <IconHome />,
     title: "E-Sign BKD",
     desc: "Tanda Tangan Digital BKD",
     color: "#1A73E8",

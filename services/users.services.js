@@ -65,3 +65,13 @@ export const sendFeedbackData = async ({ id, data }) => {
 export const customerDashboard = async () => {
   return await api.get("/dashboard").then((res) => res.data);
 };
+
+// Search users
+const usersApi = axios.create({
+  baseURL: "/helpdesk/api/users",
+});
+
+export const searchUsers = async ({ search, limit = 20 }) => {
+  if (!search || search.length < 2) return [];
+  return usersApi.get(`/search/${search}`).then((res) => res?.data);
+};
