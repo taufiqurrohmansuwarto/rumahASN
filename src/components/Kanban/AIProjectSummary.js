@@ -51,9 +51,11 @@ function AIProjectSummary({ projectId, projectName }) {
     reset();
   };
 
-  const result = data?.data;
+  // data dari mutation sudah berisi response langsung
+  const result = data?.data; // { project_name, generated_at, stats, ai_summary }
   const aiSummary = result?.ai_summary;
   const stats = result?.stats;
+  const generatedAt = result?.generated_at;
 
   return (
     <>
@@ -100,10 +102,8 @@ function AIProjectSummary({ projectId, projectName }) {
         footer={
           <Flex justify="space-between" align="center">
             <Text type="secondary" style={{ fontSize: 11 }}>
-              {result?.generated_at
-                ? `Dibuat: ${dayjs(result.generated_at).format(
-                    "DD MMM YYYY HH:mm"
-                  )}`
+              {generatedAt
+                ? `Dibuat: ${dayjs(generatedAt).format("DD MMM YYYY HH:mm")}`
                 : ""}
             </Text>
             <Button onClick={handleClose}>Tutup</Button>
@@ -196,7 +196,7 @@ function AIProjectSummary({ projectId, projectName }) {
                   <Statistic
                     title={
                       <Text type="secondary" style={{ fontSize: 11 }}>
-                        Overdue
+                        Terlambat
                       </Text>
                     }
                     value={stats?.overdue_count || 0}

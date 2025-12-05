@@ -129,14 +129,14 @@ function ProjectCard({ project }) {
           <Avatar.Group
             size={28}
             max={{
-              count: 3,
+              count: 4,
               style: {
                 backgroundColor: "#fa541c",
                 fontSize: 11,
               },
             }}
           >
-            {project.members?.slice(0, 4).map((member) => (
+            {project.members?.map((member) => (
               <Tooltip key={member.id} title={member.user?.username}>
                 <Avatar src={member.user?.image} size={28}>
                   {member.user?.username?.charAt(0)?.toUpperCase()}

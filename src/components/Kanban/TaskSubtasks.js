@@ -11,7 +11,13 @@ import {
   Empty,
   Spin,
 } from "antd";
-import { IconPlus, IconTrash, IconSubtask, IconCheck, IconSparkles } from "@tabler/icons-react";
+import {
+  IconPlus,
+  IconTrash,
+  IconSubtask,
+  IconCheck,
+  IconSparkles,
+} from "@tabler/icons-react";
 import {
   createSubtask,
   toggleSubtask,
@@ -115,10 +121,14 @@ function TaskSubtasks({ taskId, subtasks }) {
     {
       onSuccess: (result) => {
         invalidate();
-        message.success(`${result?.data?.length || 0} subtask berhasil dibuat dengan AI`);
+        message.success(
+          `${result?.data?.length || 0} subtask berhasil dibuat dengan AI`
+        );
       },
       onError: (error) => {
-        message.error(error?.response?.data?.message || "Gagal generate subtask dengan AI");
+        message.error(
+          error?.response?.data?.message || "Gagal generate subtask dengan AI"
+        );
       },
     }
   );
@@ -129,7 +139,7 @@ function TaskSubtasks({ taskId, subtasks }) {
     totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
 
   return (
-    <div>
+    <div style={{ padding: "12px 16px 24px 16px" }}>
       {/* Progress */}
       {totalCount > 0 && (
         <div
@@ -170,14 +180,21 @@ function TaskSubtasks({ taskId, subtasks }) {
           <IconSubtask size={32} color="#d9d9d9" />
           <Text
             type="secondary"
-            style={{ fontSize: 12, display: "block", marginTop: 8, marginBottom: 12 }}
+            style={{
+              fontSize: 12,
+              display: "block",
+              marginTop: 8,
+              marginBottom: 12,
+            }}
           >
             Belum ada subtask
           </Text>
           <Button
             type="default"
             size="small"
-            icon={isGenerating ? <Spin size="small" /> : <IconSparkles size={14} />}
+            icon={
+              isGenerating ? <Spin size="small" /> : <IconSparkles size={14} />
+            }
             onClick={() => generateWithAI()}
             loading={isGenerating}
             style={{ borderColor: "#fa541c", color: "#fa541c" }}

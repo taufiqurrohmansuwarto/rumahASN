@@ -6,6 +6,7 @@ const KanbanTaskActivity = require("@/models/kanban/task-activities.model");
 const KanbanTimeEntry = require("@/models/kanban/time-entries.model");
 const KanbanProjectMember = require("@/models/kanban/project-members.model");
 const KanbanProjectWatcher = require("@/models/kanban/project-watchers.model");
+const KanbanTaskAssignee = require("@/models/kanban/task-assignees.model");
 
 /**
  * Get project overview/dashboard
@@ -17,19 +18,22 @@ const getProjectOverview = async (req, res) => {
 
     // Check access (member or watcher with can_view_reports)
     const isMember = await KanbanProjectMember.isMember(projectId, userId);
-    const canViewReports = await KanbanProjectWatcher.canViewReports(projectId, userId);
+    const canViewReports = await KanbanProjectWatcher.canViewReports(
+      projectId,
+      userId
+    );
 
     if (!isMember && !canViewReports) {
-      return res.status(403).json({ message: "Anda tidak memiliki akses untuk melihat report" });
+      return res
+        .status(403)
+        .json({ message: "Anda tidak memiliki akses untuk melihat report" });
     }
 
     // Get columns with task count
     const columns = await KanbanColumn.query()
       .where("project_id", projectId)
       .select("kanban.columns.*")
-      .select(
-        KanbanColumn.relatedQuery("tasks").count().as("task_count")
-      )
+      .select(KanbanColumn.relatedQuery("tasks").count().as("task_count"))
       .orderBy("position", "asc");
 
     // Get task statistics
@@ -37,9 +41,15 @@ const getProjectOverview = async (req, res) => {
       .where("project_id", projectId)
       .select(
         KanbanTask.raw("COUNT(*) as total_tasks"),
-        KanbanTask.raw("COUNT(*) FILTER (WHERE completed_at IS NOT NULL) as completed_tasks"),
-        KanbanTask.raw("COUNT(*) FILTER (WHERE due_date < CURRENT_DATE AND completed_at IS NULL) as overdue_tasks"),
-        KanbanTask.raw("COUNT(*) FILTER (WHERE due_date = CURRENT_DATE AND completed_at IS NULL) as due_today"),
+        KanbanTask.raw(
+          "COUNT(*) FILTER (WHERE completed_at IS NOT NULL) as completed_tasks"
+        ),
+        KanbanTask.raw(
+          "COUNT(*) FILTER (WHERE due_date < CURRENT_DATE AND completed_at IS NULL) as overdue_tasks"
+        ),
+        KanbanTask.raw(
+          "COUNT(*) FILTER (WHERE due_date = CURRENT_DATE AND completed_at IS NULL) as due_today"
+        ),
         KanbanTask.raw("SUM(estimated_hours) as total_estimated_hours"),
         KanbanTask.raw("SUM(actual_hours) as total_actual_hours")
       )
@@ -88,7 +98,10 @@ const getMemberReport = async (req, res) => {
 
     // Check access
     const isMember = await KanbanProjectMember.isMember(projectId, userId);
-    const canViewReports = await KanbanProjectWatcher.canViewReports(projectId, userId);
+    const canViewReports = await KanbanProjectWatcher.canViewReports(
+      projectId,
+      userId
+    );
 
     if (!isMember && !canViewReports) {
       return res.status(403).json({ message: "Anda tidak memiliki akses" });
@@ -114,9 +127,14 @@ const getMemberReport = async (req, res) => {
 
     const memberStats = await Promise.all(
       members.map(async (member) => {
+        // Query tasks via task_assignees table for multiple assignees support
         const tasks = await KanbanTask.query()
           .where("project_id", projectId)
-          .where("assigned_to", member.user_id);
+          .whereExists(
+            KanbanTaskAssignee.query()
+              .whereColumn("kanban.task_assignees.task_id", "kanban.tasks.id")
+              .where("kanban.task_assignees.user_id", member.user_id)
+          );
 
         const completedTasks = tasks.filter((t) => t.completed_at !== null);
 
@@ -189,7 +207,10 @@ const getTimeReport = async (req, res) => {
 
     // Check access
     const isMember = await KanbanProjectMember.isMember(projectId, userId);
-    const canViewReports = await KanbanProjectWatcher.canViewReports(projectId, userId);
+    const canViewReports = await KanbanProjectWatcher.canViewReports(
+      projectId,
+      userId
+    );
 
     if (!isMember && !canViewReports) {
       return res.status(403).json({ message: "Anda tidak memiliki akses" });
@@ -303,4 +324,3 @@ module.exports = {
   getTimeReport,
   getBurndownData,
 };
-

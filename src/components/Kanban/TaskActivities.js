@@ -191,16 +191,18 @@ function TaskActivities({ taskId, activities: initialActivities }) {
 
   if (!activities || activities.length === 0) {
     return (
-      <Empty
-        image={<IconHistory size={32} color="#d9d9d9" />}
-        imageStyle={{ height: 32 }}
-        description={
-          <Text type="secondary" style={{ fontSize: 12 }}>
-            Belum ada aktivitas
-          </Text>
-        }
-        style={{ margin: "24px 0" }}
-      />
+      <div style={{ padding: "12px 16px 24px 16px" }}>
+        <Empty
+          image={<IconHistory size={32} color="#d9d9d9" />}
+          imageStyle={{ height: 32 }}
+          description={
+            <Text type="secondary" style={{ fontSize: 12 }}>
+              Belum ada aktivitas
+            </Text>
+          }
+          style={{ margin: "24px 0" }}
+        />
+      </div>
     );
   }
 
@@ -268,7 +270,7 @@ function TaskActivities({ taskId, activities: initialActivities }) {
   });
 
   return (
-    <div style={{ paddingTop: 8 }}>
+    <div style={{ padding: "12px 16px 24px 16px" }}>
       <Timeline items={timelineItems} />
     </div>
   );

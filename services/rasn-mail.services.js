@@ -343,6 +343,19 @@ export const cleanupUnusedFiles = async (days = 7) => {
 };
 
 // ==========================================
+// AI TEXT REFINE FUNCTIONS
+// ==========================================
+
+/**
+ * Refine/polish text using AI
+ * @param {Object} data - { text: string, mode: 'professional' | 'friendly' | 'concise' | 'detailed' }
+ * @returns {Promise} - { original, refined, mode, tokens_used }
+ */
+export const refineText = async (data) => {
+  return api.post("/ai/refine-text", data).then((res) => res?.data);
+};
+
+// ==========================================
 // UPLOAD UTILITY FUNCTIONS
 // ==========================================
 

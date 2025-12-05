@@ -33,6 +33,7 @@ import {
   IconEdit,
   IconCheck,
   IconHistory,
+  IconFileText,
 } from "@tabler/icons-react";
 import dayjs from "dayjs";
 import {
@@ -49,6 +50,9 @@ import TaskComments from "./TaskComments";
 import TaskAttachments from "./TaskAttachments";
 import TaskTimeEntries from "./TaskTimeEntries";
 import TaskActivities from "./TaskActivities";
+import TaskAISummary from "./TaskAISummary";
+import TaskLaporan from "./TaskLaporan";
+import ClickableAvatar, { ClickableAvatarGroup } from "./ClickableAvatar";
 
 const { TextArea } = Input;
 const { Text, Title } = Typography;
@@ -124,10 +128,10 @@ function TaskDetailDrawer({ taskId, projectId, open, onClose, members }) {
     {
       key: "subtasks",
       label: (
-        <Space size={4}>
-          <IconSubtask size={14} />
-          <span>Subtask ({task?.subtasks?.length || 0})</span>
-        </Space>
+        <Flex align="center" gap={4} style={{ fontSize: 12 }}>
+          <IconSubtask size={13} />
+          Subtask ({task?.subtasks?.length || 0})
+        </Flex>
       ),
       children: (
         <TaskSubtasks taskId={taskId} subtasks={task?.subtasks || []} />
@@ -136,20 +140,20 @@ function TaskDetailDrawer({ taskId, projectId, open, onClose, members }) {
     {
       key: "comments",
       label: (
-        <Space size={4}>
-          <IconMessage size={14} />
-          <span>Komentar</span>
-        </Space>
+        <Flex align="center" gap={4} style={{ fontSize: 12 }}>
+          <IconMessage size={13} />
+          Komentar
+        </Flex>
       ),
       children: <TaskComments taskId={taskId} />,
     },
     {
       key: "attachments",
       label: (
-        <Space size={4}>
-          <IconPaperclip size={14} />
-          <span>Lampiran ({task?.attachments?.length || 0})</span>
-        </Space>
+        <Flex align="center" gap={4} style={{ fontSize: 12 }}>
+          <IconPaperclip size={13} />
+          Lampiran ({task?.attachments?.length || 0})
+        </Flex>
       ),
       children: (
         <TaskAttachments
@@ -161,10 +165,10 @@ function TaskDetailDrawer({ taskId, projectId, open, onClose, members }) {
     {
       key: "time",
       label: (
-        <Space size={4}>
-          <IconClock size={14} />
-          <span>Waktu</span>
-        </Space>
+        <Flex align="center" gap={4} style={{ fontSize: 12 }}>
+          <IconClock size={13} />
+          Waktu
+        </Flex>
       ),
       children: (
         <TaskTimeEntries
@@ -178,14 +182,24 @@ function TaskDetailDrawer({ taskId, projectId, open, onClose, members }) {
     {
       key: "activities",
       label: (
-        <Space size={4}>
-          <IconHistory size={14} />
-          <span>Aktivitas</span>
-        </Space>
+        <Flex align="center" gap={4} style={{ fontSize: 12 }}>
+          <IconHistory size={13} />
+          Aktivitas
+        </Flex>
       ),
       children: (
         <TaskActivities taskId={taskId} activities={task?.activities || []} />
       ),
+    },
+    {
+      key: "laporan",
+      label: (
+        <Flex align="center" gap={4} style={{ fontSize: 12 }}>
+          <IconFileText size={13} />
+          Laporan
+        </Flex>
+      ),
+      children: <TaskLaporan task={task} />,
     },
   ];
 
@@ -454,24 +468,18 @@ function TaskDetailDrawer({ taskId, projectId, open, onClose, members }) {
                         Ditugaskan
                       </Text>
                       {task?.assignees?.length > 0 ? (
-                        <Avatar.Group max={{ count: 5 }} size={24}>
-                          {task.assignees.map((assignee) => (
-                            <Tooltip
-                              key={assignee.custom_id}
-                              title={assignee.username}
-                            >
-                              <Avatar src={assignee.image} size={24}>
-                                {assignee.username?.charAt(0)?.toUpperCase()}
-                              </Avatar>
-                            </Tooltip>
-                          ))}
-                        </Avatar.Group>
+                        <ClickableAvatarGroup
+                          users={task.assignees}
+                          maxCount={5}
+                          size={24}
+                          showEmailIcon={true}
+                        />
                       ) : task?.assignee ? (
-                        <Tooltip title={task.assignee.username}>
-                          <Avatar src={task.assignee.image} size={24}>
-                            {task.assignee.username?.charAt(0)?.toUpperCase()}
-                          </Avatar>
-                        </Tooltip>
+                        <ClickableAvatar
+                          user={task.assignee}
+                          size={24}
+                          showEmailIcon={true}
+                        />
                       ) : (
                         <Text type="secondary" style={{ fontSize: 12 }}>
                           Belum ditugaskan
@@ -497,6 +505,9 @@ function TaskDetailDrawer({ taskId, projectId, open, onClose, members }) {
                       </Flex>
                     </Flex>
                   )}
+
+                  {/* AI Summary */}
+                  <TaskAISummary task={task} />
                 </div>
               )}
             </div>
@@ -504,13 +515,46 @@ function TaskDetailDrawer({ taskId, projectId, open, onClose, members }) {
             <Divider style={{ margin: 0 }} />
 
             {/* Tabs */}
-            <Tabs
-              activeKey={activeTab}
-              onChange={setActiveTab}
-              items={tabItems}
-              style={{ padding: "0 16px" }}
-              size="small"
-            />
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                flex: 1,
+                minHeight: 0,
+              }}
+            >
+              <Tabs
+                activeKey={activeTab}
+                onChange={setActiveTab}
+                items={tabItems.map((item) => ({
+                  ...item,
+                  children: (
+                    <div
+                      style={{
+                        maxHeight: "calc(100vh - 380px)",
+                        minHeight: 250,
+                        overflowY: "auto",
+                        overflowX: "hidden",
+                      }}
+                    >
+                      {item.children}
+                    </div>
+                  ),
+                }))}
+                size="small"
+                tabBarStyle={{
+                  margin: 0,
+                  padding: "0 12px",
+                  position: "sticky",
+                  top: 0,
+                  backgroundColor: "#fff",
+                  zIndex: 1,
+                }}
+                style={{
+                  fontSize: 12,
+                }}
+              />
+            </div>
           </div>
         </div>
       )}

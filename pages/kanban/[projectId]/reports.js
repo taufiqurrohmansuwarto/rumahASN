@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useRouter } from "next/router";
 import { useQuery } from "@tanstack/react-query";
-import { Card, DatePicker, Table, Breadcrumb } from "antd";
+import { Card, DatePicker, Table, Breadcrumb, Tabs } from "antd";
 import {
   Stack,
   Group,
@@ -17,6 +17,8 @@ import {
   IconClock,
   IconAlertTriangle,
   IconTrendingUp,
+  IconChartBar,
+  IconFileText,
 } from "@tabler/icons-react";
 import Head from "next/head";
 import Link from "next/link";
@@ -25,6 +27,7 @@ import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import LayoutKanban from "@/components/Kanban/LayoutKanban";
 import AIProjectSummary from "@/components/Kanban/AIProjectSummary";
+import LaporanKegiatan from "@/components/Kanban/LaporanKegiatan";
 import {
   getProject,
   getProjectOverview,
@@ -60,6 +63,7 @@ function StatCard({ icon: Icon, label, value, color, subValue }) {
 function ReportsPage() {
   const router = useRouter();
   const { projectId } = router.query;
+  const [activeTab, setActiveTab] = useState("statistik");
   const [dateRange, setDateRange] = useState([
     dayjs().subtract(30, "day"),
     dayjs(),
@@ -101,6 +105,12 @@ function ReportsPage() {
   const stats = overview?.stats || {};
   const priorityDist = overview?.priority_distribution || [];
 
+  const roleLabels = {
+    owner: "Pemilik",
+    admin: "Admin",
+    member: "Anggota",
+  };
+
   const memberColumns = [
     {
       title: "Anggota",
@@ -115,12 +125,21 @@ function ReportsPage() {
       ),
     },
     {
-      title: "Role",
+      title: "Peran",
       dataIndex: "role",
-      render: (role) => <Badge size="sm">{role}</Badge>,
+      render: (role) => (
+        <Badge
+          size="sm"
+          color={
+            role === "owner" ? "blue" : role === "admin" ? "green" : "gray"
+          }
+        >
+          {roleLabels[role] || role}
+        </Badge>
+      ),
     },
     {
-      title: "Task Assigned",
+      title: "Task Ditugaskan",
       dataIndex: ["stats", "total_assigned"],
       align: "center",
     },
@@ -130,11 +149,16 @@ function ReportsPage() {
       align: "center",
     },
     {
-      title: "Completion Rate",
+      title: "Tingkat Penyelesaian",
       dataIndex: ["stats", "completion_rate"],
       render: (val) => (
         <Group gap={8}>
-          <Progress value={val} size="sm" style={{ width: 60 }} />
+          <Progress
+            value={val}
+            size="sm"
+            style={{ width: 60 }}
+            color="orange"
+          />
           <Text size="xs">{val}%</Text>
         </Group>
       ),
@@ -176,148 +200,191 @@ function ReportsPage() {
         )}
       >
         <LayoutKanban projectId={projectId} active="reports">
-          <Stack gap={20}>
-            {/* Date Filter & AI Summary */}
-            <Group justify="space-between">
-              <AIProjectSummary
-                projectId={projectId}
-                projectName={project?.name}
-              />
-              <RangePicker
-                value={dateRange}
-                onChange={setDateRange}
-                format="DD MMM YYYY"
-              />
-            </Group>
-
-            {/* Stats Cards */}
-            <SimpleGrid cols={{ base: 2, md: 4 }} spacing="md">
-              <StatCard
-                icon={IconChecklist}
-                label="Total Task"
-                value={stats.total_tasks || 0}
-                color="#228be6"
-                subValue={`${stats.completed_tasks || 0} selesai`}
-              />
-              <StatCard
-                icon={IconTrendingUp}
-                label="Completion Rate"
-                value={`${stats.completion_rate || 0}%`}
-                color="#40c057"
-              />
-              <StatCard
-                icon={IconAlertTriangle}
-                label="Overdue"
-                value={stats.overdue_tasks || 0}
-                color="#fa5252"
-                subValue={`${stats.due_today || 0} jatuh tempo hari ini`}
-              />
-              <StatCard
-                icon={IconClock}
-                label="Jam Tercatat"
-                value={`${stats.total_actual_hours || 0}`}
-                color="#fab005"
-                subValue={`Estimasi: ${stats.total_estimated_hours || 0} jam`}
-              />
-            </SimpleGrid>
-
-            {/* Columns Progress */}
-            <Card title="Progress per Kolom">
-              <Stack gap={12}>
-                {overview?.columns?.map((col) => (
-                  <Group key={col.id} justify="space-between">
-                    <Group gap={8}>
-                      <div
-                        style={{
-                          width: 12,
-                          height: 12,
-                          borderRadius: 3,
-                          backgroundColor: col.color,
-                        }}
+          <Tabs
+            activeKey={activeTab}
+            onChange={setActiveTab}
+            items={[
+              {
+                key: "statistik",
+                label: (
+                  <span
+                    style={{ display: "flex", alignItems: "center", gap: 6 }}
+                  >
+                    <IconChartBar size={14} />
+                    Statistik Project
+                  </span>
+                ),
+                children: (
+                  <Stack gap={20}>
+                    {/* Date Filter & AI Summary */}
+                    <Group justify="space-between">
+                      <AIProjectSummary
+                        projectId={projectId}
+                        projectName={project?.name}
                       />
-                      <Text size="sm">{col.name}</Text>
+                      <RangePicker
+                        value={dateRange}
+                        onChange={setDateRange}
+                        format="DD MMM YYYY"
+                      />
                     </Group>
-                    <Badge>{col.task_count} task</Badge>
-                  </Group>
-                ))}
-              </Stack>
-            </Card>
 
-            {/* Priority Distribution */}
-            <Card title="Distribusi Prioritas (Task Aktif)">
-              <Group gap={24}>
-                {priorityDist.map((p) => (
-                  <Group key={p.priority} gap={8}>
-                    <Badge
-                      color={
-                        p.priority === "urgent"
-                          ? "red"
-                          : p.priority === "high"
-                          ? "orange"
-                          : p.priority === "medium"
-                          ? "blue"
-                          : "gray"
-                      }
-                    >
-                      {p.priority}
-                    </Badge>
-                    <Text size="sm" fw={500}>
-                      {p.count}
-                    </Text>
-                  </Group>
-                ))}
-              </Group>
-            </Card>
+                    {/* Kartu Statistik */}
+                    <SimpleGrid cols={{ base: 2, md: 4 }} spacing="md">
+                      <StatCard
+                        icon={IconChecklist}
+                        label="Total Task"
+                        value={stats.total_tasks || 0}
+                        color="#228be6"
+                        subValue={`${stats.completed_tasks || 0} selesai`}
+                      />
+                      <StatCard
+                        icon={IconTrendingUp}
+                        label="Tingkat Penyelesaian"
+                        value={`${stats.completion_rate || 0}%`}
+                        color="#40c057"
+                      />
+                      <StatCard
+                        icon={IconAlertTriangle}
+                        label="Terlambat"
+                        value={stats.overdue_tasks || 0}
+                        color="#fa5252"
+                        subValue={`${
+                          stats.due_today || 0
+                        } jatuh tempo hari ini`}
+                      />
+                      <StatCard
+                        icon={IconClock}
+                        label="Jam Tercatat"
+                        value={`${stats.total_actual_hours || 0}`}
+                        color="#fab005"
+                        subValue={`Estimasi: ${
+                          stats.total_estimated_hours || 0
+                        } jam`}
+                      />
+                    </SimpleGrid>
 
-            {/* Member Report */}
-            <Card title="Aktivitas Anggota">
-              <Table
-                dataSource={memberReport?.members || []}
-                columns={memberColumns}
-                rowKey={(row) => row.user?.custom_id}
-                pagination={false}
-                size="small"
-              />
-            </Card>
+                    {/* Columns Progress */}
+                    <Card title="Progress per Kolom">
+                      <Stack gap={12}>
+                        {overview?.columns?.map((col) => (
+                          <Group key={col.id} justify="space-between">
+                            <Group gap={8}>
+                              <div
+                                style={{
+                                  width: 12,
+                                  height: 12,
+                                  borderRadius: 3,
+                                  backgroundColor: col.color,
+                                }}
+                              />
+                              <Text size="sm">{col.name}</Text>
+                            </Group>
+                            <Badge>{col.task_count} task</Badge>
+                          </Group>
+                        ))}
+                      </Stack>
+                    </Card>
 
-            {/* Time Summary */}
-            {timeReport && (
-              <Card title="Ringkasan Waktu">
-                <SimpleGrid cols={{ base: 1, md: 3 }} spacing="md">
-                  <Paper p="md" radius="md" bg="#f8f9fa">
-                    <Stack gap={4}>
-                      <Text size="xs" c="dimmed">
-                        Total Jam Tercatat
-                      </Text>
-                      <Text size="xl" fw={700}>
-                        {timeReport.summary?.total_hours || 0} jam
-                      </Text>
-                    </Stack>
-                  </Paper>
-                  <Paper p="md" radius="md" bg="#f8f9fa">
-                    <Stack gap={4}>
-                      <Text size="xs" c="dimmed">
-                        Task dengan Log Waktu
-                      </Text>
-                      <Text size="xl" fw={700}>
-                        {timeReport.summary?.tasks_with_time || 0}
-                      </Text>
-                    </Stack>
-                  </Paper>
-                  <Paper p="md" radius="md" bg="#f8f9fa">
-                    <Stack gap={4}>
-                      <Text size="xs" c="dimmed">
-                        Kontributor
-                      </Text>
-                      <Text size="xl" fw={700}>
-                        {timeReport.summary?.users_logged || 0}
-                      </Text>
-                    </Stack>
-                  </Paper>
-                </SimpleGrid>
-              </Card>
-            )}
-          </Stack>
+                    {/* Distribusi Prioritas */}
+                    <Card title="Distribusi Prioritas (Task Aktif)">
+                      <Group gap={24}>
+                        {priorityDist.map((p) => {
+                          const priorityLabels = {
+                            urgent: "Mendesak",
+                            high: "Tinggi",
+                            medium: "Sedang",
+                            low: "Rendah",
+                          };
+                          return (
+                            <Group key={p.priority} gap={8}>
+                              <Badge
+                                color={
+                                  p.priority === "urgent"
+                                    ? "red"
+                                    : p.priority === "high"
+                                    ? "orange"
+                                    : p.priority === "medium"
+                                    ? "blue"
+                                    : "gray"
+                                }
+                              >
+                                {priorityLabels[p.priority] || p.priority}
+                              </Badge>
+                              <Text size="sm" fw={500}>
+                                {p.count}
+                              </Text>
+                            </Group>
+                          );
+                        })}
+                      </Group>
+                    </Card>
+
+                    {/* Member Report */}
+                    <Card title="Aktivitas Anggota">
+                      <Table
+                        dataSource={memberReport?.members || []}
+                        columns={memberColumns}
+                        rowKey={(row) => row.user?.custom_id}
+                        pagination={false}
+                        size="small"
+                      />
+                    </Card>
+
+                    {/* Time Summary */}
+                    {timeReport && (
+                      <Card title="Ringkasan Waktu">
+                        <SimpleGrid cols={{ base: 1, md: 3 }} spacing="md">
+                          <Paper p="md" radius="md" bg="#f8f9fa">
+                            <Stack gap={4}>
+                              <Text size="xs" c="dimmed">
+                                Total Jam Tercatat
+                              </Text>
+                              <Text size="xl" fw={700}>
+                                {timeReport.summary?.total_hours || 0} jam
+                              </Text>
+                            </Stack>
+                          </Paper>
+                          <Paper p="md" radius="md" bg="#f8f9fa">
+                            <Stack gap={4}>
+                              <Text size="xs" c="dimmed">
+                                Task dengan Log Waktu
+                              </Text>
+                              <Text size="xl" fw={700}>
+                                {timeReport.summary?.tasks_with_time || 0}
+                              </Text>
+                            </Stack>
+                          </Paper>
+                          <Paper p="md" radius="md" bg="#f8f9fa">
+                            <Stack gap={4}>
+                              <Text size="xs" c="dimmed">
+                                Kontributor
+                              </Text>
+                              <Text size="xl" fw={700}>
+                                {timeReport.summary?.users_logged || 0}
+                              </Text>
+                            </Stack>
+                          </Paper>
+                        </SimpleGrid>
+                      </Card>
+                    )}
+                  </Stack>
+                ),
+              },
+              {
+                key: "laporan-kegiatan",
+                label: (
+                  <span
+                    style={{ display: "flex", alignItems: "center", gap: 6 }}
+                  >
+                    <IconFileText size={14} />
+                    Laporan Kegiatan
+                  </span>
+                ),
+                children: <LaporanKegiatan projectId={projectId} />,
+              },
+            ]}
+          />
         </LayoutKanban>
       </PageContainer>
     </>

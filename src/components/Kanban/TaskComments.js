@@ -29,17 +29,29 @@ const { Text } = Typography;
 
 function CommentItem({ comment, onDelete }) {
   const [showDelete, setShowDelete] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
 
   return (
     <div
       style={{
         display: "flex",
         gap: 10,
-        padding: "10px 0",
-        borderBottom: "1px solid #f5f5f5",
+        padding: "10px 12px",
+        marginBottom: 6,
+        borderRadius: 8,
+        backgroundColor: isHovered ? "#fafafa" : "transparent",
+        boxShadow: isHovered ? "0 2px 8px rgba(0,0,0,0.06)" : "none",
+        transition: "all 0.2s ease",
+        border: isHovered ? "1px solid #f0f0f0" : "1px solid transparent",
       }}
-      onMouseEnter={() => setShowDelete(true)}
-      onMouseLeave={() => setShowDelete(false)}
+      onMouseEnter={() => {
+        setShowDelete(true);
+        setIsHovered(true);
+      }}
+      onMouseLeave={() => {
+        setShowDelete(false);
+        setIsHovered(false);
+      }}
     >
       <Avatar src={comment.user?.image} size={28}>
         {comment.user?.username?.charAt(0)?.toUpperCase()}
@@ -59,7 +71,9 @@ function CommentItem({ comment, onDelete }) {
               </Text>
             )}
           </Flex>
-          <div style={{ opacity: showDelete ? 1 : 0, transition: "opacity 0.2s" }}>
+          <div
+            style={{ opacity: showDelete ? 1 : 0, transition: "opacity 0.2s" }}
+          >
             <Popconfirm
               title="Hapus komentar?"
               onConfirm={() => onDelete(comment.id)}
@@ -143,7 +157,7 @@ function TaskComments({ taskId }) {
   const comments = data?.comments || [];
 
   return (
-    <div>
+    <div style={{ padding: "12px 16px 24px 16px" }}>
       {/* Comment Input - Compact */}
       <div
         style={{
@@ -203,11 +217,7 @@ function TaskComments({ taskId }) {
       ) : (
         <div>
           {comments.map((comment) => (
-            <CommentItem
-              key={comment.id}
-              comment={comment}
-              onDelete={remove}
-            />
+            <CommentItem key={comment.id} comment={comment} onDelete={remove} />
           ))}
         </div>
       )}

@@ -400,11 +400,28 @@ export const aiTaskAssist = async ({ title, description }) => {
 };
 
 export const aiProjectSummary = async (projectId) => {
-  const { data } = await api.post(`/ai/project-summary?projectId=${projectId}`);
+  const { data } = await api.get(`/ai/project-summary?projectId=${projectId}`);
   return data;
 };
 
 export const aiGenerateSubtasks = async (taskId) => {
   const { data } = await api.post(`/tasks/${taskId}/ai-subtasks`);
+  return data;
+};
+
+export const aiTaskSummary = async (taskId) => {
+  const { data } = await api.get(`/tasks/${taskId}/ai-summary`);
+  return data;
+};
+
+export const aiLaporanKegiatan = async ({ projectId, startDate, endDate }) => {
+  const { data } = await api.get(
+    `/ai/laporan-kegiatan?projectId=${projectId}&startDate=${startDate}&endDate=${endDate}`
+  );
+  return data;
+};
+
+export const aiTaskLaporan = async (taskId) => {
+  const { data } = await api.get(`/tasks/${taskId}/ai-laporan`);
   return data;
 };

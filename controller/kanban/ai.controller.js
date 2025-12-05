@@ -394,8 +394,550 @@ Jawab dengan array JSON berisi string subtask saja (tanpa markdown):
   }
 };
 
+/**
+ * AI Task Summary - Ringkas progress task dalam 1 kalimat
+ */
+const taskSummary = async (req, res) => {
+  try {
+    const { customId: userId } = req?.user;
+    const { taskId } = req?.query;
+
+    // Get task with all related data
+    const task = await KanbanTask.query()
+      .findById(taskId)
+      .withGraphFetched(
+        "[subtasks, comments.[user], attachments, time_entries.[user], column]"
+      );
+
+    if (!task) {
+      return res.status(404).json({ message: "Task tidak ditemukan" });
+    }
+
+    // Check permission
+    const isMember = await KanbanProjectMember.isMember(
+      task.project_id,
+      userId
+    );
+    if (!isMember) {
+      return res.status(403).json({ message: "Anda tidak memiliki akses" });
+    }
+
+    // Build context
+    const subtasks = task.subtasks || [];
+    const completedSubtasks = subtasks.filter((s) => s.is_completed);
+    const comments = task.comments || [];
+    const attachments = task.attachments || [];
+    const timeEntries = task.time_entries || [];
+    const totalHours = timeEntries.reduce((sum, e) => sum + (e.hours || 0), 0);
+
+    const context = `
+Task: "${task.title}"
+Status: ${task.column?.name || "Unknown"}
+${task.description ? `Deskripsi: ${task.description}` : ""}
+
+Subtask: ${completedSubtasks.length}/${subtasks.length} selesai
+${subtasks
+  .map((s) => `- [${s.is_completed ? "x" : " "}] ${s.title}`)
+  .join("\n")}
+
+Komentar terbaru (${comments.length} total):
+${
+  comments.length > 0
+    ? comments
+        .slice(0, 3)
+        .map((c) => `- ${c.user?.username}: "${c.content}"`)
+        .join("\n")
+    : "Tidak ada"
+}
+
+Lampiran: ${attachments.length} file
+${
+  attachments.length > 0
+    ? attachments
+        .slice(0, 3)
+        .map((a) => `- ${a.filename}`)
+        .join("\n")
+    : "Tidak ada"
+}
+
+Waktu tercatat: ${totalHours} jam dari ${task.estimated_hours || 0} jam estimasi
+${
+  timeEntries.length > 0
+    ? timeEntries
+        .slice(0, 3)
+        .map(
+          (t) =>
+            `- ${t.user?.username}: ${t.hours} jam - ${t.description || ""}`
+        )
+        .join("\n")
+    : "Tidak ada catatan waktu"
+}
+`;
+
+    const prompt = `Berdasarkan data task berikut, buatkan ringkasan singkat (1-2 kalimat) dalam Bahasa Indonesia tentang progress task ini. Fokus pada apa yang sudah dikerjakan dan statusnya saat ini.
+
+${context}
+
+Jawab dalam format JSON (tanpa markdown):
+{
+  "summary": "Ringkasan 1-2 kalimat tentang progress task"
+}`;
+
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        {
+          role: "system",
+          content:
+            "Kamu adalah asisten AI yang meringkas progress task secara singkat dan informatif. Gunakan bahasa yang natural dan to the point.",
+        },
+        { role: "user", content: prompt },
+      ],
+      temperature: 0.7,
+      max_tokens: 200,
+    });
+
+    const responseText = completion.choices[0]?.message?.content || "";
+
+    let result;
+    try {
+      const jsonStr = responseText
+        .replace(/```json\n?/g, "")
+        .replace(/```\n?/g, "")
+        .trim();
+      result = JSON.parse(jsonStr);
+    } catch (parseError) {
+      console.error("Failed to parse AI response:", responseText);
+      return res.status(500).json({ message: "Gagal memproses respons AI" });
+    }
+
+    res.json({
+      success: true,
+      data: {
+        summary: result.summary,
+        generated_at: new Date().toISOString(),
+        stats: {
+          subtasks_completed: completedSubtasks.length,
+          subtasks_total: subtasks.length,
+          comments_count: comments.length,
+          attachments_count: attachments.length,
+          time_logged: totalHours,
+        },
+      },
+    });
+  } catch (error) {
+    console.error("AI Task Summary Error:", error);
+    handleError(res, error);
+  }
+};
+
+/**
+ * AI Laporan Kegiatan - Generate laporan kegiatan tugas jabatan
+ */
+const laporanKegiatan = async (req, res) => {
+  try {
+    const { customId: userId } = req?.user;
+    const { projectId, startDate, endDate } = req?.query;
+
+    // Check permission
+    const isMember = await KanbanProjectMember.isMember(projectId, userId);
+    if (!isMember) {
+      return res.status(403).json({ message: "Anda tidak memiliki akses" });
+    }
+
+    // Get tasks with activities in date range
+    const tasks = await KanbanTask.query()
+      .where("project_id", projectId)
+      .withGraphFetched("[subtasks, time_entries, activities]")
+      .modifyGraph("activities", (builder) => {
+        builder.whereBetween("created_at", [
+          `${startDate} 00:00:00`,
+          `${endDate} 23:59:59`,
+        ]);
+      })
+      .modifyGraph("time_entries", (builder) => {
+        builder
+          .where("user_id", userId)
+          .whereBetween("logged_date", [startDate, endDate]);
+      });
+
+    // Get time entries for this user in date range
+    const KanbanTimeEntry = require("@/models/kanban/time-entries.model");
+    const timeEntries = await KanbanTimeEntry.query()
+      .join("kanban.tasks", "kanban.time_entries.task_id", "kanban.tasks.id")
+      .where("kanban.tasks.project_id", projectId)
+      .where("kanban.time_entries.user_id", userId)
+      .whereBetween("kanban.time_entries.logged_date", [startDate, endDate])
+      .select("kanban.time_entries.*", "kanban.tasks.title as task_title")
+      .orderBy("kanban.time_entries.logged_date", "asc");
+
+    // Get activities (completed tasks, moved tasks)
+    const activities = await KanbanTaskActivity.query()
+      .join("kanban.tasks", "kanban.task_activities.task_id", "kanban.tasks.id")
+      .where("kanban.tasks.project_id", projectId)
+      .where("kanban.task_activities.user_id", userId)
+      .whereBetween("kanban.task_activities.created_at", [
+        `${startDate} 00:00:00`,
+        `${endDate} 23:59:59`,
+      ])
+      .whereIn("kanban.task_activities.action", [
+        "completed",
+        "created",
+        "moved",
+      ])
+      .select("kanban.task_activities.*", "kanban.tasks.title as task_title")
+      .orderBy("kanban.task_activities.created_at", "asc");
+
+    // Build context for AI
+    const dataForAI = [];
+
+    // Add time entries
+    timeEntries.forEach((entry) => {
+      dataForAI.push({
+        tanggal: entry.logged_date,
+        kegiatan: `${entry.task_title}${
+          entry.description ? ` - ${entry.description}` : ""
+        }`,
+        jam: entry.hours,
+        type: "time_entry",
+      });
+    });
+
+    // Add activities without time entries
+    activities.forEach((act) => {
+      const actCreatedAt =
+        act.created_at instanceof Date
+          ? act.created_at.toISOString()
+          : String(act.created_at);
+      const actTanggal = actCreatedAt.split("T")[0];
+
+      const hasTimeEntry = timeEntries.some(
+        (te) => te.task_id === act.task_id && te.logged_date === actTanggal
+      );
+      if (!hasTimeEntry) {
+        dataForAI.push({
+          tanggal: actTanggal,
+          kegiatan: act.task_title,
+          jam: 0,
+          type: "activity",
+          action: act.action,
+        });
+      }
+    });
+
+    // Sort by date
+    dataForAI.sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal));
+
+    if (dataForAI.length === 0) {
+      return res.json({
+        success: true,
+        data: {
+          kegiatan: [],
+          ringkasan: "Tidak ada kegiatan dalam periode ini.",
+          total_jam: 0,
+        },
+      });
+    }
+
+    // Build context
+    const context = `
+Data kegiatan dari ${startDate} sampai ${endDate}:
+${dataForAI
+  .map((d, i) => `${i + 1}. ${d.tanggal} - ${d.kegiatan} (${d.jam} jam)`)
+  .join("\n")}
+`;
+
+    const prompt = `Kamu adalah asisten yang membantu ASN membuat laporan kegiatan tugas jabatan. Berdasarkan data kegiatan berikut, buatkan laporan kegiatan yang rapi dan formal untuk keperluan administratif.
+
+${context}
+
+Aturan:
+1. Gabungkan kegiatan yang sama di tanggal yang sama
+2. Tulis kegiatan dengan bahasa formal dan jelas
+3. Jika jam = 0, estimasikan berdasarkan jenis kegiatan (minimal 1 jam)
+4. Buat ringkasan singkat 1-2 kalimat tentang kegiatan selama periode ini
+
+Format JSON (tanpa markdown):
+{
+  "kegiatan": [
+    { "no": 1, "tanggal": "01-12-2025", "kegiatan": "Deskripsi kegiatan formal", "jam": 2 },
+    ...
+  ],
+  "ringkasan": "Ringkasan kegiatan selama periode ini...",
+  "total_jam": 10
+}`;
+
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        {
+          role: "system",
+          content:
+            "Kamu adalah asisten AI yang membantu ASN membuat laporan kegiatan tugas jabatan. Gunakan bahasa formal dan profesional.",
+        },
+        { role: "user", content: prompt },
+      ],
+      temperature: 0.7,
+      max_tokens: 2000,
+    });
+
+    const responseText = completion.choices[0]?.message?.content || "";
+
+    let result;
+    try {
+      const jsonStr = responseText
+        .replace(/```json\n?/g, "")
+        .replace(/```\n?/g, "")
+        .trim();
+      result = JSON.parse(jsonStr);
+    } catch (parseError) {
+      console.error("Failed to parse AI response:", responseText);
+      return res.status(500).json({ message: "Gagal memproses respons AI" });
+    }
+
+    res.json({
+      success: true,
+      data: {
+        kegiatan: result.kegiatan || [],
+        ringkasan: result.ringkasan || "",
+        total_jam: result.total_jam || 0,
+        periode: { startDate, endDate },
+        generated_at: new Date().toISOString(),
+      },
+    });
+  } catch (error) {
+    console.error("AI Laporan Kegiatan Error:", error);
+    handleError(res, error);
+  }
+};
+
+/**
+ * AI Task Laporan - Generate laporan kegiatan per task
+ * Format: Tanggal | Uraian Kegiatan (dari subtask, time_entries, activities)
+ */
+const taskLaporan = async (req, res) => {
+  try {
+    const { customId: userId } = req?.user;
+    const { taskId } = req?.query;
+
+    // Get task with all related data
+    const task = await KanbanTask.query()
+      .findById(taskId)
+      .withGraphFetched(
+        "[subtasks, time_entries.[user], activities.[user], column]"
+      );
+
+    if (!task) {
+      return res.status(404).json({ message: "Task tidak ditemukan" });
+    }
+
+    // Check permission
+    const isMember = await KanbanProjectMember.isMember(
+      task.project_id,
+      userId
+    );
+    if (!isMember) {
+      return res.status(403).json({ message: "Anda tidak memiliki akses" });
+    }
+
+    // Collect data points
+    const dataPoints = [];
+
+    // From time_entries (most reliable - has date and description)
+    if (task.time_entries?.length > 0) {
+      task.time_entries.forEach((entry) => {
+        dataPoints.push({
+          tanggal: entry.logged_date,
+          kegiatan: entry.description || `Mengerjakan ${task.title}`,
+          jam: entry.hours,
+          source: "time_entry",
+        });
+      });
+    }
+
+    // From completed subtasks (using completed_at date)
+    if (task.subtasks?.length > 0) {
+      task.subtasks.forEach((subtask) => {
+        if (subtask.is_completed && subtask.completed_at) {
+          const completedAt =
+            subtask.completed_at instanceof Date
+              ? subtask.completed_at.toISOString()
+              : String(subtask.completed_at);
+          const tanggal = completedAt.split("T")[0];
+
+          dataPoints.push({
+            tanggal,
+            kegiatan: `Menyelesaikan: ${subtask.title}`,
+            source: "subtask",
+          });
+        }
+      });
+    }
+
+    // From activities (task moves, task completed, task created)
+    if (task.activities?.length > 0) {
+      task.activities.forEach((act) => {
+        // Handle both Date object and string
+        const createdAt =
+          act.created_at instanceof Date
+            ? act.created_at.toISOString()
+            : String(act.created_at);
+        const tanggal = createdAt.split("T")[0];
+        let kegiatan = "";
+
+        // Skip subtask_completed since we already get it from subtasks with completed_at
+        if (act.action === "completed") {
+          kegiatan = `Menyelesaikan task: ${task.title}`;
+        } else if (act.action === "created") {
+          kegiatan = `Membuat task: ${task.title}`;
+        } else if (act.action === "moved") {
+          const oldVal =
+            typeof act.old_value === "string"
+              ? JSON.parse(act.old_value || "{}")
+              : act.old_value || {};
+          const newVal =
+            typeof act.new_value === "string"
+              ? JSON.parse(act.new_value || "{}")
+              : act.new_value || {};
+          kegiatan = `Memindahkan task dari "${oldVal.column || "kolom"}" ke "${newVal.column || "kolom"}"`;
+        }
+
+        if (kegiatan) {
+          dataPoints.push({
+            tanggal,
+            kegiatan,
+            source: "activity",
+          });
+        }
+      });
+    }
+
+    // Fallback: If subtasks exist but none completed, list them as planned work
+    if (task.subtasks?.length > 0 && dataPoints.length === 0) {
+      const taskCreatedAt =
+        task.created_at instanceof Date
+          ? task.created_at.toISOString()
+          : String(task.created_at || new Date().toISOString());
+      const startDate = taskCreatedAt.split("T")[0];
+
+      task.subtasks.forEach((subtask) => {
+        dataPoints.push({
+          tanggal: startDate,
+          kegiatan: `Merencanakan: ${subtask.title}`,
+          source: "subtask_planned",
+        });
+      });
+    }
+
+    // If still no data, create basic entry
+    if (dataPoints.length === 0) {
+      return res.json({
+        success: true,
+        data: {
+          kegiatan: [],
+          message: "Tidak ada data kegiatan untuk task ini",
+          generated_at: new Date().toISOString(),
+        },
+      });
+    }
+
+    // Sort by date
+    dataPoints.sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal));
+
+    // Build context for AI
+    const context = `
+Task: "${task.title}"
+${task.description ? `Deskripsi: ${task.description}` : ""}
+
+Data kegiatan yang tercatat:
+${dataPoints
+  .map(
+    (d, i) =>
+      `${i + 1}. ${d.tanggal} - ${d.kegiatan}${d.jam ? ` (${d.jam} jam)` : ""}`
+  )
+  .join("\n")}
+
+Subtask yang ada:
+${
+  task.subtasks?.length > 0
+    ? task.subtasks
+        .map((s) => `- [${s.is_completed ? "x" : " "}] ${s.title}`)
+        .join("\n")
+    : "Tidak ada"
+}
+`;
+
+    const prompt = `Kamu adalah asisten yang membantu ASN membuat laporan kegiatan tugas jabatan. Berdasarkan data task berikut, buatkan laporan kegiatan yang rapi untuk di-copy ke aplikasi kinerja.
+
+${context}
+
+Aturan:
+1. Buat entri per hari kerja (pisahkan jika ada beberapa hari)
+2. Gunakan bahasa formal dan profesional
+3. Uraian kegiatan harus spesifik dan jelas
+4. Jika subtask belum ada tanggal, distribusikan ke beberapa hari secara logis
+5. Format tanggal: DD-MM-YYYY
+
+Format JSON (tanpa markdown):
+{
+  "kegiatan": [
+    { "tanggal": "01-12-2025", "kegiatan": "Uraian kegiatan hari 1" },
+    { "tanggal": "02-12-2025", "kegiatan": "Uraian kegiatan hari 2" }
+  ],
+  "periode": {
+    "start": "01-12-2025",
+    "end": "03-12-2025"
+  }
+}`;
+
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        {
+          role: "system",
+          content:
+            "Kamu adalah asisten AI yang membantu ASN membuat laporan kegiatan. Gunakan bahasa formal dan profesional.",
+        },
+        { role: "user", content: prompt },
+      ],
+      temperature: 0.7,
+      max_tokens: 1500,
+    });
+
+    const responseText = completion.choices[0]?.message?.content || "";
+
+    let result;
+    try {
+      const jsonStr = responseText
+        .replace(/```json\n?/g, "")
+        .replace(/```\n?/g, "")
+        .trim();
+      result = JSON.parse(jsonStr);
+    } catch (parseError) {
+      console.error("Failed to parse AI response:", responseText);
+      return res.status(500).json({ message: "Gagal memproses respons AI" });
+    }
+
+    res.json({
+      success: true,
+      data: {
+        task_title: task.title,
+        kegiatan: result.kegiatan || [],
+        periode: result.periode,
+        generated_at: new Date().toISOString(),
+      },
+    });
+  } catch (error) {
+    console.error("AI Task Laporan Error:", error);
+    handleError(res, error);
+  }
+};
+
 module.exports = {
   taskAssist,
   projectSummary,
   generateAndSaveSubtasks,
+  taskSummary,
+  laporanKegiatan,
+  taskLaporan,
 };

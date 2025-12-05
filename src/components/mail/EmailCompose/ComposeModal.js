@@ -1,6 +1,11 @@
-import { useReplyToEmail, useSaveDraft, useSendEmail } from "@/hooks/useEmails";
+import {
+  useRefineText,
+  useReplyToEmail,
+  useSaveDraft,
+  useSendEmail,
+} from "@/hooks/useEmails";
 import { extractAttachmentIds } from "@/utils/debugUpload";
-import { Box, Group, Stack, Text } from "@mantine/core";
+import { Box, Group, Stack, Text, Transition } from "@mantine/core";
 import {
   IconBold,
   IconEye,
@@ -11,9 +16,12 @@ import {
   IconMailReply,
   IconNote,
   IconPencil,
+  IconSparkles,
+  IconWand,
 } from "@tabler/icons-react";
 import {
   Button,
+  Dropdown,
   Form,
   Input,
   Modal,
@@ -26,7 +34,7 @@ import {
 import dayjs from "dayjs";
 import dynamic from "next/dynamic";
 import { useSession } from "next-auth/react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import AttachmentUploader from "./AttachmentUploader";
 
 // Dynamic import untuk markdown preview (SSR safe)
@@ -42,10 +50,152 @@ const ReactMarkdownCustom = dynamic(
   }
 );
 
+// AI Refine Button Component dengan animasi
+const AIRefineButton = ({ value, onChange, disabled, onLoadingChange }) => {
+  const refineText = useRefineText();
+  const [isAnimating, setIsAnimating] = useState(false);
+
+  const aiModes = [
+    {
+      key: "professional",
+      label: "Profesional",
+      icon: "👔",
+      description: "Formal & sopan",
+    },
+    {
+      key: "friendly",
+      label: "Ramah",
+      icon: "😊",
+      description: "Hangat & bersahabat",
+    },
+    {
+      key: "concise",
+      label: "Ringkas",
+      icon: "⚡",
+      description: "Singkat & padat",
+    },
+    {
+      key: "detailed",
+      label: "Detail",
+      icon: "📝",
+      description: "Lengkap & jelas",
+    },
+  ];
+
+  const isLoading = refineText.isLoading || isAnimating;
+
+  // Notify parent about loading state changes
+  useEffect(() => {
+    onLoadingChange?.(isLoading);
+  }, [isLoading, onLoadingChange]);
+
+  // Typing animation effect
+  const animateTyping = useCallback(
+    async (finalText) => {
+      setIsAnimating(true);
+      const words = finalText.split(" ");
+      let currentText = "";
+
+      for (let i = 0; i < words.length; i++) {
+        currentText += (i > 0 ? " " : "") + words[i];
+        onChange(currentText);
+        // Variable delay for natural feel
+        await new Promise((r) => setTimeout(r, 15 + Math.random() * 25));
+      }
+
+      setIsAnimating(false);
+    },
+    [onChange]
+  );
+
+  const handleRefine = async (mode) => {
+    if (!value || value.trim().length === 0) {
+      message.warning("Tulis pesan terlebih dahulu");
+      return;
+    }
+
+    try {
+      const result = await refineText.mutateAsync({
+        text: value,
+        mode,
+      });
+
+      if (result?.success && result?.data?.refined) {
+        // Animate the text change
+        await animateTyping(result.data.refined);
+        message.success("Pesan berhasil diperhalus ✨");
+      }
+    } catch (error) {
+      console.error("Refine error:", error);
+    }
+  };
+
+  const menuItems = aiModes.map((mode) => ({
+    key: mode.key,
+    label: (
+      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <span>{mode.icon}</span>
+        <div>
+          <div style={{ fontWeight: 500, fontSize: 12 }}>{mode.label}</div>
+          <div style={{ fontSize: 10, color: "#666" }}>{mode.description}</div>
+        </div>
+      </div>
+    ),
+    onClick: () => handleRefine(mode.key),
+  }));
+
+  return (
+    <Dropdown
+      menu={{ items: menuItems }}
+      trigger={["click"]}
+      disabled={disabled || isLoading || !value}
+      placement="bottomRight"
+    >
+      <Tooltip title={!value ? "Tulis pesan dulu" : "Perhalus dengan AI"}>
+        <Button
+          size="small"
+          type="text"
+          loading={isLoading}
+          disabled={disabled || !value}
+          style={{
+            background: isLoading
+              ? "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+              : value
+                ? "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+                : undefined,
+            color: value ? "#fff" : undefined,
+            border: "none",
+            borderRadius: 6,
+            padding: "2px 8px",
+            height: 24,
+            transition: "all 0.3s ease",
+            boxShadow: value ? "0 2px 8px rgba(102, 126, 234, 0.3)" : undefined,
+          }}
+          icon={
+            !isLoading && (
+              <IconSparkles
+                size={14}
+                style={{
+                  animation: isLoading ? "pulse 1.5s infinite" : undefined,
+                }}
+              />
+            )
+          }
+        >
+          {isLoading ? "Memproses..." : "AI"}
+        </Button>
+      </Tooltip>
+    </Dropdown>
+  );
+};
+
 // Simple Markdown Editor dengan toolbar dan preview
 const SimpleMarkdownEditor = ({ value, onChange, placeholder, rows = 8 }) => {
   const textareaRef = useRef(null);
   const [showPreview, setShowPreview] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
+
+  const isDisabled = showPreview || aiLoading;
 
   const getTextarea = () => {
     // Ant Design Input.TextArea wraps native textarea
@@ -130,7 +280,7 @@ const SimpleMarkdownEditor = ({ value, onChange, placeholder, rows = 8 }) => {
               type="text"
               icon={<IconBold size={14} />}
               onClick={handleBold}
-              disabled={showPreview}
+              disabled={isDisabled}
             />
           </Tooltip>
           <Tooltip title="Miring">
@@ -139,7 +289,7 @@ const SimpleMarkdownEditor = ({ value, onChange, placeholder, rows = 8 }) => {
               type="text"
               icon={<IconItalic size={14} />}
               onClick={handleItalic}
-              disabled={showPreview}
+              disabled={isDisabled}
             />
           </Tooltip>
           <Tooltip title="List">
@@ -148,21 +298,32 @@ const SimpleMarkdownEditor = ({ value, onChange, placeholder, rows = 8 }) => {
               type="text"
               icon={<IconList size={14} />}
               onClick={handleList}
-              disabled={showPreview}
+              disabled={isDisabled}
             />
           </Tooltip>
           <Text size="xs" c="dimmed" ml={4}>
             **tebal** *miring*
           </Text>
         </Group>
-        <Button
-          size="small"
-          type={showPreview ? "primary" : "text"}
-          icon={showPreview ? <IconPencil size={14} /> : <IconEye size={14} />}
-          onClick={() => setShowPreview(!showPreview)}
-        >
-          {showPreview ? "Edit" : "Preview"}
-        </Button>
+        <Group gap={4}>
+          <AIRefineButton
+            value={value}
+            onChange={onChange}
+            disabled={showPreview}
+            onLoadingChange={setAiLoading}
+          />
+          <Button
+            size="small"
+            type={showPreview ? "primary" : "text"}
+            icon={
+              showPreview ? <IconPencil size={14} /> : <IconEye size={14} />
+            }
+            onClick={() => setShowPreview(!showPreview)}
+            disabled={aiLoading}
+          >
+            {showPreview ? "Edit" : "Preview"}
+          </Button>
+        </Group>
       </Group>
 
       {showPreview ? (
@@ -192,7 +353,13 @@ const SimpleMarkdownEditor = ({ value, onChange, placeholder, rows = 8 }) => {
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
           rows={rows}
-          style={{ resize: "none" }}
+          disabled={aiLoading}
+          style={{
+            resize: "none",
+            transition: "all 0.3s ease",
+            backgroundColor: aiLoading ? "#f5f5f5" : undefined,
+            cursor: aiLoading ? "not-allowed" : undefined,
+          }}
           onKeyDown={(e) => {
             if (e.ctrlKey || e.metaKey) {
               if (e.key === "b") {

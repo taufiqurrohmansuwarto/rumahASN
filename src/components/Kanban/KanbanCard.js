@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Card, Avatar, Typography, Tooltip, Flex, Progress, Tag } from "antd";
 import {
   IconPaperclip,
@@ -9,10 +10,13 @@ import dayjs from "dayjs";
 import PriorityBadge from "./PriorityBadge";
 import LabelBadge from "./LabelBadge";
 import DueDateBadge from "./DueDateBadge";
+import { ClickableAvatarGroup } from "./ClickableAvatar";
 
 const { Text } = Typography;
 
 function KanbanCard({ task, index, onClick, isDragging }) {
+  const [isHovered, setIsHovered] = useState(false);
+
   const {
     attributes,
     listeners,
@@ -57,7 +61,14 @@ function KanbanCard({ task, index, onClick, isDragging }) {
   const daysOverdue = isOverdue ? dayjs().diff(dayjs(task.due_date), "day") : 0;
 
   return (
-    <div ref={setNodeRef} style={style} {...listeners} {...attributes}>
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...listeners}
+      {...attributes}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
       <Card
         size="small"
         hoverable
@@ -73,12 +84,15 @@ function KanbanCard({ task, index, onClick, isDragging }) {
           boxShadow:
             isDragging || isDraggingNow
               ? "0 8px 16px rgba(250, 84, 28, 0.15)"
+              : isHovered
+              ? "0 6px 16px rgba(0, 0, 0, 0.1)"
               : isOverdue
               ? "0 2px 8px rgba(255, 77, 79, 0.15)"
               : "0 1px 2px rgba(0,0,0,0.03)",
           cursor: "pointer",
           backgroundColor: isOverdue ? "#fff2f0" : "#fff",
           transition: "all 0.2s ease",
+          transform: isHovered && !isDraggingNow ? "translateY(-2px)" : "none",
         }}
         styles={{
           body: { padding: 12 },
@@ -126,13 +140,29 @@ function KanbanCard({ task, index, onClick, isDragging }) {
           style={{
             fontSize: 13,
             display: "block",
-            marginBottom: 8,
+            marginBottom: task.description ? 4 : 8,
             lineHeight: 1.4,
           }}
           ellipsis={{ rows: 2 }}
         >
           {task.title}
         </Text>
+
+        {/* Description - truncated */}
+        {task.description && (
+          <Text
+            type="secondary"
+            style={{
+              fontSize: 12,
+              display: "block",
+              marginBottom: 8,
+              lineHeight: 1.4,
+            }}
+            ellipsis={{ rows: 1 }}
+          >
+            {task.description}
+          </Text>
+        )}
 
         {/* Subtask Progress */}
         {hasSubtasks && (
@@ -197,31 +227,14 @@ function KanbanCard({ task, index, onClick, isDragging }) {
             )}
           </Flex>
 
-          {/* Right: Assignees */}
+          {/* Right: Assignees - Clickable untuk kirim email */}
           {assignees.length > 0 && (
-            <Avatar.Group
-              max={{
-                count: 3,
-                style: {
-                  backgroundColor: "#fa541c",
-                  fontSize: 10,
-                  width: 24,
-                  height: 24,
-                },
-              }}
-              size={24}
-            >
-              {assignees.map((assignee, idx) => (
-                <Tooltip
-                  key={assignee.custom_id || idx}
-                  title={assignee.username}
-                >
-                  <Avatar src={assignee.image} size={24}>
-                    {assignee.username?.charAt(0)?.toUpperCase()}
-                  </Avatar>
-                </Tooltip>
-              ))}
-            </Avatar.Group>
+            <ClickableAvatarGroup
+              users={assignees}
+              maxCount={3}
+              size={26}
+              showEmailIcon={true}
+            />
           )}
         </Flex>
       </Card>

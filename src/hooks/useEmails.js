@@ -31,6 +31,8 @@ import {
   markAsSpam,
   markAsUnread,
   moveToFolder,
+  // AI refine text
+  refineText,
   removeLabelFromEmail,
   // reply to email
   replyToEmail,
@@ -563,6 +565,25 @@ export const useDeleteAttachment = () => {
     onError: (error) => {
       const errorMessage =
         error.response?.data?.message || "Gagal menghapus file";
+      message.error(errorMessage);
+    },
+  });
+};
+
+// ==========================================
+// AI REFINE TEXT HOOKS
+// ==========================================
+
+/**
+ * Hook untuk memperhalus/memperbaiki teks menggunakan AI
+ * Seperti fitur Apple Intelligence untuk writing
+ */
+export const useRefineText = () => {
+  return useMutation({
+    mutationFn: refineText,
+    onError: (error) => {
+      const errorMessage =
+        error.response?.data?.message || "Gagal memproses teks dengan AI";
       message.error(errorMessage);
     },
   });

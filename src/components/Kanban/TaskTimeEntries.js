@@ -16,7 +16,12 @@ import {
   Popconfirm,
   Flex,
 } from "antd";
-import { IconPlus, IconTrash, IconClock, IconHourglass } from "@tabler/icons-react";
+import {
+  IconPlus,
+  IconTrash,
+  IconClock,
+  IconHourglass,
+} from "@tabler/icons-react";
 import dayjs from "dayjs";
 import {
   logTimeEntry,
@@ -25,12 +30,7 @@ import {
 
 const { Text } = Typography;
 
-function TaskTimeEntries({
-  taskId,
-  timeEntries,
-  estimatedHours,
-  actualHours,
-}) {
+function TaskTimeEntries({ taskId, timeEntries, estimatedHours, actualHours }) {
   const [isAdding, setIsAdding] = useState(false);
   const [hours, setHours] = useState(null);
   const [description, setDescription] = useState("");
@@ -71,7 +71,9 @@ function TaskTimeEntries({
       logTime({
         hours: parseFloat(hours),
         description: description || "",
-        logged_date: loggedDate ? loggedDate.format("YYYY-MM-DD") : dayjs().format("YYYY-MM-DD"),
+        logged_date: loggedDate
+          ? loggedDate.format("YYYY-MM-DD")
+          : dayjs().format("YYYY-MM-DD"),
       });
     }
   };
@@ -82,16 +84,27 @@ function TaskTimeEntries({
   const isOverEstimate = estimatedHours && actualHours > estimatedHours;
 
   return (
-    <div>
+    <div style={{ padding: "12px 16px 24px 16px" }}>
       {/* Time Summary */}
-      <Card size="small" style={{ marginBottom: 16, backgroundColor: "#fafafa" }}>
-        <Flex justify="space-between" align="center" style={{ marginBottom: estimatedHours > 0 ? 12 : 0 }}>
+      <Card
+        size="small"
+        style={{ marginBottom: 16, backgroundColor: "#fafafa" }}
+      >
+        <Flex
+          justify="space-between"
+          align="center"
+          style={{ marginBottom: estimatedHours > 0 ? 12 : 0 }}
+        >
           <Space size={4}>
             <IconHourglass size={16} color="#8c8c8c" />
-            <Text strong style={{ fontSize: 13 }}>Waktu Tercatat</Text>
+            <Text strong style={{ fontSize: 13 }}>
+              Waktu Tercatat
+            </Text>
           </Space>
           <Space size={8}>
-            <Tag color="blue" style={{ margin: 0 }}>{actualHours || 0} jam</Tag>
+            <Tag color="blue" style={{ margin: 0 }}>
+              {actualHours || 0} jam
+            </Tag>
             {estimatedHours && (
               <>
                 <Text type="secondary">/</Text>
@@ -106,12 +119,25 @@ function TaskTimeEntries({
             <Progress
               percent={Math.round(progress)}
               size="small"
-              status={isOverEstimate ? "exception" : progress > 80 ? "active" : "normal"}
-              strokeColor={isOverEstimate ? "#ff4d4f" : progress > 80 ? "#faad14" : "#1890ff"}
+              status={
+                isOverEstimate
+                  ? "exception"
+                  : progress > 80
+                  ? "active"
+                  : "normal"
+              }
+              strokeColor={
+                isOverEstimate
+                  ? "#ff4d4f"
+                  : progress > 80
+                  ? "#faad14"
+                  : "#1890ff"
+              }
             />
             {isOverEstimate && (
               <Text type="danger" style={{ fontSize: 11 }}>
-                Melebihi estimasi {(actualHours - estimatedHours).toFixed(1)} jam
+                Melebihi estimasi {(actualHours - estimatedHours).toFixed(1)}{" "}
+                jam
               </Text>
             )}
           </div>
@@ -187,19 +213,28 @@ function TaskTimeEntries({
         <List
           dataSource={timeEntries}
           renderItem={(entry) => (
-            <Card size="small" style={{ marginBottom: 8 }} bodyStyle={{ padding: 12 }}>
+            <Card
+              size="small"
+              style={{ marginBottom: 8 }}
+              bodyStyle={{ padding: 12 }}
+            >
               <Flex justify="space-between" align="center">
                 <Flex gap={12} align="center" style={{ flex: 1 }}>
                   <IconClock size={16} color="#8c8c8c" />
                   <div>
                     <Space size={8} style={{ marginBottom: 4 }}>
-                      <Tag color="blue" style={{ margin: 0 }}>{entry.hours} jam</Tag>
+                      <Tag color="blue" style={{ margin: 0 }}>
+                        {entry.hours} jam
+                      </Tag>
                       <Text type="secondary" style={{ fontSize: 11 }}>
                         {dayjs(entry.logged_date).format("DD MMM YYYY")}
                       </Text>
                     </Space>
                     {entry.description && (
-                      <Text type="secondary" style={{ fontSize: 12, display: "block" }}>
+                      <Text
+                        type="secondary"
+                        style={{ fontSize: 12, display: "block" }}
+                      >
                         {entry.description}
                       </Text>
                     )}

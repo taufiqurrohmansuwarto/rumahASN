@@ -96,7 +96,9 @@ function AttachmentItem({ attachment, baseUrl, onDelete }) {
         <Button
           type="text"
           size="small"
-          icon={isLink ? <IconExternalLink size={14} /> : <IconDownload size={14} />}
+          icon={
+            isLink ? <IconExternalLink size={14} /> : <IconDownload size={14} />
+          }
           href={fileUrl}
           target="_blank"
           style={{ height: 24, width: 24, padding: 0 }}
@@ -211,10 +213,7 @@ function TaskAttachments({ taskId, attachments }) {
         >
           <Flex vertical align="center" gap={4} style={{ padding: "8px 0" }}>
             <IconUpload size={24} color={isUploading ? "#bfbfbf" : "#8c8c8c"} />
-            <Text
-              type="secondary"
-              style={{ fontSize: 12 }}
-            >
+            <Text type="secondary" style={{ fontSize: 12 }}>
               {isUploading ? "Mengupload..." : "Drag file atau klik"}
             </Text>
           </Flex>
@@ -261,7 +260,7 @@ function TaskAttachments({ taskId, attachments }) {
   ];
 
   return (
-    <div>
+    <div style={{ padding: "12px 16px 24px 16px" }}>
       {/* Upload/Link Tabs */}
       <Tabs
         activeKey={activeTab}
