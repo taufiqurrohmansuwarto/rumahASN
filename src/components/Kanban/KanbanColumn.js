@@ -1,4 +1,4 @@
-import { Card, Button, Badge, Dropdown, Typography, Flex, Tooltip } from "antd";
+import { Button, Badge, Dropdown, Typography, Flex, Tooltip } from "antd";
 import {
   IconPlus,
   IconDots,
@@ -52,37 +52,29 @@ function KanbanColumn({
   ];
 
   return (
-    <Card
-      size="small"
+    <div
       style={{
         minWidth: 300,
         maxWidth: 300,
+        width: 300,
         backgroundColor: "#fafafa",
         display: "flex",
         flexDirection: "column",
-        maxHeight: "calc(100vh - 220px)",
+        height: "calc(100vh - 220px)",
         borderRadius: 12,
-        overflow: "hidden",
         border: "1px solid #f0f0f0",
-      }}
-      styles={{
-        body: { padding: 0, display: "flex", flexDirection: "column", flex: 1 },
+        flexShrink: 0,
       }}
     >
-      {/* Orange Accent Top */}
-      <div
-        style={{
-          height: 3,
-          background: column.color || "#6B7280",
-        }}
-      />
-
-      {/* Column Header */}
+      {/* Column Header with colored top border */}
       <div
         style={{
           padding: "12px 12px 8px 12px",
           borderBottom: "1px solid #f0f0f0",
           backgroundColor: "#fff",
+          borderRadius: "12px 12px 0 0",
+          flexShrink: 0,
+          borderTop: `4px solid ${column.color || "#6B7280"}`,
         }}
       >
         <Flex justify="space-between" align="center">
@@ -142,14 +134,15 @@ function KanbanColumn({
         )}
       </div>
 
-      {/* Droppable Area */}
+      {/* Droppable Area - Scrollable */}
       <div
         ref={setNodeRef}
         style={{
           flex: 1,
           padding: 8,
           overflowY: "auto",
-          minHeight: 100,
+          overflowX: "hidden",
+          minHeight: 0, // Important for flex scroll
           backgroundColor: isOver ? "#fff7e6" : "transparent",
           transition: "background-color 0.2s ease",
         }}
@@ -179,12 +172,14 @@ function KanbanColumn({
         ))}
       </div>
 
-      {/* Add Task Footer */}
+      {/* Add Task Footer - Always Visible */}
       <div
         style={{
           padding: 8,
           borderTop: "1px solid #f0f0f0",
           backgroundColor: "#fff",
+          borderRadius: "0 0 12px 12px",
+          flexShrink: 0,
         }}
       >
         <Button
@@ -202,7 +197,7 @@ function KanbanColumn({
           Tambah task
         </Button>
       </div>
-    </Card>
+    </div>
   );
 }
 
