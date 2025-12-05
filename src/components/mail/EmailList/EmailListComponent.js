@@ -275,7 +275,19 @@ const EmailListComponent = ({
     if (config.allowMarkAsRead && !email.is_read) {
       await markReadMutation.mutateAsync(email.id);
     }
-    router.push(`/mails/${folder}/${email.id}`);
+
+    // Tambahkan query params untuk navigasi
+    const emailIndex = emails.findIndex((e) => e.id === email.id);
+    const emailIds = emails.map((e) => e.id).join(",");
+
+    router.push({
+      pathname: `/mails/${folder}/${email.id}`,
+      query: {
+        idx: emailIndex,
+        total: emails.length,
+        ids: emailIds,
+      },
+    });
   };
 
   const handleStarClick = (emailId) => {

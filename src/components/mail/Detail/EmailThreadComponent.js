@@ -1,299 +1,327 @@
 // src/components/mail/Detail/EmailThreadComponent.js
 import {
   useDeleteEmail,
-  useMarkAsRead,
   useMarkAsUnread,
   useMoveToFolder,
   useToggleStar,
-  useUpdatePriority,
 } from "@/hooks/useEmails";
-import useScrollRestoration from "@/hooks/useScrollRestoration";
 import {
   Avatar,
-  Badge,
   Box,
-  Chip,
-  Collapse,
-  Divider,
   Group,
   Paper,
+  Popover,
   Stack,
   Text,
-  Title,
   UnstyledButton,
 } from "@mantine/core";
 import {
+  IconArchive,
+  IconArrowBackUp,
+  IconArrowForwardUp,
   IconChevronDown,
-  IconChevronUp,
-  IconMessages,
+  IconClock,
+  IconDots,
+  IconMail,
   IconPaperclip,
+  IconStar,
+  IconStarFilled,
+  IconTrash,
 } from "@tabler/icons-react";
-import { message } from "antd";
+import { Button, Dropdown, Tooltip, message } from "antd";
 import dayjs from "dayjs";
 import "dayjs/locale/id";
 import { useState } from "react";
-import EmailActionButtons from "./EmailActionButtons";
 import EmailAttachmentsDisplay from "./EmailAttachmentsDisplay";
-import EmailContentDisplay from "./EmailContentDisplay";
-import EmailDetailHeader from "./EmailDetailHeader";
 
-// Single email in thread
+dayjs.locale("id");
+
+// Single email item dalam thread - style Gmail
 const ThreadEmailItem = ({
   email,
-  isCurrentEmail,
   isLatest,
   onReply,
   onReplyAll,
   onForward,
-  threadEmails,
-  currentIndex,
 }) => {
+  const [expanded, setExpanded] = useState(isLatest);
   const toggleStarMutation = useToggleStar();
   const deleteEmailMutation = useDeleteEmail();
-  const moveToFolderMutation = useMoveToFolder();
   const markAsUnreadMutation = useMarkAsUnread();
-  const markAsReadMutation = useMarkAsRead();
-  const updatePriorityMutation = useUpdatePriority();
+  const moveToFolderMutation = useMoveToFolder();
 
-  const [expanded, setExpanded] = useState(isLatest || isCurrentEmail);
+  const senderName = email.sender?.username || email.sender_name || "?";
+  const senderImage = email.sender?.image || email.sender_image;
+  const recipientsTo = email.recipients?.to || [];
+  const recipientsCc = email.recipients?.cc || [];
 
-  const formatTime = (date) => dayjs(date).format("D MMM YYYY, HH:mm");
-
-  const getRecipientSummary = () => {
-    const toCount = email.recipients?.to?.length || 0;
-    const ccCount = email.recipients?.cc?.length || 0;
-
-    if (toCount === 0) return "";
-    if (toCount === 1 && ccCount === 0) {
-      return `ke ${email.recipients.to[0]?.user?.username || "Tidak dikenal"}`;
+  const formatDate = (date) => {
+    const now = dayjs();
+    const emailDate = dayjs(date);
+    if (now.diff(emailDate, "day") === 0) {
+      return emailDate.format("HH:mm");
     }
-    let summary = `ke ${toCount} orang`;
-    if (ccCount > 0) summary += `, cc ${ccCount}`;
-    return summary;
+    if (now.diff(emailDate, "day") < 7) {
+      return emailDate.format("ddd, HH:mm");
+    }
+    return emailDate.format("D MMM YYYY, HH:mm");
   };
 
-  const isReplyEmail = () => {
-    if (email.parent_id) return true;
-    if (email.in_reply_to) return true;
-    if (email.references?.length) return true;
-    if ((email.subject || "").toLowerCase().includes("re:")) return true;
-    if (
-      currentIndex > 0 &&
-      (email.content || "").match(/(Pada .+? menulis:|On .+? wrote:)/)
-    )
-      return true;
-    return false;
+  const formatRecipients = (list) => {
+    if (!list || list.length === 0) return "saya";
+    return list.map((r) => r.user?.username || r.name || "?").join(", ");
   };
 
-  const getQuotedContent = () => {
-    if (currentIndex === 0) return "";
-
-    let parentEmail = null;
-
-    if (email.parent_id) {
-      parentEmail = threadEmails.find((e) => e.id === email.parent_id);
-    }
-    if (!parentEmail && email.in_reply_to) {
-      parentEmail = threadEmails.find((e) => e.id === email.in_reply_to);
-    }
-    if (!parentEmail && email.references) {
-      const refs = Array.isArray(email.references)
-        ? email.references
-        : [email.references];
-      for (const ref of refs) {
-        parentEmail = threadEmails.find((e) => e.id === ref);
-        if (parentEmail) break;
-      }
-    }
-    if (!parentEmail && currentIndex > 0) {
-      parentEmail = threadEmails[currentIndex - 1];
-    }
-
-    if (!parentEmail) return "";
-
-    const senderName = parentEmail.sender?.username || "Tidak dikenal";
-    const formattedDate = dayjs(parentEmail.created_at)
-      .locale("id")
-      .format("ddd, D MMM YYYY [pukul] HH:mm");
-
-    return `Pada ${formattedDate} ${senderName} menulis:
-
-${parentEmail.content || ""}`;
+  const getContentPreview = () => {
+    const content = email.content || "";
+    return content.length > 80 ? content.substring(0, 80) + "..." : content;
   };
 
-  const getFullContent = () => {
-    const currentContent = email.content || "";
-    if (!isReplyEmail()) return currentContent;
-    const quotedContent = getQuotedContent();
-    if (!quotedContent) return currentContent;
-    return `${currentContent}
-
-${quotedContent}`;
-  };
-
-  const handleToggleStar = async () => {
+  const handleToggleStar = async (e) => {
+    e?.stopPropagation?.();
     try {
       await toggleStarMutation.mutateAsync(email.id);
-    } catch {
-      message.error("Gagal");
-    }
+    } catch {}
   };
 
-  const handleUpdatePriority = async (priority) => {
+  const handleDelete = async () => {
     try {
-      await updatePriorityMutation.mutateAsync({ emailId: email.id, priority });
+      await deleteEmailMutation.mutateAsync({ emailId: email.id, permanent: false });
+      message.success("Dipindahkan ke sampah");
     } catch {
-      message.error("Gagal");
+      message.error("Gagal menghapus");
     }
   };
 
-  const handleMarkAsUnread = async () => {
+  const handleMarkUnread = async () => {
     try {
       await markAsUnreadMutation.mutateAsync(email.id);
+      message.success("Ditandai belum dibaca");
     } catch {
       message.error("Gagal");
     }
   };
 
-  const handleMarkAsRead = async () => {
+  const handleArchive = async () => {
     try {
-      await markAsReadMutation.mutateAsync(email.id);
+      await moveToFolderMutation.mutateAsync({ emailId: email.id, folder: "archive" });
+      message.success("Diarsipkan");
     } catch {
-      message.error("Gagal");
+      message.error("Gagal mengarsipkan");
     }
   };
 
-  const handleMoveToFolder = async (folder) => {
-    try {
-      await moveToFolderMutation.mutateAsync({ emailId: email.id, folder });
-    } catch {
-      message.error("Gagal");
-    }
-  };
+  // Dropdown menu items
+  const moreMenuItems = [
+    {
+      key: "reply",
+      icon: <IconArrowBackUp size={14} />,
+      label: "Balas",
+      onClick: () => onReply?.(email),
+    },
+    {
+      key: "forward",
+      icon: <IconArrowForwardUp size={14} />,
+      label: "Teruskan",
+      onClick: () => onForward?.(email),
+    },
+    { type: "divider" },
+    {
+      key: "unread",
+      icon: <IconMail size={14} />,
+      label: "Tandai belum dibaca",
+      onClick: handleMarkUnread,
+    },
+    {
+      key: "star",
+      icon: email.is_starred ? <IconStarFilled size={14} style={{ color: "#fab005" }} /> : <IconStar size={14} />,
+      label: email.is_starred ? "Hapus bintang" : "Beri bintang",
+      onClick: handleToggleStar,
+    },
+    { type: "divider" },
+    {
+      key: "archive",
+      icon: <IconArchive size={14} />,
+      label: "Arsipkan",
+      onClick: handleArchive,
+    },
+    {
+      key: "delete",
+      icon: <IconTrash size={14} />,
+      label: "Hapus",
+      danger: true,
+      onClick: handleDelete,
+    },
+  ];
 
-  const handleReplyAction = (replyAll = false) => {
-    if (replyAll) {
-      onReplyAll?.(email);
-    } else {
-      onReply?.(email);
-    }
-  };
-
-  const handleForward = () => onForward?.(email);
-
-  const senderName = email.sender?.username || "Tidak dikenal";
-
-  return (
-    <Paper
-      withBorder
-      mb="sm"
-      radius="md"
-      style={{
-        borderColor: isCurrentEmail ? "#228be6" : undefined,
-        borderWidth: isCurrentEmail ? 2 : 1,
-      }}
-    >
-      {/* Collapsed Header */}
-      {!expanded && (
-        <UnstyledButton
-          w="100%"
-          p="sm"
-          onClick={() => setExpanded(true)}
-          style={{ borderRadius: 8 }}
-        >
-          <Group justify="space-between">
-            <Group gap="sm">
-              <Avatar
-                src={email.sender?.image}
-                radius="xl"
-                size="sm"
-                color="blue"
-              >
-                {senderName.charAt(0).toUpperCase()}
-              </Avatar>
-              <Box>
-                <Group gap="xs">
-                  <Text size="sm" fw={500}>
-                    {senderName}
-                  </Text>
-                  {isCurrentEmail && (
-                    <Chip size="xs" checked={false} color="blue">
-                      Saat ini
-                    </Chip>
-                  )}
-                  {!email.is_read && (
-                    <Badge size="xs" variant="dot" color="blue" />
-                  )}
-                </Group>
-                <Group gap="xs">
-                  <Text size="xs" c="dimmed">
-                    {getRecipientSummary()}
-                  </Text>
-                  <Text size="xs" c="dimmed">
-                    • {formatTime(email.created_at)}
-                  </Text>
-                </Group>
-              </Box>
+  // Collapsed view - seperti Gmail
+  if (!expanded) {
+    return (
+      <UnstyledButton
+        w="100%"
+        onClick={() => setExpanded(true)}
+        style={{
+          borderBottom: "1px solid #f0f0f0",
+          padding: "10px 12px",
+          transition: "background 0.15s",
+          "&:hover": { backgroundColor: "#f8f9fa" },
+        }}
+      >
+        <Group gap="sm" wrap="nowrap">
+          <Avatar src={senderImage} radius="xl" size={32} color="blue">
+            {senderName.charAt(0).toUpperCase()}
+          </Avatar>
+          <Box style={{ flex: 1, minWidth: 0 }}>
+            <Group gap={6} wrap="nowrap">
+              <Text size="xs" fw={email.is_read ? 400 : 600} truncate>
+                {senderName}
+              </Text>
+              <Text size="xs" c="dimmed" truncate style={{ flex: 1 }}>
+                — {getContentPreview()}
+              </Text>
             </Group>
-
-            <Group gap="xs">
-              {email.attachments?.length > 0 && (
-                <Chip size="xs" checked={false} variant="light">
-                  <IconPaperclip size={12} />
-                  {email.attachments.length}
-                </Chip>
-              )}
-              <IconChevronDown size={16} style={{ color: "#868e96" }} />
-            </Group>
+          </Box>
+          <Group gap={4}>
+            {email.attachments?.length > 0 && (
+              <IconPaperclip size={14} style={{ color: "#868e96" }} />
+            )}
+            <Text size="xs" c="dimmed">
+              {formatDate(email.created_at)}
+            </Text>
           </Group>
-        </UnstyledButton>
+        </Group>
+      </UnstyledButton>
+    );
+  }
+
+  // Expanded view - detail email
+  return (
+    <Box style={{ borderBottom: "1px solid #e9ecef" }}>
+      {/* Header */}
+      <Box px="sm" py="xs" style={{ backgroundColor: "#fafafa" }}>
+        <Group justify="space-between" align="flex-start">
+          <Group gap={10}>
+            <Avatar src={senderImage} size={36} radius="xl" color="blue">
+              {senderName.charAt(0).toUpperCase()}
+            </Avatar>
+            <Box>
+              <Text size="sm" fw={600}>
+                {senderName}
+              </Text>
+              <Popover position="bottom-start" withArrow width={280}>
+                <Popover.Target>
+                  <Group gap={2} style={{ cursor: "pointer" }}>
+                    <Text size="xs" c="dimmed">
+                      kepada {formatRecipients(recipientsTo)}
+                    </Text>
+                    <IconChevronDown size={12} style={{ color: "#868e96" }} />
+                  </Group>
+                </Popover.Target>
+                <Popover.Dropdown p="xs">
+                  <Stack gap={4}>
+                    <Group gap={6}>
+                      <Text size="xs" c="dimmed" w={45}>dari:</Text>
+                      <Text size="xs" fw={500}>{senderName}</Text>
+                    </Group>
+                    <Group gap={6}>
+                      <Text size="xs" c="dimmed" w={45}>kepada:</Text>
+                      <Text size="xs">{formatRecipients(recipientsTo)}</Text>
+                    </Group>
+                    {recipientsCc.length > 0 && (
+                      <Group gap={6}>
+                        <Text size="xs" c="dimmed" w={45}>cc:</Text>
+                        <Text size="xs">{formatRecipients(recipientsCc)}</Text>
+                      </Group>
+                    )}
+                    <Group gap={6}>
+                      <Text size="xs" c="dimmed" w={45}>tanggal:</Text>
+                      <Text size="xs">{dayjs(email.created_at).format("D MMM YYYY, HH:mm")}</Text>
+                    </Group>
+                  </Stack>
+                </Popover.Dropdown>
+              </Popover>
+            </Box>
+          </Group>
+
+          <Group gap={6}>
+            <Group gap={2}>
+              <IconClock size={12} style={{ color: "#868e96" }} />
+              <Text size="xs" c="dimmed">
+                {formatDate(email.created_at)}
+              </Text>
+            </Group>
+            <Tooltip title={email.is_starred ? "Hapus bintang" : "Beri bintang"}>
+              <UnstyledButton onClick={handleToggleStar}>
+                {email.is_starred ? (
+                  <IconStarFilled size={16} style={{ color: "#fab005" }} />
+                ) : (
+                  <IconStar size={16} style={{ color: "#adb5bd" }} />
+                )}
+              </UnstyledButton>
+            </Tooltip>
+            <Tooltip title="Balas">
+              <UnstyledButton onClick={() => onReply?.(email)}>
+                <IconArrowBackUp size={16} style={{ color: "#868e96" }} />
+              </UnstyledButton>
+            </Tooltip>
+            <Dropdown
+              menu={{ items: moreMenuItems }}
+              trigger={["click"]}
+              placement="bottomRight"
+            >
+              <Tooltip title="Lainnya">
+                <UnstyledButton>
+                  <IconDots size={16} style={{ color: "#868e96" }} />
+                </UnstyledButton>
+              </Tooltip>
+            </Dropdown>
+            <Tooltip title="Tutup">
+              <UnstyledButton onClick={() => setExpanded(false)}>
+                <IconChevronDown size={16} style={{ color: "#868e96", transform: "rotate(180deg)" }} />
+              </UnstyledButton>
+            </Tooltip>
+          </Group>
+        </Group>
+      </Box>
+
+      {/* Content */}
+      <Box px="sm" py="md">
+        <Text size="sm" style={{ whiteSpace: "pre-wrap", lineHeight: 1.6 }}>
+          {email.content || "(Tidak ada konten)"}
+        </Text>
+      </Box>
+
+      {/* Attachments */}
+      {email.attachments?.length > 0 && (
+        <Box px="sm" pb="sm">
+          <Group gap={4} mb={6}>
+            <IconPaperclip size={12} />
+            <Text size="xs" c="dimmed">
+              {email.attachments.length} lampiran
+            </Text>
+          </Group>
+          <EmailAttachmentsDisplay attachments={email.attachments} />
+        </Box>
       )}
 
-      {/* Expanded Content */}
-      <Collapse in={expanded}>
-        <Box p="md">
-          <Group justify="flex-end" mb="xs">
-            <UnstyledButton onClick={() => setExpanded(false)}>
-              <IconChevronUp size={16} style={{ color: "#868e96" }} />
-            </UnstyledButton>
-          </Group>
-
-          <EmailDetailHeader
-            email={email}
-            onToggleStar={handleToggleStar}
-            isStarLoading={toggleStarMutation.isLoading}
-            onToggleRead={handleMarkAsRead}
-            isReadLoading={markAsReadMutation.isLoading}
-            onToggleUnread={handleMarkAsUnread}
-            isUnreadLoading={markAsUnreadMutation.isLoading}
-            onMoveToFolder={handleMoveToFolder}
-            isMoveToFolderLoading={moveToFolderMutation.isLoading}
-            recipients={email.recipients}
-            onRefresh={() => {}}
-            onUpdatePriority={handleUpdatePriority}
-            isUpdatePriorityLoading={updatePriorityMutation.isLoading}
-          />
-
-          <Paper p="sm" bg="gray.0" radius="sm" mb="md">
-            <EmailContentDisplay content={getFullContent()} />
-          </Paper>
-
-          {email.attachments?.length > 0 && (
-            <EmailAttachmentsDisplay attachments={email.attachments} />
-          )}
-
-          <Divider my="sm" />
-
-          <EmailActionButtons
-            email={email}
-            onReply={handleReplyAction}
-            onReplyAll={() => handleReplyAction(true)}
-            onForward={handleForward}
-            loading={{}}
-          />
-        </Box>
-      </Collapse>
-    </Paper>
+      {/* Action Buttons */}
+      <Group px="sm" pb="sm" gap={8}>
+        <Button
+          size="small"
+          icon={<IconArrowBackUp size={14} />}
+          onClick={() => onReply?.(email)}
+        >
+          Balas
+        </Button>
+        <Button
+          size="small"
+          icon={<IconArrowForwardUp size={14} />}
+          onClick={() => onForward?.(email)}
+        >
+          Teruskan
+        </Button>
+      </Group>
+    </Box>
   );
 };
 
@@ -305,13 +333,11 @@ const EmailThreadComponent = ({
   onReplyAll,
   onForward,
 }) => {
-  useScrollRestoration();
-
   if (!threadData || !threadData.thread_emails) return null;
 
-  const { thread_emails, current_email_id, thread_count, thread_subject } =
-    threadData;
+  const { thread_emails, current_email_id, thread_count } = threadData;
 
+  // Flatten thread dan sort by created_at
   const flattenThread = (emails) => {
     const flattened = [];
     const processEmail = (email) => {
@@ -329,47 +355,37 @@ const EmailThreadComponent = ({
   const flatEmails = flattenThread(thread_emails);
 
   return (
-    <Stack gap="sm">
-      {/* Thread Header */}
+    <Paper withBorder radius="md" style={{ overflow: "hidden" }}>
+      {/* Thread Header - hanya tampil jika ada lebih dari 1 email */}
       {thread_count > 1 && (
-        <Paper p="sm" withBorder radius="md" bg="gray.0">
-          <Group gap="xs" mb={4}>
-            <IconMessages size={18} style={{ color: "#228be6" }} />
-            <Title order={5} c="blue">
-              Percakapan ({thread_count})
-            </Title>
-          </Group>
-          {thread_subject && (
-            <Text size="xs" c="dimmed">
-              {thread_subject}
-            </Text>
-          )}
-        </Paper>
+        <Box
+          px="sm"
+          py={6}
+          style={{
+            backgroundColor: "#f8f9fa",
+            borderBottom: "1px solid #e9ecef",
+          }}
+        >
+          <Text size="xs" c="dimmed">
+            {thread_count} pesan dalam percakapan ini
+          </Text>
+        </Box>
       )}
 
       {/* Thread Emails */}
-      <Box
-        style={{
-          maxHeight: "calc(100vh - 280px)",
-          overflowY: "auto",
-          paddingRight: 8,
-        }}
-      >
+      <Box style={{ maxHeight: "calc(100vh - 260px)", overflowY: "auto" }}>
         {flatEmails.map((email, index) => (
           <ThreadEmailItem
             key={email.id}
             email={email}
-            isCurrentEmail={email.id === current_email_id}
             isLatest={index === flatEmails.length - 1}
             onReply={onReply}
             onReplyAll={onReplyAll}
             onForward={onForward}
-            threadEmails={flatEmails}
-            currentIndex={index}
           />
         ))}
       </Box>
-    </Stack>
+    </Paper>
   );
 };
 

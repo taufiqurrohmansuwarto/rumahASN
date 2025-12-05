@@ -4,6 +4,7 @@ import { Breadcrumb, Empty, Grid, Spin } from "antd";
 
 import GmailLayout from "@/components/GmailLayout";
 import EmailDetailComponent from "@/components/mail/Detail/EmailDetailComponent";
+import EmailNavigation from "@/components/mail/Detail/EmailNavigation";
 import EmailThreadComponent from "@/components/mail/Detail/EmailThreadComponent";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -44,6 +45,7 @@ const InboxMailDetail = () => {
       title="Detail Pesan"
       subTitle={email?.subject}
       onBack={() => router.back()}
+      extra={<EmailNavigation currentEmailId={id} basePath="/mails/inbox" />}
       breadcrumbRender={() => (
         <Breadcrumb>
           <Breadcrumb.Item>

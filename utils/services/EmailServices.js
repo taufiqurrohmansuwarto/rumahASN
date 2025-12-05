@@ -53,15 +53,16 @@ class EmailService {
       console.log("🌳 Thread root determined:", rootId);
 
       // ✅ FIXED: Get all emails in thread using better recursive CTE
-      const threadQuery = `
-        WITH RECURSIVE email_thread AS (
+      console.log("🔍 Executing thread query with:", { rootId, userId });
+
+      const threadEmails = await Email.knex().raw(
+        `WITH RECURSIVE email_thread AS (
           -- Base case: root email
           SELECT 
             e.*,
-            0 as depth,
-            ARRAY[e.created_at, e.id] as sort_path
+            0 as depth
           FROM rasn_mail.emails e 
-          WHERE e.id = $1
+          WHERE e.id = ?
           AND e.is_deleted = false
           
           UNION ALL
@@ -69,12 +70,11 @@ class EmailService {
           -- Recursive case: all replies
           SELECT 
             e.*,
-            et.depth + 1,
-            et.sort_path || ARRAY[e.created_at, e.id]
+            et.depth + 1
           FROM rasn_mail.emails e
           INNER JOIN email_thread et ON e.parent_id = et.id
           WHERE e.is_deleted = false
-          AND et.depth < 50 -- Prevent infinite recursion
+          AND et.depth < 50
         )
         SELECT 
           et.*,
@@ -87,18 +87,12 @@ class EmailService {
         FROM email_thread et
         LEFT JOIN public.users s ON et.sender_id = s.custom_id
         LEFT JOIN rasn_mail.email_user_actions eua ON (
-          et.id = eua.email_id AND eua.user_id = $2
+          et.id = eua.email_id AND eua.user_id = ?
         )
         WHERE (eua.permanently_deleted IS NULL OR eua.permanently_deleted = false)
-        ORDER BY et.sort_path
-      `;
-
-      console.log("🔍 Executing thread query with:", { rootId, userId });
-
-      const threadEmails = await Email.knex().raw(threadQuery, [
-        "rYx_uIbo02uje7k6nQ5ZYDtjs",
-        "master|75235",
-      ]);
+        ORDER BY et.created_at ASC`,
+        [rootId, userId]
+      );
       const emails = threadEmails.rows;
 
       console.log("📊 Thread query results:", {
