@@ -31,6 +31,7 @@ import {
   Input,
   Modal,
   Result,
+  Select,
   Skeleton,
   Space,
   Steps,
@@ -175,26 +176,25 @@ const FormPendampinganHukum = ({ user, loading: userLoading, onSubmit, submitLoa
 
           {/* Jenis Perkara */}
           <div style={{ marginTop: 16 }}>
-            <Text size="xs" fw={500} mb={8}>Jenis Perkara:</Text>
+            <Text size="xs" fw={500} mb={4}>Jenis Perkara:</Text>
             <Form.Item
               name="jenisPerkara"
-              rules={[{ required: true, message: "Pilih minimal satu jenis perkara" }]}
+              rules={[{ required: true, message: "Pilih jenis perkara" }]}
               style={{ marginBottom: 0 }}
             >
-              <Checkbox.Group>
-                <Group gap="md">
-                  {jenisPerkaraOptions.map((opt) => (
-                    <Checkbox key={opt.value} value={opt.value}>
-                      <Text size="xs">{opt.label}</Text>
-                    </Checkbox>
-                  ))}
-                </Group>
-              </Checkbox.Group>
+              <Select
+                size="small"
+                placeholder="Pilih jenis perkara"
+                options={jenisPerkaraOptions}
+                style={{ width: "100%" }}
+                showSearch
+                optionFilterProp="label"
+              />
             </Form.Item>
           </div>
 
           {/* Input Lainnya Jenis Perkara */}
-          {jenisPerkara?.includes("lainnya") && (
+          {jenisPerkara === "lainnya" && (
             <div style={{ marginTop: 8 }}>
               <Form.Item
                 name="jenisPerkaraLainnya"
@@ -343,12 +343,10 @@ const FormPendampinganHukum = ({ user, loading: userLoading, onSubmit, submitLoa
     />
   );
 
-  const getJenisPerkaraLabel = (values) => {
-    if (!values || values.length === 0) return "-";
-    return values.map(v => {
-      if (v === "lainnya") return formValues?.jenisPerkaraLainnya || "Lainnya";
-      return jenisPerkaraOptions.find(k => k.value === v)?.label;
-    }).join(", ");
+  const getJenisPerkaraLabel = (value) => {
+    if (!value) return "-";
+    if (value === "lainnya") return formValues?.jenisPerkaraLainnya || "Lainnya";
+    return jenisPerkaraOptions.find(k => k.value === value)?.label || value;
   };
 
   const getBentukLabel = (values) => {

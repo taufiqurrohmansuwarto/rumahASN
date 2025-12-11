@@ -162,7 +162,14 @@ const DetailModal = ({ open, onClose, data }) => {
                   </Group>
                 </div>
               </SimpleGrid>
-              <InfoItem icon={IconBuilding} label="Pengadilan & Jadwal" value={data.pengadilan_jadwal} />
+              <SimpleGrid cols={2} spacing="xs">
+                <InfoItem icon={IconBuilding} label="Tempat Pengadilan" value={data.tempat_pengadilan || data.pengadilan_jadwal} />
+                <InfoItem 
+                  icon={IconCalendar} 
+                  label="Jadwal Sidang" 
+                  value={data.jadwal_pengadilan ? dayjs(data.jadwal_pengadilan).format("DD MMM YYYY, HH:mm") : "-"} 
+                />
+              </SimpleGrid>
               <div>
                 <Text size="xs" c="dimmed" mb={4}>Ringkasan Perkara</Text>
                 <Paper p="xs" bg="gray.0" radius="sm">
@@ -362,15 +369,22 @@ const ListPendampinganHukum = ({ data = [], meta = {}, loading = false, query = 
     },
     {
       title: "Pengadilan",
-      dataIndex: "pengadilan_jadwal",
-      key: "pengadilan_jadwal",
+      dataIndex: "tempat_pengadilan",
+      key: "tempat_pengadilan",
       ellipsis: true,
-      width: 140,
-      render: (text) => (
-        <Group gap={4}>
-          <IconGavel size={12} />
-          <Text size="xs">{text?.substring(0, 25) || "-"}</Text>
-        </Group>
+      width: 180,
+      render: (text, record) => (
+        <Stack gap={0}>
+          <Group gap={4}>
+            <IconGavel size={12} />
+            <Text size="xs">{text || record.pengadilan_jadwal?.substring(0, 25) || "-"}</Text>
+          </Group>
+          {record.jadwal_pengadilan && (
+            <Text size="xs" c="dimmed" ml={16}>
+              {dayjs(record.jadwal_pengadilan).format("DD MMM YYYY, HH:mm")}
+            </Text>
+          )}
+        </Stack>
       ),
     },
     {
