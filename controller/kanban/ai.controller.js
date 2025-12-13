@@ -933,6 +933,91 @@ Format JSON (tanpa markdown):
   }
 };
 
+/**
+ * AI Refine Text - Merapikan dan memperbaiki kalimat judul/deskripsi
+ */
+const refineText = async (req, res) => {
+  try {
+    const { text, type } = req?.body; // type: 'title' atau 'description'
+
+    if (!text || text.trim().length === 0) {
+      return res.status(400).json({ message: "Teks tidak boleh kosong" });
+    }
+
+    let prompt;
+    if (type === "title") {
+      prompt = `Kamu adalah asisten yang membantu merapikan judul task. 
+Perbaiki judul berikut agar:
+1. Lebih jelas dan mudah dipahami
+2. Menggunakan kata kerja aktif di awal (contoh: "Membuat...", "Menyusun...", "Menganalisis...")
+3. Singkat tapi informatif (maksimal 10-15 kata)
+4. Profesional dan formal
+
+Judul asli: "${text}"
+
+Jawab dalam format JSON (tanpa markdown):
+{
+  "refined": "Judul yang sudah diperbaiki",
+  "suggestions": ["alternatif 1", "alternatif 2"]
+}`;
+    } else {
+      prompt = `Kamu adalah asisten yang membantu merapikan deskripsi task.
+Perbaiki deskripsi berikut agar:
+1. Terstruktur dan mudah dipahami
+2. Menggunakan bahasa formal dan profesional
+3. Jelas dan spesifik
+4. Jika ada poin-poin, gunakan bullet points dengan tanda "•"
+
+Deskripsi asli: "${text}"
+
+Jawab dalam format JSON (tanpa markdown):
+{
+  "refined": "Deskripsi yang sudah diperbaiki dan terstruktur"
+}`;
+    }
+
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        {
+          role: "system",
+          content:
+            "Kamu adalah asisten AI yang membantu merapikan dan memperbaiki teks agar lebih profesional dan mudah dipahami. Gunakan Bahasa Indonesia yang baik dan benar.",
+        },
+        { role: "user", content: prompt },
+      ],
+      temperature: 0.7,
+      max_tokens: 500,
+    });
+
+    const responseText = completion.choices[0]?.message?.content || "";
+
+    let result;
+    try {
+      const jsonStr = responseText
+        .replace(/```json\n?/g, "")
+        .replace(/```\n?/g, "")
+        .trim();
+      result = JSON.parse(jsonStr);
+    } catch (parseError) {
+      console.error("Failed to parse AI response:", responseText);
+      return res.status(500).json({ message: "Gagal memproses respons AI" });
+    }
+
+    res.json({
+      success: true,
+      data: {
+        original: text,
+        refined: result.refined,
+        suggestions: result.suggestions || [],
+      },
+    });
+  } catch (error) {
+    console.error("AI Refine Text Error:", error);
+    handleError(res, error);
+  }
+};
+
 module.exports = {
   taskAssist,
   projectSummary,
@@ -940,4 +1025,5 @@ module.exports = {
   taskSummary,
   laporanKegiatan,
   taskLaporan,
+  refineText,
 };

@@ -33,9 +33,11 @@ function KanbanCard({ task, index, onClick, isDragging }) {
         marginBottom: 8,
         opacity: isDraggingNow ? 0.5 : 1,
         zIndex: isDraggingNow ? 1000 : 1,
+        touchAction: "none", // Penting untuk touch devices
       }
     : {
         marginBottom: 8,
+        touchAction: "none", // Mencegah scroll saat drag di mobile/tablet
       };
 
   const hasAttachments = task.attachment_count > 0;

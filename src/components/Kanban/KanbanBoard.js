@@ -4,10 +4,13 @@ import {
   DndContext,
   DragOverlay,
   closestCorners,
-  PointerSensor,
+  MouseSensor,
+  TouchSensor,
+  KeyboardSensor,
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
+import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { IconLayoutKanban } from "@tabler/icons-react";
 import KanbanColumn from "./KanbanColumn";
 import KanbanCard from "./KanbanCard";
@@ -25,13 +28,28 @@ function KanbanBoard({
 }) {
   const [activeTask, setActiveTask] = useState(null);
 
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 5,
-      },
-    })
-  );
+  // Sensors untuk desktop dan mobile/tablet
+  const mouseSensor = useSensor(MouseSensor, {
+    // Butuh geser 5px sebelum drag dimulai (mencegah klik tidak sengaja)
+    activationConstraint: {
+      distance: 5,
+    },
+  });
+
+  const touchSensor = useSensor(TouchSensor, {
+    // Delay 150ms sebelum drag dimulai (mencegah scroll tidak sengaja)
+    // Tolerance 5px - jika bergerak lebih dari 5px sebelum delay, batal drag
+    activationConstraint: {
+      delay: 150,
+      tolerance: 5,
+    },
+  });
+
+  const keyboardSensor = useSensor(KeyboardSensor, {
+    coordinateGetter: sortableKeyboardCoordinates,
+  });
+
+  const sensors = useSensors(mouseSensor, touchSensor, keyboardSensor);
 
   if (isLoading) {
     return (
@@ -145,6 +163,7 @@ function KanbanBoard({
           marginLeft: -24,
           marginRight: -24,
           paddingLeft: 24,
+          WebkitOverflowScrolling: "touch", // Smooth horizontal scroll di iOS
         }}
       >
         {columns.map((column) => (
@@ -159,9 +178,22 @@ function KanbanBoard({
         ))}
       </div>
 
-      <DragOverlay>
+      <DragOverlay
+        dropAnimation={{
+          duration: 200,
+          easing: "cubic-bezier(0.18, 0.67, 0.6, 1.22)",
+        }}
+      >
         {activeTask ? (
-          <div style={{ width: 280, opacity: 0.95 }}>
+          <div
+            style={{
+              width: 280,
+              opacity: 0.95,
+              transform: "rotate(3deg) scale(1.02)",
+              boxShadow: "0 15px 30px rgba(0,0,0,0.2)",
+              cursor: "grabbing",
+            }}
+          >
             <KanbanCard task={activeTask} index={0} isDragging />
           </div>
         ) : null}

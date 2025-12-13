@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Upload,
@@ -10,6 +10,8 @@ import {
   Flex,
   Input,
   Tabs,
+  Modal,
+  Image,
 } from "antd";
 import {
   IconUpload,
@@ -22,6 +24,8 @@ import {
   IconLink,
   IconPlus,
   IconExternalLink,
+  IconEye,
+  IconClipboard,
 } from "@tabler/icons-react";
 import dayjs from "dayjs";
 import {
@@ -49,12 +53,55 @@ const formatFileSize = (bytes) => {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
 };
 
-function AttachmentItem({ attachment, baseUrl, onDelete }) {
+// Check if file is an image
+const isImageFile = (fileType, filename) => {
+  const ext = filename?.split(".").pop()?.toLowerCase();
+  return (
+    fileType?.startsWith("image/") ||
+    ["jpg", "jpeg", "png", "gif", "webp", "svg", "bmp"].includes(ext)
+  );
+};
+
+// Check if file is PDF
+const isPdfFile = (fileType, filename) => {
+  const ext = filename?.split(".").pop()?.toLowerCase();
+  return fileType?.includes("pdf") || ext === "pdf";
+};
+
+function AttachmentItem({ attachment, baseUrl, onDelete, onPreview }) {
   const [showActions, setShowActions] = useState(false);
   const isLink = attachment.attachment_type === "link";
   const fileUrl = isLink
     ? attachment.file_url
     : `${baseUrl}/public/${attachment.file_path}`;
+
+  const isImage = isImageFile(attachment.file_type, attachment.filename);
+  const isPdf = isPdfFile(attachment.file_type, attachment.filename);
+
+  const handleClick = () => {
+    if (isLink) {
+      window.open(fileUrl, "_blank");
+    } else if (isImage) {
+      onPreview?.({ type: "image", url: fileUrl, title: attachment.filename });
+    } else if (isPdf) {
+      onPreview?.({ type: "pdf", url: fileUrl, title: attachment.filename });
+    } else {
+      // Download for other files
+      const link = document.createElement("a");
+      link.href = fileUrl;
+      link.download = attachment.filename || "download";
+      link.click();
+    }
+  };
+
+  const handleDownload = (e) => {
+    e.stopPropagation();
+    const link = document.createElement("a");
+    link.href = fileUrl;
+    link.download = attachment.filename || "download";
+    link.target = "_blank";
+    link.click();
+  };
 
   return (
     <div
@@ -67,11 +114,38 @@ function AttachmentItem({ attachment, baseUrl, onDelete }) {
         borderRadius: 8,
         marginBottom: 6,
         border: isLink ? "1px solid #d3adf7" : "1px solid #f0f0f0",
+        cursor: "pointer",
+        transition: "all 0.2s",
       }}
+      onClick={handleClick}
       onMouseEnter={() => setShowActions(true)}
       onMouseLeave={() => setShowActions(false)}
     >
-      {getFileIcon(attachment.file_type, isLink)}
+      {/* Thumbnail for images */}
+      {isImage && !isLink ? (
+        <div
+          style={{
+            width: 36,
+            height: 36,
+            borderRadius: 4,
+            overflow: "hidden",
+            flexShrink: 0,
+          }}
+        >
+          <img
+            src={fileUrl}
+            alt={attachment.filename}
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+            }}
+          />
+        </div>
+      ) : (
+        getFileIcon(attachment.file_type, isLink)
+      )}
+
       <div style={{ flex: 1, minWidth: 0 }}>
         <Text
           style={{ fontSize: 13, display: "block" }}
@@ -85,6 +159,7 @@ function AttachmentItem({ attachment, baseUrl, onDelete }) {
           {dayjs(attachment.created_at).format("DD MMM YYYY")}
         </Text>
       </div>
+
       <div
         style={{
           opacity: showActions ? 1 : 0,
@@ -93,19 +168,41 @@ function AttachmentItem({ attachment, baseUrl, onDelete }) {
           gap: 4,
         }}
       >
+        {/* Preview button for images/PDF */}
+        {(isImage || isPdf) && !isLink && (
+          <Button
+            type="text"
+            size="small"
+            icon={<IconEye size={14} />}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleClick();
+            }}
+            style={{ height: 24, width: 24, padding: 0 }}
+            title="Lihat"
+          />
+        )}
+
+        {/* Download/Open button */}
         <Button
           type="text"
           size="small"
           icon={
             isLink ? <IconExternalLink size={14} /> : <IconDownload size={14} />
           }
-          href={fileUrl}
-          target="_blank"
+          onClick={handleDownload}
           style={{ height: 24, width: 24, padding: 0 }}
+          title={isLink ? "Buka link" : "Download"}
         />
+
+        {/* Delete button */}
         <Popconfirm
           title="Hapus lampiran?"
-          onConfirm={() => onDelete(attachment.id)}
+          onConfirm={(e) => {
+            e?.stopPropagation();
+            onDelete(attachment.id);
+          }}
+          onCancel={(e) => e?.stopPropagation()}
           okText="Hapus"
           cancelText="Batal"
           okButtonProps={{ danger: true, size: "small" }}
@@ -117,6 +214,7 @@ function AttachmentItem({ attachment, baseUrl, onDelete }) {
             danger
             size="small"
             icon={<IconTrash size={14} />}
+            onClick={(e) => e.stopPropagation()}
             style={{ height: 24, width: 24, padding: 0 }}
           />
         </Popconfirm>
@@ -129,6 +227,14 @@ function TaskAttachments({ taskId, attachments }) {
   const [linkUrl, setLinkUrl] = useState("");
   const [linkName, setLinkName] = useState("");
   const [activeTab, setActiveTab] = useState("file");
+  const [previewModal, setPreviewModal] = useState({
+    visible: false,
+    type: null,
+    url: null,
+    title: null,
+  });
+  const [pastedImage, setPastedImage] = useState(null);
+  const containerRef = useRef(null);
   const queryClient = useQueryClient();
 
   const { mutate: upload, isLoading: isUploading } = useMutation(
@@ -136,6 +242,7 @@ function TaskAttachments({ taskId, attachments }) {
     {
       onSuccess: () => {
         message.success("File berhasil diupload");
+        setPastedImage(null);
         queryClient.invalidateQueries(["kanban-task", taskId]);
       },
       onError: (error) => {
@@ -172,6 +279,53 @@ function TaskAttachments({ taskId, attachments }) {
     }
   );
 
+  // Handle paste event for images - only when drawer/modal is open
+  useEffect(() => {
+    const handlePaste = (e) => {
+      // Only process if container exists (component is mounted and visible)
+      if (!containerRef.current) return;
+
+      const items = e.clipboardData?.items;
+      if (!items) return;
+
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].type.indexOf("image") !== -1) {
+          const file = items[i].getAsFile();
+          if (file) {
+            // Generate filename with timestamp
+            const ext = file.type.split("/")[1] || "png";
+            const timestamp = dayjs().format("YYYYMMDD_HHmmss");
+            const newFile = new File([file], `pasted_image_${timestamp}.${ext}`, {
+              type: file.type,
+            });
+
+            // Show preview
+            const reader = new FileReader();
+            reader.onload = (event) => {
+              setPastedImage({
+                file: newFile,
+                preview: event.target.result,
+              });
+            };
+            reader.readAsDataURL(file);
+
+            message.info("Gambar dari clipboard terdeteksi");
+            e.preventDefault();
+            e.stopPropagation();
+            break;
+          }
+        }
+      }
+    };
+
+    // Only use document listener
+    document.addEventListener("paste", handlePaste);
+
+    return () => {
+      document.removeEventListener("paste", handlePaste);
+    };
+  }, []);
+
   const handleUpload = (info) => {
     const file = info.file.originFileObj || info.file;
     if (file) {
@@ -179,10 +333,28 @@ function TaskAttachments({ taskId, attachments }) {
     }
   };
 
+  const handleUploadPastedImage = () => {
+    if (pastedImage?.file) {
+      upload(pastedImage.file);
+    }
+  };
+
+  const handleCancelPaste = () => {
+    setPastedImage(null);
+  };
+
   const handleAddLink = () => {
     if (linkUrl.trim()) {
       addLink({ url: linkUrl.trim(), name: linkName.trim() || null });
     }
+  };
+
+  const handlePreview = ({ type, url, title }) => {
+    setPreviewModal({ visible: true, type, url, title });
+  };
+
+  const closePreview = () => {
+    setPreviewModal({ visible: false, type: null, url: null, title: null });
   };
 
   const baseUrl =
@@ -199,25 +371,81 @@ function TaskAttachments({ taskId, attachments }) {
         </Flex>
       ),
       children: (
-        <Upload.Dragger
-          beforeUpload={() => false}
-          onChange={handleUpload}
-          showUploadList={false}
-          disabled={isUploading}
-          multiple={false}
-          style={{
-            border: "1px dashed #d9d9d9",
-            backgroundColor: "#fafafa",
-            borderRadius: 8,
-          }}
-        >
-          <Flex vertical align="center" gap={4} style={{ padding: "8px 0" }}>
-            <IconUpload size={24} color={isUploading ? "#bfbfbf" : "#8c8c8c"} />
-            <Text type="secondary" style={{ fontSize: 12 }}>
-              {isUploading ? "Mengupload..." : "Drag file atau klik"}
-            </Text>
-          </Flex>
-        </Upload.Dragger>
+        <div>
+          {/* Pasted image preview */}
+          {pastedImage && (
+            <div
+              style={{
+                marginBottom: 12,
+                padding: 12,
+                border: "2px dashed #fa541c",
+                borderRadius: 8,
+                backgroundColor: "#fff7e6",
+              }}
+            >
+              <Flex align="center" gap={12}>
+                <img
+                  src={pastedImage.preview}
+                  alt="Pasted"
+                  style={{
+                    width: 60,
+                    height: 60,
+                    objectFit: "cover",
+                    borderRadius: 4,
+                  }}
+                />
+                <div style={{ flex: 1 }}>
+                  <Text strong style={{ display: "block", fontSize: 13 }}>
+                    {pastedImage.file.name}
+                  </Text>
+                  <Text type="secondary" style={{ fontSize: 11 }}>
+                    {formatFileSize(pastedImage.file.size)} • Dari Clipboard
+                  </Text>
+                </div>
+                <Flex gap={8}>
+                  <Button size="small" onClick={handleCancelPaste}>
+                    Batal
+                  </Button>
+                  <Button
+                    type="primary"
+                    size="small"
+                    onClick={handleUploadPastedImage}
+                    loading={isUploading}
+                    style={{ backgroundColor: "#fa541c", borderColor: "#fa541c" }}
+                  >
+                    Upload
+                  </Button>
+                </Flex>
+              </Flex>
+            </div>
+          )}
+
+          <Upload.Dragger
+            beforeUpload={() => false}
+            onChange={handleUpload}
+            showUploadList={false}
+            disabled={isUploading}
+            multiple={false}
+            style={{
+              border: "1px dashed #d9d9d9",
+              backgroundColor: "#fafafa",
+              borderRadius: 8,
+            }}
+          >
+            <Flex vertical align="center" gap={4} style={{ padding: "8px 0" }}>
+              <IconUpload size={24} color={isUploading ? "#bfbfbf" : "#8c8c8c"} />
+              <Text type="secondary" style={{ fontSize: 12 }}>
+                {isUploading ? "Mengupload..." : "Drag file atau klik"}
+              </Text>
+              <Flex align="center" gap={4}>
+                <IconClipboard size={12} color="#bfbfbf" />
+                <Text type="secondary" style={{ fontSize: 11 }}>
+                  atau Ctrl+V untuk paste gambar
+                </Text>
+              </Flex>
+            </Flex>
+          </Upload.Dragger>
+        </div>
       ),
     },
     {
@@ -260,7 +488,7 @@ function TaskAttachments({ taskId, attachments }) {
   ];
 
   return (
-    <div style={{ padding: "12px 16px 24px 16px" }}>
+    <div ref={containerRef} style={{ padding: "12px 16px 24px 16px" }}>
       {/* Upload/Link Tabs */}
       <Tabs
         activeKey={activeTab}
@@ -290,10 +518,64 @@ function TaskAttachments({ taskId, attachments }) {
               attachment={attachment}
               baseUrl={baseUrl}
               onDelete={remove}
+              onPreview={handlePreview}
             />
           ))}
         </div>
       )}
+
+      {/* Image Preview Modal */}
+      <Modal
+        open={previewModal.visible && previewModal.type === "image"}
+        title={previewModal.title || "Preview Gambar"}
+        footer={null}
+        onCancel={closePreview}
+        width={800}
+        centered
+        styles={{ body: { padding: 0 } }}
+      >
+        {previewModal.url && (
+          <Image
+            alt={previewModal.title}
+            src={previewModal.url}
+            style={{ width: "100%" }}
+            preview={false}
+          />
+        )}
+      </Modal>
+
+      {/* PDF Preview Modal */}
+      <Modal
+        open={previewModal.visible && previewModal.type === "pdf"}
+        title={previewModal.title || "Preview PDF"}
+        footer={
+          <Button
+            type="primary"
+            icon={<IconDownload size={14} />}
+            href={previewModal.url}
+            download
+            style={{ backgroundColor: "#fa541c", borderColor: "#fa541c" }}
+          >
+            Download PDF
+          </Button>
+        }
+        onCancel={closePreview}
+        width={900}
+        centered
+        styles={{ body: { padding: 0, height: "70vh" } }}
+      >
+        {previewModal.url && (
+          <iframe
+            src={previewModal.url}
+            style={{
+              width: "100%",
+              height: "70vh",
+              border: "none",
+            }}
+            title={previewModal.title}
+          />
+        )}
+      </Modal>
     </div>
   );
 }

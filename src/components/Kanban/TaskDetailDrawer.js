@@ -53,6 +53,7 @@ import TaskActivities from "./TaskActivities";
 import TaskAISummary from "./TaskAISummary";
 import TaskLaporan from "./TaskLaporan";
 import ClickableAvatar, { ClickableAvatarGroup } from "./ClickableAvatar";
+import AIRefineButton from "./AIRefineButton";
 
 const { TextArea } = Input;
 const { Text, Title } = Typography;
@@ -62,6 +63,10 @@ function TaskDetailDrawer({ taskId, projectId, open, onClose, members }) {
   const [isEditing, setIsEditing] = useState(false);
   const [form] = Form.useForm();
   const queryClient = useQueryClient();
+
+  // Watch form values untuk AI refine
+  const titleValue = Form.useWatch("title", form);
+  const descriptionValue = Form.useWatch("description", form);
 
   const { data: task, isLoading } = useQuery(
     ["kanban-task", taskId],
@@ -275,13 +280,34 @@ function TaskDetailDrawer({ taskId, projectId, open, onClose, members }) {
                 >
                   <Form.Item
                     name="title"
-                    label="Judul Task"
+                    label={
+                      <Flex justify="space-between" align="center" style={{ width: "100%" }}>
+                        <span>Judul Task</span>
+                        <AIRefineButton
+                          value={titleValue}
+                          type="title"
+                          onApply={(text) => form.setFieldValue("title", text)}
+                        />
+                      </Flex>
+                    }
                     rules={[{ required: true, message: "Judul wajib diisi" }]}
                   >
                     <Input placeholder="Judul task" />
                   </Form.Item>
 
-                  <Form.Item name="description" label="Deskripsi">
+                  <Form.Item
+                    name="description"
+                    label={
+                      <Flex justify="space-between" align="center" style={{ width: "100%" }}>
+                        <span>Deskripsi</span>
+                        <AIRefineButton
+                          value={descriptionValue}
+                          type="description"
+                          onApply={(text) => form.setFieldValue("description", text)}
+                        />
+                      </Flex>
+                    }
+                  >
                     <TextArea
                       rows={3}
                       placeholder="Deskripsi task..."

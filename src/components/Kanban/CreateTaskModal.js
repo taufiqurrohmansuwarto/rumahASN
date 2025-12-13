@@ -27,6 +27,7 @@ import {
 } from "@tabler/icons-react";
 import { createTask } from "../../../services/kanban.services";
 import AITaskAssist from "./AITaskAssist";
+import AIRefineButton from "./AIRefineButton";
 
 const { TextArea } = Input;
 
@@ -43,8 +44,11 @@ function CreateTaskModal({
   const queryClient = useQueryClient();
   const [aiSubtasks, setAiSubtasks] = useState([]);
 
+  // Watch form values untuk AI refine
+  const titleValue = Form.useWatch("title", form);
+  const descriptionValue = Form.useWatch("description", form);
+
   const handleAIApply = (aiResult) => {
-    // Apply AI suggestions
     if (aiResult.priority) {
       form.setFieldValue("priority", aiResult.priority);
     }
@@ -53,9 +57,7 @@ function CreateTaskModal({
     }
     if (aiResult.subtasks?.length > 0) {
       setAiSubtasks(aiResult.subtasks);
-      message.success(
-        `${aiResult.subtasks.length} subtask akan ditambahkan setelah task dibuat`
-      );
+      message.success(`${aiResult.subtasks.length} subtask ditambahkan`);
     }
   };
 
@@ -66,7 +68,7 @@ function CreateTaskModal({
         const subtaskCount = aiSubtasks.length;
         message.success(
           subtaskCount > 0
-            ? `Task berhasil dibuat dengan ${subtaskCount} subtask`
+            ? `Task dibuat dengan ${subtaskCount} subtask`
             : "Task berhasil dibuat"
         );
         queryClient.invalidateQueries(["kanban-tasks", projectId]);
@@ -86,7 +88,7 @@ function CreateTaskModal({
       column_id: values.column_id || columnId,
       due_date: values.due_date?.format("YYYY-MM-DD"),
       label_ids: values.label_ids || [],
-      ai_subtasks: aiSubtasks, // Will be used to create subtasks after task created
+      ai_subtasks: aiSubtasks,
     });
   };
 
@@ -138,24 +140,27 @@ function CreateTaskModal({
         <Form.Item
           name="title"
           label={
-            <Flex
-              justify="space-between"
-              align="center"
-              style={{ width: "100%" }}
-            >
+            <Flex justify="space-between" align="center" style={{ width: "100%" }}>
               <Space size={4}>
                 <IconClipboardList size={14} color="#fa541c" />
                 <span>Judul Task</span>
               </Space>
-              <AITaskAssist
-                title={form.getFieldValue("title")}
-                description={form.getFieldValue("description")}
-                onApply={handleAIApply}
-                disabled={!form.getFieldValue("title")}
-              />
+              <Flex gap={2}>
+                <AIRefineButton
+                  value={titleValue}
+                  type="title"
+                  onApply={(text) => form.setFieldValue("title", text)}
+                />
+                <AITaskAssist
+                  title={titleValue}
+                  description={descriptionValue}
+                  onApply={handleAIApply}
+                  disabled={!titleValue}
+                />
+              </Flex>
             </Flex>
           }
-          rules={[{ required: true, message: "Judul task wajib diisi" }]}
+          rules={[{ required: true, message: "Judul wajib diisi" }]}
         >
           <Input placeholder="Apa yang perlu dikerjakan?" />
         </Form.Item>
@@ -163,18 +168,20 @@ function CreateTaskModal({
         <Form.Item
           name="description"
           label={
-            <Space size={4}>
-              <IconFileDescription size={14} color="#fa541c" />
-              <span>Deskripsi</span>
-            </Space>
+            <Flex justify="space-between" align="center" style={{ width: "100%" }}>
+              <Space size={4}>
+                <IconFileDescription size={14} color="#fa541c" />
+                <span>Deskripsi</span>
+              </Space>
+              <AIRefineButton
+                value={descriptionValue}
+                type="description"
+                onApply={(text) => form.setFieldValue("description", text)}
+              />
+            </Flex>
           }
         >
-          <TextArea
-            rows={3}
-            placeholder="Detail task..."
-            showCount
-            maxLength={1000}
-          />
+          <TextArea rows={3} placeholder="Detail task..." showCount maxLength={1000} />
         </Form.Item>
 
         <Flex gap={16}>
@@ -266,9 +273,7 @@ function CreateTaskModal({
               maxTagCount={2}
               optionFilterProp="label"
               filterOption={(input, option) =>
-                (option?.label ?? "")
-                  .toLowerCase()
-                  .includes(input.toLowerCase())
+                (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
               }
               options={members?.map((m) => ({
                 value: m.user?.custom_id,
@@ -318,12 +323,7 @@ function CreateTaskModal({
             </Space>
           }
         >
-          <InputNumber
-            min={0}
-            step={0.5}
-            placeholder="Contoh: 4"
-            style={{ width: "100%" }}
-          />
+          <InputNumber min={0} step={0.5} placeholder="Contoh: 4" style={{ width: "100%" }} />
         </Form.Item>
 
         {/* AI Subtasks Preview */}
@@ -337,17 +337,10 @@ function CreateTaskModal({
               border: "1px dashed #ffd591",
             }}
           >
-            <Flex
-              justify="space-between"
-              align="center"
-              style={{ marginBottom: 8 }}
-            >
-              <Space size={4}>
-                <IconClipboardList size={14} color="#fa541c" />
-                <span style={{ fontSize: 12, fontWeight: 500 }}>
-                  Subtask dari AI ({aiSubtasks.length})
-                </span>
-              </Space>
+            <Flex justify="space-between" align="center" style={{ marginBottom: 8 }}>
+              <span style={{ fontSize: 12, fontWeight: 500 }}>
+                ✨ Subtask AI ({aiSubtasks.length})
+              </span>
               <Button
                 type="text"
                 size="small"
@@ -355,7 +348,7 @@ function CreateTaskModal({
                 onClick={() => setAiSubtasks([])}
                 style={{ fontSize: 11 }}
               >
-                Hapus semua
+                Hapus
               </Button>
             </Flex>
             <Flex gap={4} wrap="wrap">
@@ -363,13 +356,9 @@ function CreateTaskModal({
                 <Tag
                   key={i}
                   closable
-                  onClose={() => {
-                    setAiSubtasks((prev) => prev.filter((_, idx) => idx !== i));
-                  }}
+                  onClose={() => setAiSubtasks((prev) => prev.filter((_, idx) => idx !== i))}
                 >
-                  {subtask.length > 30
-                    ? subtask.substring(0, 30) + "..."
-                    : subtask}
+                  {subtask.length > 25 ? subtask.substring(0, 25) + "..." : subtask}
                 </Tag>
               ))}
             </Flex>
@@ -385,10 +374,7 @@ function CreateTaskModal({
             htmlType="submit"
             loading={isLoading}
             icon={<IconPlus size={14} />}
-            style={{
-              backgroundColor: "#fa541c",
-              borderColor: "#fa541c",
-            }}
+            style={{ backgroundColor: "#fa541c", borderColor: "#fa541c" }}
           >
             Buat Task
           </Button>

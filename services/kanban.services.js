@@ -425,3 +425,8 @@ export const aiTaskLaporan = async (taskId) => {
   const { data } = await api.get(`/tasks/${taskId}/ai-laporan`);
   return data;
 };
+
+export const aiRefineText = async ({ text, type }) => {
+  const { data } = await api.post("/ai/refine-text", { text, type });
+  return data;
+};

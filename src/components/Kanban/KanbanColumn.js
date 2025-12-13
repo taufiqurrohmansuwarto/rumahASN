@@ -134,7 +134,7 @@ function KanbanColumn({
         )}
       </div>
 
-      {/* Droppable Area - Scrollable */}
+      {/* Droppable Area - Scrollable with touch support */}
       <div
         ref={setNodeRef}
         style={{
@@ -145,6 +145,7 @@ function KanbanColumn({
           minHeight: 0, // Important for flex scroll
           backgroundColor: isOver ? "#fff7e6" : "transparent",
           transition: "background-color 0.2s ease",
+          WebkitOverflowScrolling: "touch", // Smooth scroll di iOS
         }}
       >
         {column.tasks?.length === 0 && !isOver && (
