@@ -93,7 +93,7 @@ function KanbanCard({ task, index, onClick, isDragging }) {
         }}
       >
         <Flex>
-          {/* Drag Handle - area khusus untuk drag */}
+          {/* Drag Handle */}
           <div
             {...listeners}
             {...attributes}
@@ -118,80 +118,101 @@ function KanbanCard({ task, index, onClick, isDragging }) {
             />
           </div>
 
-          {/* Content - klik untuk detail */}
+          {/* Content */}
           <div
-            style={{ flex: 1, padding: 12, cursor: "pointer" }}
+            style={{ flex: 1, padding: 10, cursor: "pointer", minWidth: 0 }}
             onClick={() => onClick?.(task)}
           >
             {/* Overdue Warning */}
             {isOverdue && (
               <Flex
-                gap={6}
+                gap={4}
                 align="center"
                 style={{
-                  marginBottom: 8,
-                  padding: "4px 8px",
+                  marginBottom: 6,
+                  padding: "3px 6px",
                   backgroundColor: "#ff4d4f",
                   borderRadius: 4,
-                  marginTop: -4,
-                  marginLeft: -4,
-                  marginRight: -4,
+                  marginTop: -2,
+                  marginLeft: -2,
+                  marginRight: -2,
                 }}
               >
-                <IconAlertTriangle size={12} color="#fff" />
-                <Text style={{ fontSize: 11, color: "#fff", fontWeight: 500 }}>
+                <IconAlertTriangle size={11} color="#fff" />
+                <Text style={{ fontSize: 10, color: "#fff", fontWeight: 500 }}>
                   Terlambat {daysOverdue} hari
                 </Text>
               </Flex>
             )}
 
-            {/* Labels */}
-            {task.labels?.length > 0 && (
-              <Flex gap={4} wrap="wrap" style={{ marginBottom: 8 }}>
-                {task.labels.slice(0, 3).map((label) => (
+            {/* Header: Assignees + Labels */}
+            <Flex justify="space-between" align="center" style={{ marginBottom: 6 }}>
+              {/* Labels */}
+              <Flex gap={3} wrap="wrap" style={{ flex: 1, minWidth: 0 }}>
+                {task.labels?.slice(0, 2).map((label) => (
                   <LabelBadge key={label.id} label={label} />
                 ))}
-                {task.labels.length > 3 && (
-                  <Text type="secondary" style={{ fontSize: 11 }}>
-                    +{task.labels.length - 3}
+                {task.labels?.length > 2 && (
+                  <Text type="secondary" style={{ fontSize: 10 }}>
+                    +{task.labels.length - 2}
                   </Text>
                 )}
               </Flex>
-            )}
 
-            {/* Title */}
-            <Text
-              strong
-              style={{
-                fontSize: 13,
-                display: "block",
-                marginBottom: task.description ? 4 : 8,
-                lineHeight: 1.4,
-              }}
-              ellipsis={{ rows: 2 }}
-            >
-              {task.title}
-            </Text>
+              {/* Assignees - selalu tampil di kanan atas */}
+              {assignees.length > 0 && (
+                <div style={{ flexShrink: 0, marginLeft: 8 }}>
+                  <ClickableAvatarGroup
+                    users={assignees}
+                    maxCount={2}
+                    size={22}
+                    showEmailIcon={false}
+                  />
+                </div>
+              )}
+            </Flex>
 
-            {/* Description - truncated */}
-            {task.description && (
+            {/* Title - dengan tooltip untuk judul panjang */}
+            <Tooltip title={task.title} placement="topLeft" mouseEnterDelay={0.5}>
               <Text
-                type="secondary"
+                strong
                 style={{
-                  fontSize: 12,
+                  fontSize: 13,
                   display: "block",
-                  marginBottom: 8,
-                  lineHeight: 1.4,
+                  marginBottom: 4,
+                  lineHeight: 1.35,
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
                 }}
-                ellipsis={{ rows: 1 }}
               >
-                {task.description}
+                {task.title}
               </Text>
+            </Tooltip>
+
+            {/* Description - dengan tooltip */}
+            {task.description && (
+              <Tooltip title={task.description} placement="topLeft" mouseEnterDelay={0.5}>
+                <Text
+                  type="secondary"
+                  style={{
+                    fontSize: 11,
+                    display: "block",
+                    marginBottom: 6,
+                    lineHeight: 1.3,
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {task.description}
+                </Text>
+              </Tooltip>
             )}
 
             {/* Subtask Progress */}
             {hasSubtasks && (
-              <Flex gap={8} align="center" style={{ marginBottom: 8 }}>
+              <Flex gap={6} align="center" style={{ marginBottom: 6 }}>
                 <Progress
                   percent={subtaskProgress}
                   size="small"
@@ -199,34 +220,32 @@ function KanbanCard({ task, index, onClick, isDragging }) {
                   strokeColor={subtaskProgress === 100 ? "#52c41a" : "#fa541c"}
                   style={{ flex: 1, margin: 0 }}
                 />
-                <Text
-                  type="secondary"
-                  style={{ fontSize: 11, whiteSpace: "nowrap" }}
-                >
+                <Text type="secondary" style={{ fontSize: 10, whiteSpace: "nowrap" }}>
                   {task.completed_subtask_count || 0}/{task.subtask_count}
                 </Text>
               </Flex>
             )}
 
-            {/* Meta: Priority & Due Date */}
-            <Flex gap={6} wrap="wrap" align="center" style={{ marginBottom: 8 }}>
-              <PriorityBadge priority={task.priority} />
-              {task.due_date && (
-                <DueDateBadge
-                  dueDate={task.due_date}
-                  completedAt={task.completed_at}
-                />
-              )}
-            </Flex>
-
-            {/* Footer: Stats & Assignees */}
+            {/* Footer: Priority, Due Date, Stats */}
             <Flex justify="space-between" align="center">
-              <Flex gap={12} align="center">
+              <Flex gap={4} align="center" wrap="wrap">
+                <PriorityBadge priority={task.priority} size="small" />
+                {task.due_date && (
+                  <DueDateBadge
+                    dueDate={task.due_date}
+                    completedAt={task.completed_at}
+                    size="small"
+                  />
+                )}
+              </Flex>
+
+              {/* Stats */}
+              <Flex gap={8} align="center">
                 {hasComments && (
                   <Tooltip title={`${task.comment_count} komentar`}>
-                    <Flex align="center" gap={4}>
-                      <IconMessage size={14} color="#8c8c8c" />
-                      <Text type="secondary" style={{ fontSize: 12, lineHeight: 1 }}>
+                    <Flex align="center" gap={2}>
+                      <IconMessage size={12} color="#8c8c8c" />
+                      <Text type="secondary" style={{ fontSize: 10 }}>
                         {task.comment_count}
                       </Text>
                     </Flex>
@@ -235,24 +254,15 @@ function KanbanCard({ task, index, onClick, isDragging }) {
 
                 {hasAttachments && (
                   <Tooltip title={`${task.attachment_count} lampiran`}>
-                    <Flex align="center" gap={4}>
-                      <IconPaperclip size={14} color="#8c8c8c" />
-                      <Text type="secondary" style={{ fontSize: 12, lineHeight: 1 }}>
+                    <Flex align="center" gap={2}>
+                      <IconPaperclip size={12} color="#8c8c8c" />
+                      <Text type="secondary" style={{ fontSize: 10 }}>
                         {task.attachment_count}
                       </Text>
                     </Flex>
                   </Tooltip>
                 )}
               </Flex>
-
-              {assignees.length > 0 && (
-                <ClickableAvatarGroup
-                  users={assignees}
-                  maxCount={3}
-                  size={26}
-                  showEmailIcon={true}
-                />
-              )}
             </Flex>
           </div>
         </Flex>

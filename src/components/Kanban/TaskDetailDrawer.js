@@ -163,6 +163,7 @@ function TaskDetailDrawer({ taskId, projectId, open, onClose, members }) {
       children: (
         <TaskAttachments
           taskId={taskId}
+          taskTitle={task?.title}
           attachments={task?.attachments || []}
         />
       ),

@@ -226,7 +226,7 @@ function AttachmentItem({ attachment, baseUrl, onDelete, onPreview }) {
   );
 }
 
-function TaskAttachments({ taskId, attachments }) {
+function TaskAttachments({ taskId, taskTitle, attachments }) {
   const [linkUrl, setLinkUrl] = useState("");
   const [linkName, setLinkName] = useState("");
   const [activeTab, setActiveTab] = useState("file");
@@ -276,7 +276,13 @@ function TaskAttachments({ taskId, attachments }) {
 
       // Generate and download zip
       const zipBlob = await zip.generateAsync({ type: "blob" });
-      const zipFilename = `lampiran_${taskId}_${dayjs().format("YYYYMMDD")}.zip`;
+      // Buat nama file dari title task (hapus karakter tidak valid)
+      const safeTitle = (taskTitle || "lampiran")
+        .replace(/[^a-zA-Z0-9\s\-_]/g, "")
+        .replace(/\s+/g, "_")
+        .substring(0, 50);
+      const timestamp = dayjs().format("YYYYMMDD_HHmmss");
+      const zipFilename = `${safeTitle}_${timestamp}.zip`;
       saveAs(zipBlob, zipFilename);
       
       message.success(`${successCount} file berhasil didownload`);
