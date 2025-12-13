@@ -294,6 +294,11 @@ export const getProjectStorageUsage = async (projectId) => {
   return data;
 };
 
+export const downloadAllAttachments = (taskId) => {
+  // Return URL for direct download
+  return `/helpdesk/api/kanban/tasks/${taskId}/attachments/download-all`;
+};
+
 // ==========================================
 // LABELS
 // ==========================================

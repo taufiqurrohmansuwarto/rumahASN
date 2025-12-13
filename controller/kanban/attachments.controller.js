@@ -4,6 +4,8 @@ const KanbanTask = require("@/models/kanban/tasks.model");
 const KanbanTaskAttachment = require("@/models/kanban/task-attachments.model");
 const KanbanProjectMember = require("@/models/kanban/project-members.model");
 const { nanoid } = require("nanoid");
+const archiver = require("archiver");
+const axios = require("axios");
 
 /**
  * Get attachments for a task
@@ -204,6 +206,91 @@ const getProjectStorageUsage = async (req, res) => {
   }
 };
 
+/**
+ * Download all attachments as ZIP
+ */
+const downloadAllAttachments = async (req, res) => {
+  try {
+    const { customId: userId } = req?.user;
+    const { taskId } = req?.query;
+
+    const task = await KanbanTask.query().findById(taskId);
+    if (!task) {
+      return res.status(404).json({ message: "Task tidak ditemukan" });
+    }
+
+    // Check permission
+    const isMember = await KanbanProjectMember.isMember(task.project_id, userId);
+    if (!isMember) {
+      return res.status(403).json({ message: "Anda tidak memiliki akses" });
+    }
+
+    // Get all file attachments (not links)
+    const attachments = await KanbanTaskAttachment.query()
+      .where("task_id", taskId)
+      .where("attachment_type", "file")
+      .orWhere((builder) => {
+        builder.where("task_id", taskId).whereNull("attachment_type");
+      });
+
+    if (attachments.length === 0) {
+      return res.status(400).json({ message: "Tidak ada file untuk didownload" });
+    }
+
+    // Set response headers for ZIP download
+    const zipFilename = `lampiran_${task.task_number || taskId}.zip`;
+    res.setHeader("Content-Type", "application/zip");
+    res.setHeader("Content-Disposition", `attachment; filename="${zipFilename}"`);
+
+    // Create ZIP archive
+    const archive = archiver("zip", {
+      zlib: { level: 5 }, // Compression level
+    });
+
+    // Handle archive errors
+    archive.on("error", (err) => {
+      console.error("Archive error:", err);
+      throw err;
+    });
+
+    // Pipe archive to response
+    archive.pipe(res);
+
+    // Base URL for files
+    const baseUrl =
+      process.env.MINIO_PUBLIC_URL || "https://siasn.bkd.jatimprov.go.id:9000";
+
+    // Add each file to archive
+    for (const attachment of attachments) {
+      try {
+        const fileUrl = `${baseUrl}/public/${attachment.file_path}`;
+        
+        // Fetch file from URL
+        const response = await axios({
+          method: "GET",
+          url: fileUrl,
+          responseType: "arraybuffer",
+          timeout: 30000, // 30 second timeout per file
+        });
+
+        // Add to archive with original filename
+        archive.append(Buffer.from(response.data), {
+          name: attachment.filename || `file_${attachment.id}`,
+        });
+      } catch (fileError) {
+        console.error(`Error downloading file ${attachment.filename}:`, fileError.message);
+        // Continue with other files even if one fails
+      }
+    }
+
+    // Finalize archive
+    await archive.finalize();
+  } catch (error) {
+    console.error("Download all attachments error:", error);
+    handleError(res, error);
+  }
+};
+
 module.exports = {
   getAttachments,
   uploadAttachment,
@@ -211,5 +298,6 @@ module.exports = {
   deleteAttachment,
   getAttachmentUrl,
   getProjectStorageUsage,
+  downloadAllAttachments,
 };
 

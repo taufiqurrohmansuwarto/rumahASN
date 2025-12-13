@@ -26,6 +26,7 @@ import {
   IconExternalLink,
   IconEye,
   IconClipboard,
+  IconFileZip,
 } from "@tabler/icons-react";
 import dayjs from "dayjs";
 import {
@@ -33,6 +34,8 @@ import {
   addLinkAttachment,
   deleteAttachment,
 } from "../../../services/kanban.services";
+import { saveAs } from "file-saver";
+import JSZip from "jszip";
 
 const { Text } = Typography;
 
@@ -234,8 +237,56 @@ function TaskAttachments({ taskId, attachments }) {
     title: null,
   });
   const [pastedImage, setPastedImage] = useState(null);
+  const [isDownloadingAll, setIsDownloadingAll] = useState(false);
   const containerRef = useRef(null);
   const queryClient = useQueryClient();
+
+  // Download all attachments as ZIP (frontend)
+  const handleDownloadAll = async () => {
+    const fileAttachments = attachments.filter((a) => a.attachment_type !== "link");
+    if (fileAttachments.length === 0) {
+      message.warning("Tidak ada file untuk didownload");
+      return;
+    }
+
+    setIsDownloadingAll(true);
+    try {
+      const zip = new JSZip();
+      let successCount = 0;
+
+      // Download and add each file to zip
+      for (const attachment of fileAttachments) {
+        try {
+          const fileUrl = `${baseUrl}/public/${attachment.file_path}`;
+          const response = await fetch(fileUrl);
+          
+          if (response.ok) {
+            const blob = await response.blob();
+            zip.file(attachment.filename || `file_${attachment.id}`, blob);
+            successCount++;
+          }
+        } catch (err) {
+          console.error(`Failed to fetch ${attachment.filename}:`, err);
+        }
+      }
+
+      if (successCount === 0) {
+        throw new Error("Tidak ada file yang berhasil didownload");
+      }
+
+      // Generate and download zip
+      const zipBlob = await zip.generateAsync({ type: "blob" });
+      const zipFilename = `lampiran_${taskId}_${dayjs().format("YYYYMMDD")}.zip`;
+      saveAs(zipBlob, zipFilename);
+      
+      message.success(`${successCount} file berhasil didownload`);
+    } catch (error) {
+      console.error("Download error:", error);
+      message.error(error.message || "Gagal mendownload lampiran");
+    } finally {
+      setIsDownloadingAll(false);
+    }
+  };
 
   const { mutate: upload, isLoading: isUploading } = useMutation(
     (file) => uploadAttachment({ taskId, file }),
@@ -512,6 +563,21 @@ function TaskAttachments({ taskId, attachments }) {
         />
       ) : (
         <div>
+          {/* Download All Button */}
+          {attachments.filter((a) => a.attachment_type !== "link").length > 1 && (
+            <Flex justify="flex-end" style={{ marginBottom: 8 }}>
+              <Button
+                type="default"
+                size="small"
+                icon={<IconFileZip size={14} />}
+                onClick={handleDownloadAll}
+                loading={isDownloadingAll}
+              >
+                {isDownloadingAll ? "Mengunduh..." : "Download Semua (.zip)"}
+              </Button>
+            </Flex>
+          )}
+
           {attachments.map((attachment) => (
             <AttachmentItem
               key={attachment.id}

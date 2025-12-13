@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Spin, Empty, Typography, Flex } from "antd";
 import {
   DndContext,
@@ -27,21 +27,29 @@ function KanbanBoard({
   onDeleteColumn,
 }) {
   const [activeTask, setActiveTask] = useState(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detect mobile screen
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   // Sensors untuk desktop dan mobile/tablet
   const mouseSensor = useSensor(MouseSensor, {
-    // Butuh geser 5px sebelum drag dimulai (mencegah klik tidak sengaja)
     activationConstraint: {
       distance: 5,
     },
   });
 
   const touchSensor = useSensor(TouchSensor, {
-    // Delay 150ms sebelum drag dimulai (mencegah scroll tidak sengaja)
-    // Tolerance 5px - jika bergerak lebih dari 5px sebelum delay, batal drag
     activationConstraint: {
-      delay: 150,
-      tolerance: 5,
+      delay: 200,
+      tolerance: 8,
     },
   });
 
@@ -107,18 +115,15 @@ function KanbanBoard({
     const activeId = active.id;
     const overId = over.id;
 
-    // Find source column
     const sourceColumn = findColumnByTaskId(activeId);
     if (!sourceColumn) return;
 
-    // Determine destination column
     let destColumn = columns.find((c) => c.id === overId);
     if (!destColumn) {
       destColumn = findColumnByTaskId(overId);
     }
     if (!destColumn) return;
 
-    // Calculate destination index
     let destinationIndex = 0;
     if (destColumn.tasks?.length > 0) {
       const overIndex = destColumn.tasks.findIndex((t) => t.id === overId);
@@ -129,7 +134,6 @@ function KanbanBoard({
       }
     }
 
-    // Skip if same position
     if (sourceColumn.id === destColumn.id) {
       const sourceIndex = sourceColumn.tasks.findIndex((t) => t.id === activeId);
       if (sourceIndex === destinationIndex) return;
@@ -154,16 +158,18 @@ function KanbanBoard({
       <div
         style={{
           display: "flex",
-          gap: 16,
-          overflowX: "auto",
-          overflowY: "hidden",
+          flexDirection: isMobile ? "column" : "row",
+          gap: isMobile ? 12 : 16,
+          overflowX: isMobile ? "hidden" : "auto",
+          overflowY: isMobile ? "auto" : "hidden",
           paddingBottom: 16,
-          paddingRight: 16,
-          minHeight: "calc(100vh - 280px)",
-          marginLeft: -24,
-          marginRight: -24,
-          paddingLeft: 24,
-          WebkitOverflowScrolling: "touch", // Smooth horizontal scroll di iOS
+          paddingRight: isMobile ? 0 : 16,
+          minHeight: isMobile ? "auto" : "calc(100vh - 280px)",
+          maxHeight: isMobile ? "calc(100vh - 200px)" : "none",
+          marginLeft: isMobile ? 0 : -24,
+          marginRight: isMobile ? 0 : -24,
+          paddingLeft: isMobile ? 0 : 24,
+          WebkitOverflowScrolling: "touch",
         }}
       >
         {columns.map((column) => (
@@ -174,6 +180,7 @@ function KanbanBoard({
             onTaskClick={onTaskClick}
             onEditColumn={onEditColumn}
             onDeleteColumn={onDeleteColumn}
+            isMobile={isMobile}
           />
         ))}
       </div>
@@ -187,9 +194,9 @@ function KanbanBoard({
         {activeTask ? (
           <div
             style={{
-              width: 280,
+              width: isMobile ? "100%" : 280,
               opacity: 0.95,
-              transform: "rotate(3deg) scale(1.02)",
+              transform: "rotate(2deg) scale(1.02)",
               boxShadow: "0 15px 30px rgba(0,0,0,0.2)",
               cursor: "grabbing",
             }}

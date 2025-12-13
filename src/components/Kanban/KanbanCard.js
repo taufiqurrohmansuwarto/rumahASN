@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { Card, Avatar, Typography, Tooltip, Flex, Progress, Tag } from "antd";
+import { Card, Typography, Tooltip, Flex, Progress } from "antd";
 import {
   IconPaperclip,
   IconMessage,
   IconAlertTriangle,
+  IconGripVertical,
 } from "@tabler/icons-react";
 import { useDraggable } from "@dnd-kit/core";
 import dayjs from "dayjs";
@@ -33,11 +34,9 @@ function KanbanCard({ task, index, onClick, isDragging }) {
         marginBottom: 8,
         opacity: isDraggingNow ? 0.5 : 1,
         zIndex: isDraggingNow ? 1000 : 1,
-        touchAction: "none", // Penting untuk touch devices
       }
     : {
         marginBottom: 8,
-        touchAction: "none", // Mencegah scroll saat drag di mobile/tablet
       };
 
   const hasAttachments = task.attachment_count > 0;
@@ -50,31 +49,25 @@ function KanbanCard({ task, index, onClick, isDragging }) {
         )
       : 0;
 
-  // Support multiple assignees
   const assignees = task.assignees || (task.assignee ? [task.assignee] : []);
 
-  // Check if task is overdue (has due_date, not completed, and due_date is past)
   const isOverdue =
     task.due_date &&
     !task.completed_at &&
     dayjs(task.due_date).isBefore(dayjs(), "day");
 
-  // Calculate days overdue
   const daysOverdue = isOverdue ? dayjs().diff(dayjs(task.due_date), "day") : 0;
 
   return (
     <div
       ref={setNodeRef}
       style={style}
-      {...listeners}
-      {...attributes}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       <Card
         size="small"
         hoverable
-        onClick={() => onClick?.(task)}
         style={{
           borderRadius: 8,
           border:
@@ -91,153 +84,177 @@ function KanbanCard({ task, index, onClick, isDragging }) {
               : isOverdue
               ? "0 2px 8px rgba(255, 77, 79, 0.15)"
               : "0 1px 2px rgba(0,0,0,0.03)",
-          cursor: "pointer",
           backgroundColor: isOverdue ? "#fff2f0" : "#fff",
           transition: "all 0.2s ease",
           transform: isHovered && !isDraggingNow ? "translateY(-2px)" : "none",
         }}
         styles={{
-          body: { padding: 12 },
+          body: { padding: 0 },
         }}
       >
-        {/* Overdue Warning */}
-        {isOverdue && (
-          <Flex
-            gap={6}
-            align="center"
+        <Flex>
+          {/* Drag Handle - area khusus untuk drag */}
+          <div
+            {...listeners}
+            {...attributes}
             style={{
-              marginBottom: 8,
-              padding: "4px 8px",
-              backgroundColor: "#ff4d4f",
-              borderRadius: 4,
-              marginTop: -4,
-              marginLeft: -4,
-              marginRight: -4,
+              width: 24,
+              minHeight: "100%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: isDraggingNow ? "grabbing" : "grab",
+              backgroundColor: isHovered ? "#f5f5f5" : "#fafafa",
+              borderRadius: "8px 0 0 8px",
+              borderRight: "1px solid #f0f0f0",
+              touchAction: "none",
+              flexShrink: 0,
             }}
           >
-            <IconAlertTriangle size={12} color="#fff" />
-            <Text style={{ fontSize: 11, color: "#fff", fontWeight: 500 }}>
-              Terlambat {daysOverdue} hari
-            </Text>
-          </Flex>
-        )}
+            <IconGripVertical
+              size={14}
+              color={isHovered ? "#8c8c8c" : "#d9d9d9"}
+              style={{ transition: "color 0.2s" }}
+            />
+          </div>
 
-        {/* Labels */}
-        {task.labels?.length > 0 && (
-          <Flex gap={4} wrap="wrap" style={{ marginBottom: 8 }}>
-            {task.labels.slice(0, 3).map((label) => (
-              <LabelBadge key={label.id} label={label} />
-            ))}
-            {task.labels.length > 3 && (
-              <Text type="secondary" style={{ fontSize: 11 }}>
-                +{task.labels.length - 3}
+          {/* Content - klik untuk detail */}
+          <div
+            style={{ flex: 1, padding: 12, cursor: "pointer" }}
+            onClick={() => onClick?.(task)}
+          >
+            {/* Overdue Warning */}
+            {isOverdue && (
+              <Flex
+                gap={6}
+                align="center"
+                style={{
+                  marginBottom: 8,
+                  padding: "4px 8px",
+                  backgroundColor: "#ff4d4f",
+                  borderRadius: 4,
+                  marginTop: -4,
+                  marginLeft: -4,
+                  marginRight: -4,
+                }}
+              >
+                <IconAlertTriangle size={12} color="#fff" />
+                <Text style={{ fontSize: 11, color: "#fff", fontWeight: 500 }}>
+                  Terlambat {daysOverdue} hari
+                </Text>
+              </Flex>
+            )}
+
+            {/* Labels */}
+            {task.labels?.length > 0 && (
+              <Flex gap={4} wrap="wrap" style={{ marginBottom: 8 }}>
+                {task.labels.slice(0, 3).map((label) => (
+                  <LabelBadge key={label.id} label={label} />
+                ))}
+                {task.labels.length > 3 && (
+                  <Text type="secondary" style={{ fontSize: 11 }}>
+                    +{task.labels.length - 3}
+                  </Text>
+                )}
+              </Flex>
+            )}
+
+            {/* Title */}
+            <Text
+              strong
+              style={{
+                fontSize: 13,
+                display: "block",
+                marginBottom: task.description ? 4 : 8,
+                lineHeight: 1.4,
+              }}
+              ellipsis={{ rows: 2 }}
+            >
+              {task.title}
+            </Text>
+
+            {/* Description - truncated */}
+            {task.description && (
+              <Text
+                type="secondary"
+                style={{
+                  fontSize: 12,
+                  display: "block",
+                  marginBottom: 8,
+                  lineHeight: 1.4,
+                }}
+                ellipsis={{ rows: 1 }}
+              >
+                {task.description}
               </Text>
             )}
-          </Flex>
-        )}
 
-        {/* Title */}
-        <Text
-          strong
-          style={{
-            fontSize: 13,
-            display: "block",
-            marginBottom: task.description ? 4 : 8,
-            lineHeight: 1.4,
-          }}
-          ellipsis={{ rows: 2 }}
-        >
-          {task.title}
-        </Text>
-
-        {/* Description - truncated */}
-        {task.description && (
-          <Text
-            type="secondary"
-            style={{
-              fontSize: 12,
-              display: "block",
-              marginBottom: 8,
-              lineHeight: 1.4,
-            }}
-            ellipsis={{ rows: 1 }}
-          >
-            {task.description}
-          </Text>
-        )}
-
-        {/* Subtask Progress */}
-        {hasSubtasks && (
-          <Flex gap={8} align="center" style={{ marginBottom: 8 }}>
-            <Progress
-              percent={subtaskProgress}
-              size="small"
-              showInfo={false}
-              strokeColor={subtaskProgress === 100 ? "#52c41a" : "#fa541c"}
-              style={{ flex: 1, margin: 0 }}
-            />
-            <Text
-              type="secondary"
-              style={{ fontSize: 11, whiteSpace: "nowrap" }}
-            >
-              {task.completed_subtask_count || 0}/{task.subtask_count}
-            </Text>
-          </Flex>
-        )}
-
-        {/* Meta: Priority & Due Date */}
-        <Flex gap={6} wrap="wrap" align="center" style={{ marginBottom: 8 }}>
-          <PriorityBadge priority={task.priority} />
-          {task.due_date && (
-            <DueDateBadge
-              dueDate={task.due_date}
-              completedAt={task.completed_at}
-            />
-          )}
-        </Flex>
-
-        {/* Footer: Stats & Assignees */}
-        <Flex justify="space-between" align="center">
-          {/* Left: Stats */}
-          <Flex gap={12} align="center">
-            {hasComments && (
-              <Tooltip title={`${task.comment_count} komentar`}>
-                <Flex align="center" gap={4}>
-                  <IconMessage size={14} color="#8c8c8c" />
-                  <Text
-                    type="secondary"
-                    style={{ fontSize: 12, lineHeight: 1 }}
-                  >
-                    {task.comment_count}
-                  </Text>
-                </Flex>
-              </Tooltip>
+            {/* Subtask Progress */}
+            {hasSubtasks && (
+              <Flex gap={8} align="center" style={{ marginBottom: 8 }}>
+                <Progress
+                  percent={subtaskProgress}
+                  size="small"
+                  showInfo={false}
+                  strokeColor={subtaskProgress === 100 ? "#52c41a" : "#fa541c"}
+                  style={{ flex: 1, margin: 0 }}
+                />
+                <Text
+                  type="secondary"
+                  style={{ fontSize: 11, whiteSpace: "nowrap" }}
+                >
+                  {task.completed_subtask_count || 0}/{task.subtask_count}
+                </Text>
+              </Flex>
             )}
 
-            {hasAttachments && (
-              <Tooltip title={`${task.attachment_count} lampiran`}>
-                <Flex align="center" gap={4}>
-                  <IconPaperclip size={14} color="#8c8c8c" />
-                  <Text
-                    type="secondary"
-                    style={{ fontSize: 12, lineHeight: 1 }}
-                  >
-                    {task.attachment_count}
-                  </Text>
-                </Flex>
-              </Tooltip>
-            )}
-          </Flex>
+            {/* Meta: Priority & Due Date */}
+            <Flex gap={6} wrap="wrap" align="center" style={{ marginBottom: 8 }}>
+              <PriorityBadge priority={task.priority} />
+              {task.due_date && (
+                <DueDateBadge
+                  dueDate={task.due_date}
+                  completedAt={task.completed_at}
+                />
+              )}
+            </Flex>
 
-          {/* Right: Assignees - Clickable untuk kirim email */}
-          {assignees.length > 0 && (
-            <ClickableAvatarGroup
-              users={assignees}
-              maxCount={3}
-              size={26}
-              showEmailIcon={true}
-            />
-          )}
+            {/* Footer: Stats & Assignees */}
+            <Flex justify="space-between" align="center">
+              <Flex gap={12} align="center">
+                {hasComments && (
+                  <Tooltip title={`${task.comment_count} komentar`}>
+                    <Flex align="center" gap={4}>
+                      <IconMessage size={14} color="#8c8c8c" />
+                      <Text type="secondary" style={{ fontSize: 12, lineHeight: 1 }}>
+                        {task.comment_count}
+                      </Text>
+                    </Flex>
+                  </Tooltip>
+                )}
+
+                {hasAttachments && (
+                  <Tooltip title={`${task.attachment_count} lampiran`}>
+                    <Flex align="center" gap={4}>
+                      <IconPaperclip size={14} color="#8c8c8c" />
+                      <Text type="secondary" style={{ fontSize: 12, lineHeight: 1 }}>
+                        {task.attachment_count}
+                      </Text>
+                    </Flex>
+                  </Tooltip>
+                )}
+              </Flex>
+
+              {assignees.length > 0 && (
+                <ClickableAvatarGroup
+                  users={assignees}
+                  maxCount={3}
+                  size={26}
+                  showEmailIcon={true}
+                />
+              )}
+            </Flex>
+          </div>
         </Flex>
       </Card>
     </div>
