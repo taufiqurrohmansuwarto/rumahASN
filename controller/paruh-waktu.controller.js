@@ -37,7 +37,24 @@ export const getPengadaanParuhWaktu = async (req, res) => {
       is_blud,
       luar_perangkat_daerah,
       unor_match, // "same" or "different"
+      sortBy = "nama",
+      sortOrder = "asc",
     } = req?.query;
+
+    // Validasi kolom yang diizinkan untuk sorting (whitelist untuk keamanan)
+    const allowedSortColumns = [
+      "nama",
+      "nip",
+      "gaji",
+      "no_peserta",
+      "unor_simaster_text",
+      "unor_siasn_text",
+      "unor_pk_text",
+    ];
+    const validSortBy = allowedSortColumns.includes(sortBy) ? sortBy : "nama";
+    const validSortOrder = ["asc", "desc"].includes(sortOrder)
+      ? sortOrder
+      : "asc";
 
     const currentOperator = await OperatorGajiPW.query()
       .where("user_id", req?.user?.customId)
@@ -103,7 +120,7 @@ export const getPengadaanParuhWaktu = async (req, res) => {
         }
       })
       .withGraphFetched("[detail, status_usulan]")
-      .orderBy("nama", "asc");
+      .orderBy(validSortBy, validSortOrder);
 
     // Check if limit = -1 for downloading all data
     if (Number(limit) === -1) {
@@ -218,10 +235,49 @@ export const getPengadaanParuhWaktu = async (req, res) => {
           });
       }
 
+      // Calculate PK statistics for download mode
+      // Untuk operator, hanya hitung data di unit organisasinya
+      let dataForPkStats = processedData;
+
+      if (current_role !== "admin" && currentOperator && unorId) {
+        // Filter data yang accessible oleh operator
+        dataForPkStats = processedData.filter((item) => {
+          const unorFieldToCheck =
+            unor_type === "pk" ? item.unor_pk : item.unor_id_simaster;
+          return (
+            unorFieldToCheck &&
+            String(unorFieldToCheck).startsWith(String(unorId))
+          );
+        });
+      }
+
+      const totalPkFilledDownload = dataForPkStats.filter(
+        (item) => item.unor_pk && item.unor_pk !== ""
+      ).length;
+      const totalPkEmptyDownload =
+        dataForPkStats.length - totalPkFilledDownload;
+      const pkFilledPercentageDownload =
+        dataForPkStats.length > 0
+          ? ((totalPkFilledDownload / dataForPkStats.length) * 100).toFixed(2)
+          : 0;
+      const pkEmptyPercentageDownload =
+        dataForPkStats.length > 0
+          ? ((totalPkEmptyDownload / dataForPkStats.length) * 100).toFixed(2)
+          : 0;
+
+      const pkStatsDownload = {
+        total: dataForPkStats.length,
+        filled: totalPkFilledDownload,
+        empty: totalPkEmptyDownload,
+        filled_percentage: Number(pkFilledPercentageDownload),
+        empty_percentage: Number(pkEmptyPercentageDownload),
+      };
+
       return res.json({
         success: true,
         total: processedData.length,
         total_gaji: totalGaji,
+        pk_stats: pkStatsDownload,
         has_action: hasAction,
         data: processedData,
       });
@@ -330,12 +386,85 @@ export const getPengadaanParuhWaktu = async (req, res) => {
         });
     }
 
+    // Calculate PK statistics (yang sudah mengisi unor_pk)
+    // Untuk operator, hanya hitung data di unit organisasinya
+    // Untuk admin, hitung semua data sesuai filter OPD
+    let pkStatsQuery = knex("pengadaan.p3k_paruh_waktu").where(
+      "unor_id_simaster",
+      "ILIKE",
+      `${opdIdFilter}%`
+    );
+
+    // Jika bukan admin dan merupakan operator, filter berdasarkan unorId operator
+    if (current_role !== "admin" && currentOperator && unorId) {
+      const unorField = unor_type === "pk" ? "unor_pk" : "unor_id_simaster";
+      pkStatsQuery = pkStatsQuery.where(unorField, "ILIKE", `${unorId}%`);
+    }
+
+    pkStatsQuery = pkStatsQuery.where((builder) => {
+      if (nama) {
+        builder.where("nama", "ILIKE", `%${nama}%`);
+      }
+      if (nip) {
+        builder.where("nip", "ILIKE", `%${nip}%`);
+      }
+      if (no_peserta) {
+        builder.where("no_peserta", "ILIKE", `%${no_peserta}%`);
+      }
+      if (min_gaji) {
+        builder.where("gaji", ">=", Number(min_gaji));
+      }
+      if (max_gaji) {
+        builder.where("gaji", "<=", Number(max_gaji));
+      }
+      if (is_blud !== undefined) {
+        builder.where("is_blud", is_blud === "true" || is_blud === true);
+      }
+      if (luar_perangkat_daerah !== undefined) {
+        builder.where(
+          "luar_perangkat_daerah",
+          luar_perangkat_daerah === "true" || luar_perangkat_daerah === true
+        );
+      }
+      if (unor_match === "same") {
+        builder.whereRaw("unor_pk = unor_id_simaster");
+      } else if (unor_match === "different") {
+        builder.whereRaw("unor_pk != unor_id_simaster OR unor_pk IS NULL");
+      }
+    });
+
+    const pkStatsResult = await pkStatsQuery
+      .select(
+        knex.raw("COUNT(*) as total_all"),
+        knex.raw(
+          "COUNT(CASE WHEN unor_pk IS NOT NULL AND unor_pk != '' THEN 1 END) as total_pk_filled"
+        )
+      )
+      .first();
+
+    const totalAll = Number(pkStatsResult?.total_all || 0);
+    const totalPkFilled = Number(pkStatsResult?.total_pk_filled || 0);
+    const totalPkEmpty = totalAll - totalPkFilled;
+    const pkFilledPercentage =
+      totalAll > 0 ? ((totalPkFilled / totalAll) * 100).toFixed(2) : 0;
+    const pkEmptyPercentage =
+      totalAll > 0 ? ((totalPkEmpty / totalAll) * 100).toFixed(2) : 0;
+
+    const pkStats = {
+      total: totalAll,
+      filled: totalPkFilled,
+      empty: totalPkEmpty,
+      filled_percentage: Number(pkFilledPercentage),
+      empty_percentage: Number(pkEmptyPercentage),
+    };
+
     const data = {
       success: true,
       page: pageNum,
       limit: lim,
       total: result.total,
       total_gaji: totalGaji,
+      pk_stats: pkStats,
       has_action: hasAction || false,
       data: processedData,
     };

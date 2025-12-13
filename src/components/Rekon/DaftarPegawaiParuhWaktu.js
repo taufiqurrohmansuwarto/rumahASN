@@ -4,10 +4,16 @@ import {
 } from "@/services/master.services";
 import { getPengadaanParuhWaktu } from "@/services/siasn-services";
 import { DownloadOutlined, ReloadOutlined } from "@ant-design/icons";
-import { Group, Paper, Stack, Text } from "@mantine/core";
-import { IconBuilding, IconFileText, IconUsers } from "@tabler/icons-react";
+import { Badge, Group, Paper, Stack, Text } from "@mantine/core";
+import {
+  IconBuilding,
+  IconFileText,
+  IconUsers,
+  IconCheck,
+  IconX,
+} from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
-import { Button, Card, Space, Table, Typography } from "antd";
+import { Button, Card, Progress, Space, Table, Typography } from "antd";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { createColumns } from "./DaftarPegawaiParuhWaktuColumns";
@@ -33,6 +39,8 @@ const DaftarPegawaiParuhWaktu = () => {
     is_blud,
     luar_perangkat_daerah,
     unor_match,
+    sortBy,
+    sortOrder,
   } = router.query;
 
   const [modalVisible, setModalVisible] = useState(false);
@@ -160,10 +168,39 @@ const DaftarPegawaiParuhWaktu = () => {
     });
   };
 
+  const handleTableChange = (pagination, filters, sorter) => {
+    const newQuery = { ...router.query };
+
+    // Handle pagination
+    if (pagination.current) {
+      newQuery.page = pagination.current;
+    }
+
+    // Handle sorting
+    if (sorter.field && sorter.order) {
+      newQuery.sortBy = sorter.field;
+      newQuery.sortOrder = sorter.order === "ascend" ? "asc" : "desc";
+      // Reset ke page 1 saat sorting berubah
+      newQuery.page = 1;
+    } else if (sorter.field && !sorter.order) {
+      // Jika user klik untuk menghapus sort (order undefined)
+      delete newQuery.sortBy;
+      delete newQuery.sortOrder;
+      newQuery.page = 1;
+    }
+
+    router.push({
+      pathname: router.pathname,
+      query: newQuery,
+    });
+  };
+
   const columns = createColumns(
     handleShowDetail,
     data?.has_action,
-    handleShowSiasn
+    handleShowSiasn,
+    sortBy,
+    sortOrder
   );
   const hasFilter =
     nama ||
@@ -321,7 +358,7 @@ const DaftarPegawaiParuhWaktu = () => {
             onClearFilter={clearFilter}
           />
 
-          {/* Total Gaji Section */}
+          {/* Statistics Section */}
           {data?.total_gaji !== undefined && (
             <div
               style={{
@@ -332,6 +369,7 @@ const DaftarPegawaiParuhWaktu = () => {
                 marginBottom: "16px",
               }}
             >
+              {/* Total Gaji Row */}
               <div
                 style={{
                   display: "flex",
@@ -339,6 +377,7 @@ const DaftarPegawaiParuhWaktu = () => {
                   alignItems: "center",
                   flexWrap: "wrap",
                   gap: "12px",
+                  marginBottom: "16px",
                 }}
               >
                 <div>
@@ -360,6 +399,71 @@ const DaftarPegawaiParuhWaktu = () => {
                   </Text>
                 </div>
               </div>
+
+              {/* PK Statistics Row */}
+              {data?.pk_stats && (
+                <div
+                  style={{
+                    padding: "12px",
+                    background: "white",
+                    borderRadius: "8px",
+                    border: "1px solid #e8e8e8",
+                  }}
+                >
+                  <Group justify="space-between" mb="xs">
+                    <Text fw={600} size="sm" c="dimmed">
+                      Status Pengisian Perjanjian Kerja (PK)
+                    </Text>
+                    <Badge
+                      color={
+                        data.pk_stats.filled_percentage >= 50
+                          ? "green"
+                          : "orange"
+                      }
+                      variant="light"
+                      size="sm"
+                    >
+                      {data.pk_stats.filled_percentage}% Terisi
+                    </Badge>
+                  </Group>
+
+                  <Progress
+                    percent={data.pk_stats.filled_percentage}
+                    success={{
+                      percent: data.pk_stats.filled_percentage,
+                      strokeColor: "#52c41a",
+                    }}
+                    strokeColor="#ff4d4f"
+                    trailColor="#ff4d4f"
+                    showInfo={false}
+                    size="default"
+                    style={{ marginBottom: 8 }}
+                  />
+
+                  <Group justify="space-between" mt="xs">
+                    <Group gap="xs">
+                      <IconCheck size={14} style={{ color: "green" }} />
+                      <Text size="xs" c="dimmed">
+                        Sudah Mengisi:{" "}
+                        <Text span fw={600} c="green">
+                          {data.pk_stats.filled.toLocaleString("id-ID")}
+                        </Text>{" "}
+                        ({data.pk_stats.filled_percentage}%)
+                      </Text>
+                    </Group>
+                    <Group gap="xs">
+                      <IconX size={14} style={{ color: "red" }} />
+                      <Text size="xs" c="dimmed">
+                        Belum Mengisi:{" "}
+                        <Text span fw={600} c="red">
+                          {data.pk_stats.empty.toLocaleString("id-ID")}
+                        </Text>{" "}
+                        ({data.pk_stats.empty_percentage}%)
+                      </Text>
+                    </Group>
+                  </Group>
+                </div>
+              )}
             </div>
           )}
 
@@ -406,6 +510,7 @@ const DaftarPegawaiParuhWaktu = () => {
               loading={isLoading || isFetching}
               scroll={{ x: 910 }}
               size="middle"
+              onChange={handleTableChange}
               style={{
                 borderRadius: "12px",
                 overflow: "hidden",
@@ -423,15 +528,6 @@ const DaftarPegawaiParuhWaktu = () => {
                 pageSize: parseInt(limit),
                 current: parseInt(page),
                 showSizeChanger: false,
-                onChange: (newPage) => {
-                  router.push({
-                    pathname: router.pathname,
-                    query: {
-                      ...router.query,
-                      page: newPage,
-                    },
-                  });
-                },
                 showTotal: (total, range) =>
                   `${range[0].toLocaleString(
                     "id-ID"

@@ -1,5 +1,9 @@
 import { Badge, Text } from "@mantine/core";
-import { UserOutlined, SettingOutlined, InfoCircleOutlined } from "@ant-design/icons";
+import {
+  UserOutlined,
+  SettingOutlined,
+  InfoCircleOutlined,
+} from "@ant-design/icons";
 import {
   IconDownload,
   IconX,
@@ -10,12 +14,30 @@ import {
 } from "@tabler/icons-react";
 import { Avatar, Button, Space, Tooltip } from "antd";
 
-export const createColumns = (handleShowDetail, hasAction = false, handleShowSiasn) => {
+export const createColumns = (
+  handleShowDetail,
+  hasAction = false,
+  handleShowSiasn,
+  sortBy,
+  sortOrder
+) => {
+  // Helper untuk menentukan sortOrder aktif pada kolom
+  const getSortOrder = (field) => {
+    if (sortBy === field) {
+      return sortOrder === "asc" ? "ascend" : "descend";
+    }
+    return null;
+  };
+
   const columns = [
     {
       title: "Pegawai",
       key: "pegawai",
+      dataIndex: "nama",
       width: 180,
+      sorter: true,
+      sortOrder: getSortOrder("nama"),
+      sortDirections: ["ascend", "descend", "ascend"],
       render: (_, record) => (
         <Space size="small">
           <Avatar size={36} style={{ border: "2px solid #f0f0f0" }}>
@@ -55,7 +77,11 @@ export const createColumns = (handleShowDetail, hasAction = false, handleShowSia
     {
       title: "Unit Organisasi",
       key: "unor",
+      dataIndex: "unor_simaster_text",
       width: 120,
+      sorter: true,
+      sortOrder: getSortOrder("unor_simaster_text"),
+      sortDirections: ["ascend", "descend", "ascend"],
       render: (_, record) => (
         <div>
           <Text size="10px" c="dimmed" style={{ fontStyle: "italic" }}>
@@ -70,7 +96,11 @@ export const createColumns = (handleShowDetail, hasAction = false, handleShowSia
     {
       title: "Upah",
       key: "upah",
+      dataIndex: "gaji",
       width: 110,
+      sorter: true,
+      sortOrder: getSortOrder("gaji"),
+      sortDirections: ["ascend", "descend", "ascend"],
       render: (_, record) => {
         const upah =
           record?.gaji || record?.detail?.usulan_data?.data?.gaji_pokok || "0";
