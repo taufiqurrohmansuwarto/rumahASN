@@ -171,22 +171,31 @@ const DaftarPegawaiParuhWaktu = () => {
   const handleTableChange = (pagination, filters, sorter) => {
     const newQuery = { ...router.query };
 
-    // Handle pagination
-    if (pagination.current) {
-      newQuery.page = pagination.current;
-    }
+    // Cek apakah sorting berubah dari state sebelumnya
+    const newSortBy = sorter.field || undefined;
+    const newSortOrder = sorter.order
+      ? sorter.order === "ascend"
+        ? "asc"
+        : "desc"
+      : undefined;
 
-    // Handle sorting
-    if (sorter.field && sorter.order) {
-      newQuery.sortBy = sorter.field;
-      newQuery.sortOrder = sorter.order === "ascend" ? "asc" : "desc";
-      // Reset ke page 1 saat sorting berubah
-      newQuery.page = 1;
-    } else if (sorter.field && !sorter.order) {
-      // Jika user klik untuk menghapus sort (order undefined)
+    const sortingChanged = newSortBy !== sortBy || newSortOrder !== sortOrder;
+
+    // Update sorting di query
+    if (newSortBy && newSortOrder) {
+      newQuery.sortBy = newSortBy;
+      newQuery.sortOrder = newSortOrder;
+    } else {
       delete newQuery.sortBy;
       delete newQuery.sortOrder;
+    }
+
+    // Handle pagination
+    // Reset ke page 1 hanya jika sorting berubah
+    if (sortingChanged) {
       newQuery.page = 1;
+    } else if (pagination.current) {
+      newQuery.page = pagination.current;
     }
 
     router.push({
