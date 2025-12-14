@@ -1,9 +1,20 @@
-import { useChatStats, useMentionCount, useUnreadCounts } from "@/hooks/useRasnChat";
-import { Button } from "antd";
-import { Stack, Text, Divider, Group, Badge, UnstyledButton, Box } from "@mantine/core";
-import { IconPlus, IconAt, IconPhone, IconUsers } from "@tabler/icons-react";
+import { useChatStats, useMentionCount, useOnlineUsers, useBookmarkCount } from "@/hooks/useRasnChat";
+import { Button, Avatar } from "antd";
+import { Stack, Text, Divider, Group, Badge, UnstyledButton, Box, Indicator } from "@mantine/core";
+import { IconPlus, IconAt, IconPhone, IconUsers, IconBookmark, IconStar } from "@tabler/icons-react";
 import { useRouter } from "next/router";
 import ChannelList from "./ChannelList";
+
+// Status color helper
+const getStatusColor = (status) => {
+  const colors = {
+    online: "#22C55E", // green
+    away: "#F59E0B", // yellow
+    busy: "#EF4444", // red
+    offline: "#9CA3AF", // gray
+  };
+  return colors[status] || colors.offline;
+};
 
 const NavItem = ({ icon: Icon, label, badge, active, onClick }) => (
   <UnstyledButton
@@ -29,11 +40,51 @@ const NavItem = ({ icon: Icon, label, badge, active, onClick }) => (
   </UnstyledButton>
 );
 
+// User item with online status indicator
+const UserItem = ({ user, active, onClick }) => {
+  const statusColor = getStatusColor(user?.presence?.status);
+
+  return (
+    <UnstyledButton
+      onClick={onClick}
+      px={8}
+      py={4}
+      style={{
+        borderRadius: 4,
+        backgroundColor: active ? "#e6f4ff" : "transparent",
+      }}
+    >
+      <Group gap={8}>
+        <Indicator
+          inline
+          size={10}
+          offset={2}
+          position="bottom-end"
+          color={statusColor}
+          withBorder
+          processing={user?.presence?.status === "online"}
+        >
+          <Avatar src={user?.image} size={24}>
+            {user?.username?.[0]?.toUpperCase()}
+          </Avatar>
+        </Indicator>
+        <Box style={{ flex: 1, minWidth: 0 }}>
+          <Text size="xs" truncate>
+            {user?.username}
+          </Text>
+        </Box>
+      </Group>
+    </UnstyledButton>
+  );
+};
+
 const ChatSidebar = ({ onCreateChannel }) => {
   const router = useRouter();
   const { pathname } = router;
   const { data: stats } = useChatStats();
   const { data: mentionData } = useMentionCount();
+  const { data: bookmarkData } = useBookmarkCount();
+  const { data: onlineUsers } = useOnlineUsers();
 
   return (
     <Stack gap={0} h="100%">
@@ -47,6 +98,21 @@ const ChatSidebar = ({ onCreateChannel }) => {
         </Group>
       </Box>
 
+      {/* Starred Section */}
+      <Box px={6} py={4}>
+        <Group gap={4} px={4} mb={4}>
+          <IconStar size={12} color="#666" />
+          <Text size={10} c="dimmed" tt="uppercase" fw={600}>
+            Starred
+          </Text>
+        </Group>
+        <Text size={10} c="dimmed" px={4}>
+          Drag and drop important stuff here
+        </Text>
+      </Box>
+
+      <Divider my={4} />
+
       {/* Navigation */}
       <Stack gap={0} px={6} py={4}>
         <NavItem
@@ -55,6 +121,13 @@ const ChatSidebar = ({ onCreateChannel }) => {
           badge={mentionData?.count}
           active={pathname === "/rasn-chat/mentions"}
           onClick={() => router.push("/rasn-chat/mentions")}
+        />
+        <NavItem
+          icon={IconBookmark}
+          label="Saved Items"
+          badge={bookmarkData?.count}
+          active={pathname === "/rasn-chat/bookmarks"}
+          onClick={() => router.push("/rasn-chat/bookmarks")}
         />
         <NavItem
           icon={IconPhone}
@@ -73,16 +146,48 @@ const ChatSidebar = ({ onCreateChannel }) => {
       <Divider my={4} />
 
       {/* Channel List */}
-      <Box style={{ flex: 1, overflow: "auto" }} px={6}>
+      <Box px={6}>
         <Group justify="space-between" px={4} mb={4}>
           <Text size="xs" c="dimmed" tt="uppercase" fw={600}>
-            CHANNELS
+            Channels
           </Text>
           <Text size="xs" c="dimmed">
             {stats?.channels || 0}
           </Text>
         </Group>
         <ChannelList />
+      </Box>
+
+      <Divider my={4} />
+
+      {/* Online Users / Direct Messages Section */}
+      <Box style={{ flex: 1, overflow: "auto" }} px={6}>
+        <Group justify="space-between" px={4} mb={4}>
+          <Text size="xs" c="dimmed" tt="uppercase" fw={600}>
+            Direct Messages
+          </Text>
+          {onlineUsers?.length > 0 && (
+            <Badge size="xs" color="green" variant="light">
+              {onlineUsers.length} online
+            </Badge>
+          )}
+        </Group>
+        <Stack gap={0}>
+          {onlineUsers?.slice(0, 10).map((presence) => (
+            <UserItem
+              key={presence.user_id}
+              user={{ ...presence.user, presence }}
+              onClick={() => {
+                // TODO: Open DM with user
+              }}
+            />
+          ))}
+          {(!onlineUsers || onlineUsers.length === 0) && (
+            <Text size={10} c="dimmed" px={4}>
+              Tidak ada user online
+            </Text>
+          )}
+        </Stack>
       </Box>
 
       {/* Footer */}

@@ -3,30 +3,36 @@ import {
   useThreadMessages,
   useTogglePinMessage,
   useToggleReaction,
+  useToggleBookmark,
+  useSendMessage,
 } from "@/hooks/useRasnChat";
+import { Avatar, Box, Group, Paper, Stack, Text } from "@mantine/core";
 import {
-  ActionIcon,
-  Avatar,
-  Box,
-  Group,
-  Paper,
-  Stack,
-  Text,
-} from "@mantine/core";
-import {
+  IconBookmark,
+  IconBookmarkFilled,
   IconDotsVertical,
   IconEdit,
   IconFile,
+  IconFileText,
+  IconFileTypeCsv,
+  IconFileTypeDoc,
+  IconFileTypePdf,
+  IconFileTypePpt,
+  IconFileTypeXls,
+  IconFileTypeZip,
   IconMail,
   IconMessage,
+  IconMessageForward,
   IconMessageReply,
   IconMicrophone,
   IconMoodSmile,
   IconPin,
+  IconPinnedOff,
+  IconSend,
   IconSubtask,
   IconTrash,
 } from "@tabler/icons-react";
-import { Drawer, Dropdown, Empty, Popover, Skeleton } from "antd";
+import { Button, Drawer, Dropdown, Empty, Input, Popover, Skeleton, Space, Tooltip } from "antd";
 import dayjs from "dayjs";
 import "dayjs/locale/id";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -38,7 +44,15 @@ import remarkGfm from "remark-gfm";
 dayjs.extend(relativeTime);
 dayjs.locale("id");
 
-const COMMON_REACTIONS = ["👍", "❤️", "😂", "😮", "😢", "🎉", "👀", "🔥"];
+// Quick reactions shown in hover toolbar (Slack-style)
+const QUICK_REACTIONS = [
+  { emoji: "✅", tooltip: "Selesai" },
+  { emoji: "👀", tooltip: "Sedang dilihat" },
+  { emoji: "🙌", tooltip: "Kerja bagus" },
+];
+
+// Full reaction picker
+const COMMON_REACTIONS = ["👍", "❤️", "😂", "😮", "😢", "🎉", "👀", "🔥", "✅", "🙌"];
 
 // Mention component with hover card - match by full username
 const MentionTag = ({ username, mentions }) => {
@@ -279,78 +293,109 @@ const MessageContent = ({ content, mentions }) => {
   );
 };
 
-// Attachment preview component
-const AttachmentPreview = ({ attachment }) => {
-  const { attachment_type, file_name, file_url, thumbnail_url } = attachment;
+// Get file icon based on file type/extension (compact size)
+const getFileIcon = (fileName, fileType, size = 16) => {
+  const ext = fileName?.split(".").pop()?.toLowerCase();
+  const iconProps = { size, stroke: 1.5 };
 
+  if (ext === "pdf" || fileType?.includes("pdf")) return <IconFileTypePdf {...iconProps} color="#e74c3c" />;
+  if (["doc", "docx"].includes(ext) || fileType?.includes("word")) return <IconFileTypeDoc {...iconProps} color="#2b579a" />;
+  if (["xls", "xlsx"].includes(ext) || fileType?.includes("sheet")) return <IconFileTypeXls {...iconProps} color="#217346" />;
+  if (ext === "csv") return <IconFileTypeCsv {...iconProps} color="#217346" />;
+  if (["ppt", "pptx"].includes(ext) || fileType?.includes("presentation")) return <IconFileTypePpt {...iconProps} color="#d24726" />;
+  if (["zip", "rar", "7z", "tar", "gz"].includes(ext)) return <IconFileTypeZip {...iconProps} color="#f39c12" />;
+  if (["txt", "md", "json", "xml", "html", "css", "js"].includes(ext)) return <IconFileText {...iconProps} color="#7f8c8d" />;
+  return <IconFile {...iconProps} color="#95a5a6" />;
+};
+
+// Format file size
+const formatSize = (bytes) => {
+  if (!bytes) return "";
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+};
+
+// Compact Attachment preview component
+const AttachmentPreview = ({ attachment }) => {
+  const { attachment_type, file_name, file_url, thumbnail_url, file_size, file_type } = attachment;
+
+  // Image attachment - compact with thumbnail
   if (attachment_type === "image") {
     return (
-      <a href={file_url} target="_blank" rel="noopener noreferrer">
-        <img
-          src={thumbnail_url || file_url}
-          alt={file_name}
-          style={{
-            maxWidth: 280,
-            maxHeight: 160,
-            borderRadius: 6,
-            marginTop: 4,
-            border: "1px solid #e8e8e8",
-          }}
-        />
-      </a>
+      <Box mt={6}>
+        <a href={file_url} target="_blank" rel="noopener noreferrer">
+          <img
+            src={thumbnail_url || file_url}
+            alt={file_name}
+            style={{
+              maxWidth: 200,
+              maxHeight: 120,
+              borderRadius: 6,
+              border: "1px solid #e8e8e8",
+              display: "block",
+            }}
+          />
+        </a>
+      </Box>
     );
   }
 
+  // Video attachment - compact
   if (attachment_type === "video") {
     return (
-      <video
-        controls
-        style={{
-          maxWidth: 280,
-          marginTop: 4,
-          borderRadius: 6,
-          border: "1px solid #e8e8e8",
-        }}
-      >
-        <source src={file_url} />
-      </video>
+      <Box mt={6}>
+        <video
+          controls
+          style={{
+            maxWidth: 220,
+            maxHeight: 140,
+            borderRadius: 6,
+            border: "1px solid #e8e8e8",
+          }}
+        >
+          <source src={file_url} />
+        </video>
+      </Box>
     );
   }
 
-  if (attachment_type === "voice") {
+  // Voice/Audio attachment - compact inline
+  if (attachment_type === "voice" || attachment_type === "audio") {
     return (
-      <Group gap={4} mt={4}>
-        <IconMicrophone size={14} color="#666" />
-        <audio controls style={{ height: 28 }}>
+      <Group gap={6} mt={6}>
+        <IconMicrophone size={14} color="#1890ff" />
+        <audio controls style={{ height: 28, maxWidth: 200 }}>
           <source src={file_url} />
         </audio>
       </Group>
     );
   }
 
+  // File attachment - compact inline style
   return (
-    <Paper
-      withBorder
-      p={4}
-      mt={4}
-      radius="sm"
+    <Group
+      gap={6}
+      mt={6}
+      p={6}
       style={{
+        backgroundColor: "#f5f5f5",
+        borderRadius: 6,
         display: "inline-flex",
-        alignItems: "center",
-        gap: 6,
-        backgroundColor: "#f9f9f9",
+        cursor: "pointer",
       }}
+      onClick={() => window.open(file_url, "_blank")}
     >
-      <IconFile size={14} color="#666" />
-      <a
-        href={file_url}
-        target="_blank"
-        rel="noopener noreferrer"
-        style={{ color: "#1890ff", textDecoration: "none", fontSize: 11 }}
-      >
+      {getFileIcon(file_name, file_type, 16)}
+      <Text size={11} c="blue" style={{ textDecoration: "underline" }}>
         {file_name}
-      </a>
-    </Paper>
+      </Text>
+      {file_size && (
+        <Text size={10} c="dimmed">
+          ({formatSize(file_size)})
+        </Text>
+      )}
+    </Group>
   );
 };
 
@@ -409,10 +454,37 @@ const MessageReactions = ({ reactions, messageId, onReact }) => {
   );
 };
 
-// Thread drawer component
+// Thread drawer component with reply input
 const ThreadDrawer = ({ open, onClose, parentMessage, channelId }) => {
-  const { data: threadData, isLoading } = useThreadMessages(parentMessage?.id);
+  const { data: threadData, isLoading, refetch } = useThreadMessages(parentMessage?.id);
+  const sendMessage = useSendMessage();
+  const [replyContent, setReplyContent] = useState("");
   const replies = threadData?.replies || [];
+
+  const handleSendReply = async () => {
+    if (!replyContent.trim() || !parentMessage) return;
+
+    sendMessage.mutate(
+      {
+        channelId: parentMessage.channel_id || channelId,
+        content: replyContent.trim(),
+        parentId: parentMessage.id,
+      },
+      {
+        onSuccess: () => {
+          setReplyContent("");
+          refetch();
+        },
+      }
+    );
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSendReply();
+    }
+  };
 
   return (
     <Drawer
@@ -426,71 +498,128 @@ const ThreadDrawer = ({ open, onClose, parentMessage, channelId }) => {
       }
       open={open}
       onClose={onClose}
-      width={400}
+      width={420}
       placement="right"
+      styles={{
+        body: {
+          display: "flex",
+          flexDirection: "column",
+          height: "calc(100% - 55px)",
+          padding: 0,
+        },
+      }}
     >
-      {/* Original message */}
-      {parentMessage && (
-        <Paper
-          withBorder
-          p="xs"
-          mb="md"
-          radius="sm"
-          style={{ backgroundColor: "#fafafa" }}
-        >
-          <Group gap={6} mb={4}>
-            <Avatar src={parentMessage.user?.image} size={24} radius="sm">
-              {parentMessage.user?.username?.[0]?.toUpperCase()}
-            </Avatar>
-            <Text size="xs" fw={600}>
-              {parentMessage.user?.username}
-            </Text>
-            <Text size={10} c="dimmed">
-              {dayjs(parentMessage.created_at).format("DD/MM HH:mm")}
-            </Text>
-          </Group>
-          <MessageContent
-            content={parentMessage.content}
-            mentions={parentMessage.mentions}
-          />
-        </Paper>
-      )}
-
-      {/* Replies */}
-      {isLoading ? (
-        <Skeleton active paragraph={{ rows: 3 }} />
-      ) : replies.length === 0 ? (
-        <Empty
-          description="Belum ada balasan"
-          image={Empty.PRESENTED_IMAGE_SIMPLE}
-        />
-      ) : (
-        <Stack gap={8}>
-          {replies.map((reply) => (
-            <Box
-              key={reply.id}
-              pl={8}
-              style={{ borderLeft: "2px solid #1264a3" }}
-            >
-              <Group gap={6} mb={2}>
-                <Avatar src={reply.user?.image} size={20} radius="sm">
-                  {reply.user?.username?.[0]?.toUpperCase()}
-                </Avatar>
-                <Text size={11} fw={600}>
-                  {reply.user?.username}
+      {/* Scrollable content area */}
+      <Box style={{ flex: 1, overflowY: "auto", padding: 16 }}>
+        {/* Original message */}
+        {parentMessage && (
+          <Paper
+            withBorder
+            p="sm"
+            mb="md"
+            radius="sm"
+            style={{ backgroundColor: "#fafafa" }}
+          >
+            <Group gap={6} mb={4}>
+              <Avatar src={parentMessage.user?.image} size={28} radius="sm">
+                {parentMessage.user?.username?.[0]?.toUpperCase()}
+              </Avatar>
+              <Box>
+                <Text size="xs" fw={600}>
+                  {parentMessage.user?.username}
                 </Text>
                 <Text size={10} c="dimmed">
-                  {dayjs(reply.created_at).format("HH:mm")}
+                  {dayjs(parentMessage.created_at).format("DD MMM YYYY, HH:mm")}
                 </Text>
-              </Group>
-              <MessageContent
-                content={reply.content}
-                mentions={reply.mentions}
-              />
-            </Box>
-          ))}
-        </Stack>
-      )}
+              </Box>
+            </Group>
+            <MessageContent
+              content={parentMessage.content}
+              mentions={parentMessage.mentions}
+            />
+          </Paper>
+        )}
+
+        {/* Replies */}
+        {isLoading ? (
+          <Skeleton active paragraph={{ rows: 3 }} />
+        ) : replies.length === 0 ? (
+          <Box ta="center" py="xl">
+            <Text size="sm" c="dimmed">
+              Belum ada balasan
+            </Text>
+            <Text size="xs" c="dimmed" mt={4}>
+              Mulai percakapan dengan membalas di bawah
+            </Text>
+          </Box>
+        ) : (
+          <Stack gap={12}>
+            <Text size="xs" c="dimmed" fw={500}>
+              {replies.length} balasan
+            </Text>
+            {replies.map((reply) => (
+              <Box
+                key={reply.id}
+                pl={10}
+                py={6}
+                style={{
+                  borderLeft: "2px solid #1264a3",
+                  backgroundColor: "#f8f9fa",
+                  borderRadius: "0 6px 6px 0",
+                }}
+              >
+                <Group gap={6} mb={4}>
+                  <Avatar src={reply.user?.image} size={22} radius="sm">
+                    {reply.user?.username?.[0]?.toUpperCase()}
+                  </Avatar>
+                  <Text size={11} fw={600}>
+                    {reply.user?.username}
+                  </Text>
+                  <Text size={10} c="dimmed">
+                    {dayjs(reply.created_at).format("HH:mm")}
+                  </Text>
+                </Group>
+                <MessageContent
+                  content={reply.content}
+                  mentions={reply.mentions}
+                />
+              </Box>
+            ))}
+          </Stack>
+        )}
+      </Box>
+
+      {/* Reply input - fixed at bottom */}
+      <Box
+        p="sm"
+        style={{
+          borderTop: "1px solid #e8e8e8",
+          backgroundColor: "#fff",
+        }}
+      >
+        <Group gap={8} align="flex-end">
+          <Input.TextArea
+            placeholder="Tulis balasan..."
+            value={replyContent}
+            onChange={(e) => setReplyContent(e.target.value)}
+            onKeyDown={handleKeyDown}
+            autoSize={{ minRows: 1, maxRows: 4 }}
+            style={{ flex: 1 }}
+          />
+          <Tooltip title="Kirim balasan">
+            <Button
+              type="primary"
+              icon={<IconSend size={16} />}
+              onClick={handleSendReply}
+              loading={sendMessage.isPending}
+              disabled={!replyContent.trim()}
+            />
+          </Tooltip>
+        </Group>
+        <Text size={10} c="dimmed" mt={4}>
+          Tekan Enter untuk mengirim
+        </Text>
+      </Box>
     </Drawer>
   );
 };
@@ -506,8 +635,10 @@ const MessageItem = ({
   isHighlighted,
 }) => {
   const [hovered, setHovered] = useState(false);
+  const [isBookmarked, setIsBookmarked] = useState(false);
   const toggleReaction = useToggleReaction();
   const togglePin = useTogglePinMessage();
+  const toggleBookmark = useToggleBookmark();
 
   const handleReact = (emoji) => {
     toggleReaction.mutate({ messageId: message.id, emoji });
@@ -517,6 +648,17 @@ const MessageItem = ({
     togglePin.mutate({ channelId, messageId: message.id });
   };
 
+  const handleBookmark = () => {
+    toggleBookmark.mutate(
+      { messageId: message.id },
+      {
+        onSuccess: (data) => {
+          setIsBookmarked(data?.bookmarked);
+        },
+      }
+    );
+  };
+
   // Use can_edit/can_delete if available, fallback to is_own for backwards compatibility
   const canEdit = message.can_edit ?? message.is_own;
   const canDelete = message.can_delete ?? message.is_own;
@@ -524,9 +666,20 @@ const MessageItem = ({
   const menuItems = [
     { key: "reply", icon: <IconMessageReply size={12} />, label: "Balas" },
     {
+      key: "thread",
+      icon: <IconMessage size={12} />,
+      label: "Balas di thread",
+    },
+    { type: "divider" },
+    {
       key: "pin",
-      icon: <IconPin size={12} />,
+      icon: message.is_pinned ? <IconPinnedOff size={12} /> : <IconPin size={12} />,
       label: message.is_pinned ? "Unpin pesan" : "Pin pesan",
+    },
+    {
+      key: "bookmark",
+      icon: isBookmarked ? <IconBookmarkFilled size={12} /> : <IconBookmark size={12} />,
+      label: isBookmarked ? "Hapus dari simpanan" : "Simpan pesan",
     },
     { type: "divider" },
     {
@@ -546,23 +699,19 @@ const MessageItem = ({
 
   const handleMenuClick = ({ key }) => {
     if (key === "pin") handlePin();
+    if (key === "bookmark") handleBookmark();
     if (key === "edit") onEdit?.(message);
     if (key === "delete") onDelete?.(message.id);
     if (key === "reply") onReply?.(message);
+    if (key === "thread") onViewThread?.(message);
   };
 
   const reactionContent = (
-    <Group gap={2} p={2}>
+    <Group gap={4} p={4}>
       {COMMON_REACTIONS.map((emoji) => (
-        <ActionIcon
-          key={emoji}
-          variant="subtle"
-          size="sm"
-          onClick={() => handleReact(emoji)}
-          style={{ fontSize: 14 }}
-        >
-          {emoji}
-        </ActionIcon>
+        <Button key={emoji} type="text" size="small" onClick={() => handleReact(emoji)}>
+          <span style={{ fontSize: 18 }}>{emoji}</span>
+        </Button>
       ))}
     </Group>
   );
@@ -741,36 +890,92 @@ const MessageItem = ({
           )}
         </Box>
 
-        {/* Hover actions */}
-        <Group
-          gap={1}
+        {/* Hover actions - Slack style with white card */}
+        <Paper
+          withBorder
+          radius="md"
           style={{
             position: "absolute",
-            top: 2,
-            right: 8,
+            top: -12,
+            right: 12,
             opacity: hovered ? 1 : 0,
+            transition: "all 0.15s ease",
             backgroundColor: "#fff",
-            border: "1px solid #e8e8e8",
-            borderRadius: 4,
-            padding: "1px 2px",
-            boxShadow: "0 1px 2px rgba(0,0,0,0.06)",
-            transition: "opacity 0.15s",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.12)",
+            padding: 2,
+            transform: hovered ? "translateY(0)" : "translateY(4px)",
           }}
         >
-          <Popover content={reactionContent} trigger="click" placement="top">
-            <ActionIcon variant="subtle" size="xs" color="gray">
-              <IconMoodSmile size={14} />
-            </ActionIcon>
-          </Popover>
-          <Dropdown
-            menu={{ items: menuItems, onClick: handleMenuClick }}
-            trigger={["click"]}
-          >
-            <ActionIcon variant="subtle" size="xs" color="gray">
-              <IconDotsVertical size={14} />
-            </ActionIcon>
-          </Dropdown>
-        </Group>
+          <Space.Compact>
+            {/* Quick Reactions */}
+            {QUICK_REACTIONS.map((item) => (
+              <Tooltip key={item.emoji} title={item.tooltip}>
+                <Button
+                  type="text"
+                  size="small"
+                  onClick={() => handleReact(item.emoji)}
+                >
+                  <span style={{ fontSize: 16 }}>{item.emoji}</span>
+                </Button>
+              </Tooltip>
+            ))}
+
+            {/* Add Emoji Reaction */}
+            <Popover content={reactionContent} trigger="click" placement="top">
+              <Tooltip title="Tambah reaksi">
+                <Button
+                  type="text"
+                  size="small"
+                  icon={<IconMoodSmile size={16} />}
+                />
+              </Tooltip>
+            </Popover>
+
+            {/* Reply in Thread */}
+            <Tooltip title="Balas di thread">
+              <Button
+                type="text"
+                size="small"
+                icon={<IconMessageReply size={16} />}
+                onClick={() => onViewThread?.(message)}
+              />
+            </Tooltip>
+
+            {/* Forward/Share */}
+            <Tooltip title="Teruskan pesan">
+              <Button
+                type="text"
+                size="small"
+                icon={<IconMessageForward size={16} />}
+              />
+            </Tooltip>
+
+            {/* Bookmark/Save */}
+            <Tooltip title={isBookmarked ? "Hapus dari simpanan" : "Simpan pesan"}>
+              <Button
+                type="text"
+                size="small"
+                icon={isBookmarked ? <IconBookmarkFilled size={16} color="#faad14" /> : <IconBookmark size={16} />}
+                onClick={handleBookmark}
+              />
+            </Tooltip>
+
+            {/* More Actions */}
+            <Dropdown
+              menu={{ items: menuItems, onClick: handleMenuClick }}
+              trigger={["click"]}
+              placement="bottomRight"
+            >
+              <Tooltip title="Lainnya">
+                <Button
+                  type="text"
+                  size="small"
+                  icon={<IconDotsVertical size={16} />}
+                />
+              </Tooltip>
+            </Dropdown>
+          </Space.Compact>
+        </Paper>
       </Group>
     </Box>
   );

@@ -97,6 +97,7 @@ const MessageInput = ({
   const [mentionIndex, setMentionIndex] = useState(0);
   const [isSearching, setIsSearching] = useState(false);
   const [selectedMentions, setSelectedMentions] = useState([]);
+  const justInsertedMentionRef = useRef(false);
 
   const sendMsg = useSendMessage();
   const editMsg = useEditMessage();
@@ -269,6 +270,12 @@ const MessageInput = ({
     const cursorPos = textarea?.selectionStart || newValue.length;
     cursorPosRef.current = cursorPos;
 
+    // Skip mention check if we just inserted a mention
+    if (justInsertedMentionRef.current) {
+      justInsertedMentionRef.current = false;
+      return;
+    }
+
     const { show, query } = checkForMention(newValue, cursorPos);
 
     if (show) {
@@ -302,6 +309,9 @@ const MessageInput = ({
     const beforeMention = content.substring(0, lastAtIndex);
     const displayName = user.username || "";
     const newText = `${beforeMention}@${displayName} ${textAfterCursor}`;
+
+    // Set flag to skip next mention check
+    justInsertedMentionRef.current = true;
 
     setContent(newText);
 
@@ -505,18 +515,9 @@ const MessageInput = ({
             <Button
               type="text"
               size="small"
+              icon={<IconX size={14} />}
               onClick={onCancelReply}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                width: 24,
-                height: 24,
-                padding: 0,
-              }}
-            >
-              <IconX size={14} />
-            </Button>
+            />
           </Group>
         </Paper>
       )}
@@ -539,18 +540,9 @@ const MessageInput = ({
             <Button
               type="text"
               size="small"
+              icon={<IconX size={14} />}
               onClick={onCancelEdit}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                width: 24,
-                height: 24,
-                padding: 0,
-              }}
-            >
-              <IconX size={14} />
-            </Button>
+            />
           </Group>
         </Paper>
       )}
@@ -582,19 +574,9 @@ const MessageInput = ({
                 type="text"
                 size="small"
                 danger
+                icon={<IconX size={12} />}
                 onClick={() => removePendingFile(file.uid)}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  width: 20,
-                  height: 20,
-                  padding: 0,
-                  minWidth: 20,
-                }}
-              >
-                <IconX size={12} />
-              </Button>
+              />
             </Paper>
           ))}
         </Group>
@@ -841,39 +823,18 @@ const MessageInput = ({
             >
               <Button
                 type={canSend ? "primary" : "default"}
-                shape="default"
                 onClick={handleSend}
                 loading={isLoading}
                 disabled={!canSend}
                 icon={<IconSend size={18} />}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  width: 36,
-                  height: 36,
-                  padding: 0,
-                  borderRadius: 8,
-                  transition: "all 0.2s",
-                }}
               />
             </Tooltip>
 
             <Button
               type="text"
               size="small"
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                width: 24,
-                height: 24,
-                padding: 0,
-                color: "#999",
-              }}
-            >
-              <IconChevronDown size={16} />
-            </Button>
+              icon={<IconChevronDown size={16} />}
+            />
           </Group>
         </Group>
       </Paper>

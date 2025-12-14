@@ -3,23 +3,22 @@ import {
   useMentionCount,
   useMyChannels,
   useUnreadCounts,
+  useOnlineUsers,
+  useBookmarkCount,
 } from "@/hooks/useRasnChat";
 import { layoutToken } from "@/styles/rasn.theme";
 import { Center } from "@mantine/core";
 import {
   IconAt,
+  IconBookmark,
+  IconCircleFilled,
   IconHash,
   IconLock,
   IconLogout,
-  IconPencil,
   IconPhone,
   IconPlus,
-  IconSettings,
   IconUser,
   IconUsers,
-  IconSubtask,
-  IconMail,
-  IconChartBar,
 } from "@tabler/icons-react";
 import { Badge, Button, Dropdown, Space } from "antd";
 import { signOut, useSession } from "next-auth/react";
@@ -43,8 +42,10 @@ function ChatLayout({ children, onCompose, currentChannelId }) {
 
   const { data: stats } = useChatStats();
   const { data: mentionData } = useMentionCount();
+  const { data: bookmarkData } = useBookmarkCount();
   const { data: channels } = useMyChannels();
   const { data: unreadData } = useUnreadCounts();
+  const { data: onlineUsers } = useOnlineUsers();
 
   // Enable chat notifications
   useChatNotifications(currentChannelId);
@@ -59,6 +60,17 @@ function ChatLayout({ children, onCompose, currentChannelId }) {
     } else {
       router.push("/rasn-chat?compose=true");
     }
+  };
+
+  // Get status color for online indicator
+  const getStatusColor = (status) => {
+    const colors = {
+      online: "#22C55E",
+      away: "#F59E0B",
+      busy: "#EF4444",
+      offline: "#9CA3AF",
+    };
+    return colors[status] || colors.offline;
   };
 
   const getAllRoutes = () => {
@@ -78,38 +90,30 @@ function ChatLayout({ children, onCompose, currentChannelId }) {
         icon: <IconAt size={16} />,
       },
       {
+        key: "/rasn-chat/bookmarks",
+        path: "/rasn-chat/bookmarks",
+        name:
+          bookmarkData?.count > 0 ? (
+            <Space>
+              Saved Items
+              <Badge count={bookmarkData.count} size="small" style={{ backgroundColor: "#faad14" }} />
+            </Space>
+          ) : (
+            "Saved Items"
+          ),
+        icon: <IconBookmark size={16} />,
+      },
+      {
         key: "/rasn-chat/calls",
         path: "/rasn-chat/calls",
         name: "Riwayat Call",
         icon: <IconPhone size={16} />,
       },
       {
-        key: "/rasn-chat/stats",
-        path: "/rasn-chat/stats",
-        name: "Statistik",
-        icon: <IconChartBar size={16} />,
-      },
-      {
         key: "/rasn-chat/roles",
         path: "/rasn-chat/roles",
         name: "Kelola Roles",
         icon: <IconUsers size={16} />,
-      },
-      {
-        key: "link-divider",
-        type: "divider",
-      },
-      {
-        key: "/kanban",
-        path: "/kanban",
-        name: "Kanban",
-        icon: <IconSubtask size={16} />,
-      },
-      {
-        key: "/mails",
-        path: "/mails",
-        name: "Email",
-        icon: <IconMail size={16} />,
       },
       {
         key: "divider-channels",
@@ -147,11 +151,38 @@ function ChatLayout({ children, onCompose, currentChannelId }) {
       };
     });
 
-    return [...mainRoutes, ...channelRoutes];
+    // Direct Messages header and online users
+    const dmRoutes = [
+      {
+        key: "divider-dm",
+        type: "divider",
+      },
+      {
+        key: "dm-header",
+        path: "#",
+        name: `DIRECT MESSAGES${onlineUsers?.length > 0 ? ` (${onlineUsers.length} online)` : ""}`,
+        disabled: true,
+      },
+    ];
+
+    // Add online users as DM options
+    const userRoutes = (onlineUsers || []).slice(0, 8).map((presence) => ({
+      key: `dm-${presence.user_id}`,
+      path: "#",
+      name: (
+        <Space size={4}>
+          <IconCircleFilled size={8} color={getStatusColor(presence.status)} />
+          <span>{presence.user?.username || "User"}</span>
+        </Space>
+      ),
+      icon: null,
+    }));
+
+    return [...mainRoutes, ...channelRoutes, ...dmRoutes, ...userRoutes];
   };
 
   const handleMenuClick = ({ key }) => {
-    if (key === "channels-header" || key === "divider-channels") {
+    if (key === "channels-header" || key === "divider-channels" || key === "dm-header" || key.startsWith("dm-")) {
       return;
     }
 

@@ -7,6 +7,7 @@ export { default as MessageList } from "./MessageList";
 export { default as MessageInput } from "./MessageInput";
 export { default as CreateChannelModal } from "./CreateChannelModal";
 export { default as MentionList } from "./MentionList";
+export { default as BookmarkList } from "./BookmarkList";
 export { default as CallHistory } from "./CallHistory";
 export { default as PinnedMessages } from "./PinnedMessages";
 export { default as MediaGallery } from "./MediaGallery";

@@ -151,6 +151,25 @@ export const togglePinMessage = (channelId, messageId) =>
   api.post(`/messages/${messageId}/pin`, { channelId }).then((res) => res?.data);
 
 // ============================================
+// BOOKMARKS
+// ============================================
+
+export const getMyBookmarks = (params) =>
+  api.get("/bookmarks", { params }).then((res) => res?.data);
+
+export const getBookmarkCount = () =>
+  api.get("/bookmarks/count").then((res) => res?.data);
+
+export const toggleBookmark = (messageId, note = null) =>
+  api.post(`/bookmarks/${messageId}`, { note }).then((res) => res?.data);
+
+export const updateBookmarkNote = (messageId, note) =>
+  api.patch(`/bookmarks/${messageId}`, { note }).then((res) => res?.data);
+
+export const checkBookmarkStatus = (messageId) =>
+  api.get(`/bookmarks/${messageId}`).then((res) => res?.data);
+
+// ============================================
 // USER PRESENCE
 // ============================================
 

@@ -18,6 +18,7 @@ const {
   Attachment,
   UserPresence,
   PinnedMessage,
+  Bookmark,
   VideoCall,
   CallParticipant,
 } = require("@/models/rasn_chat");
@@ -680,6 +681,82 @@ const togglePinMessage = async (req, res) => {
 };
 
 // ============================================
+// BOOKMARKS
+// ============================================
+
+const getMyBookmarks = async (req, res) => {
+  try {
+    const { customId } = req.user;
+    const { page = 1, limit = 20, search } = req.query;
+
+    let result;
+    if (search && search.length >= 2) {
+      result = await Bookmark.searchBookmarks(customId, search, {
+        page: parseInt(page),
+        limit: parseInt(limit),
+      });
+    } else {
+      result = await Bookmark.getUserBookmarks(customId, {
+        page: parseInt(page),
+        limit: parseInt(limit),
+      });
+    }
+
+    res.json(result);
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+const toggleBookmark = async (req, res) => {
+  try {
+    const { messageId } = req.query;
+    const { customId } = req.user;
+    const { note } = req.body;
+
+    const result = await Bookmark.toggleBookmark(customId, messageId, note);
+    res.json(result);
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+const updateBookmarkNote = async (req, res) => {
+  try {
+    const { messageId } = req.query;
+    const { customId } = req.user;
+    const { note } = req.body;
+
+    await Bookmark.updateNote(customId, messageId, note);
+    res.json({ message: "Catatan bookmark berhasil diupdate" });
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+const getBookmarkCount = async (req, res) => {
+  try {
+    const { customId } = req.user;
+    const count = await Bookmark.getBookmarkCount(customId);
+    res.json({ count });
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+const checkBookmarkStatus = async (req, res) => {
+  try {
+    const { messageId } = req.query;
+    const { customId } = req.user;
+
+    const bookmarked = await Bookmark.isBookmarked(customId, messageId);
+    res.json({ bookmarked });
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+// ============================================
 // USER PRESENCE
 // ============================================
 
@@ -1125,6 +1202,13 @@ module.exports = {
   // Pinned Messages
   getPinnedMessages,
   togglePinMessage,
+
+  // Bookmarks
+  getMyBookmarks,
+  toggleBookmark,
+  updateBookmarkNote,
+  getBookmarkCount,
+  checkBookmarkStatus,
 
   // User Presence
   updatePresence,

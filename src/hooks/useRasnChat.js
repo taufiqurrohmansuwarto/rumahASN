@@ -410,6 +410,60 @@ export const useTogglePinMessage = () => {
 };
 
 // ============================================
+// BOOKMARKS
+// ============================================
+
+export const useMyBookmarks = (params) => {
+  return useQuery({
+    queryKey: ["chat-bookmarks", params],
+    queryFn: () => chatApi.getMyBookmarks(params),
+    keepPreviousData: true,
+  });
+};
+
+export const useBookmarkCount = () => {
+  return useQuery({
+    queryKey: ["chat-bookmark-count"],
+    queryFn: chatApi.getBookmarkCount,
+    staleTime: 60000,
+  });
+};
+
+export const useToggleBookmark = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ messageId, note }) => chatApi.toggleBookmark(messageId, note),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries(["chat-bookmarks"]);
+      queryClient.invalidateQueries(["chat-bookmark-count"]);
+      message.success(
+        data?.bookmarked ? "Pesan disimpan" : "Pesan dihapus dari simpanan"
+      );
+    },
+  });
+};
+
+export const useUpdateBookmarkNote = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ messageId, note }) =>
+      chatApi.updateBookmarkNote(messageId, note),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["chat-bookmarks"]);
+      message.success("Catatan berhasil diupdate");
+    },
+  });
+};
+
+export const useCheckBookmarkStatus = (messageId) => {
+  return useQuery({
+    queryKey: ["chat-bookmark-status", messageId],
+    queryFn: () => chatApi.checkBookmarkStatus(messageId),
+    enabled: !!messageId,
+  });
+};
+
+// ============================================
 // USER PRESENCE
 // ============================================
 

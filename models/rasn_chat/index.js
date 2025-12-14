@@ -11,6 +11,7 @@ const Mention = require("./mentions.model");
 const Attachment = require("./attachments.model");
 const UserPresence = require("./user-presence.model");
 const PinnedMessage = require("./pinned-messages.model");
+const Bookmark = require("./bookmarks.model");
 const VideoCall = require("./video-calls.model");
 const CallParticipant = require("./call-participants.model");
 
@@ -29,6 +30,7 @@ module.exports = {
   Attachment,
   UserPresence,
   PinnedMessage,
+  Bookmark,
 
   // Video Call
   VideoCall,

@@ -1,12 +1,75 @@
-import { Popover } from "antd";
-import { ActionIcon, SimpleGrid, Text, Tabs } from "@mantine/core";
+import { Popover, Button } from "antd";
+import { SimpleGrid, Text, Tabs } from "@mantine/core";
 import { IconMoodSmile } from "@tabler/icons-react";
 
 const EMOJI_CATEGORIES = {
-  "Sering": ["👍", "❤️", "😂", "😮", "😢", "🎉", "🔥", "👏", "💪", "🙏"],
-  "Wajah": ["😀", "😃", "😄", "😁", "😅", "😂", "🤣", "😊", "😇", "🙂", "🙃", "😉", "😌", "😍", "🥰", "😘", "😗", "😙", "😚", "😋"],
-  "Gesture": ["👋", "🤚", "🖐", "✋", "🖖", "👌", "🤌", "🤏", "✌️", "🤞", "🤟", "🤘", "🤙", "👈", "👉", "👆", "🖕", "👇", "☝️", "👍"],
-  "Objek": ["❤️", "🧡", "💛", "💚", "💙", "💜", "🖤", "🤍", "🤎", "💔", "❤️‍🔥", "💕", "💞", "💓", "💗", "💖", "💘", "💝", "💟", "☮️"],
+  Sering: ["👍", "❤️", "😂", "😮", "😢", "🎉", "🔥", "👏", "💪", "🙏"],
+  Wajah: [
+    "😀",
+    "😃",
+    "😄",
+    "😁",
+    "😅",
+    "😂",
+    "🤣",
+    "😊",
+    "😇",
+    "🙂",
+    "🙃",
+    "😉",
+    "😌",
+    "😍",
+    "🥰",
+    "😘",
+    "😗",
+    "😙",
+    "😚",
+    "😋",
+  ],
+  Gesture: [
+    "👋",
+    "🤚",
+    "🖐",
+    "✋",
+    "🖖",
+    "👌",
+    "🤌",
+    "🤏",
+    "✌️",
+    "🤞",
+    "🤟",
+    "🤘",
+    "🤙",
+    "👈",
+    "👉",
+    "👆",
+    "🖕",
+    "👇",
+    "☝️",
+    "👍",
+  ],
+  Objek: [
+    "❤️",
+    "🧡",
+    "💛",
+    "💚",
+    "💙",
+    "💜",
+    "🖤",
+    "🤍",
+    "🤎",
+    "💔",
+    "❤️‍🔥",
+    "💕",
+    "💞",
+    "💓",
+    "💗",
+    "💖",
+    "💘",
+    "💝",
+    "💟",
+    "☮️",
+  ],
 };
 
 const EmojiPicker = ({ onSelect, children }) => {
@@ -25,14 +88,14 @@ const EmojiPicker = ({ onSelect, children }) => {
           <Tabs.Panel key={cat} value={cat} pt="xs">
             <SimpleGrid cols={8} spacing={2}>
               {emojis.map((emoji) => (
-                <ActionIcon
+                <Button
                   key={emoji}
-                  variant="subtle"
-                  size="lg"
+                  type="text"
+                  size="small"
                   onClick={() => onSelect?.(emoji)}
                 >
                   <Text size="lg">{emoji}</Text>
-                </ActionIcon>
+                </Button>
               ))}
             </SimpleGrid>
           </Tabs.Panel>
@@ -44,13 +107,10 @@ const EmojiPicker = ({ onSelect, children }) => {
   return (
     <Popover content={content} trigger="click" placement="top">
       {children || (
-        <ActionIcon variant="subtle">
-          <IconMoodSmile size={18} />
-        </ActionIcon>
+        <Button type="text" size="small" icon={<IconMoodSmile size={18} />} />
       )}
     </Popover>
   );
 };
 
 export default EmojiPicker;
-
