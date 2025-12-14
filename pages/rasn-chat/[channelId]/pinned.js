@@ -2,7 +2,6 @@ import ChatLayout from "@/components/ChatLayout";
 import PageContainer from "@/components/PageContainer";
 import { PinnedMessages } from "@/components/RasnChat";
 import { useChannel } from "@/hooks/useRasnChat";
-import { Typography } from "antd";
 import Head from "next/head";
 import { useRouter } from "next/router";
 

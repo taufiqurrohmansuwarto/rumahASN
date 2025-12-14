@@ -3,27 +3,21 @@ import {
   useEditMessage,
   useSendMessage,
 } from "@/hooks/useRasnChat";
-import { formatFileSize, searchUsers } from "@/services/rasn-chat.services";
-import { Box, Group, Kbd, Paper, Text } from "@mantine/core";
+import { searchUsers } from "@/services/rasn-chat.services";
+import { Box, Group, Paper, Text } from "@mantine/core";
 import {
   IconAt,
   IconBold,
-  IconChevronDown,
   IconCode,
   IconItalic,
   IconLink,
   IconList,
-  IconListNumbers,
-  IconMicrophone,
   IconMoodSmile,
   IconPaperclip,
-  IconPlus,
   IconQuote,
   IconSend,
   IconStrikethrough,
   IconTypography,
-  IconUnderline,
-  IconVideo,
   IconX,
 } from "@tabler/icons-react";
 import { Avatar, Button, Input, message, Tooltip, Upload } from "antd";
@@ -59,17 +53,6 @@ const ToolbarButton = ({
   </Tooltip>
 );
 
-// Divider for toolbar
-const ToolbarDivider = () => (
-  <Box
-    style={{
-      width: 1,
-      height: 20,
-      backgroundColor: "#e0e0e0",
-      margin: "0 4px",
-    }}
-  />
-);
 
 const MessageInput = ({
   channelId,
@@ -82,7 +65,7 @@ const MessageInput = ({
   const [content, setContent] = useState("");
   const [pendingFiles, setPendingFiles] = useState([]);
   const [uploading, setUploading] = useState(false);
-  const [showFormatting, setShowFormatting] = useState(true);
+  const [showFormatting, setShowFormatting] = useState(false); // Hidden by default for compact view
   const textareaRef = useRef(null);
   const cursorPosRef = useRef(0);
 
@@ -489,95 +472,86 @@ const MessageInput = ({
 
   return (
     <Box>
-      {/* Reply indicator */}
+      {/* Reply indicator - compact */}
       {replyTo && (
-        <Paper
-          p={8}
-          mb={8}
-          radius="sm"
+        <Group
+          gap={8}
+          mb={4}
+          px={8}
+          py={4}
           style={{
-            borderLeft: "3px solid #1264a3",
-            backgroundColor: "#f8f9fa",
+            borderLeft: "2px solid #1264a3",
+            backgroundColor: "#f0f7ff",
+            borderRadius: 4,
           }}
         >
-          <Group justify="space-between">
-            <Box>
-              <Text size="xs" c="dimmed">
-                Membalas{" "}
-                <Text span fw={600} c="blue">
-                  {replyTo.user?.username}
-                </Text>
-              </Text>
-              <Text size="xs" lineClamp={1} c="dimmed" mt={2}>
-                {replyTo.content}
-              </Text>
-            </Box>
-            <Button
-              type="text"
-              size="small"
-              icon={<IconX size={14} />}
-              onClick={onCancelReply}
-            />
-          </Group>
-        </Paper>
+          <Text size="xs" c="dimmed" style={{ flex: 1 }}>
+            Membalas <Text span fw={600} c="blue">{replyTo.user?.username}</Text>
+          </Text>
+          <Button
+            type="text"
+            size="small"
+            icon={<IconX size={12} />}
+            onClick={onCancelReply}
+            style={{ padding: 2, height: "auto", minWidth: "auto" }}
+          />
+        </Group>
       )}
 
-      {/* Edit indicator */}
+      {/* Edit indicator - compact */}
       {editMessage && (
-        <Paper
-          p={8}
-          mb={8}
-          radius="sm"
+        <Group
+          gap={8}
+          mb={4}
+          px={8}
+          py={4}
           style={{
-            borderLeft: "3px solid #e8912d",
-            backgroundColor: "#fffbf0",
+            borderLeft: "2px solid #faad14",
+            backgroundColor: "#fffbe6",
+            borderRadius: 4,
           }}
         >
-          <Group justify="space-between">
-            <Text size="xs" c="orange" fw={500}>
-              Mengedit pesan
-            </Text>
-            <Button
-              type="text"
-              size="small"
-              icon={<IconX size={14} />}
-              onClick={onCancelEdit}
-            />
-          </Group>
-        </Paper>
+          <Text size="xs" c="orange" fw={500} style={{ flex: 1 }}>
+            Mengedit pesan
+          </Text>
+          <Button
+            type="text"
+            size="small"
+            icon={<IconX size={12} />}
+            onClick={onCancelEdit}
+            style={{ padding: 2, height: "auto", minWidth: "auto" }}
+          />
+        </Group>
       )}
 
-      {/* Pending files preview */}
+      {/* Pending files preview - compact */}
       {pendingFiles.length > 0 && (
-        <Group gap={8} mb={8} wrap="wrap">
+        <Group gap={4} mb={4} wrap="wrap">
           {pendingFiles.map((file) => (
-            <Paper
+            <Group
               key={file.uid}
-              withBorder
-              p={8}
-              radius="sm"
+              gap={4}
+              px={6}
+              py={2}
               style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 8,
-                backgroundColor: "#f8f9fa",
+                backgroundColor: "#f5f5f5",
+                borderRadius: 4,
+                fontSize: 11,
               }}
             >
-              <IconPaperclip size={14} color="#666" />
-              <Text size="xs" truncate style={{ maxWidth: 150 }}>
+              <IconPaperclip size={12} color="#666" />
+              <Text size="xs" truncate style={{ maxWidth: 100 }}>
                 {file.name}
-              </Text>
-              <Text size="xs" c="dimmed">
-                ({formatFileSize(file.size)})
               </Text>
               <Button
                 type="text"
                 size="small"
                 danger
-                icon={<IconX size={12} />}
+                icon={<IconX size={10} />}
                 onClick={() => removePendingFile(file.uid)}
+                style={{ padding: 0, height: "auto", minWidth: "auto" }}
               />
-            </Paper>
+            </Group>
           ))}
         </Group>
       )}
@@ -585,11 +559,11 @@ const MessageInput = ({
       {/* Main Input Container */}
       <Paper
         withBorder
-        radius="lg"
+        radius="md"
         style={{
           overflow: "visible",
           position: "relative",
-          border: "1px solid #e0e0e0",
+          border: "1px solid #d9d9d9",
         }}
       >
         {/* Mention Dropdown */}
@@ -654,79 +628,61 @@ const MessageInput = ({
           </Paper>
         )}
 
-        {/* Formatting Toolbar - Top */}
+        {/* Formatting Toolbar - Compact */}
         {showFormatting && (
           <Group
-            gap={2}
-            px={12}
-            py={6}
+            gap={0}
+            px={8}
+            py={4}
+            wrap="wrap"
             style={{
               borderBottom: "1px solid #f0f0f0",
               backgroundColor: "#fafafa",
-              borderTopLeftRadius: 16,
-              borderTopRightRadius: 16,
+              borderTopLeftRadius: 8,
+              borderTopRightRadius: 8,
             }}
           >
             <ToolbarButton
               icon={IconBold}
-              tooltip="Tebal (Ctrl+B)"
+              tooltip="Tebal"
               onClick={() => insertMarkdown("**")}
+              size={14}
             />
             <ToolbarButton
               icon={IconItalic}
-              tooltip="Miring (Ctrl+I)"
+              tooltip="Miring"
               onClick={() => insertMarkdown("*")}
-            />
-            <ToolbarButton
-              icon={IconUnderline}
-              tooltip="Garis Bawah"
-              onClick={() => insertMarkdown("__")}
+              size={14}
             />
             <ToolbarButton
               icon={IconStrikethrough}
               tooltip="Coret"
               onClick={() => insertMarkdown("~~")}
+              size={14}
             />
-
-            <ToolbarDivider />
-
             <ToolbarButton
               icon={IconLink}
               tooltip="Link"
               onClick={insertLink}
+              size={14}
             />
-
-            <ToolbarDivider />
-
             <ToolbarButton
-              icon={IconListNumbers}
-              tooltip="Daftar Bernomor"
-              onClick={() => insertList(true)}
+              icon={IconCode}
+              tooltip="Kode"
+              onClick={() => insertMarkdown("`")}
+              size={14}
             />
             <ToolbarButton
               icon={IconList}
               tooltip="Daftar"
               onClick={() => insertList(false)}
-            />
-
-            <ToolbarDivider />
-
-            <ToolbarButton
-              icon={IconCode}
-              tooltip="Kode Inline"
-              onClick={() => insertMarkdown("`")}
-            />
-            <ToolbarButton
-              icon={() => (
-                <Text size="xs" fw={600} ff="monospace">{`</>`}</Text>
-              )}
-              tooltip="Blok Kode"
-              onClick={insertCodeBlock}
+              size={14}
             />
             <ToolbarButton
               icon={IconQuote}
               tooltip="Kutipan"
               onClick={insertQuote}
+              size={14}
             />
           </Group>
         )}
@@ -738,33 +694,33 @@ const MessageInput = ({
           onChange={handleContentChange}
           onKeyDown={handleKeyDown}
           placeholder={
-            editMessage ? "Edit pesan..." : `Message #${displayChannelName}`
+            editMessage ? "Edit pesan..." : `Tulis pesan...`
           }
-          autoSize={{ minRows: 1, maxRows: 10 }}
+          autoSize={{ minRows: 1, maxRows: 6 }}
           variant="borderless"
           style={{
             resize: "none",
-            padding: "12px 16px",
-            fontSize: 15,
-            lineHeight: 1.5,
+            padding: "8px 12px",
+            fontSize: 14,
+            lineHeight: 1.4,
           }}
           disabled={isLoading}
         />
 
-        {/* Bottom Toolbar */}
+        {/* Bottom Toolbar - Compact */}
         <Group
           justify="space-between"
-          px={12}
-          py={8}
+          px={8}
+          py={4}
           style={{
             borderTop: "1px solid #f0f0f0",
             backgroundColor: "#fafafa",
-            borderBottomLeftRadius: 16,
-            borderBottomRightRadius: 16,
+            borderBottomLeftRadius: 8,
+            borderBottomRightRadius: 8,
           }}
         >
           {/* Left side tools */}
-          <Group gap={2}>
+          <Group gap={0}>
             <Upload
               beforeUpload={handleFileSelect}
               showUploadList={false}
@@ -772,11 +728,23 @@ const MessageInput = ({
               disabled={uploading}
             >
               <ToolbarButton
-                icon={IconPlus}
+                icon={IconPaperclip}
                 tooltip="Tambah File"
                 disabled={uploading}
+                size={16}
               />
             </Upload>
+
+            <EmojiPicker onSelect={handleEmojiSelect}>
+              <ToolbarButton icon={IconMoodSmile} tooltip="Emoji" size={16} />
+            </EmojiPicker>
+
+            <ToolbarButton
+              icon={IconAt}
+              tooltip="Mention (@)"
+              onClick={triggerMention}
+              size={16}
+            />
 
             <ToolbarButton
               icon={IconTypography}
@@ -785,57 +753,23 @@ const MessageInput = ({
               }
               onClick={() => setShowFormatting(!showFormatting)}
               active={showFormatting}
-            />
-
-            <EmojiPicker onSelect={handleEmojiSelect}>
-              <ToolbarButton icon={IconMoodSmile} tooltip="Emoji" />
-            </EmojiPicker>
-
-            <ToolbarButton
-              icon={IconAt}
-              tooltip="Mention (@)"
-              onClick={triggerMention}
-            />
-
-            <ToolbarDivider />
-
-            <ToolbarButton
-              icon={IconVideo}
-              tooltip="Video (Coming Soon)"
-              disabled
-            />
-            <ToolbarButton
-              icon={IconMicrophone}
-              tooltip="Voice (Coming Soon)"
-              disabled
+              size={16}
             />
           </Group>
 
           {/* Right side - Send button */}
-          <Group gap={8}>
-            <Text size="xs" c="dimmed" visibleFrom="sm">
-              <Kbd size="xs">Shift</Kbd> + <Kbd size="xs">Enter</Kbd> untuk
-              baris baru
-            </Text>
-
-            <Tooltip
-              title={canSend ? "Kirim pesan" : "Tulis pesan terlebih dahulu"}
-            >
-              <Button
-                type={canSend ? "primary" : "default"}
-                onClick={handleSend}
-                loading={isLoading}
-                disabled={!canSend}
-                icon={<IconSend size={18} />}
-              />
-            </Tooltip>
-
+          <Tooltip
+            title={canSend ? "Kirim (Enter)" : "Tulis pesan"}
+          >
             <Button
-              type="text"
+              type={canSend ? "primary" : "text"}
               size="small"
-              icon={<IconChevronDown size={16} />}
+              onClick={handleSend}
+              loading={isLoading}
+              disabled={!canSend}
+              icon={<IconSend size={16} />}
             />
-          </Group>
+          </Tooltip>
         </Group>
       </Paper>
     </Box>

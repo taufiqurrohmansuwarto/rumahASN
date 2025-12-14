@@ -3,6 +3,7 @@ import {
   useMentionCount,
   useMyChannels,
   usePublicChannels,
+  useArchivedChannels,
   useUnreadCounts,
   useOnlineUsers,
   useBookmarkCount,
@@ -14,6 +15,7 @@ import { layoutToken } from "@/styles/rasn.theme";
 import { Center, Avatar as MantineAvatar, Group as MantineGroup, Indicator } from "@mantine/core";
 import {
   IconAt,
+  IconArchive,
   IconBookmark,
   IconCircleFilled,
   IconHash,
@@ -54,6 +56,7 @@ function ChatLayout({ children, onCompose, currentChannelId }) {
   const { data: bookmarkData } = useBookmarkCount();
   const { data: channels } = useMyChannels();
   const { data: publicChannels } = usePublicChannels();
+  const { data: archivedChannels } = useArchivedChannels();
   const { data: unreadData } = useUnreadCounts();
   const { data: onlineUsers } = useOnlineUsers();
   const { data: membership } = useMyWorkspaceMembership();
@@ -258,6 +261,34 @@ function ChatLayout({ children, onCompose, currentChannelId }) {
       });
     }
 
+    // Archived channels
+    const archivedRoutes = [];
+    if (archivedChannels?.length > 0) {
+      archivedRoutes.push(
+        {
+          key: "divider-archived",
+          type: "divider",
+        },
+        {
+          key: "archived-header",
+          path: "#",
+          name: `ARSIP (${archivedChannels.length})`,
+          disabled: true,
+        }
+      );
+
+      archivedChannels.forEach((channel) => {
+        archivedRoutes.push({
+          key: `/rasn-chat/${channel.id}`,
+          path: `/rasn-chat/${channel.id}`,
+          name: (
+            <span style={{ color: "#999", fontStyle: "italic" }}>{channel.name}</span>
+          ),
+          icon: <IconArchive size={14} color="#999" />,
+        });
+      });
+    }
+
     // Online users - compact inline display
     const onlineCount = onlineUsers?.length || 0;
     const dmRoutes = onlineCount > 0 ? [
@@ -308,7 +339,7 @@ function ChatLayout({ children, onCompose, currentChannelId }) {
       },
     ] : [];
 
-    return [...mainRoutes, ...channelRoutes, ...browseRoutes, ...dmRoutes];
+    return [...mainRoutes, ...channelRoutes, ...browseRoutes, ...archivedRoutes, ...dmRoutes];
   };
 
   // Get status label in Indonesian
@@ -330,7 +361,9 @@ function ChatLayout({ children, onCompose, currentChannelId }) {
       key === "dm-header" ||
       key === "browse-header" ||
       key === "divider-browse" ||
-      key === "divider-dm"
+      key === "divider-dm" ||
+      key === "archived-header" ||
+      key === "divider-archived"
     ) {
       return;
     }

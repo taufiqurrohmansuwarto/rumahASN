@@ -135,6 +135,23 @@ const getPublicChannels = async (req, res) => {
   }
 };
 
+// Get user's archived channels
+const getArchivedChannels = async (req, res) => {
+  try {
+    const { customId } = req.user;
+
+    const archivedChannels = await Channel.query()
+      .whereExists(Channel.relatedQuery("members").where("user_id", customId))
+      .where("is_archived", true)
+      .withGraphFetched("[creator(simpleWithImage)]")
+      .orderBy("name", "asc");
+
+    res.json(archivedChannels);
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
 const getChannelById = async (req, res) => {
   try {
     const { channelId } = req.query;
@@ -992,10 +1009,19 @@ const getChatStats = async (req, res) => {
   try {
     const { customId } = req.user;
 
-    const [channelCount, unreadMentions] = await Promise.all([
+    // Get user's channel IDs first
+    const userChannelIds = Channel.query()
+      .select("id")
+      .whereExists(Channel.relatedQuery("members").where("user_id", customId));
+
+    const [channelCount, messageCount, unreadMentions] = await Promise.all([
       Channel.query()
         .whereExists(Channel.relatedQuery("members").where("user_id", customId))
         .where("is_archived", false)
+        .count("* as count")
+        .first(),
+      Message.query()
+        .whereIn("channel_id", userChannelIds)
         .count("* as count")
         .first(),
       Mention.getUnreadCount(customId),
@@ -1003,6 +1029,7 @@ const getChatStats = async (req, res) => {
 
     res.json({
       channels: parseInt(channelCount?.count || 0),
+      messages: parseInt(messageCount?.count || 0),
       unreadMentions,
     });
   } catch (error) {
@@ -1218,6 +1245,7 @@ module.exports = {
   getChannels,
   getMyChannels,
   getPublicChannels,
+  getArchivedChannels,
   getChannelById,
   createChannel,
   updateChannel,

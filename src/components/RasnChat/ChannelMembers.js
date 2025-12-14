@@ -10,6 +10,7 @@ import { Table, Select, Button, Modal, Input, Popconfirm, message } from "antd";
 import { Stack, Text, Group, Avatar, Badge, Paper, Box } from "@mantine/core";
 import { IconUserPlus, IconTrash, IconCrown, IconShield, IconUser } from "@tabler/icons-react";
 import { useState } from "react";
+import { useSession } from "next-auth/react";
 
 const getRoleIcon = (roleId) => {
   if (roleId?.includes("owner")) return <IconCrown size={12} color="#faad14" />;
@@ -97,10 +98,16 @@ const InviteMemberModal = ({ channelId, open, onClose }) => {
 
 const ChannelMembers = ({ channelId }) => {
   const [inviteOpen, setInviteOpen] = useState(false);
+  const { data: session } = useSession();
   const { data: members, isLoading } = useChannelMembers(channelId);
   const { data: roles } = useChannelRoles();
   const updateRole = useUpdateMemberRole();
   const removeMember = useRemoveMember();
+
+  // Find current user's membership to check if they are the owner
+  const currentUserId = session?.user?.id;
+  const myMembership = members?.find((m) => m.user_id === currentUserId);
+  const isOwner = myMembership?.role_id === "ch-role-owner";
 
   const columns = [
     {
@@ -127,18 +134,38 @@ const ChannelMembers = ({ channelId }) => {
       title: "Role",
       key: "role",
       width: 160,
-      render: (_, record) => (
-        <Select
-          value={record.role_id}
-          onChange={(value) =>
-            updateRole.mutate({ channelId, userId: record.user_id, roleId: value })
-          }
-          options={roles?.map((r) => ({ value: r.id, label: r.name }))}
-          style={{ width: "100%" }}
-          size="small"
-          disabled={record.role_id === "ch-role-owner"}
-        />
-      ),
+      render: (_, record) => {
+        // Find role name for display
+        const roleName = roles?.find((r) => r.id === record.role_id)?.name || record.role_id;
+
+        // Only owner can edit roles, and owner role cannot be changed
+        if (!isOwner || record.role_id === "ch-role-owner") {
+          return (
+            <Badge
+              size="sm"
+              variant="light"
+              color={
+                record.role_id === "ch-role-owner" ? "yellow" :
+                record.role_id === "ch-role-admin" ? "blue" : "gray"
+              }
+            >
+              {roleName}
+            </Badge>
+          );
+        }
+
+        return (
+          <Select
+            value={record.role_id}
+            onChange={(value) =>
+              updateRole.mutate({ channelId, userId: record.user_id, roleId: value })
+            }
+            options={roles?.filter((r) => r.id !== "ch-role-owner").map((r) => ({ value: r.id, label: r.name }))}
+            style={{ width: "100%" }}
+            size="small"
+          />
+        );
+      },
     },
     {
       title: "Status",
@@ -156,7 +183,8 @@ const ChannelMembers = ({ channelId }) => {
       key: "actions",
       width: 60,
       render: (_, record) =>
-        record.role_id !== "ch-role-owner" && (
+        // Only owner can remove members, and owner cannot remove themselves
+        isOwner && record.role_id !== "ch-role-owner" && (
           <Popconfirm
             title="Hapus member ini?"
             onConfirm={() => removeMember.mutate({ channelId, userId: record.user_id })}
@@ -173,14 +201,16 @@ const ChannelMembers = ({ channelId }) => {
     <div>
       <Group justify="space-between" mb="md">
         <Text size="sm">{members?.length || 0} member di channel ini</Text>
-        <Button
-          type="primary"
-          size="small"
-          icon={<IconUserPlus size={14} />}
-          onClick={() => setInviteOpen(true)}
-        >
-          Undang
-        </Button>
+        {isOwner && (
+          <Button
+            type="primary"
+            size="small"
+            icon={<IconUserPlus size={14} />}
+            onClick={() => setInviteOpen(true)}
+          >
+            Undang
+          </Button>
+        )}
       </Group>
 
       <Table

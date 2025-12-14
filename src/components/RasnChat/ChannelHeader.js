@@ -5,6 +5,7 @@ import {
   useMyWorkspaceMembership,
   useDeleteChannel,
   useArchiveChannel,
+  useUnarchiveChannel,
   useTogglePinMessage,
   useInviteMember,
   useRemoveMember,
@@ -18,8 +19,6 @@ import {
   IconUsers,
   IconPin,
   IconInfoCircle,
-  IconPhone,
-  IconVideo,
   IconSettings,
   IconTrash,
   IconArchive,
@@ -32,6 +31,7 @@ import {
 } from "@tabler/icons-react";
 import { useState } from "react";
 import { useRouter } from "next/router";
+import { useSession } from "next-auth/react";
 import { Group, Text, Box, ActionIcon, Paper, Stack, Badge } from "@mantine/core";
 
 // Pinned Message Bar - Shows latest pinned message
@@ -105,11 +105,11 @@ const InviteMemberModal = ({ open, onClose, channelId, existingMembers }) => {
     if (!selectedUser) return;
     try {
       await inviteMember.mutateAsync({ channelId, userId: selectedUser });
-      message.success("Member berhasil diundang");
+      // Success message handled by hook
       setSelectedUser(null);
       onClose();
     } catch (e) {
-      message.error("Gagal mengundang member");
+      // Error message handled by hook
     }
   };
   
@@ -315,22 +315,29 @@ const ChannelDetailsDrawer = ({ channel, members, pinned, open, onClose, channel
 
 const ChannelHeader = ({ channelId, onStartCall, onSettings }) => {
   const router = useRouter();
+  const { data: session } = useSession();
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [inviteOpen, setInviteOpen] = useState(false);
-  
+
   const { data: channel, isLoading } = useChannel(channelId);
   const { data: members } = useChannelMembers(channelId);
   const { data: pinned } = usePinnedMessages(channelId);
   const { data: membership } = useMyWorkspaceMembership();
-  
+
   const deleteChannel = useDeleteChannel();
   const archiveChannel = useArchiveChannel();
+  const unarchiveChannel = useUnarchiveChannel();
+
+  // Check if current user is channel owner
+  const currentUserId = session?.user?.id;
+  const myChannelMembership = members?.find((m) => m.user_id === currentUserId);
+  const isChannelOwner = myChannelMembership?.role_id === "ch-role-owner";
 
   // Check permissions
   const permissions = membership?.role?.permissions || {};
-  const canManageChannels = permissions.can_delete_channel || permissions.all;
+  const canManageChannels = permissions.can_delete_channel || permissions.all || isChannelOwner;
   const canBroadcast = permissions.can_broadcast || permissions.all;
-  const canInvite = channel?.type === "private" || permissions.all;
+  const canInvite = channel?.type === "private" || permissions.all || isChannelOwner;
 
   const handleDeleteChannel = () => {
     Modal.confirm({
@@ -354,11 +361,23 @@ const ChannelHeader = ({ channelId, onStartCall, onSettings }) => {
   const handleArchiveChannel = async () => {
     try {
       await archiveChannel.mutateAsync(channelId);
-      message.success("Channel berhasil diarsipkan");
+      // Success message handled by hook
     } catch (e) {
-      message.error("Gagal mengarsipkan channel");
+      // Error handled by hook
     }
   };
+
+  const handleUnarchiveChannel = async () => {
+    try {
+      await unarchiveChannel.mutateAsync(channelId);
+      // Success message handled by hook
+    } catch (e) {
+      // Error handled by hook
+    }
+  };
+
+  // Check if channel is archived
+  const isArchived = channel?.is_archived;
 
   // Admin menu items
   const adminMenuItems = [
@@ -367,7 +386,9 @@ const ChannelHeader = ({ channelId, onStartCall, onSettings }) => {
     ] : []),
     ...(canManageChannels ? [
       { key: "settings", icon: <IconSettings size={14} />, label: "Pengaturan Channel" },
-      { key: "archive", icon: <IconArchive size={14} />, label: "Arsipkan Channel" },
+      isArchived
+        ? { key: "unarchive", icon: <IconArchive size={14} />, label: "Batal Arsip" }
+        : { key: "archive", icon: <IconArchive size={14} />, label: "Arsipkan Channel" },
       { type: "divider" },
       { key: "delete", icon: <IconTrash size={14} />, label: "Hapus Channel", danger: true },
     ] : []),
@@ -381,6 +402,7 @@ const ChannelHeader = ({ channelId, onStartCall, onSettings }) => {
     if (key === "settings") onSettings?.();
     if (key === "delete") handleDeleteChannel();
     if (key === "archive") handleArchiveChannel();
+    if (key === "unarchive") handleUnarchiveChannel();
     if (key === "invite") setInviteOpen(true);
     if (key === "broadcast") {
       message.info("Fitur broadcast dalam pengembangan");
@@ -412,20 +434,6 @@ const ChannelHeader = ({ channelId, onStartCall, onSettings }) => {
               <IconUsers size={12} color="#616061" />
               <Text size="xs" c="dimmed">{members?.length || 0}</Text>
             </Group>
-            {pinned?.length > 0 && (
-              <Group gap={4}>
-                <IconPin size={12} color="#d4a72c" />
-                <Text size="xs" c="orange">{pinned.length}</Text>
-              </Group>
-            )}
-            {channel.description && (
-              <>
-                <Text c="dimmed" size="xs">|</Text>
-                <Text size="xs" c="dimmed" truncate style={{ maxWidth: 200 }}>
-                  {channel.description}
-                </Text>
-              </>
-            )}
           </Group>
 
           {/* Right - Actions */}
@@ -437,22 +445,12 @@ const ChannelHeader = ({ channelId, onStartCall, onSettings }) => {
                 </ActionIcon>
               </Tooltip>
             )}
-            <Tooltip title="Voice Call">
-              <ActionIcon variant="subtle" color="gray" size="sm" onClick={() => onStartCall?.("voice")}>
-                <IconPhone size={16} />
-              </ActionIcon>
-            </Tooltip>
-            <Tooltip title="Video Call">
-              <ActionIcon variant="subtle" color="gray" size="sm" onClick={() => onStartCall?.("video")}>
-                <IconVideo size={16} />
-              </ActionIcon>
-            </Tooltip>
             <Tooltip title="Info & Stats">
               <ActionIcon variant="subtle" color="gray" size="sm" onClick={() => setDetailsOpen(true)}>
                 <IconInfoCircle size={16} />
               </ActionIcon>
             </Tooltip>
-            
+
             {/* Admin Menu */}
             {adminMenuItems.length > 0 && (
               <Dropdown

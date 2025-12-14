@@ -79,6 +79,13 @@ export const usePublicChannels = () => {
   });
 };
 
+export const useArchivedChannels = () => {
+  return useQuery({
+    queryKey: ["chat-archived-channels"],
+    queryFn: chatApi.getArchivedChannels,
+  });
+};
+
 export const useChannel = (channelId) => {
   return useQuery({
     queryKey: ["chat-channel", channelId],
@@ -128,8 +135,11 @@ export const useArchiveChannel = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: chatApi.archiveChannel,
-    onSuccess: () => {
+    onSuccess: (_, channelId) => {
       queryClient.invalidateQueries(["chat-channels"]);
+      queryClient.invalidateQueries(["chat-my-channels"]);
+      queryClient.invalidateQueries(["chat-archived-channels"]);
+      queryClient.invalidateQueries(["chat-channel", channelId]);
       message.success("Channel berhasil diarsipkan");
     },
   });
@@ -139,9 +149,12 @@ export const useUnarchiveChannel = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: chatApi.unarchiveChannel,
-    onSuccess: () => {
+    onSuccess: (_, channelId) => {
       queryClient.invalidateQueries(["chat-channels"]);
-      message.success("Channel berhasil diaktifkan");
+      queryClient.invalidateQueries(["chat-my-channels"]);
+      queryClient.invalidateQueries(["chat-archived-channels"]);
+      queryClient.invalidateQueries(["chat-channel", channelId]);
+      message.success("Channel berhasil diaktifkan kembali");
     },
   });
 };

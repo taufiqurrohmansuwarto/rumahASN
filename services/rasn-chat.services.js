@@ -40,6 +40,9 @@ export const getMyChannels = () =>
 export const getPublicChannels = () =>
   api.get("/channels/public").then((res) => res?.data);
 
+export const getArchivedChannels = () =>
+  api.get("/channels/archived").then((res) => res?.data);
+
 export const getChannelById = (channelId) =>
   api.get(`/channels/${channelId}`).then((res) => res?.data);
 

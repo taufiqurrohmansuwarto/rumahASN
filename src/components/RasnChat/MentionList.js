@@ -1,5 +1,5 @@
 import { useMyMentions, useMarkMentionAsRead } from "@/hooks/useRasnChat";
-import { Skeleton, Segmented } from "antd";
+import { Skeleton, Tabs, message } from "antd";
 import { Stack, Text, Group, Avatar, Paper, Badge, Box } from "@mantine/core";
 import { useRouter } from "next/router";
 import { useState } from "react";
@@ -19,27 +19,37 @@ const MentionList = () => {
   const mentions = data?.results || [];
 
   const handleClick = async (mention) => {
+    const channelId = mention.message?.channel_id;
+
+    // Check if channel exists
+    if (!channelId || !mention.message?.channel) {
+      message.warning("Channel sudah dihapus atau tidak tersedia");
+      return;
+    }
+
     // Mark as read if unread
     if (!mention.is_read) {
       markAsRead.mutate(mention.id);
     }
     // Navigate to channel with messageId for scrolling
-    router.push(`/rasn-chat/${mention.message?.channel_id}?scrollTo=${mention.message_id}`);
+    router.push(`/rasn-chat/${channelId}?scrollTo=${mention.message_id}`);
   };
 
   if (isLoading) return <Skeleton active paragraph={{ rows: 4 }} />;
 
+  const tabItems = [
+    { key: "all", label: "Semua" },
+    { key: "unread", label: "Belum Dibaca" },
+    { key: "read", label: "Sudah Dibaca" },
+  ];
+
   return (
     <Stack gap="sm">
       {/* Filter tabs */}
-      <Segmented
-        value={filter}
+      <Tabs
+        activeKey={filter}
         onChange={setFilter}
-        options={[
-          { value: "all", label: "Semua" },
-          { value: "unread", label: "Belum Dibaca" },
-          { value: "read", label: "Sudah Dibaca" },
-        ]}
+        items={tabItems}
         size="small"
       />
 

@@ -79,20 +79,25 @@ class UserPresence extends Model {
       .first();
   }
 
-  // Get online users
+  // Get online users - only show users with recent heartbeat (last 2 minutes)
   static async getOnlineUsers() {
+    const cutoffTime = new Date(Date.now() - 2 * 60 * 1000).toISOString();
+
     return UserPresence.query()
       .whereIn("status", ["online", "away", "busy"])
+      .where("last_seen", ">=", cutoffTime)
       .withGraphFetched("user(simpleWithImage)")
       .orderBy("last_seen", "desc");
   }
 
-  // Get online users in channel
+  // Get online users in channel - only show users with recent heartbeat (last 2 minutes)
   static async getOnlineUsersInChannel(channelId) {
     const ChannelMember = require("@/models/rasn_chat/channel-members.model");
+    const cutoffTime = new Date(Date.now() - 2 * 60 * 1000).toISOString();
 
     return UserPresence.query()
       .whereIn("status", ["online", "away", "busy"])
+      .where("last_seen", ">=", cutoffTime)
       .whereIn(
         "user_id",
         ChannelMember.query().select("user_id").where("channel_id", channelId)

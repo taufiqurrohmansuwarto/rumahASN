@@ -205,7 +205,7 @@ const processTextWithMentions = (text, mentions) => {
 // Compact markdown components for chat
 const createMarkdownComponents = (mentions) => ({
   p: ({ children }) => (
-    <span style={{ display: "inline" }}>
+    <div style={{ marginBottom: 4 }}>
       {Array.isArray(children)
         ? children.map((child, i) =>
             typeof child === "string" ? (
@@ -217,8 +217,9 @@ const createMarkdownComponents = (mentions) => ({
         : typeof children === "string"
         ? processTextWithMentions(children, mentions)
         : children}
-    </span>
+    </div>
   ),
+  br: () => <br />,
   strong: ({ children }) => (
     <strong style={{ fontWeight: 600 }}>{children}</strong>
   ),
