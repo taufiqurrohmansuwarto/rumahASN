@@ -2,6 +2,7 @@ import Head from "next/head";
 import { Typography } from "antd";
 import ChatLayout from "@/components/ChatLayout";
 import { RolesManager } from "@/components/RasnChat";
+import PageContainer from "@/components/PageContainer";
 
 const { Title } = Typography;
 
@@ -12,13 +13,9 @@ function RolesPage() {
         <title>Kelola Roles - RASN Chat | Rumah ASN</title>
       </Head>
 
-      <div style={{ padding: 24 }}>
-        <Title level={4} style={{ marginBottom: 16 }}>
-          Kelola Roles
-        </Title>
-
+      <PageContainer title="Kelola Roles" content="Kelola roles pada channel">
         <RolesManager />
-      </div>
+      </PageContainer>
     </>
   );
 }

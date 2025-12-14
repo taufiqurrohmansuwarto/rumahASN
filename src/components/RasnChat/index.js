@@ -14,3 +14,5 @@ export { default as MediaGallery } from "./MediaGallery";
 export { default as EmojiPicker } from "./EmojiPicker";
 export { default as FileUploader } from "./FileUploader";
 export { default as RolesManager } from "./RolesManager";
+export { default as JumpToDate } from "./JumpToDate";
+export { default as ChatCTA } from "./ChatCTA";

@@ -37,6 +37,9 @@ export const getChannels = () =>
 export const getMyChannels = () =>
   api.get("/channels/me").then((res) => res?.data);
 
+export const getPublicChannels = () =>
+  api.get("/channels/public").then((res) => res?.data);
+
 export const getChannelById = (channelId) =>
   api.get(`/channels/${channelId}`).then((res) => res?.data);
 
@@ -95,6 +98,9 @@ export const updateNotificationPref = (channelId, preference) =>
 
 export const getMessages = (channelId, params) =>
   api.get(`/channels/${channelId}/messages`, { params }).then((res) => res?.data);
+
+export const getChannelDateRange = (channelId) =>
+  api.get(`/channels/${channelId}/date-range`).then((res) => res?.data);
 
 export const sendMessage = (channelId, data) =>
   api.post(`/channels/${channelId}/messages`, data).then((res) => res?.data);

@@ -173,19 +173,53 @@ class Message extends Model {
   }
 
   // Get messages in channel
-  static async getChannelMessages(channelId, { page = 1, limit = 50, before = null } = {}) {
+  static async getChannelMessages(channelId, { page = 1, limit = 50, before = null, after = null, around = null } = {}) {
     let query = Message.query()
       .where("channel_id", channelId)
       .whereNull("parent_id") // Only top-level messages
       .modify("notDeleted")
-      .withGraphFetched("[user(simpleWithImage), attachments, reactions, mentions.[mentioned_user(simpleWithImage)], parent.[user(simpleWithImage)], linked_task, linked_email]")
-      .orderBy("created_at", "desc");
+      .withGraphFetched("[user(simpleWithImage), attachments, reactions, mentions.[mentioned_user(simpleWithImage)], parent.[user(simpleWithImage)], linked_task, linked_email]");
 
-    if (before) {
-      query = query.where("created_at", "<", before);
+    // If jumping to a specific date (around), get messages around that date
+    if (around) {
+      query = query
+        .where("created_at", ">=", around)
+        .orderBy("created_at", "asc");
+    } else if (after) {
+      query = query
+        .where("created_at", ">", after)
+        .orderBy("created_at", "asc");
+    } else {
+      // Default: newest first
+      if (before) {
+        query = query.where("created_at", "<", before);
+      }
+      query = query.orderBy("created_at", "desc");
     }
 
     return query.page(page - 1, limit);
+  }
+
+  // Get first message date in channel (for jump to date validation)
+  static async getChannelDateRange(channelId) {
+    const oldest = await Message.query()
+      .where("channel_id", channelId)
+      .modify("notDeleted")
+      .orderBy("created_at", "asc")
+      .first()
+      .select("created_at");
+
+    const newest = await Message.query()
+      .where("channel_id", channelId)
+      .modify("notDeleted")
+      .orderBy("created_at", "desc")
+      .first()
+      .select("created_at");
+
+    return {
+      oldest: oldest?.created_at || null,
+      newest: newest?.created_at || null,
+    };
   }
 
   // Get thread messages

@@ -72,6 +72,13 @@ export const useMyChannels = () => {
   });
 };
 
+export const usePublicChannels = () => {
+  return useQuery({
+    queryKey: ["chat-public-channels"],
+    queryFn: chatApi.getPublicChannels,
+  });
+};
+
 export const useChannel = (channelId) => {
   return useQuery({
     queryKey: ["chat-channel", channelId],
@@ -256,6 +263,14 @@ export const useMessages = (channelId, params) => {
     enabled: !!channelId,
     refetchInterval: 5000, // Poll setiap 5 detik
     keepPreviousData: true,
+  });
+};
+
+export const useChannelDateRange = (channelId) => {
+  return useQuery({
+    queryKey: ["chat-channel-date-range", channelId],
+    queryFn: () => chatApi.getChannelDateRange(channelId),
+    enabled: !!channelId,
   });
 };
 

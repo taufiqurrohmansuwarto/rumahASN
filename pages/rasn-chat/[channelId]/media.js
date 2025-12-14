@@ -1,10 +1,10 @@
-import { useRouter } from "next/router";
-import Head from "next/head";
-import { Button, Typography } from "antd";
-import { IconArrowLeft } from "@tabler/icons-react";
 import ChatLayout from "@/components/ChatLayout";
+import PageContainer from "@/components/PageContainer";
 import { MediaGallery } from "@/components/RasnChat";
 import { useChannel } from "@/hooks/useRasnChat";
+import { Typography } from "antd";
+import Head from "next/head";
+import { useRouter } from "next/router";
 
 const { Title } = Typography;
 
@@ -17,25 +17,17 @@ function ChannelMediaPage() {
   return (
     <>
       <Head>
-        <title>Media Gallery - {channel?.name || "RASN Chat"} | Rumah ASN</title>
+        <title>
+          Media Gallery - {channel?.name || "RASN Chat"} | Rumah ASN
+        </title>
       </Head>
 
-      <div style={{ padding: 24 }}>
-        <Button
-          type="text"
-          icon={<IconArrowLeft size={16} />}
-          onClick={() => router.push(`/rasn-chat/${channelId}`)}
-          style={{ marginBottom: 16 }}
-        >
-          Kembali ke Chat
-        </Button>
-
-        <Title level={4} style={{ marginBottom: 16 }}>
-          Media & File - #{channel?.name}
-        </Title>
-
+      <PageContainer
+        title={`Media & File - #${channel?.name || ""}`}
+        onBack={() => router.push(`/rasn-chat/${channelId}`)}
+      >
         <MediaGallery channelId={channelId} />
-      </div>
+      </PageContainer>
     </>
   );
 }

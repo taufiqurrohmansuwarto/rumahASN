@@ -3,6 +3,7 @@ import { Button, Typography, Badge, Space } from "antd";
 import ChatLayout from "@/components/ChatLayout";
 import { MentionList } from "@/components/RasnChat";
 import { useMarkAllMentionsAsRead, useMentionCount } from "@/hooks/useRasnChat";
+import PageContainer from "@/components/PageContainer";
 
 const { Title, Text } = Typography;
 
@@ -17,24 +18,10 @@ function MentionsPage() {
         <title>Mentions - RASN Chat | Rumah ASN</title>
       </Head>
 
-      <div style={{ padding: 24 }}>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: 16,
-          }}
-        >
-          <Space>
-            <Title level={4} style={{ margin: 0 }}>
-              Mentions
-            </Title>
-            {unreadCount > 0 && (
-              <Badge count={unreadCount} style={{ backgroundColor: "#52c41a" }} />
-            )}
-          </Space>
-          {unreadCount > 0 && (
+      <PageContainer
+        title="Mentions"
+        extra={
+          unreadCount > 0 && (
             <Button
               size="small"
               onClick={() => markAllAsRead.mutate()}
@@ -42,11 +29,16 @@ function MentionsPage() {
             >
               Tandai Semua Dibaca
             </Button>
-          )}
-        </div>
-
+          )
+        }
+        subTitle={
+          unreadCount > 0 && (
+            <Badge count={unreadCount} style={{ backgroundColor: "#52c41a" }} />
+          )
+        }
+      >
         <MentionList />
-      </div>
+      </PageContainer>
     </>
   );
 }

@@ -72,15 +72,17 @@ function ChannelChatPage() {
           onSettings={() => setSettingsOpen(true)}
         />
 
-        {/* Messages */}
-        <MessageList
-          channelId={channelId}
-          onEdit={setEditMessage}
-          onDelete={handleDelete}
-          onReply={setReplyTo}
-          scrollToMessageId={scrollToMessageId}
-          onScrollComplete={() => setScrollToMessageId(null)}
-        />
+        {/* Messages - with relative position for JumpToDate */}
+        <Box style={{ flex: 1, display: "flex", flexDirection: "column", position: "relative", overflow: "hidden" }}>
+          <MessageList
+            channelId={channelId}
+            onEdit={setEditMessage}
+            onDelete={handleDelete}
+            onReply={setReplyTo}
+            scrollToMessageId={scrollToMessageId}
+            onScrollComplete={() => setScrollToMessageId(null)}
+          />
+        </Box>
 
         {/* Input */}
         <Box px="md" py="sm" style={{ borderTop: "1px solid #f0f0f0" }}>

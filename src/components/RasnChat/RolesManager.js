@@ -36,26 +36,31 @@ const getRoleColor = (roleId) => {
   return "gray";
 };
 
-// Deskripsi permissions yang mudah dibaca
+// Deskripsi permissions yang mudah dibaca (Bahasa Indonesia)
 const PERMISSION_INFO = {
   // Workspace permissions
+  all: { label: "Semua Akses", icon: IconShield, desc: "Akses penuh ke semua fitur" },
   manage_workspace: { label: "Kelola Workspace", icon: IconSettings, desc: "Ubah pengaturan workspace" },
   manage_channels: { label: "Kelola Channel", icon: IconSettings, desc: "Buat, edit, hapus channel" },
-  manage_members: { label: "Kelola Member", icon: IconUserPlus, desc: "Invite/kick member workspace" },
-  manage_roles: { label: "Kelola Roles", icon: IconShield, desc: "Ubah role member" },
+  manage_members: { label: "Kelola Anggota", icon: IconUserPlus, desc: "Undang/keluarkan anggota workspace" },
+  manage_roles: { label: "Kelola Roles", icon: IconShield, desc: "Ubah role anggota" },
   view_all_channels: { label: "Lihat Semua Channel", icon: IconMessage, desc: "Akses channel private" },
-  
+  can_delete_channel: { label: "Hapus Channel", icon: IconTrash, desc: "Hapus channel" },
+  can_broadcast: { label: "Broadcast", icon: IconMessage, desc: "Kirim pesan ke semua channel" },
+  can_delete_any_message: { label: "Hapus Semua Pesan", icon: IconTrash, desc: "Hapus pesan siapapun" },
+  can_edit_any_message: { label: "Edit Semua Pesan", icon: IconEdit, desc: "Edit pesan siapapun" },
+
   // Channel permissions
   send_messages: { label: "Kirim Pesan", icon: IconMessage, desc: "Kirim pesan di channel" },
   edit_messages: { label: "Edit Pesan", icon: IconEdit, desc: "Edit pesan sendiri" },
   delete_messages: { label: "Hapus Pesan", icon: IconTrash, desc: "Hapus pesan orang lain" },
   pin_messages: { label: "Pin Pesan", icon: IconPin, desc: "Pin/unpin pesan" },
   manage_channel: { label: "Kelola Channel", icon: IconSettings, desc: "Edit nama, deskripsi channel" },
-  invite_members: { label: "Undang Member", icon: IconUserPlus, desc: "Undang orang ke channel" },
-  remove_members: { label: "Hapus Member", icon: IconTrash, desc: "Kick member dari channel" },
-  mention_all: { label: "Mention All", icon: IconAt, desc: "Gunakan @channel @here" },
-  upload_files: { label: "Upload File", icon: IconUpload, desc: "Upload file dan media" },
-  start_calls: { label: "Mulai Call", icon: IconVideo, desc: "Mulai video/voice call" },
+  invite_members: { label: "Undang Anggota", icon: IconUserPlus, desc: "Undang orang ke channel" },
+  remove_members: { label: "Keluarkan Anggota", icon: IconTrash, desc: "Keluarkan anggota dari channel" },
+  mention_all: { label: "Mention Semua", icon: IconAt, desc: "Gunakan @channel @here" },
+  upload_files: { label: "Unggah File", icon: IconUpload, desc: "Unggah file dan media" },
+  start_calls: { label: "Mulai Panggilan", icon: IconVideo, desc: "Mulai video/voice call" },
 };
 
 const PermissionItem = ({ permKey, value }) => {
@@ -85,7 +90,7 @@ const WorkspaceRolesTab = () => {
   // Tampilkan info roles dulu
   const RolesInfo = () => (
     <Stack gap="xs" mb="md">
-      <Text size="xs" fw={600} c="dimmed">WORKSPACE ROLES</Text>
+      <Text size="xs" fw={600} c="dimmed">DAFTAR ROLE WORKSPACE</Text>
       {roles?.map((role) => (
         <Paper key={role.id} withBorder p="xs" radius="sm">
           <Group justify="space-between" mb={4}>
@@ -110,7 +115,7 @@ const WorkspaceRolesTab = () => {
 
   const columns = [
     {
-      title: "User",
+      title: "Pengguna",
       key: "user",
       render: (_, record) => (
         <Group gap="xs">
@@ -158,8 +163,8 @@ const WorkspaceRolesTab = () => {
   return (
     <div>
       <RolesInfo />
-      
-      <Text size="xs" fw={600} c="dimmed" mb="xs">MEMBER LIST</Text>
+
+      <Text size="xs" fw={600} c="dimmed" mb="xs">DAFTAR ANGGOTA</Text>
       <Table
         dataSource={members?.results || []}
         columns={columns}
@@ -184,8 +189,8 @@ const ChannelRolesTab = () => {
   return (
     <div>
       <Text size="xs" c="dimmed" mb="md">
-        Role channel menentukan apa yang bisa dilakukan member di dalam channel.
-        Owner channel bisa mengatur role member di channel.
+        Role channel menentukan apa yang bisa dilakukan anggota di dalam channel.
+        Pemilik channel dapat mengatur role anggota di halaman anggota channel.
       </Text>
       
       <Stack gap="sm">
@@ -223,11 +228,11 @@ const ChannelRolesTab = () => {
         <Stack gap={4}>
           <Group gap={4}>
             <IconCrown size={12} color="red" />
-            <Text size={10}><strong>Owner</strong> - Pemilik channel, semua akses</Text>
+            <Text size={10}><strong>Pemilik</strong> - Pemilik channel, semua akses</Text>
           </Group>
           <Group gap={4}>
             <IconShield size={12} color="orange" />
-            <Text size={10}><strong>Admin</strong> - Kelola member & pesan</Text>
+            <Text size={10}><strong>Admin</strong> - Kelola anggota & pesan</Text>
           </Group>
           <Group gap={4}>
             <IconShield size={12} color="blue" />
@@ -235,7 +240,7 @@ const ChannelRolesTab = () => {
           </Group>
           <Group gap={4}>
             <IconUser size={12} color="gray" />
-            <Text size={10}><strong>Member</strong> - Kirim pesan & file</Text>
+            <Text size={10}><strong>Anggota</strong> - Kirim pesan & file</Text>
           </Group>
         </Stack>
       </Paper>
@@ -245,15 +250,15 @@ const ChannelRolesTab = () => {
 
 const RolesManager = () => {
   const items = [
-    { 
-      key: "workspace", 
-      label: <Text size="xs">Workspace Roles</Text>, 
-      children: <WorkspaceRolesTab /> 
+    {
+      key: "workspace",
+      label: <Text size="xs">Role Workspace</Text>,
+      children: <WorkspaceRolesTab />,
     },
-    { 
-      key: "channel", 
-      label: <Text size="xs">Channel Roles</Text>, 
-      children: <ChannelRolesTab /> 
+    {
+      key: "channel",
+      label: <Text size="xs">Role Channel</Text>,
+      children: <ChannelRolesTab />,
     },
   ];
 

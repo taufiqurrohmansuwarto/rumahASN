@@ -1,11 +1,9 @@
-import Head from "next/head";
-import { Typography, Badge, Space } from "antd";
 import ChatLayout from "@/components/ChatLayout";
+import PageContainer from "@/components/PageContainer";
 import { BookmarkList } from "@/components/RasnChat";
 import { useBookmarkCount } from "@/hooks/useRasnChat";
-import { IconBookmark } from "@tabler/icons-react";
-
-const { Title } = Typography;
+import { Badge } from "antd";
+import Head from "next/head";
 
 function BookmarksPage() {
   const { data: bookmarkData } = useBookmarkCount();
@@ -17,28 +15,16 @@ function BookmarksPage() {
         <title>Saved Items - RASN Chat | Rumah ASN</title>
       </Head>
 
-      <div style={{ padding: 24 }}>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: 16,
-          }}
-        >
-          <Space>
-            <IconBookmark size={24} color="#faad14" />
-            <Title level={4} style={{ margin: 0 }}>
-              Saved Items
-            </Title>
-            {count > 0 && (
-              <Badge count={count} style={{ backgroundColor: "#faad14" }} />
-            )}
-          </Space>
-        </div>
-
+      <PageContainer
+        title="Saved Items"
+        subTitle={
+          count > 0 && (
+            <Badge count={count} style={{ backgroundColor: "#faad14" }} />
+          )
+        }
+      >
         <BookmarkList />
-      </div>
+      </PageContainer>
     </>
   );
 }

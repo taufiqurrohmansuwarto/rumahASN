@@ -108,6 +108,33 @@ const getMyChannels = async (req, res) => {
   }
 };
 
+// Get all public channels (for browsing)
+const getPublicChannels = async (req, res) => {
+  try {
+    const { customId } = req.user;
+
+    // Get all public channels
+    const publicChannels = await Channel.query()
+      .where("type", "public")
+      .where("is_archived", false)
+      .withGraphFetched("[creator(simpleWithImage)]")
+      .orderBy("name", "asc");
+
+    // Mark channels that user is already a member of
+    const userChannels = await Channel.getUserChannels(customId);
+    const userChannelIds = userChannels.map((c) => c.id);
+
+    const channelsWithMemberStatus = publicChannels.map((channel) => ({
+      ...channel,
+      is_member: userChannelIds.includes(channel.id),
+    }));
+
+    res.json(channelsWithMemberStatus);
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
 const getChannelById = async (req, res) => {
   try {
     const { channelId } = req.query;
@@ -130,6 +157,19 @@ const getChannelById = async (req, res) => {
         return res
           .status(403)
           .json({ message: "Anda tidak memiliki akses ke channel ini" });
+      }
+    } else {
+      // For public channels, auto-join if not already a member
+      const isMember = await channel.isMember(customId);
+      if (!isMember) {
+        await ChannelMember.addMember(channelId, customId);
+        // Refresh channel data with new member
+        const updatedChannel = await Channel.query()
+          .findById(channelId)
+          .withGraphFetched(
+            "[creator(simpleWithImage), members.[user(simpleWithImage), role], kanban_project]"
+          );
+        return res.json(updatedChannel);
       }
     }
 
@@ -322,7 +362,7 @@ const updateNotificationPref = async (req, res) => {
 
 const getMessages = async (req, res) => {
   try {
-    const { channelId, page = 1, limit = 50, before } = req.query;
+    const { channelId, page = 1, limit = 50, before, after, around } = req.query;
     const { customId } = req.user;
 
     // Check membership for private channels
@@ -371,6 +411,8 @@ const getMessages = async (req, res) => {
       page: parseInt(page),
       limit: parseInt(limit),
       before,
+      after,
+      around,
     });
 
     // Add is_own, can_edit, can_delete to each message
@@ -388,6 +430,17 @@ const getMessages = async (req, res) => {
       ...result,
       results: messagesWithPermissions,
     });
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+// Get channel date range for jump to date feature
+const getChannelDateRange = async (req, res) => {
+  try {
+    const { channelId } = req.query;
+    const dateRange = await Message.getChannelDateRange(channelId);
+    res.json(dateRange);
   } catch (error) {
     handleError(res, error);
   }
@@ -1164,6 +1217,7 @@ module.exports = {
   // Channels
   getChannels,
   getMyChannels,
+  getPublicChannels,
   getChannelById,
   createChannel,
   updateChannel,
@@ -1183,6 +1237,7 @@ module.exports = {
 
   // Messages
   getMessages,
+  getChannelDateRange,
   getThreadMessages,
   sendMessage,
   editMessage,

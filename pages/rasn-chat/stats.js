@@ -1,22 +1,28 @@
-import Head from "next/head";
-import { Card, Row, Col, Statistic, Table, Skeleton } from "antd";
-import { Stack, Text, Group, Avatar, Paper, Box } from "@mantine/core";
-import {
-  IconMessage,
-  IconHash,
-  IconUsers,
-  IconFile,
-  IconPin,
-  IconTrendingUp,
-} from "@tabler/icons-react";
 import ChatLayout from "@/components/ChatLayout";
-import { useChatStats, useChannels, useWorkspaceMembers } from "@/hooks/useRasnChat";
+import {
+  useChannels,
+  useChatStats,
+  useWorkspaceMembers,
+} from "@/hooks/useRasnChat";
+import { Avatar, Box, Group, Paper, Stack, Text } from "@mantine/core";
+import {
+  IconFile,
+  IconHash,
+  IconMessage,
+  IconUsers,
+} from "@tabler/icons-react";
+import { Card, Col, Row, Skeleton, Statistic, Table } from "antd";
 import dayjs from "dayjs";
+import Head from "next/head";
+import PageContainer from "@/components/PageContainer";
 
 function StatsPage() {
   const { data: stats, isLoading: statsLoading } = useChatStats();
   const { data: channels, isLoading: channelsLoading } = useChannels();
-  const { data: membersData, isLoading: membersLoading } = useWorkspaceMembers({ page: 1, limit: 10 });
+  const { data: membersData, isLoading: membersLoading } = useWorkspaceMembers({
+    page: 1,
+    limit: 10,
+  });
 
   const channelColumns = [
     {
@@ -63,7 +69,9 @@ function StatsPage() {
           <Box>
             <Text size="xs">{record.user?.username}</Text>
             {record.user?.info?.nama && (
-              <Text size={10} c="dimmed">{record.user.info.nama}</Text>
+              <Text size={10} c="dimmed">
+                {record.user.info.nama}
+              </Text>
             )}
           </Box>
         </Group>
@@ -92,9 +100,10 @@ function StatsPage() {
         <title>Statistik Chat | Rumah ASN</title>
       </Head>
 
-      <Stack gap="md" p="md">
-        <Text size="lg" fw={700}>Statistik Chat</Text>
-
+      <PageContainer
+        title="Statistik Chat"
+        content="Statistik penggunaan RASN Chat"
+      >
         {/* Overview Stats */}
         <Row gutter={[16, 16]}>
           <Col xs={24} sm={12} md={6}>
@@ -152,10 +161,12 @@ function StatsPage() {
         </Row>
 
         {/* Channels List */}
-        <Paper withBorder p="md" radius="md">
+        <Paper withBorder p="md" radius="md" style={{ marginTop: 16 }}>
           <Group gap={6} mb="md">
             <IconHash size={16} />
-            <Text size="sm" fw={600}>Daftar Channel</Text>
+            <Text size="sm" fw={600}>
+              Daftar Channel
+            </Text>
           </Group>
           <Table
             dataSource={channels || []}
@@ -168,10 +179,12 @@ function StatsPage() {
         </Paper>
 
         {/* Members List */}
-        <Paper withBorder p="md" radius="md">
+        <Paper withBorder p="md" radius="md" style={{ marginTop: 16 }}>
           <Group gap={6} mb="md">
             <IconUsers size={16} />
-            <Text size="sm" fw={600}>Member Terbaru</Text>
+            <Text size="sm" fw={600}>
+              Member Terbaru
+            </Text>
           </Group>
           <Table
             dataSource={membersData?.results || []}
@@ -182,7 +195,7 @@ function StatsPage() {
             pagination={false}
           />
         </Paper>
-      </Stack>
+      </PageContainer>
     </>
   );
 }
@@ -197,4 +210,3 @@ StatsPage.Auth = {
 };
 
 export default StatsPage;
-

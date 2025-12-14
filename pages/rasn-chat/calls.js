@@ -1,11 +1,12 @@
-import Head from "next/head";
-import { Select, Typography, Empty } from "antd";
 import ChatLayout from "@/components/ChatLayout";
+import PageContainer from "@/components/PageContainer";
 import { CallHistory } from "@/components/RasnChat";
 import { useMyChannels } from "@/hooks/useRasnChat";
+import { Empty, Select, Typography } from "antd";
+import Head from "next/head";
 import { useState } from "react";
 
-const { Title, Text } = Typography;
+const { Title } = Typography;
 
 function CallsPage() {
   const [selectedChannel, setSelectedChannel] = useState(null);
@@ -17,15 +18,9 @@ function CallsPage() {
         <title>Riwayat Call - RASN Chat | Rumah ASN</title>
       </Head>
 
-      <div style={{ padding: 24 }}>
-        <Title level={4} style={{ marginBottom: 16 }}>
-          Riwayat Panggilan
-        </Title>
-
-        <div style={{ marginBottom: 16 }}>
-          <Text type="secondary" style={{ marginRight: 8 }}>
-            Filter Channel:
-          </Text>
+      <PageContainer
+        title="Riwayat Panggilan"
+        extra={
           <Select
             placeholder="Pilih channel"
             allowClear
@@ -37,14 +32,14 @@ function CallsPage() {
               label: `# ${c.name}`,
             }))}
           />
-        </div>
-
+        }
+      >
         {selectedChannel ? (
           <CallHistory channelId={selectedChannel} />
         ) : (
           <Empty description="Pilih channel untuk melihat riwayat panggilan" />
         )}
-      </div>
+      </PageContainer>
     </>
   );
 }

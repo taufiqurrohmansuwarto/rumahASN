@@ -6,6 +6,7 @@ import {
   useToggleBookmark,
   useSendMessage,
 } from "@/hooks/useRasnChat";
+import JumpToDate from "./JumpToDate";
 import { Avatar, Box, Group, Paper, Stack, Text } from "@mantine/core";
 import {
   IconBookmark,
@@ -279,8 +280,8 @@ const MessageContent = ({ content, mentions }) => {
     <Box
       style={{
         wordBreak: "break-word",
-        lineHeight: 1.4,
-        fontSize: 12,
+        lineHeight: 1.5,
+        fontSize: 14,
       }}
     >
       <ReactMarkdown
@@ -316,22 +317,22 @@ const formatSize = (bytes) => {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 };
 
-// Compact Attachment preview component
+// Attachment preview component
 const AttachmentPreview = ({ attachment }) => {
   const { attachment_type, file_name, file_url, thumbnail_url, file_size, file_type } = attachment;
 
-  // Image attachment - compact with thumbnail
+  // Image attachment - with thumbnail
   if (attachment_type === "image") {
     return (
-      <Box mt={6}>
+      <Box mt={8}>
         <a href={file_url} target="_blank" rel="noopener noreferrer">
           <img
             src={thumbnail_url || file_url}
             alt={file_name}
             style={{
-              maxWidth: 200,
-              maxHeight: 120,
-              borderRadius: 6,
+              maxWidth: 320,
+              maxHeight: 240,
+              borderRadius: 8,
               border: "1px solid #e8e8e8",
               display: "block",
             }}
@@ -341,16 +342,16 @@ const AttachmentPreview = ({ attachment }) => {
     );
   }
 
-  // Video attachment - compact
+  // Video attachment
   if (attachment_type === "video") {
     return (
-      <Box mt={6}>
+      <Box mt={8}>
         <video
           controls
           style={{
-            maxWidth: 220,
-            maxHeight: 140,
-            borderRadius: 6,
+            maxWidth: 320,
+            maxHeight: 200,
+            borderRadius: 8,
             border: "1px solid #e8e8e8",
           }}
         >
@@ -360,38 +361,39 @@ const AttachmentPreview = ({ attachment }) => {
     );
   }
 
-  // Voice/Audio attachment - compact inline
+  // Voice/Audio attachment
   if (attachment_type === "voice" || attachment_type === "audio") {
     return (
-      <Group gap={6} mt={6}>
-        <IconMicrophone size={14} color="#1890ff" />
-        <audio controls style={{ height: 28, maxWidth: 200 }}>
+      <Group gap={8} mt={8}>
+        <IconMicrophone size={16} color="#1890ff" />
+        <audio controls style={{ height: 32, maxWidth: 280 }}>
           <source src={file_url} />
         </audio>
       </Group>
     );
   }
 
-  // File attachment - compact inline style
+  // File attachment
   return (
     <Group
-      gap={6}
-      mt={6}
-      p={6}
+      gap={8}
+      mt={8}
+      px={10}
+      py={8}
       style={{
         backgroundColor: "#f5f5f5",
-        borderRadius: 6,
+        borderRadius: 8,
         display: "inline-flex",
         cursor: "pointer",
       }}
       onClick={() => window.open(file_url, "_blank")}
     >
-      {getFileIcon(file_name, file_type, 16)}
-      <Text size={11} c="blue" style={{ textDecoration: "underline" }}>
+      {getFileIcon(file_name, file_type, 20)}
+      <Text size="xs" c="blue" style={{ textDecoration: "underline" }}>
         {file_name}
       </Text>
       {file_size && (
-        <Text size={10} c="dimmed">
+        <Text size="xs" c="dimmed">
           ({formatSize(file_size)})
         </Text>
       )}
@@ -721,8 +723,8 @@ const MessageItem = ({
       id={`message-${message.id}`}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      px="sm"
-      py={3}
+      px="md"
+      py={6}
       style={{
         position: "relative",
         backgroundColor: isHighlighted
@@ -736,28 +738,28 @@ const MessageItem = ({
           : "3px solid transparent",
       }}
     >
-      <Group align="flex-start" gap={8} wrap="nowrap">
-        <Avatar src={message.user?.image} size={28} radius="sm">
+      <Group align="flex-start" gap={12} wrap="nowrap">
+        <Avatar src={message.user?.image} size={40} radius="md">
           {message.user?.username?.[0]?.toUpperCase()}
         </Avatar>
 
         <Box style={{ flex: 1, minWidth: 0 }}>
-          <Group gap={6} mb={1}>
-            <Text size="xs" fw={700} style={{ color: "#1d1c1d" }}>
+          <Group gap={8} mb={2}>
+            <Text size="sm" fw={700} style={{ color: "#1d1c1d" }}>
               {message.user?.username || "Unknown"}
             </Text>
-            <Text size={10} c="dimmed">
+            <Text size="xs" c="dimmed">
               {dayjs(message.created_at).format("HH:mm")}
             </Text>
             {message.is_edited && (
-              <Text size={10} c="dimmed">
+              <Text size="xs" c="dimmed">
                 (diedit)
               </Text>
             )}
             {message.is_pinned && (
               <Group gap={2}>
-                <IconPin size={10} color="#e8912d" />
-                <Text size={10} c="orange">
+                <IconPin size={12} color="#e8912d" />
+                <Text size="xs" c="orange">
                   pinned
                 </Text>
               </Group>
@@ -767,9 +769,9 @@ const MessageItem = ({
           {/* Show parent message if this is a reply */}
           {message.parent && (
             <Box
-              mb={3}
-              pl={6}
-              py={2}
+              mb={4}
+              pl={8}
+              py={4}
               style={{
                 borderLeft: "2px solid #1264a3",
                 backgroundColor: "#f0f7ff",
@@ -778,13 +780,13 @@ const MessageItem = ({
               }}
               onClick={() => onViewThread?.(message.parent)}
             >
-              <Text size={10} c="dimmed">
+              <Text size="xs" c="dimmed">
                 Membalas{" "}
-                <Text span fw={600} c="blue" size={10}>
+                <Text span fw={600} c="blue" size="xs">
                   {message.parent.user?.username}
                 </Text>
               </Text>
-              <Text size={10} c="dimmed" lineClamp={1}>
+              <Text size="xs" c="dimmed" lineClamp={1}>
                 {message.parent.content?.slice(0, 50)}...
               </Text>
             </Box>
@@ -870,21 +872,22 @@ const MessageItem = ({
           {/* Thread count - clickable */}
           {message.thread_count > 0 && (
             <Box
-              mt={4}
-              p={4}
+              mt={6}
+              px={8}
+              py={4}
               onClick={() => onViewThread?.(message)}
               style={{
                 cursor: "pointer",
                 backgroundColor: "#f0f7ff",
-                borderRadius: 4,
+                borderRadius: 6,
                 display: "inline-flex",
                 alignItems: "center",
-                gap: 4,
+                gap: 6,
               }}
             >
-              <IconMessage size={12} color="#1264a3" />
-              <Text size={10} c="blue" fw={600}>
-                {message.thread_count} balasan - Klik untuk lihat
+              <IconMessage size={14} color="#1264a3" />
+              <Text size="xs" c="blue" fw={600}>
+                {message.thread_count} balasan
               </Text>
             </Box>
           )}
@@ -990,13 +993,47 @@ const MessageList = ({
   onScrollComplete,
 }) => {
   const containerRef = useRef(null);
-  const { data, isLoading } = useMessages(channelId, { page: 1, limit: 100 });
+  const [jumpDate, setJumpDate] = useState(null);
+  const [dateLabel, setDateLabel] = useState("Hari Ini");
+
+  // Fetch messages with optional date filter
+  const messageParams = jumpDate
+    ? { page: 1, limit: 100, around: jumpDate }
+    : { page: 1, limit: 100 };
+
+  const { data, isLoading } = useMessages(channelId, messageParams);
   const prevLengthRef = useRef(0);
   const [highlightedMessageId, setHighlightedMessageId] = useState(null);
 
   const [threadMessage, setThreadMessage] = useState(null);
 
   const messages = data?.results || [];
+
+  // Handle jump to date
+  const handleJumpToDate = (date) => {
+    setJumpDate(date);
+    // Update label based on date
+    const targetDate = dayjs(date);
+    const today = dayjs().startOf("day");
+    const lastWeek = dayjs().subtract(1, "week").startOf("day");
+    const lastMonth = dayjs().subtract(1, "month").startOf("day");
+
+    if (targetDate.isSame(today, "day")) {
+      setDateLabel("Hari Ini");
+    } else if (targetDate.isSame(lastWeek, "day")) {
+      setDateLabel("Minggu Lalu");
+    } else if (targetDate.isSame(lastMonth, "day")) {
+      setDateLabel("Bulan Lalu");
+    } else {
+      setDateLabel(targetDate.format("DD MMM YYYY"));
+    }
+  };
+
+  // Reset to today
+  const handleResetToToday = () => {
+    setJumpDate(null);
+    setDateLabel("Hari Ini");
+  };
 
   // Scroll to bottom on new messages
   useEffect(() => {
@@ -1033,7 +1070,7 @@ const MessageList = ({
   if (isLoading)
     return <Skeleton active paragraph={{ rows: 6 }} style={{ padding: 12 }} />;
 
-  if (!messages.length) {
+  if (!messages.length && !jumpDate) {
     return (
       <Box ta="center" py={40}>
         <Text c="dimmed" size="xs">
@@ -1048,28 +1085,91 @@ const MessageList = ({
 
   return (
     <>
+      {/* Jump to Date Button - floating at top right */}
+      <Box
+        style={{
+          position: "absolute",
+          top: 8,
+          right: 16,
+          zIndex: 10,
+        }}
+      >
+        <JumpToDate
+          channelId={channelId}
+          onJumpToDate={handleJumpToDate}
+          currentLabel={dateLabel}
+        />
+      </Box>
+
       <Box
         ref={containerRef}
         style={{
           flex: 1,
           overflowY: "auto",
           overflowX: "hidden",
+          position: "relative",
         }}
       >
-        <Stack gap={0} py="xs">
-          {[...messages].reverse().map((msg) => (
-            <MessageItem
-              key={msg.id}
-              message={msg}
-              channelId={channelId}
-              onEdit={onEdit}
-              onDelete={onDelete}
-              onReply={onReply}
-              onViewThread={setThreadMessage}
-              isHighlighted={highlightedMessageId === msg.id}
-            />
-          ))}
-        </Stack>
+        {/* Show indicator when viewing past messages */}
+        {jumpDate && (
+          <Box
+            ta="center"
+            py="xs"
+            style={{
+              backgroundColor: "#fff8e6",
+              borderBottom: "1px solid #ffe58f",
+              position: "sticky",
+              top: 0,
+              zIndex: 5,
+            }}
+          >
+            <Group gap={8} justify="center">
+              <Text size="xs" c="orange">
+                Menampilkan pesan dari {dateLabel}
+              </Text>
+              <Text
+                size="xs"
+                c="blue"
+                style={{ cursor: "pointer", textDecoration: "underline" }}
+                onClick={handleResetToToday}
+              >
+                Kembali ke hari ini
+              </Text>
+            </Group>
+          </Box>
+        )}
+
+        {messages.length === 0 && jumpDate ? (
+          <Box ta="center" py={40}>
+            <Text c="dimmed" size="xs">
+              Tidak ada pesan pada tanggal ini
+            </Text>
+            <Text
+              size="xs"
+              c="blue"
+              mt="xs"
+              style={{ cursor: "pointer" }}
+              onClick={handleResetToToday}
+            >
+              Kembali ke hari ini
+            </Text>
+          </Box>
+        ) : (
+          <Stack gap={0} py="xs">
+            {(jumpDate ? messages : [...messages].reverse()).map((msg) => (
+              <MessageItem
+                key={msg.id}
+                message={msg}
+                channelId={channelId}
+                onEdit={onEdit}
+                onDelete={onDelete}
+                onReply={onReply}
+                onViewThread={setThreadMessage}
+                isHighlighted={highlightedMessageId === msg.id}
+              />
+            ))}
+          </Stack>
+        )}
       </Box>
 
       {/* Thread Drawer */}

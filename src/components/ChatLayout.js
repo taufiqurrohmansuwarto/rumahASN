@@ -2,12 +2,16 @@ import {
   useChatStats,
   useMentionCount,
   useMyChannels,
+  usePublicChannels,
   useUnreadCounts,
   useOnlineUsers,
   useBookmarkCount,
+  useMyWorkspaceMembership,
+  useUpdatePresence,
+  useHeartbeat,
 } from "@/hooks/useRasnChat";
 import { layoutToken } from "@/styles/rasn.theme";
-import { Center } from "@mantine/core";
+import { Center, Avatar as MantineAvatar, Group as MantineGroup, Indicator } from "@mantine/core";
 import {
   IconAt,
   IconBookmark,
@@ -19,12 +23,16 @@ import {
   IconPlus,
   IconUser,
   IconUsers,
+  IconPhoto,
+  IconPin,
+  IconShield,
+  IconWorld,
 } from "@tabler/icons-react";
-import { Badge, Button, Dropdown, Space } from "antd";
+import { Badge, Button, Dropdown, Space, Tooltip } from "antd";
 import { signOut, useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import MegaMenuTop from "./MegaMenu/MegaMenuTop";
 import NotifikasiPrivateMessage from "./Notification/NotifikasiPrivateMessage";
 import NotifikasiForumKepegawaian from "./Notification/NotifikasiForumKepegawaian";
@@ -39,16 +47,47 @@ function ChatLayout({ children, onCompose, currentChannelId }) {
   const { data } = useSession();
   const router = useRouter();
   const [collapsed, setCollapsed] = useState(false);
+  const heartbeatIntervalRef = useRef(null);
 
   const { data: stats } = useChatStats();
   const { data: mentionData } = useMentionCount();
   const { data: bookmarkData } = useBookmarkCount();
   const { data: channels } = useMyChannels();
+  const { data: publicChannels } = usePublicChannels();
   const { data: unreadData } = useUnreadCounts();
   const { data: onlineUsers } = useOnlineUsers();
+  const { data: membership } = useMyWorkspaceMembership();
+
+  // Filter public channels that user hasn't joined yet
+  const browseableChannels = (publicChannels || []).filter((c) => !c.is_member);
+
+  const updatePresence = useUpdatePresence();
+  const heartbeat = useHeartbeat();
 
   // Enable chat notifications
   useChatNotifications(currentChannelId);
+
+  // Check if user can manage roles (superadmin or admin only)
+  const permissions = membership?.role?.permissions || {};
+  const canManageRoles = permissions.all === true || permissions.manage_roles === true;
+
+  // Auto-update presence when entering chat
+  useEffect(() => {
+    // Set user as online when entering
+    updatePresence.mutate({ status: "online" });
+
+    // Send heartbeat every 30 seconds to keep online status
+    heartbeatIntervalRef.current = setInterval(() => {
+      heartbeat.mutate();
+    }, 30000);
+
+    // Cleanup: set offline when leaving
+    return () => {
+      if (heartbeatIntervalRef.current) {
+        clearInterval(heartbeatIntervalRef.current);
+      }
+    };
+  }, []);
 
   const getUnreadCount = (channelId) => {
     return unreadData?.channels?.find((c) => c.channelId === channelId)?.count || 0;
@@ -73,6 +112,9 @@ function ChatLayout({ children, onCompose, currentChannelId }) {
     return colors[status] || colors.offline;
   };
 
+  // Get current channel ID from router
+  const currentChannel = router.query?.channelId;
+
   const getAllRoutes = () => {
     const mainRoutes = [
       {
@@ -81,11 +123,11 @@ function ChatLayout({ children, onCompose, currentChannelId }) {
         name:
           mentionData?.count > 0 ? (
             <Space>
-              Mentions
+              Sebutan
               <Badge count={mentionData.count} size="small" />
             </Space>
           ) : (
-            "Mentions"
+            "Sebutan"
           ),
         icon: <IconAt size={16} />,
       },
@@ -95,26 +137,33 @@ function ChatLayout({ children, onCompose, currentChannelId }) {
         name:
           bookmarkData?.count > 0 ? (
             <Space>
-              Saved Items
+              Tersimpan
               <Badge count={bookmarkData.count} size="small" style={{ backgroundColor: "#faad14" }} />
             </Space>
           ) : (
-            "Saved Items"
+            "Tersimpan"
           ),
         icon: <IconBookmark size={16} />,
       },
       {
         key: "/rasn-chat/calls",
         path: "/rasn-chat/calls",
-        name: "Riwayat Call",
+        name: "Riwayat Panggilan",
         icon: <IconPhone size={16} />,
       },
-      {
+    ];
+
+    // Only show Kelola Roles for admin/superadmin
+    if (canManageRoles) {
+      mainRoutes.push({
         key: "/rasn-chat/roles",
         path: "/rasn-chat/roles",
         name: "Kelola Roles",
-        icon: <IconUsers size={16} />,
-      },
+        icon: <IconShield size={16} />,
+      });
+    }
+
+    mainRoutes.push(
       {
         key: "divider-channels",
         type: "divider",
@@ -122,15 +171,17 @@ function ChatLayout({ children, onCompose, currentChannelId }) {
       {
         key: "channels-header",
         path: "#",
-        name: `CHANNELS (${channels?.length || 0})`,
+        name: `CHANNEL (${channels?.length || 0})`,
         disabled: true,
-      },
-    ];
+      }
+    );
 
-    // Add channels
+    // Add channels with submenu for current channel
     const channelRoutes = (channels || []).map((channel) => {
       const unread = getUnreadCount(channel.id);
-      return {
+      const isCurrentChannel = currentChannel === channel.id;
+
+      const channelRoute = {
         key: `/rasn-chat/${channel.id}`,
         path: `/rasn-chat/${channel.id}`,
         name:
@@ -149,10 +200,67 @@ function ChatLayout({ children, onCompose, currentChannelId }) {
             <IconHash size={14} />
           ),
       };
+
+      // Add submenu for current channel
+      if (isCurrentChannel) {
+        channelRoute.routes = [
+          {
+            key: `/rasn-chat/${channel.id}/members`,
+            path: `/rasn-chat/${channel.id}/members`,
+            name: "Anggota",
+            icon: <IconUsers size={12} />,
+          },
+          {
+            key: `/rasn-chat/${channel.id}/media`,
+            path: `/rasn-chat/${channel.id}/media`,
+            name: "Media & File",
+            icon: <IconPhoto size={12} />,
+          },
+          {
+            key: `/rasn-chat/${channel.id}/pinned`,
+            path: `/rasn-chat/${channel.id}/pinned`,
+            name: "Pesan Dipin",
+            icon: <IconPin size={12} />,
+          },
+        ];
+      }
+
+      return channelRoute;
     });
 
-    // Direct Messages header and online users
-    const dmRoutes = [
+    // Browseable public channels (not joined yet)
+    const browseRoutes = [];
+    if (browseableChannels.length > 0) {
+      browseRoutes.push(
+        {
+          key: "divider-browse",
+          type: "divider",
+        },
+        {
+          key: "browse-header",
+          path: "#",
+          name: `JELAJAHI CHANNEL (${browseableChannels.length})`,
+          disabled: true,
+        }
+      );
+
+      browseableChannels.slice(0, 5).forEach((channel) => {
+        browseRoutes.push({
+          key: `/rasn-chat/${channel.id}`,
+          path: `/rasn-chat/${channel.id}`,
+          name: (
+            <Tooltip title="Klik untuk bergabung">
+              <span style={{ color: "#888" }}>{channel.name}</span>
+            </Tooltip>
+          ),
+          icon: <IconWorld size={14} color="#888" />,
+        });
+      });
+    }
+
+    // Online users - compact inline display
+    const onlineCount = onlineUsers?.length || 0;
+    const dmRoutes = onlineCount > 0 ? [
       {
         key: "divider-dm",
         type: "divider",
@@ -160,33 +268,86 @@ function ChatLayout({ children, onCompose, currentChannelId }) {
       {
         key: "dm-header",
         path: "#",
-        name: `DIRECT MESSAGES${onlineUsers?.length > 0 ? ` (${onlineUsers.length} online)` : ""}`,
+        name: (
+          <MantineGroup gap={6} wrap="nowrap" style={{ paddingBottom: 4 }}>
+            <span style={{ fontSize: 11, fontWeight: 600, color: "#999", whiteSpace: "nowrap" }}>
+              ONLINE
+            </span>
+            <MantineAvatar.Group spacing={4}>
+              {(onlineUsers || []).slice(0, 5).map((presence) => (
+                <Tooltip
+                  key={presence.user_id}
+                  title={`${presence.user?.username} - ${getStatusLabel(presence.status)}`}
+                >
+                  <Indicator
+                    color={getStatusColor(presence.status)}
+                    size={6}
+                    offset={1}
+                    position="bottom-end"
+                    withBorder
+                  >
+                    <MantineAvatar
+                      src={presence.user?.image}
+                      size={24}
+                      radius="xl"
+                    >
+                      {presence.user?.username?.[0]?.toUpperCase()}
+                    </MantineAvatar>
+                  </Indicator>
+                </Tooltip>
+              ))}
+              {onlineCount > 5 && (
+                <MantineAvatar size={24} radius="xl" color="gray">
+                  +{onlineCount - 5}
+                </MantineAvatar>
+              )}
+            </MantineAvatar.Group>
+          </MantineGroup>
+        ),
         disabled: true,
       },
-    ];
+    ] : [];
 
-    // Add online users as DM options
-    const userRoutes = (onlineUsers || []).slice(0, 8).map((presence) => ({
-      key: `dm-${presence.user_id}`,
-      path: "#",
-      name: (
-        <Space size={4}>
-          <IconCircleFilled size={8} color={getStatusColor(presence.status)} />
-          <span>{presence.user?.username || "User"}</span>
-        </Space>
-      ),
-      icon: null,
-    }));
+    return [...mainRoutes, ...channelRoutes, ...browseRoutes, ...dmRoutes];
+  };
 
-    return [...mainRoutes, ...channelRoutes, ...dmRoutes, ...userRoutes];
+  // Get status label in Indonesian
+  const getStatusLabel = (status) => {
+    const labels = {
+      online: "Aktif",
+      away: "Tidak di Tempat",
+      busy: "Sibuk",
+      offline: "Offline",
+    };
+    return labels[status] || "Offline";
   };
 
   const handleMenuClick = ({ key }) => {
-    if (key === "channels-header" || key === "divider-channels" || key === "dm-header" || key.startsWith("dm-")) {
+    // Skip non-navigable items
+    if (
+      key === "channels-header" ||
+      key === "divider-channels" ||
+      key === "dm-header" ||
+      key === "browse-header" ||
+      key === "divider-browse" ||
+      key === "divider-dm"
+    ) {
       return;
     }
 
-    const route = getAllRoutes().find((r) => r.key === key);
+    // Helper to find route including nested routes
+    const findRoute = (routes, targetKey) => {
+      for (const route of routes) {
+        if (route.key === targetKey) return route;
+        if (route.routes) {
+          const found = findRoute(route.routes, targetKey);
+          if (found) return found;
+        }
+      }
+      return null;
+    };
+
+    const route = findRoute(getAllRoutes(), key);
     if (route?.path && route.path !== "#") {
       router.push(route.path);
     }
@@ -303,7 +464,7 @@ function ChatLayout({ children, onCompose, currentChannelId }) {
       }}
       footerRender={() => (
         <div style={{ textAlign: "center", padding: "8px 0", color: "#999", fontSize: 11 }}>
-          {stats?.messages || 0} pesan total
+          Total {stats?.channels || 0} channel, {stats?.messages || 0} pesan
         </div>
       )}
     >
