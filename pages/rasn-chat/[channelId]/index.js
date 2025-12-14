@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import Head from "next/head";
 import { Modal, message } from "antd";
@@ -15,7 +15,17 @@ import { useChannel, useDeleteMessage, useStartVideoCall } from "@/hooks/useRasn
 
 function ChannelChatPage() {
   const router = useRouter();
-  const { channelId } = router.query;
+  const { channelId, scrollTo } = router.query;
+  const [scrollToMessageId, setScrollToMessageId] = useState(null);
+
+  // Handle scrollTo query param
+  useEffect(() => {
+    if (scrollTo) {
+      setScrollToMessageId(scrollTo);
+      // Clear the query param after setting
+      router.replace(`/rasn-chat/${channelId}`, undefined, { shallow: true });
+    }
+  }, [scrollTo, channelId, router]);
 
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -68,6 +78,8 @@ function ChannelChatPage() {
           onEdit={setEditMessage}
           onDelete={handleDelete}
           onReply={setReplyTo}
+          scrollToMessageId={scrollToMessageId}
+          onScrollComplete={() => setScrollToMessageId(null)}
         />
 
         {/* Input */}

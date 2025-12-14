@@ -1,14 +1,15 @@
 import Head from "next/head";
-import { Button, Typography } from "antd";
+import { Button, Typography, Badge, Space } from "antd";
 import ChatLayout from "@/components/ChatLayout";
 import { MentionList } from "@/components/RasnChat";
 import { useMarkAllMentionsAsRead, useMentionCount } from "@/hooks/useRasnChat";
 
-const { Title } = Typography;
+const { Title, Text } = Typography;
 
 function MentionsPage() {
   const { data: mentionData } = useMentionCount();
   const markAllAsRead = useMarkAllMentionsAsRead();
+  const unreadCount = mentionData?.count || 0;
 
   return (
     <>
@@ -25,10 +26,15 @@ function MentionsPage() {
             marginBottom: 16,
           }}
         >
-          <Title level={4} style={{ margin: 0 }}>
-            Mentions ({mentionData?.count || 0})
-          </Title>
-          {mentionData?.count > 0 && (
+          <Space>
+            <Title level={4} style={{ margin: 0 }}>
+              Mentions
+            </Title>
+            {unreadCount > 0 && (
+              <Badge count={unreadCount} style={{ backgroundColor: "#52c41a" }} />
+            )}
+          </Space>
+          {unreadCount > 0 && (
             <Button
               size="small"
               onClick={() => markAllAsRead.mutate()}

@@ -66,6 +66,23 @@ class Mention extends Model {
       .page(page - 1, limit);
   }
 
+  // Get all mentions for user (both read and unread)
+  static async getAllMentions(userId, { page = 1, limit = 20, filter = "all" } = {}) {
+    let query = Mention.query()
+      .where("mentioned_user_id", userId)
+      .withGraphFetched("[message.[user(simpleWithImage), channel(simpleSelect)]]")
+      .orderBy("created_at", "desc");
+
+    // Filter by read status if specified
+    if (filter === "unread") {
+      query = query.where("is_read", false);
+    } else if (filter === "read") {
+      query = query.where("is_read", true);
+    }
+
+    return query.page(page - 1, limit);
+  }
+
   // Mark mention as read
   static async markAsRead(mentionId) {
     return Mention.query()

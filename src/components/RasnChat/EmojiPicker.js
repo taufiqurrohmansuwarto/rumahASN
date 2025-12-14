@@ -42,7 +42,7 @@ const EmojiPicker = ({ onSelect, children }) => {
   );
 
   return (
-    <Popover content={content} trigger="click" placement="topRight">
+    <Popover content={content} trigger="click" placement="top">
       {children || (
         <ActionIcon variant="subtle">
           <IconMoodSmile size={18} />

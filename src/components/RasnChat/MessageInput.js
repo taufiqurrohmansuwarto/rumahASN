@@ -1,24 +1,75 @@
-import { useSendMessage, useEditMessage } from "@/hooks/useRasnChat";
-import { Button, message, Upload, Input, Tooltip, Avatar } from "antd";
-import { Group, Box, Paper, Text, ActionIcon } from "@mantine/core";
 import {
-  IconSend,
-  IconPaperclip,
-  IconX,
-  IconMoodSmile,
+  useChannel,
+  useEditMessage,
+  useSendMessage,
+} from "@/hooks/useRasnChat";
+import { formatFileSize, searchUsers } from "@/services/rasn-chat.services";
+import { Box, Group, Kbd, Paper, Text } from "@mantine/core";
+import {
   IconAt,
   IconBold,
-  IconItalic,
-  IconList,
+  IconChevronDown,
   IconCode,
+  IconItalic,
   IconLink,
+  IconList,
+  IconListNumbers,
+  IconMicrophone,
+  IconMoodSmile,
+  IconPaperclip,
+  IconPlus,
   IconQuote,
+  IconSend,
+  IconStrikethrough,
+  IconTypography,
+  IconUnderline,
+  IconVideo,
+  IconX,
 } from "@tabler/icons-react";
-import { useState, useEffect, useRef, useCallback } from "react";
+import { Avatar, Button, Input, message, Tooltip, Upload } from "antd";
+import { useCallback, useEffect, useRef, useState } from "react";
 import EmojiPicker from "./EmojiPicker";
-import { formatFileSize, searchUsers } from "@/services/rasn-chat.services";
 
 const { TextArea } = Input;
+
+const splitPerangkatDaerah = (perangkatDaerah) => {
+  const parts = perangkatDaerah?.split("-");
+  const firstPart = parts?.length > 0 ? parts[0] : "";
+  const secondPart = parts?.length > 1 ? parts[1] : "";
+  return `${firstPart} - ${secondPart}`;
+};
+
+// Toolbar button component using Ant Design Button
+const ToolbarButton = ({
+  icon: Icon,
+  tooltip,
+  onClick,
+  active,
+  disabled,
+  size = 18,
+}) => (
+  <Tooltip title={tooltip}>
+    <Button
+      type={active ? "primary" : "text"}
+      size="small"
+      icon={<Icon size={size} stroke={1.5} />}
+      onClick={onClick}
+      disabled={disabled}
+    />
+  </Tooltip>
+);
+
+// Divider for toolbar
+const ToolbarDivider = () => (
+  <Box
+    style={{
+      width: 1,
+      height: 20,
+      backgroundColor: "#e0e0e0",
+      margin: "0 4px",
+    }}
+  />
+);
 
 const MessageInput = ({
   channelId,
@@ -26,12 +77,18 @@ const MessageInput = ({
   editMessage,
   onCancelReply,
   onCancelEdit,
+  channelName,
 }) => {
   const [content, setContent] = useState("");
   const [pendingFiles, setPendingFiles] = useState([]);
   const [uploading, setUploading] = useState(false);
+  const [showFormatting, setShowFormatting] = useState(true);
   const textareaRef = useRef(null);
   const cursorPosRef = useRef(0);
+
+  // Get channel name if not provided
+  const { data: channel } = useChannel(channelId);
+  const displayChannelName = channelName || channel?.name || "channel";
 
   // Mention state
   const [mentionQuery, setMentionQuery] = useState("");
@@ -39,8 +96,6 @@ const MessageInput = ({
   const [showMentionDropdown, setShowMentionDropdown] = useState(false);
   const [mentionIndex, setMentionIndex] = useState(0);
   const [isSearching, setIsSearching] = useState(false);
-
-  // Store selected mentions with their user IDs for sending to API
   const [selectedMentions, setSelectedMentions] = useState([]);
 
   const sendMsg = useSendMessage();
@@ -77,6 +132,13 @@ const MessageInput = ({
     return textareaRef.current?.resizableTextArea?.textArea;
   }, []);
 
+  const focusTextarea = useCallback(() => {
+    const textarea = getTextarea();
+    if (textarea) {
+      textarea.focus();
+    }
+  }, [getTextarea]);
+
   const insertMarkdown = (prefix, suffix = prefix) => {
     const textarea = getTextarea();
     if (!textarea) return;
@@ -107,7 +169,7 @@ const MessageInput = ({
     }
   };
 
-  const insertList = () => {
+  const insertList = (ordered = false) => {
     const textarea = getTextarea();
     if (!textarea) return;
 
@@ -116,7 +178,7 @@ const MessageInput = ({
     const after = content.substring(start);
     const needsNewline = before.length > 0 && !before.endsWith("\n");
 
-    const listItem = `${needsNewline ? "\n" : ""}- `;
+    const listItem = `${needsNewline ? "\n" : ""}${ordered ? "1. " : "- "}`;
     const newText = `${before}${listItem}${after}`;
     setContent(newText);
 
@@ -149,7 +211,30 @@ const MessageInput = ({
     }, 0);
   };
 
-  // Check for mention - ALLOW SPACES in query
+  const insertCodeBlock = () => {
+    const textarea = getTextarea();
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selectedText = content.substring(start, end);
+    const before = content.substring(0, start);
+    const after = content.substring(end);
+
+    const codeBlock = selectedText
+      ? `\`\`\`\n${selectedText}\n\`\`\``
+      : "```\n\n```";
+    const newText = `${before}${codeBlock}${after}`;
+    setContent(newText);
+
+    setTimeout(() => {
+      textarea.focus();
+      const newPos = selectedText ? start + codeBlock.length : start + 4;
+      textarea.setSelectionRange(newPos, newPos);
+    }, 0);
+  };
+
+  // Check for mention
   const checkForMention = useCallback((text, cursorPos) => {
     const textBeforeCursor = text.substring(0, cursorPos);
 
@@ -169,8 +254,6 @@ const MessageInput = ({
     }
 
     const textAfterAt = textBeforeCursor.substring(lastAtIndex + 1);
-
-    // Close dropdown if double space
     if (textAfterAt.endsWith("  ")) {
       return { show: false, query: "" };
     }
@@ -217,15 +300,12 @@ const MessageInput = ({
     if (lastAtIndex === -1) return;
 
     const beforeMention = content.substring(0, lastAtIndex);
-    // Use full username for display (nama lengkap biru)
     const displayName = user.username || "";
     const newText = `${beforeMention}@${displayName} ${textAfterCursor}`;
 
     setContent(newText);
 
-    // Store the mention with user ID for sending to API
     setSelectedMentions((prev) => {
-      // Avoid duplicates
       if (prev.find((m) => m.userId === user.custom_id)) return prev;
       return [
         ...prev,
@@ -268,20 +348,19 @@ const MessageInput = ({
     }
   };
 
-  // Extract mentions from content text
   const extractMentionsFromContent = (text) => {
-    const mentionRegex = /@([^\s@]+(?:\s[^\s@]+)*?)(?=\s|$)/g;
     const foundMentions = [];
-    let match;
+    const textLower = text.toLowerCase();
 
-    while ((match = mentionRegex.exec(text)) !== null) {
-      const username = match[1];
-      // Find the user ID from selectedMentions
-      const stored = selectedMentions.find(
-        (m) => m.username.toLowerCase() === username.toLowerCase()
-      );
-      if (stored) {
-        foundMentions.push({ userId: stored.userId, type: "user" });
+    for (const mention of selectedMentions) {
+      const mentionPattern = `@${mention.username.toLowerCase()}`;
+      if (textLower.includes(mentionPattern)) {
+        if (!foundMentions.find((m) => m.userId === mention.userId)) {
+          foundMentions.push({
+            userId: mention.userId,
+            type: mention.type || "user",
+          });
+        }
       }
     }
 
@@ -300,14 +379,13 @@ const MessageInput = ({
         });
         onCancelEdit?.();
       } else {
-        // Extract mentions from content
         const mentions = extractMentionsFromContent(content);
 
         await sendMsg.mutateAsync({
           channelId,
           content: content.trim(),
           parentId: replyTo?.id,
-          mentions, // Send mentions array to API
+          mentions,
           files: pendingFiles.map((f) => ({
             name: f.name,
             size: f.size,
@@ -319,7 +397,10 @@ const MessageInput = ({
       }
       setContent("");
       setPendingFiles([]);
-      setSelectedMentions([]); // Clear selected mentions after send
+      setSelectedMentions([]);
+
+      // Keep focus on textarea after sending
+      setTimeout(focusTextarea, 50);
     } catch (error) {
       message.error(
         editMessage ? "Gagal mengedit pesan" : "Gagal mengirim pesan"
@@ -393,36 +474,49 @@ const MessageInput = ({
     }
   };
 
-  const isLoading = sendMsg.isLoading || editMsg.isLoading || uploading;
+  const isLoading = sendMsg.isPending || editMsg.isPending || uploading;
+  const canSend = content.trim() || pendingFiles.length > 0;
 
   return (
     <Box>
       {/* Reply indicator */}
       {replyTo && (
         <Paper
-          p={6}
-          mb={6}
-          radius={0}
+          p={8}
+          mb={8}
+          radius="sm"
           style={{
             borderLeft: "3px solid #1264a3",
-            backgroundColor: "#f8f8f8",
+            backgroundColor: "#f8f9fa",
           }}
         >
           <Group justify="space-between">
             <Box>
               <Text size="xs" c="dimmed">
                 Membalas{" "}
-                <Text span fw={600}>
+                <Text span fw={600} c="blue">
                   {replyTo.user?.username}
                 </Text>
               </Text>
-              <Text size="xs" lineClamp={1} c="dimmed">
+              <Text size="xs" lineClamp={1} c="dimmed" mt={2}>
                 {replyTo.content}
               </Text>
             </Box>
-            <ActionIcon size="sm" variant="subtle" onClick={onCancelReply}>
-              <IconX size={12} />
-            </ActionIcon>
+            <Button
+              type="text"
+              size="small"
+              onClick={onCancelReply}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: 24,
+                height: 24,
+                padding: 0,
+              }}
+            >
+              <IconX size={14} />
+            </Button>
           </Group>
         </Paper>
       )}
@@ -430,89 +524,116 @@ const MessageInput = ({
       {/* Edit indicator */}
       {editMessage && (
         <Paper
-          p={6}
-          mb={6}
-          radius={0}
+          p={8}
+          mb={8}
+          radius="sm"
           style={{
             borderLeft: "3px solid #e8912d",
-            backgroundColor: "#fff8f0",
+            backgroundColor: "#fffbf0",
           }}
         >
           <Group justify="space-between">
-            <Text size="xs" c="dimmed">
+            <Text size="xs" c="orange" fw={500}>
               Mengedit pesan
             </Text>
-            <ActionIcon size="sm" variant="subtle" onClick={onCancelEdit}>
-              <IconX size={12} />
-            </ActionIcon>
+            <Button
+              type="text"
+              size="small"
+              onClick={onCancelEdit}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: 24,
+                height: 24,
+                padding: 0,
+              }}
+            >
+              <IconX size={14} />
+            </Button>
           </Group>
         </Paper>
       )}
 
       {/* Pending files preview */}
       {pendingFiles.length > 0 && (
-        <Group gap={6} mb={6} wrap="wrap">
+        <Group gap={8} mb={8} wrap="wrap">
           {pendingFiles.map((file) => (
             <Paper
               key={file.uid}
               withBorder
-              p={6}
+              p={8}
               radius="sm"
               style={{
                 display: "inline-flex",
                 alignItems: "center",
-                gap: 6,
-                backgroundColor: "#f9f9f9",
+                gap: 8,
+                backgroundColor: "#f8f9fa",
               }}
             >
-              <Text size="xs" truncate style={{ maxWidth: 120 }}>
+              <IconPaperclip size={14} color="#666" />
+              <Text size="xs" truncate style={{ maxWidth: 150 }}>
                 {file.name}
               </Text>
               <Text size="xs" c="dimmed">
                 ({formatFileSize(file.size)})
               </Text>
-              <ActionIcon
-                size="xs"
-                variant="subtle"
+              <Button
+                type="text"
+                size="small"
+                danger
                 onClick={() => removePendingFile(file.uid)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: 20,
+                  height: 20,
+                  padding: 0,
+                  minWidth: 20,
+                }}
               >
-                <IconX size={10} />
-              </ActionIcon>
+                <IconX size={12} />
+              </Button>
             </Paper>
           ))}
         </Group>
       )}
 
-      {/* Input container */}
+      {/* Main Input Container */}
       <Paper
         withBorder
-        radius="md"
-        style={{ overflow: "visible", position: "relative" }}
+        radius="lg"
+        style={{
+          overflow: "visible",
+          position: "relative",
+          border: "1px solid #e0e0e0",
+        }}
       >
         {/* Mention Dropdown */}
         {showMentionDropdown && (
           <Paper
             withBorder
             shadow="lg"
-            radius="sm"
+            radius="md"
             style={{
               position: "absolute",
               bottom: "100%",
               left: 0,
               right: 0,
-              marginBottom: 4,
-              maxHeight: 280,
+              marginBottom: 8,
+              maxHeight: 300,
               overflowY: "auto",
               zIndex: 1000,
               backgroundColor: "#fff",
             }}
           >
-            <Box px={8} py={6} style={{ borderBottom: "1px solid #f0f0f0" }}>
-              <Text size="xs" c="dimmed">
+            <Box px={12} py={8} style={{ borderBottom: "1px solid #f0f0f0" }}>
+              <Text size="xs" c="dimmed" fw={500}>
                 {isSearching
                   ? "Mencari..."
                   : mentionUsers.length > 0
-                  ? `Pilih user (${mentionUsers.length} ditemukan)`
+                  ? `${mentionUsers.length} user ditemukan`
                   : "Tidak ada user ditemukan"}
               </Text>
             </Box>
@@ -520,33 +641,29 @@ const MessageInput = ({
               <Box
                 key={user.custom_id}
                 onClick={() => insertMention(user)}
-                px={10}
-                py={8}
+                px={12}
+                py={10}
                 style={{
                   display: "flex",
                   alignItems: "center",
-                  gap: 10,
+                  gap: 12,
                   cursor: "pointer",
                   backgroundColor:
                     idx === mentionIndex ? "#e6f4ff" : "transparent",
+                  transition: "background-color 0.15s",
                 }}
                 onMouseEnter={() => setMentionIndex(idx)}
               >
-                <Avatar src={user.image} size={32}>
+                <Avatar src={user.image} size={36} radius="sm">
                   {user.username?.[0]?.toUpperCase() || "?"}
                 </Avatar>
                 <Box>
                   <Text size="sm" fw={600}>
                     {user.username}
                   </Text>
-                  {user.info?.nama && (
-                    <Text size="xs" c="dimmed">
-                      {user.info.nama}
-                    </Text>
-                  )}
-                  {user.info?.nip && (
-                    <Text size={10} c="dimmed">
-                      NIP: {user.info.nip}
+                  {user.perangkat_daerah && (
+                    <Text size="10px" c="dimmed" lineClamp={1} fs="italic">
+                      {splitPerangkatDaerah(user.perangkat_daerah)}
                     </Text>
                   )}
                 </Box>
@@ -555,145 +672,209 @@ const MessageInput = ({
           </Paper>
         )}
 
-        {/* Markdown Toolbar */}
-        <Group
-          gap={4}
-          px={8}
-          py={4}
-          style={{
-            borderBottom: "1px solid #f0f0f0",
-            backgroundColor: "#fafafa",
-          }}
-        >
-          <Tooltip title="Tebal">
-            <ActionIcon
-              variant="subtle"
-              size="sm"
-              color="gray"
+        {/* Formatting Toolbar - Top */}
+        {showFormatting && (
+          <Group
+            gap={2}
+            px={12}
+            py={6}
+            style={{
+              borderBottom: "1px solid #f0f0f0",
+              backgroundColor: "#fafafa",
+              borderTopLeftRadius: 16,
+              borderTopRightRadius: 16,
+            }}
+          >
+            <ToolbarButton
+              icon={IconBold}
+              tooltip="Tebal (Ctrl+B)"
               onClick={() => insertMarkdown("**")}
-            >
-              <IconBold size={14} />
-            </ActionIcon>
-          </Tooltip>
-          <Tooltip title="Miring">
-            <ActionIcon
-              variant="subtle"
-              size="sm"
-              color="gray"
+            />
+            <ToolbarButton
+              icon={IconItalic}
+              tooltip="Miring (Ctrl+I)"
               onClick={() => insertMarkdown("*")}
-            >
-              <IconItalic size={14} />
-            </ActionIcon>
-          </Tooltip>
-          <Tooltip title="Code">
-            <ActionIcon
-              variant="subtle"
-              size="sm"
-              color="gray"
-              onClick={() => insertMarkdown("`")}
-            >
-              <IconCode size={14} />
-            </ActionIcon>
-          </Tooltip>
-          <Tooltip title="List">
-            <ActionIcon
-              variant="subtle"
-              size="sm"
-              color="gray"
-              onClick={insertList}
-            >
-              <IconList size={14} />
-            </ActionIcon>
-          </Tooltip>
-          <Tooltip title="Link">
-            <ActionIcon
-              variant="subtle"
-              size="sm"
-              color="gray"
-              onClick={insertLink}
-            >
-              <IconLink size={14} />
-            </ActionIcon>
-          </Tooltip>
-          <Tooltip title="Quote">
-            <ActionIcon
-              variant="subtle"
-              size="sm"
-              color="gray"
-              onClick={insertQuote}
-            >
-              <IconQuote size={14} />
-            </ActionIcon>
-          </Tooltip>
-        </Group>
+            />
+            <ToolbarButton
+              icon={IconUnderline}
+              tooltip="Garis Bawah"
+              onClick={() => insertMarkdown("__")}
+            />
+            <ToolbarButton
+              icon={IconStrikethrough}
+              tooltip="Coret"
+              onClick={() => insertMarkdown("~~")}
+            />
 
-        {/* Text input */}
+            <ToolbarDivider />
+
+            <ToolbarButton
+              icon={IconLink}
+              tooltip="Link"
+              onClick={insertLink}
+            />
+
+            <ToolbarDivider />
+
+            <ToolbarButton
+              icon={IconListNumbers}
+              tooltip="Daftar Bernomor"
+              onClick={() => insertList(true)}
+            />
+            <ToolbarButton
+              icon={IconList}
+              tooltip="Daftar"
+              onClick={() => insertList(false)}
+            />
+
+            <ToolbarDivider />
+
+            <ToolbarButton
+              icon={IconCode}
+              tooltip="Kode Inline"
+              onClick={() => insertMarkdown("`")}
+            />
+            <ToolbarButton
+              icon={() => (
+                <Text size="xs" fw={600} ff="monospace">{`</>`}</Text>
+              )}
+              tooltip="Blok Kode"
+              onClick={insertCodeBlock}
+            />
+            <ToolbarButton
+              icon={IconQuote}
+              tooltip="Kutipan"
+              onClick={insertQuote}
+            />
+          </Group>
+        )}
+
+        {/* Text Input */}
         <TextArea
           ref={textareaRef}
           value={content}
           onChange={handleContentChange}
           onKeyDown={handleKeyDown}
           placeholder={
-            editMessage ? "Edit pesan..." : "Tulis pesan... (@ untuk mention)"
+            editMessage ? "Edit pesan..." : `Message #${displayChannelName}`
           }
-          autoSize={{ minRows: 2, maxRows: 8 }}
-          bordered={false}
-          style={{ resize: "none", padding: "10px 12px", fontSize: 14 }}
+          autoSize={{ minRows: 1, maxRows: 10 }}
+          variant="borderless"
+          style={{
+            resize: "none",
+            padding: "12px 16px",
+            fontSize: 15,
+            lineHeight: 1.5,
+          }}
           disabled={isLoading}
         />
 
         {/* Bottom Toolbar */}
         <Group
           justify="space-between"
-          px={8}
-          py={6}
-          style={{ borderTop: "1px solid #f0f0f0" }}
+          px={12}
+          py={8}
+          style={{
+            borderTop: "1px solid #f0f0f0",
+            backgroundColor: "#fafafa",
+            borderBottomLeftRadius: 16,
+            borderBottomRightRadius: 16,
+          }}
         >
-          <Group gap={4}>
+          {/* Left side tools */}
+          <Group gap={2}>
             <Upload
               beforeUpload={handleFileSelect}
               showUploadList={false}
               multiple
               disabled={uploading}
             >
-              <ActionIcon
-                variant="subtle"
-                size="sm"
-                color="gray"
-                loading={uploading}
-                title="Upload File"
-              >
-                <IconPaperclip size={16} />
-              </ActionIcon>
+              <ToolbarButton
+                icon={IconPlus}
+                tooltip="Tambah File"
+                disabled={uploading}
+              />
             </Upload>
 
+            <ToolbarButton
+              icon={IconTypography}
+              tooltip={
+                showFormatting ? "Sembunyikan Format" : "Tampilkan Format"
+              }
+              onClick={() => setShowFormatting(!showFormatting)}
+              active={showFormatting}
+            />
+
             <EmojiPicker onSelect={handleEmojiSelect}>
-              <ActionIcon variant="subtle" size="sm" color="gray" title="Emoji">
-                <IconMoodSmile size={16} />
-              </ActionIcon>
+              <ToolbarButton icon={IconMoodSmile} tooltip="Emoji" />
             </EmojiPicker>
 
-            <ActionIcon
-              variant="subtle"
-              size="sm"
-              color="gray"
-              title="Mention (@)"
+            <ToolbarButton
+              icon={IconAt}
+              tooltip="Mention (@)"
               onClick={triggerMention}
-            >
-              <IconAt size={16} />
-            </ActionIcon>
+            />
+
+            <ToolbarDivider />
+
+            <ToolbarButton
+              icon={IconVideo}
+              tooltip="Video (Coming Soon)"
+              disabled
+            />
+            <ToolbarButton
+              icon={IconMicrophone}
+              tooltip="Voice (Coming Soon)"
+              disabled
+            />
           </Group>
 
-          <Button
-            type="primary"
-            size="small"
-            icon={<IconSend size={14} />}
-            onClick={handleSend}
-            loading={isLoading}
-            disabled={!content.trim() && pendingFiles.length === 0}
-          >
-            Kirim
-          </Button>
+          {/* Right side - Send button */}
+          <Group gap={8}>
+            <Text size="xs" c="dimmed" visibleFrom="sm">
+              <Kbd size="xs">Shift</Kbd> + <Kbd size="xs">Enter</Kbd> untuk
+              baris baru
+            </Text>
+
+            <Tooltip
+              title={canSend ? "Kirim pesan" : "Tulis pesan terlebih dahulu"}
+            >
+              <Button
+                type={canSend ? "primary" : "default"}
+                shape="default"
+                onClick={handleSend}
+                loading={isLoading}
+                disabled={!canSend}
+                icon={<IconSend size={18} />}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: 36,
+                  height: 36,
+                  padding: 0,
+                  borderRadius: 8,
+                  transition: "all 0.2s",
+                }}
+              />
+            </Tooltip>
+
+            <Button
+              type="text"
+              size="small"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: 24,
+                height: 24,
+                padding: 0,
+                color: "#999",
+              }}
+            >
+              <IconChevronDown size={16} />
+            </Button>
+          </Group>
         </Group>
       </Paper>
     </Box>

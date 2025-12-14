@@ -346,7 +346,8 @@ export const useMyMentions = (params) => {
   return useQuery({
     queryKey: ["chat-mentions", params],
     queryFn: () => chatApi.getMyMentions(params),
-    refetchInterval: 30000, // Poll setiap 30 detik
+    refetchInterval: 30000,
+    keepPreviousData: true,
   });
 };
 

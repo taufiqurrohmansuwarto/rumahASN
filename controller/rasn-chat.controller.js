@@ -333,16 +333,60 @@ const getMessages = async (req, res) => {
       }
     }
 
+    // Get user's workspace membership to check permissions
+    let membership = await WorkspaceMember.getByUserId(customId);
+    const { current_role } = req.user;
+    const expectedRoleId =
+      current_role === "admin" ? "ws-role-superadmin" : null;
+
+    // Auto-enroll user in workspace if not a member yet
+    if (!membership) {
+      const roleId = expectedRoleId || "ws-role-member";
+      await WorkspaceMember.addMember(customId, roleId);
+      membership = await WorkspaceMember.getByUserId(customId);
+    }
+    // Sync role: if user is admin in main system but not superadmin in chat, upgrade
+    else if (expectedRoleId && membership.role_id !== expectedRoleId) {
+      await WorkspaceMember.updateRole(customId, expectedRoleId);
+      membership = await WorkspaceMember.getByUserId(customId);
+    }
+
+    // Check permissions from role
+    let canDeleteAny = false;
+    let canEditAny = false;
+
+    if (membership?.role) {
+      const perms =
+        typeof membership.role.permissions === "string"
+          ? JSON.parse(membership.role.permissions)
+          : membership.role.permissions || {};
+
+      canDeleteAny =
+        perms.all === true || perms.can_delete_any_message === true;
+      canEditAny = perms.all === true || perms.can_edit_any_message === true;
+    }
+
     const result = await Message.getChannelMessages(channelId, {
       page: parseInt(page),
       limit: parseInt(limit),
       before,
     });
 
+    // Add is_own, can_edit, can_delete to each message
+    const messagesWithPermissions = result.results.map((msg) => ({
+      ...msg,
+      is_own: msg.user_id === customId,
+      can_edit: msg.user_id === customId || canEditAny,
+      can_delete: msg.user_id === customId || canDeleteAny,
+    }));
+
     // Update last read
     await ChannelMember.updateLastRead(channelId, customId);
 
-    res.json(result);
+    res.json({
+      ...result,
+      results: messagesWithPermissions,
+    });
   } catch (error) {
     handleError(res, error);
   }
@@ -560,11 +604,12 @@ const getMessageReactions = async (req, res) => {
 const getMyMentions = async (req, res) => {
   try {
     const { customId } = req.user;
-    const { page = 1, limit = 20 } = req.query;
+    const { page = 1, limit = 20, filter = "all" } = req.query;
 
-    const result = await Mention.getUnreadMentions(customId, {
+    const result = await Mention.getAllMentions(customId, {
       page: parseInt(page),
       limit: parseInt(limit),
+      filter, // "all", "unread", or "read"
     });
 
     res.json(result);
@@ -981,14 +1026,35 @@ const uploadVoiceMessage = async (req, res) => {
 // ============================================
 
 const Users = require("@/models/users.model");
+const { raw } = require("objection");
 
 const searchUsers = async (req, res) => {
   try {
     const { q } = req.query;
+    const { organization_id } = req?.user;
 
     let query = Users.query()
-      .select("custom_id", "username", "image", "info")
-      .orderBy("username")
+      .select(
+        "custom_id",
+        "username",
+        "image",
+        "info",
+        raw("info->'jabatan'->>'jabatan' as jabatan"),
+        raw("info->'perangkat_daerah'->>'detail' as perangkat_daerah")
+      )
+      .orderByRaw(
+        `
+    CASE
+      WHEN organization_id = ? THEN 0
+      WHEN organization_id LIKE ? THEN 1
+      ELSE 2
+    END,
+    LENGTH(organization_id),
+    organization_id
+    `,
+        [organization_id, `${organization_id}%`]
+      )
+      .orderBy("username", "asc")
       .limit(15);
 
     // If query provided, filter by it
@@ -996,8 +1062,8 @@ const searchUsers = async (req, res) => {
       query = query.where((builder) => {
         builder
           .where("username", "ilike", `%${q}%`)
-          .orWhereRaw("info->>'nip' ilike ?", [`%${q}%`])
-          .orWhereRaw("info->>'nama' ilike ?", [`%${q}%`]);
+          .andWhere("group", "=", "MASTER")
+          .andWhere("role", "=", "USER");
       });
     }
 

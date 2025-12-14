@@ -1,6 +1,26 @@
-import { useMessages, useToggleReaction, useTogglePinMessage, useThreadMessages } from "@/hooks/useRasnChat";
-import { Skeleton, Dropdown, Popover, Avatar as AntAvatar, Drawer, Empty } from "antd";
-import { Stack, Text, Group, Avatar, Box, ActionIcon, Paper } from "@mantine/core";
+import {
+  useMessages,
+  useToggleReaction,
+  useTogglePinMessage,
+  useThreadMessages,
+} from "@/hooks/useRasnChat";
+import {
+  Skeleton,
+  Dropdown,
+  Popover,
+  Avatar as AntAvatar,
+  Drawer,
+  Empty,
+} from "antd";
+import {
+  Stack,
+  Text,
+  Group,
+  Avatar,
+  Box,
+  ActionIcon,
+  Paper,
+} from "@mantine/core";
 import {
   IconDotsVertical,
   IconPin,
@@ -32,7 +52,7 @@ const MentionTag = ({ username, mentions }) => {
   const [hovered, setHovered] = useState(false);
 
   const cleanUsername = username.slice(1); // remove @
-  
+
   // Find mention by matching full username
   const mentionInfo = mentions?.find((m) => {
     const userFullname = m.mentioned_user?.username || "";
@@ -41,26 +61,34 @@ const MentionTag = ({ username, mentions }) => {
   const user = mentionInfo?.mentioned_user;
 
   const popoverContent = user ? (
-    <div style={{ display: "flex", alignItems: "center", gap: 10, padding: 6 }}>
-      <AntAvatar src={user.image} size={40}>
+    <Box
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 10,
+        padding: 6,
+        maxWidth: 280,
+      }}
+    >
+      <Avatar src={user.image} size={40} radius="sm">
         {user.username?.[0]?.toUpperCase()}
-      </AntAvatar>
-      <div>
-        <div style={{ fontWeight: 700, fontSize: 14, color: "#1d1c1d" }}>{user.username}</div>
-        {user.info?.nama && (
-          <div style={{ fontSize: 12, color: "#616061" }}>{user.info.nama}</div>
+      </Avatar>
+      <Box style={{ flex: 1, minWidth: 0 }}>
+        <Text fw={700} size="sm" c="#1d1c1d" lineClamp={1}>
+          {user.username}
+        </Text>
+        {user.nama_jabatan && (
+          <Text size="xs" c="#616061" lineClamp={1}>
+            {user.nama_jabatan}
+          </Text>
         )}
-        {user.info?.nip && (
-          <div style={{ fontSize: 11, color: "#888" }}>NIP: {user.info.nip}</div>
+        {user.perangkat_daerah_detail && (
+          <Text size={10} c="#999" lineClamp={1}>
+            {user.perangkat_daerah_detail}
+          </Text>
         )}
-        {user.info?.jabatan?.nama && (
-          <div style={{ fontSize: 11, color: "#888" }}>{user.info.jabatan.nama}</div>
-        )}
-        {user.info?.perangkat_daerah?.detail && (
-          <div style={{ fontSize: 10, color: "#999" }}>{user.info.perangkat_daerah.detail}</div>
-        )}
-      </div>
-    </div>
+      </Box>
+    </Box>
   ) : (
     <div style={{ padding: 4 }}>
       <div style={{ fontSize: 12, color: "#666" }}>@{cleanUsername}</div>
@@ -98,13 +126,15 @@ const MentionTag = ({ username, mentions }) => {
 // Matches @username where username can contain letters, numbers, spaces, dots, underscores
 const processTextWithMentions = (text, mentions) => {
   if (typeof text !== "string") return text;
-  
+
   // Build regex from known mentions to properly match usernames with spaces
-  const mentionUsernames = mentions?.map(m => m.mentioned_user?.username).filter(Boolean) || [];
-  
+  const mentionUsernames =
+    mentions?.map((m) => m.mentioned_user?.username).filter(Boolean) || [];
+
   if (mentionUsernames.length === 0) {
-    // Fallback: match @word pattern
-    const regex = /@[\w]+/g;
+    // Fallback: match @username pattern
+    // Supports unicode, spaces (ended by double space or another @)
+    const regex = /@([\w\u00C0-\u024F][\w\u00C0-\u024F\s.]*?)(?=\s{2}|@|$)/g;
     const parts = [];
     let lastIndex = 0;
     let match;
@@ -113,10 +143,16 @@ const processTextWithMentions = (text, mentions) => {
       if (match.index > lastIndex) {
         parts.push(text.slice(lastIndex, match.index));
       }
+      // Trim trailing space from captured username
+      const capturedMention = match[0].trimEnd();
       parts.push(
-        <MentionTag key={match.index} username={match[0]} mentions={mentions} />
+        <MentionTag
+          key={match.index}
+          username={capturedMention}
+          mentions={mentions}
+        />
       );
-      lastIndex = match.index + match[0].length;
+      lastIndex = match.index + capturedMention.length;
     }
 
     if (lastIndex < text.length) {
@@ -127,14 +163,16 @@ const processTextWithMentions = (text, mentions) => {
   }
 
   // Sort by length descending to match longer usernames first
-  const sortedUsernames = [...mentionUsernames].sort((a, b) => b.length - a.length);
-  
-  // Create pattern to match known usernames
-  const escapedUsernames = sortedUsernames.map(u => 
-    u.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const sortedUsernames = [...mentionUsernames].sort(
+    (a, b) => b.length - a.length
   );
-  const pattern = new RegExp(`@(${escapedUsernames.join('|')})`, 'gi');
-  
+
+  // Create pattern to match known usernames
+  const escapedUsernames = sortedUsernames.map((u) =>
+    u.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+  );
+  const pattern = new RegExp(`@(${escapedUsernames.join("|")})`, "gi");
+
   const parts = [];
   let lastIndex = 0;
   let match;
@@ -173,7 +211,9 @@ const createMarkdownComponents = (mentions) => ({
         : children}
     </span>
   ),
-  strong: ({ children }) => <strong style={{ fontWeight: 600 }}>{children}</strong>,
+  strong: ({ children }) => (
+    <strong style={{ fontWeight: 600 }}>{children}</strong>
+  ),
   em: ({ children }) => <em>{children}</em>,
   code: ({ children }) => (
     <code
@@ -199,10 +239,14 @@ const createMarkdownComponents = (mentions) => ({
     </a>
   ),
   ul: ({ children }) => (
-    <ul style={{ margin: "2px 0", paddingLeft: 16, fontSize: 12 }}>{children}</ul>
+    <ul style={{ margin: "2px 0", paddingLeft: 16, fontSize: 12 }}>
+      {children}
+    </ul>
   ),
   ol: ({ children }) => (
-    <ol style={{ margin: "2px 0", paddingLeft: 16, fontSize: 12 }}>{children}</ol>
+    <ol style={{ margin: "2px 0", paddingLeft: 16, fontSize: 12 }}>
+      {children}
+    </ol>
   ),
   li: ({ children }) => <li style={{ margin: 0 }}>{children}</li>,
   blockquote: ({ children }) => (
@@ -382,7 +426,9 @@ const ThreadDrawer = ({ open, onClose, parentMessage, channelId }) => {
       title={
         <Group gap={6}>
           <IconMessage size={16} />
-          <span style={{ fontSize: 13 }}>Thread ({replies.length} balasan)</span>
+          <span style={{ fontSize: 13 }}>
+            Thread ({replies.length} balasan)
+          </span>
         </Group>
       }
       open={open}
@@ -392,15 +438,28 @@ const ThreadDrawer = ({ open, onClose, parentMessage, channelId }) => {
     >
       {/* Original message */}
       {parentMessage && (
-        <Paper withBorder p="xs" mb="md" radius="sm" style={{ backgroundColor: "#fafafa" }}>
+        <Paper
+          withBorder
+          p="xs"
+          mb="md"
+          radius="sm"
+          style={{ backgroundColor: "#fafafa" }}
+        >
           <Group gap={6} mb={4}>
             <Avatar src={parentMessage.user?.image} size={24} radius="sm">
               {parentMessage.user?.username?.[0]?.toUpperCase()}
             </Avatar>
-            <Text size="xs" fw={600}>{parentMessage.user?.username}</Text>
-            <Text size={10} c="dimmed">{dayjs(parentMessage.created_at).format("DD/MM HH:mm")}</Text>
+            <Text size="xs" fw={600}>
+              {parentMessage.user?.username}
+            </Text>
+            <Text size={10} c="dimmed">
+              {dayjs(parentMessage.created_at).format("DD/MM HH:mm")}
+            </Text>
           </Group>
-          <MessageContent content={parentMessage.content} mentions={parentMessage.mentions} />
+          <MessageContent
+            content={parentMessage.content}
+            mentions={parentMessage.mentions}
+          />
         </Paper>
       )}
 
@@ -408,19 +467,33 @@ const ThreadDrawer = ({ open, onClose, parentMessage, channelId }) => {
       {isLoading ? (
         <Skeleton active paragraph={{ rows: 3 }} />
       ) : replies.length === 0 ? (
-        <Empty description="Belum ada balasan" image={Empty.PRESENTED_IMAGE_SIMPLE} />
+        <Empty
+          description="Belum ada balasan"
+          image={Empty.PRESENTED_IMAGE_SIMPLE}
+        />
       ) : (
         <Stack gap={8}>
           {replies.map((reply) => (
-            <Box key={reply.id} pl={8} style={{ borderLeft: "2px solid #1264a3" }}>
+            <Box
+              key={reply.id}
+              pl={8}
+              style={{ borderLeft: "2px solid #1264a3" }}
+            >
               <Group gap={6} mb={2}>
                 <Avatar src={reply.user?.image} size={20} radius="sm">
                   {reply.user?.username?.[0]?.toUpperCase()}
                 </Avatar>
-                <Text size={11} fw={600}>{reply.user?.username}</Text>
-                <Text size={10} c="dimmed">{dayjs(reply.created_at).format("HH:mm")}</Text>
+                <Text size={11} fw={600}>
+                  {reply.user?.username}
+                </Text>
+                <Text size={10} c="dimmed">
+                  {dayjs(reply.created_at).format("HH:mm")}
+                </Text>
               </Group>
-              <MessageContent content={reply.content} mentions={reply.mentions} />
+              <MessageContent
+                content={reply.content}
+                mentions={reply.mentions}
+              />
             </Box>
           ))}
         </Stack>
@@ -430,7 +503,15 @@ const ThreadDrawer = ({ open, onClose, parentMessage, channelId }) => {
 };
 
 // Single message item
-const MessageItem = ({ message, channelId, onEdit, onDelete, onReply, onViewThread }) => {
+const MessageItem = ({
+  message,
+  channelId,
+  onEdit,
+  onDelete,
+  onReply,
+  onViewThread,
+  isHighlighted,
+}) => {
   const [hovered, setHovered] = useState(false);
   const toggleReaction = useToggleReaction();
   const togglePin = useTogglePinMessage();
@@ -442,6 +523,10 @@ const MessageItem = ({ message, channelId, onEdit, onDelete, onReply, onViewThre
   const handlePin = () => {
     togglePin.mutate({ channelId, messageId: message.id });
   };
+
+  // Use can_edit/can_delete if available, fallback to is_own for backwards compatibility
+  const canEdit = message.can_edit ?? message.is_own;
+  const canDelete = message.can_delete ?? message.is_own;
 
   const menuItems = [
     { key: "reply", icon: <IconMessageReply size={12} />, label: "Balas" },
@@ -455,14 +540,14 @@ const MessageItem = ({ message, channelId, onEdit, onDelete, onReply, onViewThre
       key: "edit",
       icon: <IconEdit size={12} />,
       label: "Edit",
-      disabled: !message.is_own,
+      disabled: !canEdit,
     },
     {
       key: "delete",
       icon: <IconTrash size={12} />,
       label: "Hapus",
       danger: true,
-      disabled: !message.is_own,
+      disabled: !canDelete,
     },
   ];
 
@@ -491,14 +576,22 @@ const MessageItem = ({ message, channelId, onEdit, onDelete, onReply, onViewThre
 
   return (
     <Box
+      id={`message-${message.id}`}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       px="sm"
       py={3}
       style={{
         position: "relative",
-        backgroundColor: hovered ? "#f8f8f8" : "transparent",
-        transition: "background-color 0.1s",
+        backgroundColor: isHighlighted
+          ? "#fff7e6"
+          : hovered
+          ? "#f8f8f8"
+          : "transparent",
+        transition: "background-color 0.3s",
+        borderLeft: isHighlighted
+          ? "3px solid #faad14"
+          : "3px solid transparent",
       }}
     >
       <Group align="flex-start" gap={8} wrap="nowrap">
@@ -515,12 +608,16 @@ const MessageItem = ({ message, channelId, onEdit, onDelete, onReply, onViewThre
               {dayjs(message.created_at).format("HH:mm")}
             </Text>
             {message.is_edited && (
-              <Text size={10} c="dimmed">(diedit)</Text>
+              <Text size={10} c="dimmed">
+                (diedit)
+              </Text>
             )}
             {message.is_pinned && (
               <Group gap={2}>
                 <IconPin size={10} color="#e8912d" />
-                <Text size={10} c="orange">pinned</Text>
+                <Text size={10} c="orange">
+                  pinned
+                </Text>
               </Group>
             )}
           </Group>
@@ -551,7 +648,10 @@ const MessageItem = ({ message, channelId, onEdit, onDelete, onReply, onViewThre
             </Box>
           )}
 
-          <MessageContent content={message.content} mentions={message.mentions} />
+          <MessageContent
+            content={message.content}
+            mentions={message.mentions}
+          />
 
           {message.attachments?.map((att) => (
             <AttachmentPreview key={att.id} attachment={att} />
@@ -569,10 +669,17 @@ const MessageItem = ({ message, channelId, onEdit, onDelete, onReply, onViewThre
               <Group gap={6}>
                 <IconSubtask size={14} color="#16a34a" />
                 <Box>
-                  <Text size={10} c="dimmed">Terkait dengan task Kanban:</Text>
+                  <Text size={10} c="dimmed">
+                    Terkait dengan task Kanban:
+                  </Text>
                   <a
                     href={`/kanban?task=${message.linked_task.id}`}
-                    style={{ color: "#16a34a", fontWeight: 600, fontSize: 12, textDecoration: "none" }}
+                    style={{
+                      color: "#16a34a",
+                      fontWeight: 600,
+                      fontSize: 12,
+                      textDecoration: "none",
+                    }}
                   >
                     {message.linked_task.title}
                   </a>
@@ -593,10 +700,17 @@ const MessageItem = ({ message, channelId, onEdit, onDelete, onReply, onViewThre
               <Group gap={6}>
                 <IconMail size={14} color="#d97706" />
                 <Box>
-                  <Text size={10} c="dimmed">Terkait dengan email:</Text>
+                  <Text size={10} c="dimmed">
+                    Terkait dengan email:
+                  </Text>
                   <a
                     href={`/mails?email=${message.linked_email.id}`}
-                    style={{ color: "#d97706", fontWeight: 600, fontSize: 12, textDecoration: "none" }}
+                    style={{
+                      color: "#d97706",
+                      fontWeight: 600,
+                      fontSize: 12,
+                      textDecoration: "none",
+                    }}
                   >
                     {message.linked_email.subject}
                   </a>
@@ -669,32 +783,67 @@ const MessageItem = ({ message, channelId, onEdit, onDelete, onReply, onViewThre
   );
 };
 
-const MessageList = ({ channelId, onEdit, onDelete, onReply }) => {
+const MessageList = ({
+  channelId,
+  onEdit,
+  onDelete,
+  onReply,
+  scrollToMessageId,
+  onScrollComplete,
+}) => {
   const containerRef = useRef(null);
   const { data, isLoading } = useMessages(channelId, { page: 1, limit: 100 });
   const prevLengthRef = useRef(0);
-  
+  const [highlightedMessageId, setHighlightedMessageId] = useState(null);
+
   const [threadMessage, setThreadMessage] = useState(null);
 
   const messages = data?.results || [];
 
+  // Scroll to bottom on new messages
   useEffect(() => {
-    if (messages.length > prevLengthRef.current) {
+    if (messages.length > prevLengthRef.current && !scrollToMessageId) {
       containerRef.current?.scrollTo({
         top: containerRef.current.scrollHeight,
         behavior: prevLengthRef.current === 0 ? "auto" : "smooth",
       });
     }
     prevLengthRef.current = messages.length;
-  }, [messages.length]);
+  }, [messages.length, scrollToMessageId]);
 
-  if (isLoading) return <Skeleton active paragraph={{ rows: 6 }} style={{ padding: 12 }} />;
+  // Scroll to specific message
+  useEffect(() => {
+    if (scrollToMessageId && messages.length > 0) {
+      const messageElement = document.getElementById(
+        `message-${scrollToMessageId}`
+      );
+      if (messageElement) {
+        // Scroll to the message
+        messageElement.scrollIntoView({ behavior: "smooth", block: "center" });
+        // Highlight the message
+        setHighlightedMessageId(scrollToMessageId);
+        // Remove highlight after 3 seconds
+        setTimeout(() => {
+          setHighlightedMessageId(null);
+        }, 3000);
+        // Notify parent that scroll is complete
+        onScrollComplete?.();
+      }
+    }
+  }, [scrollToMessageId, messages.length, onScrollComplete]);
+
+  if (isLoading)
+    return <Skeleton active paragraph={{ rows: 6 }} style={{ padding: 12 }} />;
 
   if (!messages.length) {
     return (
       <Box ta="center" py={40}>
-        <Text c="dimmed" size="xs">Belum ada pesan di channel ini</Text>
-        <Text size={10} c="dimmed" mt={2}>Mulai percakapan dengan mengirim pesan pertama</Text>
+        <Text c="dimmed" size="xs">
+          Belum ada pesan di channel ini
+        </Text>
+        <Text size={10} c="dimmed" mt={2}>
+          Mulai percakapan dengan mengirim pesan pertama
+        </Text>
       </Box>
     );
   }
@@ -719,6 +868,7 @@ const MessageList = ({ channelId, onEdit, onDelete, onReply }) => {
               onDelete={onDelete}
               onReply={onReply}
               onViewThread={setThreadMessage}
+              isHighlighted={highlightedMessageId === msg.id}
             />
           ))}
         </Stack>

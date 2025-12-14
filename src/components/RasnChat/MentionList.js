@@ -1,7 +1,8 @@
 import { useMyMentions, useMarkMentionAsRead } from "@/hooks/useRasnChat";
-import { Skeleton } from "antd";
+import { Skeleton, Segmented } from "antd";
 import { Stack, Text, Group, Avatar, Paper, Badge, Box } from "@mantine/core";
 import { useRouter } from "next/router";
+import { useState } from "react";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import "dayjs/locale/id";
@@ -11,57 +12,77 @@ dayjs.locale("id");
 
 const MentionList = () => {
   const router = useRouter();
-  const { data, isLoading } = useMyMentions({ page: 1, limit: 50 });
+  const [filter, setFilter] = useState("all");
+  const { data, isLoading } = useMyMentions({ page: 1, limit: 50, filter });
   const markAsRead = useMarkMentionAsRead();
 
   const mentions = data?.results || [];
 
   const handleClick = async (mention) => {
-    if (!mention.is_read) await markAsRead.mutateAsync(mention.id);
-    router.push(`/rasn-chat/${mention.message?.channel_id}`);
+    // Mark as read if unread
+    if (!mention.is_read) {
+      markAsRead.mutate(mention.id);
+    }
+    // Navigate to channel with messageId for scrolling
+    router.push(`/rasn-chat/${mention.message?.channel_id}?scrollTo=${mention.message_id}`);
   };
 
   if (isLoading) return <Skeleton active paragraph={{ rows: 4 }} />;
-  
-  if (!mentions.length) {
-    return (
-      <Box ta="center" py="xl">
-        <Text c="dimmed">Tidak ada mention</Text>
-        <Text size="xs" c="dimmed">Anda akan melihat notifikasi ketika seseorang @mention Anda</Text>
-      </Box>
-    );
-  }
 
   return (
-    <Stack gap="xs">
-      {mentions.map((mention) => (
-        <Paper
-          key={mention.id}
-          p="sm"
-          withBorder
-          onClick={() => handleClick(mention)}
-          style={{
-            cursor: "pointer",
-            backgroundColor: mention.is_read ? "transparent" : "#f6ffed",
-            borderLeft: mention.is_read ? undefined : "3px solid #52c41a",
-          }}
-        >
-          <Group align="flex-start" gap="sm">
-            <Avatar src={mention.message?.user?.image} size="sm" radius="xl">
-              {mention.message?.user?.username?.[0]?.toUpperCase()}
-            </Avatar>
-            <Box style={{ flex: 1, minWidth: 0 }}>
-              <Group gap="xs">
-                <Text size="xs" fw={600}>{mention.message?.user?.username}</Text>
-                <Text size="xs" c="dimmed">di #{mention.message?.channel?.name}</Text>
-              </Group>
-              <Text size="sm" lineClamp={2} mt={2}>{mention.message?.content}</Text>
-              <Text size="xs" c="dimmed" mt={4}>{dayjs(mention.created_at).fromNow()}</Text>
-            </Box>
-            {!mention.is_read && <Badge size="xs" color="green">Baru</Badge>}
-          </Group>
-        </Paper>
-      ))}
+    <Stack gap="sm">
+      {/* Filter tabs */}
+      <Segmented
+        value={filter}
+        onChange={setFilter}
+        options={[
+          { value: "all", label: "Semua" },
+          { value: "unread", label: "Belum Dibaca" },
+          { value: "read", label: "Sudah Dibaca" },
+        ]}
+        size="small"
+      />
+
+      {!mentions.length ? (
+        <Box ta="center" py="xl">
+          <Text c="dimmed">Tidak ada mention</Text>
+          <Text size="xs" c="dimmed">
+            {filter === "unread"
+              ? "Semua mention sudah dibaca"
+              : "Anda akan melihat notifikasi ketika seseorang @mention Anda"}
+          </Text>
+        </Box>
+      ) : (
+        mentions.map((mention) => (
+          <Paper
+            key={mention.id}
+            p="sm"
+            withBorder
+            onClick={() => handleClick(mention)}
+            style={{
+              cursor: "pointer",
+              backgroundColor: mention.is_read ? "transparent" : "#f6ffed",
+              borderLeft: mention.is_read ? "3px solid transparent" : "3px solid #52c41a",
+              transition: "all 0.2s ease",
+            }}
+          >
+            <Group align="flex-start" gap="sm">
+              <Avatar src={mention.message?.user?.image} size="sm" radius="xl">
+                {mention.message?.user?.username?.[0]?.toUpperCase()}
+              </Avatar>
+              <Box style={{ flex: 1, minWidth: 0 }}>
+                <Group gap="xs">
+                  <Text size="xs" fw={600}>{mention.message?.user?.username}</Text>
+                  <Text size="xs" c="dimmed">di #{mention.message?.channel?.name}</Text>
+                </Group>
+                <Text size="sm" lineClamp={2} mt={2}>{mention.message?.content}</Text>
+                <Text size="xs" c="dimmed" mt={4}>{dayjs(mention.created_at).fromNow()}</Text>
+              </Box>
+              {!mention.is_read && <Badge size="xs" color="green">Baru</Badge>}
+            </Group>
+          </Paper>
+        ))
+      )}
     </Stack>
   );
 };
