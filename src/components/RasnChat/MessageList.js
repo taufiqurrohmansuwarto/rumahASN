@@ -1,46 +1,39 @@
 import {
   useMessages,
-  useToggleReaction,
-  useTogglePinMessage,
   useThreadMessages,
+  useTogglePinMessage,
+  useToggleReaction,
 } from "@/hooks/useRasnChat";
 import {
-  Skeleton,
-  Dropdown,
-  Popover,
-  Avatar as AntAvatar,
-  Drawer,
-  Empty,
-} from "antd";
-import {
-  Stack,
-  Text,
-  Group,
+  ActionIcon,
   Avatar,
   Box,
-  ActionIcon,
+  Group,
   Paper,
+  Stack,
+  Text,
 } from "@mantine/core";
 import {
   IconDotsVertical,
-  IconPin,
   IconEdit,
-  IconTrash,
-  IconMessageReply,
-  IconMoodSmile,
   IconFile,
-  IconMicrophone,
-  IconMessage,
-  IconSubtask,
   IconMail,
+  IconMessage,
+  IconMessageReply,
+  IconMicrophone,
+  IconMoodSmile,
+  IconPin,
+  IconSubtask,
+  IconTrash,
 } from "@tabler/icons-react";
-import { useEffect, useRef, useState } from "react";
+import { Drawer, Dropdown, Empty, Popover, Skeleton } from "antd";
 import dayjs from "dayjs";
-import relativeTime from "dayjs/plugin/relativeTime";
 import "dayjs/locale/id";
+import relativeTime from "dayjs/plugin/relativeTime";
+import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 import remarkBreaks from "remark-breaks";
+import remarkGfm from "remark-gfm";
 
 dayjs.extend(relativeTime);
 dayjs.locale("id");
