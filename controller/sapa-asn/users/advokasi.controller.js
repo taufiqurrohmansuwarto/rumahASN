@@ -218,7 +218,7 @@ const create = async (req, res) => {
           tanggal_konsultasi: tanggal,
           waktu_mulai: "10:00",
           waktu_selesai: "12:00",
-          kuota_maksimal: 10,
+          kuota_maksimal: 3,
           kuota_terisi: 0,
           status: "active",
         });
@@ -374,7 +374,7 @@ const getJadwal = async (req, res) => {
         (j) => dayjs(j.tanggal_konsultasi).format("YYYY-MM-DD") === dateStr
       );
 
-      const kuotaMaksimal = existing?.kuota_maksimal || 10; // Default 10 slot per sesi
+      const kuotaMaksimal = existing?.kuota_maksimal || 3; // Default 3 slot per sesi
       // Count from actual bookings, not kuota_terisi
       const bookedCount = existing ? bookingMap[existing.id] || 0 : 0;
       const sisaKuota = kuotaMaksimal - bookedCount;

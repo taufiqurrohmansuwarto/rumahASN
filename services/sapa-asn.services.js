@@ -446,6 +446,16 @@ export const exportAdminPendampinganHukum = async (params = {}) => {
   });
 };
 
+/**
+ * Download pendampingan hukum summary as PDF or ZIP (if has attachments)
+ * @param {String} id - Pendampingan ID
+ */
+export const downloadAdminPendampinganHukum = async (id) => {
+  return api.get(`/admin/pendampingan-hukum/${id}/download`, {
+    responseType: "blob",
+  });
+};
+
 // ==========================================
 // USERS - PROFILE
 // ==========================================

@@ -32,6 +32,7 @@ import {
   Modal,
   Radio,
   Result,
+  Select,
   Skeleton,
   Space,
   Steps,
@@ -233,26 +234,25 @@ const FormAdvokasi = ({
 
           {/* Kategori Isu Hukum */}
           <div>
-            <Text size="xs" c="dimmed" mb={8}>Kategori isu hukum:</Text>
+            <Text size="xs" c="dimmed" mb={4}>Kategori isu hukum:</Text>
             <Form.Item
               name="kategori"
-              rules={[{ required: true, message: "Pilih minimal satu kategori" }]}
+              rules={[{ required: true, message: "Pilih kategori isu hukum" }]}
               style={{ marginBottom: 0 }}
             >
-              <Checkbox.Group>
-                <Stack gap={6}>
-                  {kategoriOptions.map((opt) => (
-                    <Checkbox key={opt.value} value={opt.value}>
-                      <Text size="xs">{opt.label}</Text>
-                    </Checkbox>
-                  ))}
-                </Stack>
-              </Checkbox.Group>
+              <Select
+                size="small"
+                placeholder="Pilih kategori isu hukum"
+                options={kategoriOptions}
+                style={{ width: "100%" }}
+                showSearch
+                optionFilterProp="label"
+              />
             </Form.Item>
           </div>
 
           {/* Input Lainnya */}
-          {kategori?.includes("lainnya") && (
+          {kategori === "lainnya" && (
             <div style={{ marginTop: 8, marginLeft: 24 }}>
               <Form.Item
                 name="kategoriLainnya"
@@ -401,12 +401,10 @@ const FormAdvokasi = ({
     />
   );
 
-  const getKategoriLabel = (values) => {
-    if (!values) return "-";
-    return values.map(v => {
-      if (v === "lainnya") return formValues?.kategoriLainnya || "Lainnya";
-      return kategoriOptions.find(k => k.value === v)?.label;
-    }).join(", ");
+  const getKategoriLabel = (value) => {
+    if (!value) return "-";
+    if (value === "lainnya") return formValues?.kategoriLainnya || "Lainnya";
+    return kategoriOptions.find(k => k.value === value)?.label || value;
   };
 
   const getJadwalLabel = (value) => {

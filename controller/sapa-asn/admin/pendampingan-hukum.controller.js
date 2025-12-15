@@ -2,10 +2,234 @@ const Pendampingan = require("@/models/sapa-asn/sapa-asn.pendampingan.model");
 const Notifikasi = require("@/models/sapa-asn/sapa-asn.notifikasi.model");
 const { handleError } = require("@/utils/helper/controller-helper");
 const ExcelJS = require("exceljs");
+const archiver = require("archiver");
+const { PDFDocument, StandardFonts, rgb } = require("pdf-lib");
+const {
+  downloadFileAsBuffer,
+  parseMinioUrl,
+} = require("@/utils/helper/minio-helper");
 
 const dayjs = require("dayjs");
 require("dayjs/locale/id");
 dayjs.locale("id");
+
+// Helper function to parse JSON fields
+const parseJsonField = (field) => {
+  if (!field) return [];
+  if (typeof field === "string") {
+    try {
+      return JSON.parse(field);
+    } catch {
+      return [];
+    }
+  }
+  return field;
+};
+
+// Helper function to wrap text for PDF
+const wrapText = (text, maxWidth, font, fontSize) => {
+  if (!text) return ["-"];
+  
+  const textStr = String(text);
+  const lines = [];
+  
+  // Split by newlines first
+  const paragraphs = textStr.split(/\r?\n/);
+  
+  for (const paragraph of paragraphs) {
+    if (!paragraph.trim()) {
+      lines.push(""); // Preserve empty lines
+      continue;
+    }
+    
+    const words = paragraph.split(" ");
+    let currentLine = "";
+
+    for (const word of words) {
+      if (!word) continue;
+      
+      const testLine = currentLine ? `${currentLine} ${word}` : word;
+      const testWidth = font.widthOfTextAtSize(testLine, fontSize);
+
+      if (testWidth <= maxWidth) {
+        currentLine = testLine;
+      } else {
+        if (currentLine) {
+          lines.push(currentLine);
+          currentLine = word;
+        } else {
+          // Word is too long, force add (truncate if necessary)
+          lines.push(word);
+          currentLine = "";
+        }
+      }
+    }
+
+    if (currentLine) {
+      lines.push(currentLine);
+    }
+  }
+
+  return lines.length > 0 ? lines : ["-"];
+};
+
+// Generate PDF summary using pdf-lib
+const generatePdfSummary = async (pendampingan, jenisPerkara, bentukPendampingan, lampiran) => {
+  const pdfDoc = await PDFDocument.create();
+  let page = pdfDoc.addPage([595.28, 841.89]); // A4 size
+  const { width, height } = page.getSize();
+
+  const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+  const fontRegular = await pdfDoc.embedFont(StandardFonts.Helvetica);
+
+  const margin = 50;
+  const contentWidth = width - margin * 2;
+  const labelWidth = 130;
+  const valueStartX = margin + labelWidth + 15;
+  const valueMaxWidth = contentWidth - labelWidth - 25;
+  const lineHeight = 14;
+  let yPosition = height - margin;
+
+  // Colors
+  const black = rgb(0, 0, 0);
+  const gray = rgb(0.3, 0.3, 0.3);
+  const lightGray = rgb(0.9, 0.9, 0.9);
+
+  // Helper function to check if need new page
+  const checkNewPage = (requiredSpace) => {
+    if (yPosition - requiredSpace < margin + 30) {
+      page = pdfDoc.addPage([595.28, 841.89]);
+      yPosition = height - margin;
+      return true;
+    }
+    return false;
+  };
+
+  // Helper function to draw text
+  const drawText = (text, x, y, options = {}) => {
+    const { font = fontRegular, size = 10, color = black } = options;
+    page.drawText(String(text || ""), { x, y, size, font, color });
+  };
+
+  // Helper function to draw section title
+  const drawSectionTitle = (title, y) => {
+    checkNewPage(50);
+    page.drawRectangle({
+      x: margin,
+      y: y - 5,
+      width: contentWidth,
+      height: 20,
+      color: lightGray,
+    });
+    drawText(title, margin + 5, y, { font: fontBold, size: 11 });
+    return y - 30;
+  };
+
+  // Helper function to draw info row with text wrapping
+  const drawInfoRow = (label, value, y) => {
+    const valueText = String(value || "-");
+    const valueLines = wrapText(valueText, valueMaxWidth, fontRegular, 10);
+    const rowHeight = Math.max(valueLines.length * lineHeight, lineHeight);
+    
+    checkNewPage(rowHeight + 5);
+    
+    // Draw label
+    drawText(label, margin + 10, y, { size: 10 });
+    drawText(":", margin + labelWidth, y, { size: 10 });
+    
+    // Draw value lines
+    for (let i = 0; i < valueLines.length; i++) {
+      drawText(valueLines[i], valueStartX, y - (i * lineHeight), { size: 10 });
+    }
+    
+    return y - rowHeight - 4;
+  };
+
+  // Header
+  drawText("RINGKASAN PERMOHONAN PENDAMPINGAN HUKUM", width / 2 - 170, yPosition, { font: fontBold, size: 14 });
+  yPosition -= 20;
+  drawText(`ID: ${pendampingan.id}`, width / 2 - 40, yPosition, { size: 11, color: gray });
+  yPosition -= 10;
+
+  // Line separator
+  page.drawLine({
+    start: { x: margin, y: yPosition },
+    end: { x: width - margin, y: yPosition },
+    thickness: 1.5,
+    color: black,
+  });
+  yPosition -= 30;
+
+  // Section A: Informasi Pemohon
+  yPosition = drawSectionTitle("A. INFORMASI PEMOHON", yPosition);
+  yPosition = drawInfoRow("Nama", pendampingan.user?.username, yPosition);
+  yPosition = drawInfoRow("NIP", pendampingan.user?.employee_number, yPosition);
+  yPosition = drawInfoRow("Jabatan", pendampingan.user?.nama_jabatan, yPosition);
+  yPosition = drawInfoRow("Perangkat Daerah", pendampingan.user?.perangkat_daerah_detail, yPosition);
+  yPosition = drawInfoRow("No. HP", pendampingan.no_hp_user, yPosition);
+  yPosition = drawInfoRow("Email", pendampingan.email_user, yPosition);
+  yPosition -= 10;
+
+  // Section B: Detail Perkara
+  yPosition = drawSectionTitle("B. DETAIL PERKARA", yPosition);
+  yPosition = drawInfoRow("No. Perkara", pendampingan.no_perkara, yPosition);
+  yPosition = drawInfoRow("Jenis Perkara", jenisPerkara.length > 0 ? jenisPerkara.join(", ") : "-", yPosition);
+  yPosition = drawInfoRow("Tempat Pengadilan", pendampingan.tempat_pengadilan, yPosition);
+  yPosition = drawInfoRow("Jadwal Sidang", pendampingan.jadwal_pengadilan ? dayjs(pendampingan.jadwal_pengadilan).format("DD MMMM YYYY, HH:mm") : "-", yPosition);
+  yPosition = drawInfoRow("Bentuk Pendampingan", bentukPendampingan.length > 0 ? bentukPendampingan.join(", ") : "-", yPosition);
+  yPosition = drawInfoRow("Status", pendampingan.status, yPosition);
+  yPosition = drawInfoRow("Tanggal Pengajuan", dayjs(pendampingan.created_at).format("DD MMMM YYYY, HH:mm"), yPosition);
+  yPosition -= 10;
+
+  // Section C: Ringkasan Pokok Perkara
+  yPosition = drawSectionTitle("C. RINGKASAN POKOK PERKARA", yPosition);
+
+  // Draw ringkasan with word wrap
+  const ringkasanText = pendampingan.ringkasan_perkara || "-";
+  const ringkasanLines = wrapText(ringkasanText, contentWidth - 20, fontRegular, 10);
+
+  // Calculate height needed
+  const ringkasanHeight = Math.max(ringkasanLines.length * lineHeight + 20, 50);
+  checkNewPage(ringkasanHeight + 20);
+
+  // Background for ringkasan
+  page.drawRectangle({
+    x: margin,
+    y: yPosition - ringkasanHeight + 15,
+    width: contentWidth,
+    height: ringkasanHeight,
+    color: rgb(0.98, 0.98, 0.98),
+    borderColor: rgb(0.85, 0.85, 0.85),
+    borderWidth: 0.5,
+  });
+
+  for (let i = 0; i < ringkasanLines.length; i++) {
+    drawText(ringkasanLines[i], margin + 10, yPosition - (i * lineHeight), { size: 10 });
+  }
+  yPosition -= ringkasanHeight + 10;
+
+  // Section D: Daftar Lampiran (if any)
+  if (lampiran.length > 0) {
+    yPosition = drawSectionTitle("D. DAFTAR LAMPIRAN", yPosition);
+    for (let i = 0; i < lampiran.length; i++) {
+      checkNewPage(20);
+      // Wrap long filenames
+      const filenameLines = wrapText(`${i + 1}. ${lampiran[i].name}`, contentWidth - 20, fontRegular, 10);
+      for (let j = 0; j < filenameLines.length; j++) {
+        drawText(filenameLines[j], margin + 10, yPosition - (j * lineHeight), { size: 10 });
+      }
+      yPosition -= filenameLines.length * lineHeight + 2;
+    }
+  }
+
+  // Footer on last page
+  const footerText = `Dicetak pada: ${dayjs().format("DD MMMM YYYY, HH:mm")}`;
+  drawText(footerText, width - margin - fontRegular.widthOfTextAtSize(footerText, 9), margin, { size: 9, color: gray });
+
+  // Save and convert Uint8Array to Buffer
+  const pdfBytes = await pdfDoc.save();
+  return Buffer.from(pdfBytes);
+};
 
 // Get all pendampingan hukum (admin)
 const getAll = async (req, res) => {
@@ -246,9 +470,109 @@ const updateStatus = async (req, res) => {
   }
 };
 
+// Download pendampingan as PDF or ZIP (if has attachments)
+const downloadPendampingan = async (req, res) => {
+  try {
+    const { id } = req?.query;
+    const mc = req?.mc;
+
+    const pendampingan = await Pendampingan.query()
+      .findById(id)
+      .withGraphFetched("[user(simpleWithImage)]");
+
+    if (!pendampingan) {
+      return res.status(404).json({ message: "Data tidak ditemukan" });
+    }
+
+    const jenisPerkara = parseJsonField(pendampingan.jenis_perkara);
+    const bentukPendampingan = parseJsonField(pendampingan.bentuk_pendampingan);
+    const lampiran = parseJsonField(pendampingan.lampiran_dokumen);
+
+    // Generate PDF using pdf-lib
+    const pdfBuffer = await generatePdfSummary(
+      pendampingan,
+      jenisPerkara,
+      bentukPendampingan,
+      lampiran
+    );
+
+    // If no attachments, return PDF directly
+    if (lampiran.length === 0) {
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader("Content-Length", pdfBuffer.length);
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename="ringkasan-${pendampingan.id}.pdf"`
+      );
+      return res.end(pdfBuffer);
+    }
+
+    // If has attachments, create ZIP
+    const archive = archiver("zip", { zlib: { level: 9 } });
+
+    res.setHeader("Content-Type", "application/zip");
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="pendampingan-${pendampingan.id}.zip"`
+    );
+
+    archive.on("warning", (err) => console.warn("Archive warning:", err));
+    archive.on("error", (err) => {
+      console.error("Archive error:", err);
+      res.status(500).send({ error: err.message });
+    });
+
+    archive.pipe(res);
+
+    // Add PDF to archive (ensure it's a Buffer)
+    archive.append(Buffer.from(pdfBuffer), { name: `ringkasan-${pendampingan.id}.pdf` });
+
+    // Add attachment files to archive
+    for (const file of lampiran) {
+      try {
+        console.log(`[Download] Processing attachment: ${file.name}`);
+        console.log(`[Download] File URL: ${file.url}`);
+        console.log(`[Download] File path: ${file.path}`);
+
+        // Try using file.path first (direct path), fallback to URL parsing
+        let bucket = "public";
+        let filePath = file.path;
+
+        if (!filePath && file.url) {
+          const urlInfo = parseMinioUrl(file.url);
+          if (urlInfo) {
+            bucket = urlInfo.bucket;
+            filePath = urlInfo.filename;
+          }
+        }
+
+        if (filePath) {
+          console.log(`[Download] Downloading from bucket: ${bucket}, path: ${filePath}`);
+          const fileBuffer = await downloadFileAsBuffer(mc, bucket, filePath);
+          console.log(`[Download] Downloaded ${file.name}, size: ${fileBuffer.length} bytes`);
+          archive.append(fileBuffer, { name: `lampiran/${file.name}` });
+          console.log(`[Download] Added ${file.name} to archive`);
+        } else {
+          console.error(`[Download] No valid path found for: ${file.name}`);
+        }
+      } catch (err) {
+        console.error(`[Download] Failed to download attachment: ${file.name}`, err.message || err);
+        // Continue with other files
+      }
+    }
+
+    console.log(`[Download] Finalizing archive...`);
+    await archive.finalize();
+    console.log(`[Download] Archive finalized`);
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
 module.exports = {
   getAll,
   getById,
   updateStatus,
+  downloadPendampingan,
 };
 

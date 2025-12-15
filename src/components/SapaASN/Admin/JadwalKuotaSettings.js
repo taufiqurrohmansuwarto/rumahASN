@@ -17,7 +17,7 @@ import {
 const JadwalKuotaSettings = () => {
   const queryClient = useQueryClient();
   const [editModal, setEditModal] = useState({ open: false, jadwal: null });
-  const [newKuota, setNewKuota] = useState(10);
+  const [newKuota, setNewKuota] = useState(3);
 
   // Get jadwal list
   const { data: jadwalList, isLoading } = useQuery({
@@ -39,7 +39,7 @@ const JadwalKuotaSettings = () => {
   });
 
   const handleEditKuota = (jadwal) => {
-    setNewKuota(jadwal.kuota_maksimal || 10);
+    setNewKuota(jadwal.kuota_maksimal || 3);
     setEditModal({ open: true, jadwal });
   };
 
@@ -77,7 +77,7 @@ const JadwalKuotaSettings = () => {
         const terisi = record.advokasi_list?.filter(
           (a) => !["Cancelled", "Ditolak", "Rejected"].includes(a.status)
         ).length || 0;
-        const maksimal = record.kuota_maksimal || 10;
+        const maksimal = record.kuota_maksimal || 3;
         const tersedia = Math.max(0, maksimal - terisi);
         const isPenuh = tersedia === 0;
         
@@ -113,7 +113,7 @@ const JadwalKuotaSettings = () => {
         const terisi = record.advokasi_list?.filter(
           (a) => !["Cancelled", "Ditolak", "Rejected"].includes(a.status)
         ).length || 0;
-        const maksimal = record.kuota_maksimal || 10;
+        const maksimal = record.kuota_maksimal || 3;
         const isPenuh = terisi >= maksimal;
         
         if (isPenuh) {

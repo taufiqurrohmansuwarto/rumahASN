@@ -55,7 +55,7 @@ const CreatePendampinganHukum = () => {
     if (values.noPerkara) {
       formData.append("no_perkara", values.noPerkara);
     }
-    formData.append("jenis_perkara", JSON.stringify(values.jenisPerkara || []));
+    formData.append("jenis_perkara", JSON.stringify(values.jenisPerkara ? [values.jenisPerkara] : []));
     if (values.jenisPerkaraLainnya) {
       formData.append("jenis_perkara_lainnya", values.jenisPerkaraLainnya);
     }

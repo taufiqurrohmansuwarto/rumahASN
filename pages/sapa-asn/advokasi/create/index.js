@@ -61,7 +61,7 @@ const CreateAdvokasi = () => {
     const payload = {
       no_hp: values.noHp,
       email: values.email,
-      kategori_isu: values.kategori || [],
+      kategori_isu: values.kategori ? [values.kategori] : [],
       kategori_lainnya: values.kategoriLainnya || null,
       sensitif: values.sensitif === "ya",
       poin_konsultasi: values.poinKonsultasi || null,
