@@ -7,7 +7,10 @@ const { PDFDocument, StandardFonts, rgb } = require("pdf-lib");
 const {
   downloadFileAsBuffer,
   parseMinioUrl,
+  uploadFilePublic,
+  generatePublicUrl,
 } = require("@/utils/helper/minio-helper");
+const { nanoid } = require("nanoid");
 
 const dayjs = require("dayjs");
 require("dayjs/locale/id");
@@ -405,6 +408,7 @@ const updateStatus = async (req, res) => {
   try {
     const { customId } = req?.user;
     const { id } = req?.query;
+    const mc = req?.mc;
     const { status, catatan, alasan_tolak } = req?.body;
 
     const pendampingan = await Pendampingan.query().findById(id);
@@ -424,6 +428,23 @@ const updateStatus = async (req, res) => {
 
     if (alasan_tolak) {
       updateData.alasan_tolak = alasan_tolak;
+    }
+
+    // Handle file upload for attachment_disposisi
+    if (req.file) {
+      const file = req.file;
+      const ext = file.originalname.split(".").pop();
+      const filename = `sapa-asn/pendampingan-hukum/disposisi/${id}-${nanoid(8)}.${ext}`;
+      
+      await uploadFilePublic(
+        mc,
+        file.buffer,
+        filename,
+        file.size,
+        file.mimetype
+      );
+      
+      updateData.attachment_disposisi = generatePublicUrl(filename);
     }
 
     await Pendampingan.query().findById(id).patch(updateData);
