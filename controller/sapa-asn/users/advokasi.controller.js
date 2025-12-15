@@ -116,20 +116,26 @@ const create = async (req, res) => {
       is_persetujuan,
     } = body;
 
-    // Check if user already registered this month
+    // Check if user already registered within the last 3 months
     const now = dayjs();
-    const startOfMonth = now.startOf("month").format("YYYY-MM-DD");
-    const endOfMonth = now.endOf("month").format("YYYY-MM-DD");
+    const threeMonthsAgo = now.subtract(3, "month").format("YYYY-MM-DD");
     const existingAdvokasi = await Advokasi.query()
       .where("user_id", customId)
-      .whereBetween("created_at", [startOfMonth, endOfMonth])
+      .where("created_at", ">=", threeMonthsAgo)
       .whereNot("status", "Cancelled")
+      .orderBy("created_at", "desc")
       .first();
 
     if (existingAdvokasi) {
+      const tanggalPengajuan = dayjs(existingAdvokasi.created_at);
+      const tanggalBolehAjukan = tanggalPengajuan.add(3, "month");
+      const sisaHari = tanggalBolehAjukan.diff(now, "day");
+      
       return res.status(400).json({
-        message: "Anda sudah terdaftar untuk sesi advokasi bulan ini",
+        message: `Anda baru dapat mengajukan kembali setelah ${tanggalBolehAjukan.format("D MMMM YYYY")} (${sisaHari} hari lagi)`,
         existing: existingAdvokasi,
+        tanggal_boleh_ajukan: tanggalBolehAjukan.format("YYYY-MM-DD"),
+        sisa_hari: sisaHari,
       });
     }
 
@@ -356,16 +362,25 @@ const getJadwal = async (req, res) => {
       return acc;
     }, {});
 
-    // Check if user already registered this month
-    const startOfMonth = now.startOf("month").format("YYYY-MM-DD");
-    const endOfMonth = now.endOf("month").format("YYYY-MM-DD");
-    const userAdvokasiBulanIni = await Advokasi.query()
+    // Check if user already registered within the last 3 months
+    const threeMonthsAgo = now.subtract(3, "month").format("YYYY-MM-DD");
+    const userAdvokasiTerakhir = await Advokasi.query()
       .where("user_id", customId)
-      .whereBetween("created_at", [startOfMonth, endOfMonth])
+      .where("created_at", ">=", threeMonthsAgo)
       .whereNot("status", "Cancelled")
+      .orderBy("created_at", "desc")
       .first();
 
-    const sudahDaftarBulanIni = !!userAdvokasiBulanIni;
+    const sudahDaftarDalam3Bulan = !!userAdvokasiTerakhir;
+    
+    // Calculate when user can submit again
+    let tanggalBolehAjukan = null;
+    let sisaHari = 0;
+    if (userAdvokasiTerakhir) {
+      const tanggalPengajuan = dayjs(userAdvokasiTerakhir.created_at);
+      tanggalBolehAjukan = tanggalPengajuan.add(3, "month");
+      sisaHari = tanggalBolehAjukan.diff(now, "day");
+    }
 
     // Build response with slot info
     const slots = availableThursdays.map((date) => {
@@ -424,14 +439,18 @@ const getJadwal = async (req, res) => {
     res.json({
       jadwal: grouped,
       info: {
-        sudah_daftar_bulan_ini: sudahDaftarBulanIni,
-        advokasi_bulan_ini: userAdvokasiBulanIni || null,
+        sudah_daftar_dalam_3_bulan: sudahDaftarDalam3Bulan,
+        advokasi_terakhir: userAdvokasiTerakhir || null,
+        tanggal_boleh_ajukan: tanggalBolehAjukan?.format("YYYY-MM-DD") || null,
+        tanggal_boleh_ajukan_formatted: tanggalBolehAjukan?.format("D MMMM YYYY") || null,
+        sisa_hari: sisaHari,
         ketentuan: {
           hari_sesi: "Kamis minggu ke-2 & ke-4",
           waktu_sesi: "10:00 - 12:00 WIB",
           durasi_per_sesi: "Maksimal 45 menit",
           batas_pendaftaran: "Selasa (H-2) pukul 16:00 WIB",
           tipe_sesi: "Daring (video conference) atau Luring",
+          batas_pengajuan_ulang: "3 bulan sejak pengajuan sebelumnya",
         },
       },
     });
