@@ -6,6 +6,7 @@ import {
   IconCategory,
   IconDownload,
   IconEdit,
+  IconFileUpload,
   IconFilter,
   IconHash,
   IconMail,
@@ -26,6 +27,7 @@ import {
   Select,
   Table,
   Tag,
+  Upload,
 } from "antd";
 import dayjs from "dayjs";
 import { useRouter } from "next/router";
@@ -110,7 +112,19 @@ const DetailModal = ({ open, onClose, data }) => {
   const lampiran = parseJsonField(data.lampiran_dokumen);
 
   const handleSubmit = (values) => {
-    updateStatus({ id: data.id, payload: values });
+    const { attachment_disposisi, ...rest } = values;
+    
+    // Check if there's a file attachment
+    if (attachment_disposisi?.fileList?.length > 0) {
+      const formData = new FormData();
+      formData.append("status", rest.status);
+      if (rest.alasan_tolak) formData.append("alasan_tolak", rest.alasan_tolak);
+      if (rest.catatan) formData.append("catatan", rest.catatan);
+      formData.append("attachment_disposisi", attachment_disposisi.fileList[0].originFileObj);
+      updateStatus({ id: data.id, payload: formData });
+    } else {
+      updateStatus({ id: data.id, payload: rest });
+    }
   };
 
   return (
@@ -218,13 +232,34 @@ const DetailModal = ({ open, onClose, data }) => {
             <Form.Item noStyle shouldUpdate={(prev, cur) => prev.status !== cur.status}>
               {({ getFieldValue }) =>
                 getFieldValue("status") === "Ditolak" ? (
-                  <Form.Item
-                    name="alasan_tolak"
-                    label="Alasan Penolakan"
-                    rules={[{ required: true, message: "Isi alasan penolakan" }]}
-                  >
-                    <Input.TextArea rows={3} placeholder="Masukkan alasan penolakan..." />
-                  </Form.Item>
+                  <>
+                    <Form.Item
+                      name="alasan_tolak"
+                      label="Alasan Penolakan"
+                      rules={[{ required: true, message: "Isi alasan penolakan" }]}
+                    >
+                      <Input.TextArea rows={3} placeholder="Masukkan alasan penolakan..." />
+                    </Form.Item>
+                    <Form.Item
+                      name="attachment_disposisi"
+                      label="Lampiran Disposisi (Opsional)"
+                    >
+                      <Upload.Dragger
+                        maxCount={1}
+                        beforeUpload={() => false}
+                        accept=".pdf,.doc,.docx"
+                        style={{ padding: "12px 0" }}
+                      >
+                        <Group justify="center" gap={8}>
+                          <IconFileUpload size={20} color="#999" />
+                          <Stack gap={2} align="center">
+                            <Text size="xs">Klik atau drag file ke sini</Text>
+                            <Text size="xs" c="dimmed">Format PDF/DOC, ukuran ≤ 5MB</Text>
+                          </Stack>
+                        </Group>
+                      </Upload.Dragger>
+                    </Form.Item>
+                  </>
                 ) : null
               }
             </Form.Item>

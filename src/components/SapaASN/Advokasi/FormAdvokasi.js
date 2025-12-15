@@ -110,7 +110,10 @@ const FormAdvokasi = ({
 
   const jadwal = jadwalData?.jadwal || [];
   const jadwalInfo = jadwalData?.info || {};
-  const sudahDaftarBulanIni = jadwalInfo?.sudah_daftar_bulan_ini;
+  const sudahDaftarDalam3Bulan = jadwalInfo?.sudah_daftar_dalam_3_bulan;
+  const advokasiTerakhir = jadwalInfo?.advokasi_terakhir;
+  const tanggalBolehAjukan = jadwalInfo?.tanggal_boleh_ajukan_formatted;
+  const sisaHari = jadwalInfo?.sisa_hari;
   const ketentuan = jadwalInfo?.ketentuan;
 
   const renderStep1 = () => {
@@ -122,26 +125,30 @@ const FormAdvokasi = ({
       );
     }
 
-    // If already registered this month
-    if (sudahDaftarBulanIni) {
+    // If already registered within the last 3 months
+    if (sudahDaftarDalam3Bulan) {
       return (
         <Stack gap="sm">
           <Alert icon={<IconAlertCircle size={16} />} color="orange" variant="light">
-            Anda sudah terdaftar untuk sesi advokasi bulan ini. Silakan tunggu konfirmasi 
-            atau hubungi admin untuk informasi lebih lanjut.
+            Anda tidak dapat mengajukan permohonan advokasi karena sudah pernah mengajukan 
+            dalam kurun waktu 3 bulan terakhir. Pengajuan ulang dapat dilakukan setelah 
+            tanggal <b>{tanggalBolehAjukan}</b> ({sisaHari} hari lagi).
           </Alert>
           <Paper p="md" radius="md" withBorder>
-            <Text size="sm" fw={500} mb="sm">Pendaftaran Anda:</Text>
+            <Text size="sm" fw={500} mb="sm">Pengajuan Terakhir Anda:</Text>
             <Descriptions column={1} size="small" bordered>
               <Descriptions.Item label="Status">
-                <Tag color="blue">{jadwalInfo?.advokasi_bulan_ini?.status || "Pending"}</Tag>
+                <Tag color="blue">{advokasiTerakhir?.status || "Pending"}</Tag>
               </Descriptions.Item>
               <Descriptions.Item label="Tanggal Pendaftaran">
-                {jadwalInfo?.advokasi_bulan_ini?.created_at 
-                  ? new Date(jadwalInfo.advokasi_bulan_ini.created_at).toLocaleDateString("id-ID", {
+                {advokasiTerakhir?.created_at 
+                  ? new Date(advokasiTerakhir.created_at).toLocaleDateString("id-ID", {
                       weekday: "long", day: "numeric", month: "long", year: "numeric"
                     })
                   : "-"}
+              </Descriptions.Item>
+              <Descriptions.Item label="Dapat Mengajukan Kembali">
+                <Text size="sm" c="green" fw={500}>{tanggalBolehAjukan}</Text>
               </Descriptions.Item>
             </Descriptions>
           </Paper>
@@ -432,9 +439,9 @@ const FormAdvokasi = ({
             <Paper p="sm" radius="md" withBorder>
               <Group justify="space-between">
                 <Button danger size="small" onClick={() => router.push("/sapa-asn/advokasi")}>
-                  {sudahDaftarBulanIni ? "Kembali" : "Batal"}
+                  {sudahDaftarDalam3Bulan ? "Kembali" : "Batal"}
                 </Button>
-                {!sudahDaftarBulanIni && (
+                {!sudahDaftarDalam3Bulan && (
                   <Space>
                     {current > 0 && <Button size="small" onClick={handlePrev}>Kembali</Button>}
                     <Button 

@@ -1,8 +1,10 @@
 import { Accordion, Group, Paper, SimpleGrid, Stack, Text } from "@mantine/core";
 import { useDebouncedValue } from "@mantine/hooks";
 import {
+  IconAlertCircle,
   IconBuilding,
   IconCalendar,
+  IconDownload,
   IconEye,
   IconFile,
   IconFileText,
@@ -35,9 +37,11 @@ import { useEffect, useState } from "react";
 
 const statusConfig = {
   Approved: { color: "green", label: "Disetujui" },
+  Diterima: { color: "blue", label: "Diterima" },
   Rejected: { color: "red", label: "Ditolak" },
+  Ditolak: { color: "red", label: "Ditolak" },
   Pending: { color: "orange", label: "Menunggu" },
-  "In Progress": { color: "blue", label: "Sedang Diproses" },
+  "In Progress": { color: "purple", label: "Sedang Diproses" },
   Completed: { color: "cyan", label: "Selesai" },
 };
 
@@ -74,10 +78,10 @@ const bentukPendampinganOptions = [
 const statusOptions = [
   { value: "", label: "Semua Status" },
   { value: "Pending", label: "Menunggu" },
-  { value: "Approved", label: "Disetujui" },
+  { value: "Diterima", label: "Diterima" },
   { value: "In Progress", label: "Sedang Diproses" },
   { value: "Completed", label: "Selesai" },
-  { value: "Rejected", label: "Ditolak" },
+  { value: "Ditolak", label: "Ditolak" },
 ];
 
 const InfoItem = ({ icon: Icon, label, value }) => (
@@ -108,6 +112,12 @@ const DetailModal = ({ open, onClose, data }) => {
   const jenisPerkara = parseJsonField(data.jenis_perkara);
   const bentukPendampingan = parseJsonField(data.bentuk_pendampingan);
   const lampiran = parseJsonField(data.lampiran_dokumen);
+  const isRejected = data.status === "Ditolak" || data.status === "Rejected";
+
+  // Include "penolakan" in default expanded sections if rejected
+  const defaultAccordionValue = isRejected 
+    ? ["info", "perkara", "penolakan"] 
+    : ["info", "perkara"];
 
   return (
     <Modal
@@ -123,7 +133,7 @@ const DetailModal = ({ open, onClose, data }) => {
       footer={null}
       width={550}
     >
-      <Accordion variant="separated" radius="sm" defaultValue={["info", "perkara"]}>
+      <Accordion variant="separated" radius="sm" defaultValue={defaultAccordionValue}>
         <Accordion.Item value="info">
           <Accordion.Control icon={<IconHash size={16} />}>
             <Text size="xs" fw={600}>Informasi Permohonan</Text>
@@ -227,6 +237,36 @@ const DetailModal = ({ open, onClose, data }) => {
             </Stack>
           </Accordion.Panel>
         </Accordion.Item>
+
+        {isRejected && (
+          <Accordion.Item value="penolakan">
+            <Accordion.Control icon={<IconAlertCircle size={16} color="red" />}>
+              <Text size="xs" fw={600} c="red">Informasi Penolakan</Text>
+            </Accordion.Control>
+            <Accordion.Panel>
+              <Stack gap="xs">
+                <div>
+                  <Text size="xs" c="dimmed" mb={4}>Alasan Penolakan</Text>
+                  <Paper p="xs" bg="red.0" radius="sm" style={{ border: "1px solid var(--mantine-color-red-2)" }}>
+                    <Text size="xs" style={{ whiteSpace: "pre-wrap" }}>{data.alasan_tolak || "-"}</Text>
+                  </Paper>
+                </div>
+                {data.attachment_disposisi && (
+                  <div>
+                    <Text size="xs" c="dimmed" mb={4}>Lampiran Disposisi</Text>
+                    <Button
+                      size="small"
+                      icon={<IconDownload size={14} />}
+                      onClick={() => window.open(data.attachment_disposisi, "_blank")}
+                    >
+                      Download Disposisi
+                    </Button>
+                  </div>
+                )}
+              </Stack>
+            </Accordion.Panel>
+          </Accordion.Item>
+        )}
       </Accordion>
     </Modal>
   );

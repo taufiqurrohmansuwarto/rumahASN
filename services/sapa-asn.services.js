@@ -421,11 +421,14 @@ export const getAdminPendampinganHukumById = async (id) => {
 /**
  * Update pendampingan hukum status (admin)
  * @param {String} id - Pendampingan ID
- * @param {Object} data - { status, catatan, alasan_tolak }
+ * @param {Object|FormData} data - { status, catatan, alasan_tolak, attachment_disposisi }
  */
 export const updateAdminPendampinganHukumStatus = async (id, data) => {
+  const config = data instanceof FormData 
+    ? { headers: { "Content-Type": "multipart/form-data" } }
+    : {};
   return api
-    .patch(`/admin/pendampingan-hukum/${id}`, data)
+    .patch(`/admin/pendampingan-hukum/${id}`, data, config)
     .then((res) => res?.data);
 };
 
