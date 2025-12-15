@@ -294,7 +294,7 @@ const upsertJadwal = async (req, res) => {
         tanggal_konsultasi,
         waktu_mulai: waktu_mulai || "10:00",
         waktu_selesai: waktu_selesai || "12:00",
-        kuota_maksimal: kuota_maksimal || 10,
+        kuota_maksimal: kuota_maksimal || 3,
         kuota_terisi: 0,
         status: status || "active",
       });
