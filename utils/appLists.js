@@ -16,7 +16,7 @@ export const appLists = [
     color: "#1A73E8",
     url: "/",
     icon: "https://siasn.bkd.jatimprov.go.id:9000/public/icon-beranda.png",
-    userType: ["asn", "non_asn", "umum"],
+    userType: ["asn", "nonasn", "umum"],
     target: "_blank",
   },
   {
@@ -25,8 +25,28 @@ export const appLists = [
     desc: "Sapa ASN",
     color: "#1A73E8",
     url: "/sapa-asn/dashboard",
-    icon: "https://siasn.bkd.jatimprov.go.id:9000/public/icon-sapa-asn.png",
+    icon: "https://siasn.bkd.jatimprov.go.id:9000/public/icon-sapaasn.png",
     userType: ["asn", "admin"],
+    target: "_blank",
+  },
+  {
+    rightIcon: <IconHome />,
+    title: "ASNMail",
+    desc: "Pesan Pribadi ASN",
+    color: "#1A73E8",
+    url: "/mails/inbox",
+    icon: "https://siasn.bkd.jatimprov.go.id:9000/public/icon-asnmail.png",
+    userType: ["asn", "nonasn"],
+    target: "_blank",
+  },
+  {
+    rightIcon: <IconHome />,
+    title: "ASNChat",
+    desc: "Chat di mana saja",
+    color: "#1A73E8",
+    url: "/rasn-chat",
+    icon: "https://siasn.bkd.jatimprov.go.id:9000/public/icon-asnchat.png",
+    userType: ["asn", "nonasn"],
     target: "_blank",
   },
   {
@@ -41,12 +61,12 @@ export const appLists = [
   },
   {
     rightIcon: <IconHome />,
-    title: "Kanban",
-    desc: "Kanban",
+    title: "ASNBoard",
+    desc: "Kanban untuk ASN",
     color: "#1A73E8",
     url: "/kanban",
-    icon: "https://siasn.bkd.jatimprov.go.id:9000/public/icon-beranda.png",
-    userType: ["asn", "non_asn"],
+    icon: "https://siasn.bkd.jatimprov.go.id:9000/public/icon-asnboard.png",
+    userType: ["asn", "nonasn"],
     target: "_blank",
   },
   {
@@ -84,7 +104,7 @@ export const appLists = [
     color: "#4285F4",
     url: "/guests-books/my-visit/visits",
     icon: "https://siasn.bkd.jatimprov.go.id:9000/public/icon-temu-bkd.png",
-    userType: ["asn", "umum", "non_asn"],
+    userType: ["asn", "umum", "nonasn"],
     target: "_blank",
   },
   {
@@ -210,7 +230,7 @@ export const getUserType = (user) => {
   ) {
     userTypes.push("asn");
   }
-  if (statusKepegawaian === "NONASN") {
+  if (statusKepegawaian === "NON ASN") {
     userTypes.push("nonasn");
   }
   if (statusKepegawaian === "FASILITATOR") {
@@ -243,7 +263,7 @@ export const getMenuItems = (menuItems, user) => {
   // Cek role user
   const isAdmin =
     (user?.role === "USER" || user?.role === "FASILITATOR") &&
-    (user?.group === "MASTER" || user?.group === "NON ASN") &&
+    (user?.group === "MASTER" || user?.group === "PTTPK") &&
     user?.current_role === "admin";
 
   const asn = user?.group === "MASTER";
