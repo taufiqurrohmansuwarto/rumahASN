@@ -34,6 +34,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   updateAdminPendampinganHukumStatus,
   exportAdminPendampinganHukum,
+  downloadAdminPendampinganHukum,
 } from "@/services/sapa-asn.services";
 import { saveAs } from "file-saver";
 
@@ -260,6 +261,7 @@ const ListPendampinganHukumAdmin = ({ data = [], meta = {}, loading = false, que
   const [searchValue, setSearchValue] = useState(search);
   const [debouncedSearch] = useDebouncedValue(searchValue, 500);
   const [exporting, setExporting] = useState(false);
+  const [downloadingId, setDownloadingId] = useState(null);
 
   const selectedData = query.selectedId ? data.find((d) => d.id === query.selectedId) : null;
   const modalOpen = !!query.selectedId;
@@ -309,6 +311,28 @@ const ListPendampinganHukumAdmin = ({ data = [], meta = {}, loading = false, que
       message.error("Gagal mengexport data");
     } finally {
       setExporting(false);
+    }
+  };
+
+  const handleDownload = async (record) => {
+    try {
+      setDownloadingId(record.id);
+      const lampiran = parseJsonField(record.lampiran_dokumen);
+      const response = await downloadAdminPendampinganHukum(record.id);
+
+      // Determine filename based on whether it has attachments
+      const filename =
+        lampiran.length > 0
+          ? `pendampingan-${record.id}.zip`
+          : `ringkasan-${record.id}.pdf`;
+
+      saveAs(response.data, filename);
+      message.success("Berhasil mengunduh data");
+    } catch (err) {
+      console.error(err);
+      message.error("Gagal mengunduh data");
+    } finally {
+      setDownloadingId(null);
     }
   };
 
@@ -376,10 +400,33 @@ const ListPendampinganHukumAdmin = ({ data = [], meta = {}, loading = false, que
     {
       title: "Aksi",
       key: "aksi",
-      width: 70,
+      width: 100,
       align: "center",
       render: (_, record) => (
-        <Button type="primary" size="small" icon={<IconEdit size={14} />} onClick={() => handleView(record)} />
+        <Group gap={4} justify="center" wrap="nowrap">
+          <Tooltip label="Detail">
+            <Button
+              type="primary"
+              size="small"
+              icon={<IconEdit size={14} />}
+              onClick={() => handleView(record)}
+            />
+          </Tooltip>
+          <Tooltip
+            label={
+              parseJsonField(record.lampiran_dokumen).length > 0
+                ? "Download (ZIP)"
+                : "Download (PDF)"
+            }
+          >
+            <Button
+              size="small"
+              icon={<IconDownload size={14} />}
+              loading={downloadingId === record.id}
+              onClick={() => handleDownload(record)}
+            />
+          </Tooltip>
+        </Group>
       ),
     },
   ];
