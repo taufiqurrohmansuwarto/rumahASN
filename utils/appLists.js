@@ -94,7 +94,7 @@ export const appLists = [
     desc: "Manajemen Pengetahuan",
     color: "#FBBC05",
     url: "/knowledge-managements/dashboard",
-    icon: "https://siasn.bkd.jatimprov.go.id:9000/public/icon-layanan-keuangan.png",
+    icon: "https://siasn.bkd.jatimprov.go.id:9000/public/icon-asnpedia.png",
     userType: ["admin"],
   },
   {
