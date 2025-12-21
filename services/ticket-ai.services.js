@@ -67,7 +67,12 @@ const calculateTextSimilarity = (text1, text2) => {
 
 const getQdrantClient = () => {
   if (!qdrantClient) {
-    qdrantClient = new QdrantClient({ url: QDRANT_URL });
+    qdrantClient = new QdrantClient({
+      url: QDRANT_URL,
+      // Skip version check untuk Node.js 16 compatibility
+      checkCompatibility: false,
+    });
+    console.log("✅ [TICKET-AI] Qdrant client initialized:", QDRANT_URL);
   }
   return qdrantClient;
 };
