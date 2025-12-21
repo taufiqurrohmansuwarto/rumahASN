@@ -3,16 +3,19 @@
  * Shared service untuk AI processing ticket (summary + recommendation)
  * MIMIC logic yang sama persis dengan /api/ref/faq-qna/ask
  *
- * Menggunakan CommonJS agar compatible dengan worker
+ * Menggunakan CommonJS + Axios agar compatible dengan Node.js 16 worker
  */
 
-const OpenAI = require("openai").default;
+const axios = require("axios");
 const { QdrantClient } = require("@qdrant/js-client-rest");
 const FaqQna = require("@/models/faq-qna.model");
 
 // ========================================
 // CONFIGURATION
 // ========================================
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+const OPENAI_BASE_URL = "https://api.openai.com/v1";
+
 const QDRANT_HOST = process.env.QDRANT_HOST || "localhost";
 const QDRANT_PORT = process.env.QDRANT_PORT || 6333;
 const QDRANT_URL = `http://${QDRANT_HOST}:${QDRANT_PORT}`;
@@ -29,9 +32,8 @@ const SIMILARITY_THRESHOLD_HIGH = parseFloat(
 );
 const MAX_CONTEXT_ITEMS = parseInt(process.env.MAX_CONTEXT_ITEMS || "3");
 
-// Initialize clients
+// Initialize Qdrant client only
 let qdrantClient = null;
-let openaiClient = null;
 
 const getQdrantClient = () => {
   if (!qdrantClient) {
@@ -40,22 +42,25 @@ const getQdrantClient = () => {
   return qdrantClient;
 };
 
-const getOpenAIClient = () => {
-  if (!openaiClient) {
-    openaiClient = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-    });
-  }
-  return openaiClient;
+// ========================================
+// AXIOS: OpenAI API calls (Node.js 16 compatible)
+// ========================================
+const openaiRequest = async (endpoint, data, timeout = 60000) => {
+  const response = await axios.post(`${OPENAI_BASE_URL}${endpoint}`, data, {
+    headers: {
+      Authorization: `Bearer ${OPENAI_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    timeout,
+  });
+  return response.data;
 };
 
 // ========================================
-// OPENAI: Generate Embedding
+// OPENAI: Generate Embedding (via Axios)
 // ========================================
 const generateEmbedding = async (text) => {
   try {
-    const openai = getOpenAIClient();
-
     // Preprocess text
     const processedText = text.trim().replace(/\s+/g, " ").toLowerCase();
 
@@ -63,7 +68,7 @@ const generateEmbedding = async (text) => {
       return { success: false, error: "Text is empty" };
     }
 
-    const response = await openai.embeddings.create({
+    const response = await openaiRequest("/embeddings", {
       model: "text-embedding-3-large",
       input: processedText,
       dimensions: 3072,
@@ -74,19 +79,18 @@ const generateEmbedding = async (text) => {
       data: response.data[0].embedding,
     };
   } catch (error) {
-    console.error("❌ [TICKET-AI] Embedding error:", error.message);
-    return { success: false, error: error.message };
+    const errMsg = error.response?.data?.error?.message || error.message;
+    console.error("❌ [TICKET-AI] Embedding error:", errMsg);
+    return { success: false, error: errMsg };
   }
 };
 
 // ========================================
-// OPENAI: Generate Summary
+// OPENAI: Generate Summary (via Axios)
 // ========================================
 const generateSummary = async (text) => {
   try {
-    const openai = getOpenAIClient();
-
-    const response = await openai.chat.completions.create({
+    const response = await openaiRequest("/chat/completions", {
       model: "gpt-4o-mini",
       messages: [
         {
@@ -108,13 +112,14 @@ const generateSummary = async (text) => {
       data: response.choices[0].message.content,
     };
   } catch (error) {
-    console.error("❌ [TICKET-AI] Summary error:", error.message);
-    return { success: false, error: error.message };
+    const errMsg = error.response?.data?.error?.message || error.message;
+    console.error("❌ [TICKET-AI] Summary error:", errMsg);
+    return { success: false, error: errMsg };
   }
 };
 
 // ========================================
-// OPENAI: Generate Answer (sama persis dengan open-ai.services.js)
+// OPENAI: Generate Answer (via Axios - sama persis dengan open-ai.services.js)
 // ========================================
 const generateAnswer = async (query, contextQnA) => {
   try {
@@ -125,7 +130,6 @@ const generateAnswer = async (query, contextQnA) => {
       };
     }
 
-    const openai = getOpenAIClient();
     const now = new Date();
 
     // Build context dari FAQ (sama persis dengan open-ai.services.js)
@@ -185,7 +189,7 @@ Referensi: ${q.regulation_ref || "-"}`;
       })
       .join("\n\n---\n\n");
 
-    const response = await openai.chat.completions.create({
+    const response = await openaiRequest("/chat/completions", {
       model: "gpt-4o-mini",
       messages: [
         {
@@ -236,8 +240,9 @@ STRUKTUR JAWABAN:
       data: response.choices[0].message.content,
     };
   } catch (error) {
-    console.error("❌ [TICKET-AI] Answer error:", error.message);
-    return { success: false, error: error.message };
+    const errMsg = error.response?.data?.error?.message || error.message;
+    console.error("❌ [TICKET-AI] Answer error:", errMsg);
+    return { success: false, error: errMsg };
   }
 };
 
