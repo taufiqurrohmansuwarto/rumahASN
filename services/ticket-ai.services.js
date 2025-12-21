@@ -87,22 +87,87 @@ const openaiRequest = async (endpoint, data, timeout = 60000) => {
 };
 
 // ========================================
-// OPENAI: Generate Embedding (via Axios)
+// PREPROCESSING: Sama persis dengan open-ai.services.js
+// ========================================
+const preprocessText = (text) => {
+  if (!text || typeof text !== "string") return "";
+
+  // Common acronyms to preserve (uppercase)
+  const acronyms = [
+    "MFA",
+    "ASN",
+    "PNS",
+    "PPPK",
+    "BKD",
+    "BKN",
+    "NIP",
+    "NIK",
+    "SIASN",
+    "CASN",
+    "CPNS",
+  ];
+
+  // Step 1: Trim and normalize spacing
+  let processed = text.trim().replace(/\s+/g, " ");
+
+  // Step 2: Create a map to preserve acronyms
+  const acronymMap = {};
+  acronyms.forEach((acronym) => {
+    const placeholder = `__${acronym}__`;
+    const regex = new RegExp(`\\b${acronym}\\b`, "gi");
+    if (regex.test(processed)) {
+      acronymMap[placeholder] = acronym;
+      processed = processed.replace(regex, placeholder);
+    }
+  });
+
+  // Step 3: Lowercase
+  processed = processed.toLowerCase();
+
+  // Step 4: Restore acronyms
+  Object.keys(acronymMap).forEach((placeholder) => {
+    processed = processed.replace(
+      new RegExp(placeholder, "g"),
+      acronymMap[placeholder]
+    );
+  });
+
+  // Step 5: Remove excessive punctuation but keep meaningful ones
+  processed = processed.replace(/([?.!,;:]){2,}/g, "$1");
+
+  // Step 6: Normalize quotes
+  processed = processed.replace(/[""]/g, '"').replace(/['']/g, "'");
+
+  return processed;
+};
+
+// ========================================
+// OPENAI: Generate Embedding (via Axios) - sama dengan open-ai.services.js
 // ========================================
 const generateEmbedding = async (text) => {
   try {
-    // Preprocess text
-    const processedText = text.trim().replace(/\s+/g, " ").toLowerCase();
+    // Preprocess text untuk consistent embeddings (sama dengan open-ai.services.js)
+    const processedText = preprocessText(text);
 
     if (!processedText) {
-      return { success: false, error: "Text is empty" };
+      return { success: false, error: "Text is empty after preprocessing" };
     }
+
+    console.log(
+      "🔍 [TICKET-AI] Generating embedding for:",
+      processedText.substring(0, 50) + "..."
+    );
 
     const response = await openaiRequest("/embeddings", {
       model: "text-embedding-3-large",
       input: processedText,
       dimensions: 3072,
     });
+
+    console.log(
+      "✅ [TICKET-AI] Embedding generated, length:",
+      response.data[0].embedding.length
+    );
 
     return {
       success: true,
@@ -277,7 +342,7 @@ STRUKTUR JAWABAN:
 };
 
 // ========================================
-// QDRANT: Search Similar
+// QDRANT: Search Similar (sama dengan search.services.js)
 // ========================================
 const searchWithQdrant = async (
   query,
@@ -287,8 +352,13 @@ const searchWithQdrant = async (
 ) => {
   try {
     console.log("🔍 [TICKET-AI] Qdrant search starting...");
+    console.log("🔍 [TICKET-AI] Search params:", {
+      query: query.substring(0, 50) + "...",
+      subCategoryIds,
+      limit,
+    });
 
-    // Generate embedding
+    // Generate embedding (dengan preprocessing yang sama dengan open-ai.services.js)
     const embeddingResult = await generateEmbedding(query);
     if (!embeddingResult.success) {
       throw new Error(embeddingResult.error);
@@ -296,16 +366,26 @@ const searchWithQdrant = async (
 
     const client = getQdrantClient();
 
-    // Build filters
+    // Build filters (sama dengan buildQdrantFilter di qdrant.services.js)
     const must = [];
 
-    if (subCategoryIds && subCategoryIds.length > 0) {
+    // Handle sub_category_ids (array filtering)
+    if (
+      subCategoryIds &&
+      Array.isArray(subCategoryIds) &&
+      subCategoryIds.length > 0
+    ) {
       must.push({
         key: "sub_category_ids",
         match: { any: subCategoryIds },
       });
+      console.log(
+        "🔍 [TICKET-AI] Added sub_category_ids filter:",
+        subCategoryIds
+      );
     }
 
+    // Handle is_active (boolean)
     must.push({
       key: "is_active",
       match: { value: true },
@@ -313,13 +393,19 @@ const searchWithQdrant = async (
 
     const searchParams = {
       vector: embeddingResult.data,
-      limit: limit * 2,
+      limit: limit * 2, // Get more for diversity filtering
       with_payload: true,
     };
 
     if (must.length > 0) {
       searchParams.filter = { must };
     }
+
+    console.log("🔍 [TICKET-AI] Qdrant search params:", {
+      hasFilter: !!searchParams.filter,
+      filterCount: must.length,
+      limit: searchParams.limit,
+    });
 
     const searchResult = await client.search(COLLECTION_NAME, searchParams);
 
