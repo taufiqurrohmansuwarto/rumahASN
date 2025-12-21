@@ -684,6 +684,8 @@ const getTicketRecommendation = async (
 ) => {
   try {
     console.log("🤖 [TICKET-AI] Getting recommendation...");
+    console.log("🔍 [TICKET-AI] Query for search:", query);
+    console.log("🔍 [TICKET-AI] Sub category ID:", subCategoryId);
 
     if (!query) {
       return { success: false, error: "Query is required" };
@@ -691,6 +693,7 @@ const getTicketRecommendation = async (
 
     // Convert to array
     const subCategoryIds = subCategoryId ? [subCategoryId] : [];
+    console.log("🔍 [TICKET-AI] Sub category IDs array:", subCategoryIds);
 
     // Smart search dengan fallback (Qdrant -> Fulltext -> Keyword)
     const searchResult = await smartSearch(
