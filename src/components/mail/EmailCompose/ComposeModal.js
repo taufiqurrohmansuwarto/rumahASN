@@ -1,14 +1,32 @@
 import {
+  useCheckTypo,
+  useEmailTemplates,
+  useGenerateTemplate,
   useRefineText,
   useReplyToEmail,
   useSaveDraft,
   useSendEmail,
 } from "@/hooks/useEmails";
 import { extractAttachmentIds } from "@/utils/debugUpload";
-import { Box, Group, Stack, Text, Transition } from "@mantine/core";
 import {
+  ActionIcon,
+  Badge,
+  Box,
+  Divider,
+  Group,
+  ScrollArea,
+  Stack,
+  Text,
+} from "@mantine/core";
+import {
+  IconAbc,
+  IconAlertCircle,
+  IconArrowRight,
   IconBold,
+  IconCheck,
+  IconClipboardText,
   IconEye,
+  IconFileText,
   IconItalic,
   IconList,
   IconMail,
@@ -17,7 +35,8 @@ import {
   IconNote,
   IconPencil,
   IconSparkles,
-  IconWand,
+  IconTemplate,
+  IconX,
 } from "@tabler/icons-react";
 import {
   Button,
@@ -34,7 +53,7 @@ import {
 import dayjs from "dayjs";
 import dynamic from "next/dynamic";
 import { useSession } from "next-auth/react";
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import AttachmentUploader from "./AttachmentUploader";
 
 // Dynamic import untuk markdown preview (SSR safe)
@@ -50,10 +69,376 @@ const ReactMarkdownCustom = dynamic(
   }
 );
 
-// AI Refine Button Component dengan animasi
+// AI Comparison Modal - Untuk melihat sebelum dan sesudah
+const AIComparisonModal = ({
+  visible,
+  onClose,
+  original,
+  refined,
+  mode,
+  onUseRefined,
+  onEditAgain,
+}) => {
+  const getModeLabel = (m) => {
+    const labels = {
+      professional: "Profesional",
+      friendly: "Ramah",
+      concise: "Ringkas",
+      detailed: "Detail",
+      surat_dinas: "Surat Dinas",
+    };
+    return labels[m] || m;
+  };
+
+  return (
+    <Modal
+      title={
+        <Group gap={8}>
+          <IconSparkles size={18} style={{ color: "#667eea" }} />
+          <span>Hasil AI - Mode {getModeLabel(mode)}</span>
+        </Group>
+      }
+      open={visible}
+      onCancel={onClose}
+      width={800}
+      footer={
+        <Group justify="flex-end" gap={8}>
+          <Button onClick={onClose}>Batal</Button>
+          <Button onClick={onEditAgain} icon={<IconPencil size={14} />}>
+            Edit Lagi
+          </Button>
+          <Button
+            type="primary"
+            onClick={onUseRefined}
+            icon={<IconCheck size={14} />}
+          >
+            Gunakan Hasil AI
+          </Button>
+        </Group>
+      }
+    >
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 40px 1fr",
+          gap: 16,
+          alignItems: "stretch",
+        }}
+      >
+        {/* Original */}
+        <Box>
+          <Group gap={4} mb={8}>
+            <Badge color="gray" size="sm">
+              Sebelum
+            </Badge>
+          </Group>
+          <Box
+            p="sm"
+            style={{
+              border: "1px solid #f0f0f0",
+              borderRadius: 8,
+              backgroundColor: "#fafafa",
+              minHeight: 200,
+              maxHeight: 300,
+              overflow: "auto",
+            }}
+          >
+            <Text
+              size="sm"
+              style={{ whiteSpace: "pre-wrap", lineHeight: 1.6 }}
+            >
+              {original}
+            </Text>
+          </Box>
+        </Box>
+
+        {/* Arrow */}
+        <Box
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <IconArrowRight size={24} style={{ color: "#667eea" }} />
+        </Box>
+
+        {/* Refined */}
+        <Box>
+          <Group gap={4} mb={8}>
+            <Badge
+              color="violet"
+              size="sm"
+              leftSection={<IconSparkles size={10} />}
+            >
+              Sesudah (AI)
+            </Badge>
+          </Group>
+          <Box
+            p="sm"
+            style={{
+              border: "2px solid #667eea",
+              borderRadius: 8,
+              backgroundColor: "#f8f7ff",
+              minHeight: 200,
+              maxHeight: 300,
+              overflow: "auto",
+            }}
+          >
+            <Text
+              size="sm"
+              style={{ whiteSpace: "pre-wrap", lineHeight: 1.6 }}
+            >
+              {refined}
+            </Text>
+          </Box>
+        </Box>
+      </div>
+    </Modal>
+  );
+};
+
+// Typo Check Modal
+const TypoCheckModal = ({ visible, onClose, data, onUseCorrected }) => {
+  if (!data) return null;
+
+  const { original, hasErrors, errors = [], correctedText, summary } = data;
+
+  return (
+    <Modal
+      title={
+        <Group gap={8}>
+          <IconAbc size={18} style={{ color: hasErrors ? "#fa8c16" : "#52c41a" }} />
+          <span>Hasil Cek Ejaan</span>
+          {hasErrors ? (
+            <Badge color="orange">{errors.length} kesalahan</Badge>
+          ) : (
+            <Badge color="green">Tidak ada kesalahan</Badge>
+          )}
+        </Group>
+      }
+      open={visible}
+      onCancel={onClose}
+      width={650}
+      footer={
+        <Group justify="flex-end" gap={8}>
+          <Button onClick={onClose}>Tutup</Button>
+          {hasErrors && (
+            <Button
+              type="primary"
+              onClick={onUseCorrected}
+              icon={<IconCheck size={14} />}
+            >
+              Gunakan Teks Perbaikan
+            </Button>
+          )}
+        </Group>
+      }
+    >
+      <Stack gap="md">
+        {hasErrors ? (
+          <>
+            <Text size="sm" c="dimmed">
+              {summary}
+            </Text>
+
+            {/* Error List */}
+            <Box>
+              <Text size="xs" fw={600} mb={8}>
+                Kesalahan Ditemukan:
+              </Text>
+              <ScrollArea.Autosize mah={150}>
+                <Stack gap={4}>
+                  {errors.map((err, idx) => (
+                    <Group
+                      key={idx}
+                      gap={8}
+                      p={8}
+                      style={{
+                        backgroundColor: "#fff7e6",
+                        borderRadius: 6,
+                        border: "1px solid #ffd591",
+                      }}
+                    >
+                      <Badge color="orange" size="xs">
+                        {err.type === "typo"
+                          ? "Typo"
+                          : err.type === "ejaan"
+                            ? "Ejaan"
+                            : "Tata Bahasa"}
+                      </Badge>
+                      <Text size="xs" style={{ textDecoration: "line-through" }}>
+                        {err.word}
+                      </Text>
+                      <IconArrowRight size={12} />
+                      <Text size="xs" fw={600} c="green">
+                        {err.suggestion}
+                      </Text>
+                    </Group>
+                  ))}
+                </Stack>
+              </ScrollArea.Autosize>
+            </Box>
+
+            <Divider />
+
+            {/* Corrected Text Preview */}
+            <Box>
+              <Text size="xs" fw={600} mb={8}>
+                Teks Setelah Perbaikan:
+              </Text>
+              <Box
+                p="sm"
+                style={{
+                  border: "2px solid #52c41a",
+                  borderRadius: 8,
+                  backgroundColor: "#f6ffed",
+                  maxHeight: 200,
+                  overflow: "auto",
+                }}
+              >
+                <Text size="sm" style={{ whiteSpace: "pre-wrap" }}>
+                  {correctedText}
+                </Text>
+              </Box>
+            </Box>
+          </>
+        ) : (
+          <Box
+            p="lg"
+            style={{
+              textAlign: "center",
+              backgroundColor: "#f6ffed",
+              borderRadius: 8,
+            }}
+          >
+            <IconCheck size={48} style={{ color: "#52c41a", marginBottom: 8 }} />
+            <Text fw={600}>Tidak ada kesalahan ejaan!</Text>
+            <Text size="sm" c="dimmed">
+              Teks Anda sudah benar.
+            </Text>
+          </Box>
+        )}
+      </Stack>
+    </Modal>
+  );
+};
+
+// Template Picker Component
+const TemplatePicker = ({ onSelect, disabled }) => {
+  const { data: templatesData, isLoading } = useEmailTemplates();
+  const generateTemplate = useGenerateTemplate();
+
+  const templates = templatesData?.data || [];
+
+  const handleSelectTemplate = async (templateKey) => {
+    try {
+      const result = await generateTemplate.mutateAsync({
+        templateType: templateKey,
+      });
+
+      if (result?.success && result?.data?.content) {
+        onSelect(result.data.content, result.data.templateName);
+        message.success(`Template "${result.data.templateName}" diterapkan`);
+      }
+    } catch (error) {
+      console.error("Template error:", error);
+    }
+  };
+
+  const menuItems = templates.map((t) => ({
+    key: t.key,
+    label: (
+      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <span>{t.icon}</span>
+        <div>
+          <div style={{ fontWeight: 500, fontSize: 12 }}>{t.name}</div>
+          <div style={{ fontSize: 10, color: "#666" }}>{t.description}</div>
+        </div>
+      </div>
+    ),
+    onClick: () => handleSelectTemplate(t.key),
+  }));
+
+  return (
+    <Dropdown
+      menu={{ items: menuItems }}
+      trigger={["click"]}
+      disabled={disabled || isLoading || generateTemplate.isLoading}
+      placement="bottomRight"
+    >
+      <Tooltip title="Template Cepat">
+        <Button
+          size="small"
+          type="text"
+          loading={generateTemplate.isLoading}
+          disabled={disabled}
+          style={{
+            background: "#e6f7ff",
+            color: "#1890ff",
+            border: "1px solid #91d5ff",
+            borderRadius: 6,
+            padding: "2px 8px",
+            height: 24,
+          }}
+          icon={!generateTemplate.isLoading && <IconTemplate size={14} />}
+        >
+          {generateTemplate.isLoading ? "..." : "Template"}
+        </Button>
+      </Tooltip>
+    </Dropdown>
+  );
+};
+
+// Typo Check Button
+const TypoCheckButton = ({ value, disabled, onResult }) => {
+  const checkTypoMutation = useCheckTypo();
+
+  const handleCheck = async () => {
+    if (!value || value.trim().length === 0) {
+      message.warning("Tulis pesan terlebih dahulu");
+      return;
+    }
+
+    try {
+      const result = await checkTypoMutation.mutateAsync({ text: value });
+      if (result?.success) {
+        onResult(result.data);
+      }
+    } catch (error) {
+      console.error("Typo check error:", error);
+    }
+  };
+
+  return (
+    <Tooltip title="Cek Kesalahan Ejaan">
+      <Button
+        size="small"
+        type="text"
+        loading={checkTypoMutation.isLoading}
+        disabled={disabled || !value}
+        onClick={handleCheck}
+        style={{
+          background: value ? "#fff7e6" : undefined,
+          color: value ? "#fa8c16" : undefined,
+          border: value ? "1px solid #ffd591" : undefined,
+          borderRadius: 6,
+          padding: "2px 8px",
+          height: 24,
+        }}
+        icon={!checkTypoMutation.isLoading && <IconAbc size={14} />}
+      >
+        {checkTypoMutation.isLoading ? "..." : "Typo"}
+      </Button>
+    </Tooltip>
+  );
+};
+
+// AI Refine Button Component dengan comparison modal
 const AIRefineButton = ({ value, onChange, disabled, onLoadingChange }) => {
   const refineText = useRefineText();
-  const [isAnimating, setIsAnimating] = useState(false);
+  const [showComparison, setShowComparison] = useState(false);
+  const [comparisonData, setComparisonData] = useState(null);
 
   const aiModes = [
     {
@@ -80,33 +465,21 @@ const AIRefineButton = ({ value, onChange, disabled, onLoadingChange }) => {
       icon: "📝",
       description: "Lengkap & jelas",
     },
+    { type: "divider" },
+    {
+      key: "surat_dinas",
+      label: "Surat Dinas",
+      icon: "🏛️",
+      description: "Format resmi pemerintah",
+    },
   ];
 
-  const isLoading = refineText.isLoading || isAnimating;
+  const isLoading = refineText.isLoading;
 
   // Notify parent about loading state changes
   useEffect(() => {
     onLoadingChange?.(isLoading);
   }, [isLoading, onLoadingChange]);
-
-  // Typing animation effect
-  const animateTyping = useCallback(
-    async (finalText) => {
-      setIsAnimating(true);
-      const words = finalText.split(" ");
-      let currentText = "";
-
-      for (let i = 0; i < words.length; i++) {
-        currentText += (i > 0 ? " " : "") + words[i];
-        onChange(currentText);
-        // Variable delay for natural feel
-        await new Promise((r) => setTimeout(r, 15 + Math.random() * 25));
-      }
-
-      setIsAnimating(false);
-    },
-    [onChange]
-  );
 
   const handleRefine = async (mode) => {
     if (!value || value.trim().length === 0) {
@@ -121,30 +494,56 @@ const AIRefineButton = ({ value, onChange, disabled, onLoadingChange }) => {
       });
 
       if (result?.success && result?.data?.refined) {
-        // Animate the text change
-        await animateTyping(result.data.refined);
-        message.success("Pesan berhasil diperhalus ✨");
+        // Show comparison modal instead of direct apply
+        setComparisonData({
+          original: value,
+          refined: result.data.refined,
+          mode,
+        });
+        setShowComparison(true);
       }
     } catch (error) {
       console.error("Refine error:", error);
     }
   };
 
-  const menuItems = aiModes.map((mode) => ({
+  const handleUseRefined = () => {
+    if (comparisonData?.refined) {
+      onChange(comparisonData.refined);
+      message.success("Hasil AI diterapkan ✨");
+    }
+    setShowComparison(false);
+    setComparisonData(null);
+  };
+
+  const handleEditAgain = () => {
+    // Close modal, keep original text
+    setShowComparison(false);
+    setComparisonData(null);
+  };
+
+  const menuItems = aiModes.map((mode) =>
+    mode.type === "divider"
+      ? { type: "divider" }
+      : {
     key: mode.key,
     label: (
       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
         <span>{mode.icon}</span>
         <div>
           <div style={{ fontWeight: 500, fontSize: 12 }}>{mode.label}</div>
-          <div style={{ fontSize: 10, color: "#666" }}>{mode.description}</div>
+                <div style={{ fontSize: 10, color: "#666" }}>
+                  {mode.description}
+                </div>
         </div>
       </div>
     ),
     onClick: () => handleRefine(mode.key),
-  }));
+        }
+  );
 
   return (
+    <>
     <Dropdown
       menu={{ items: menuItems }}
       trigger={["click"]}
@@ -169,7 +568,9 @@ const AIRefineButton = ({ value, onChange, disabled, onLoadingChange }) => {
             padding: "2px 8px",
             height: 24,
             transition: "all 0.3s ease",
-            boxShadow: value ? "0 2px 8px rgba(102, 126, 234, 0.3)" : undefined,
+              boxShadow: value
+                ? "0 2px 8px rgba(102, 126, 234, 0.3)"
+                : undefined,
           }}
           icon={
             !isLoading && (
@@ -186,6 +587,18 @@ const AIRefineButton = ({ value, onChange, disabled, onLoadingChange }) => {
         </Button>
       </Tooltip>
     </Dropdown>
+
+      {/* Comparison Modal */}
+      <AIComparisonModal
+        visible={showComparison}
+        onClose={() => setShowComparison(false)}
+        original={comparisonData?.original}
+        refined={comparisonData?.refined}
+        mode={comparisonData?.mode}
+        onUseRefined={handleUseRefined}
+        onEditAgain={handleEditAgain}
+      />
+    </>
   );
 };
 
@@ -194,6 +607,8 @@ const SimpleMarkdownEditor = ({ value, onChange, placeholder, rows = 8 }) => {
   const textareaRef = useRef(null);
   const [showPreview, setShowPreview] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
+  const [typoModalVisible, setTypoModalVisible] = useState(false);
+  const [typoData, setTypoData] = useState(null);
 
   const isDisabled = showPreview || aiLoading;
 
@@ -270,6 +685,35 @@ const SimpleMarkdownEditor = ({ value, onChange, placeholder, rows = 8 }) => {
     }, 10);
   };
 
+  const handleTemplateSelect = (templateContent, templateName) => {
+    // If there's existing content, ask or append
+    if (value && value.trim().length > 0) {
+      Modal.confirm({
+        title: "Terapkan Template",
+        content: `Template "${templateName}" akan mengganti isi pesan saat ini. Lanjutkan?`,
+        okText: "Ganti",
+        cancelText: "Batal",
+        onOk: () => onChange(templateContent),
+      });
+    } else {
+      onChange(templateContent);
+    }
+  };
+
+  const handleTypoResult = (data) => {
+    setTypoData(data);
+    setTypoModalVisible(true);
+  };
+
+  const handleUseCorrectedText = () => {
+    if (typoData?.correctedText) {
+      onChange(typoData.correctedText);
+      message.success("Teks diperbaiki");
+    }
+    setTypoModalVisible(false);
+    setTypoData(null);
+  };
+
   return (
     <div>
       <Group gap={4} mb={4} justify="space-between">
@@ -306,12 +750,25 @@ const SimpleMarkdownEditor = ({ value, onChange, placeholder, rows = 8 }) => {
           </Text>
         </Group>
         <Group gap={4}>
+          {/* Template Button */}
+          <TemplatePicker onSelect={handleTemplateSelect} disabled={isDisabled} />
+
+          {/* Typo Check Button */}
+          <TypoCheckButton
+            value={value}
+            disabled={isDisabled}
+            onResult={handleTypoResult}
+          />
+
+          {/* AI Refine Button */}
           <AIRefineButton
             value={value}
             onChange={onChange}
             disabled={showPreview}
             onLoadingChange={setAiLoading}
           />
+
+          {/* Preview Button */}
           <Button
             size="small"
             type={showPreview ? "primary" : "text"}
@@ -373,6 +830,14 @@ const SimpleMarkdownEditor = ({ value, onChange, placeholder, rows = 8 }) => {
           }}
         />
       )}
+
+      {/* Typo Check Modal */}
+      <TypoCheckModal
+        visible={typoModalVisible}
+        onClose={() => setTypoModalVisible(false)}
+        data={typoData}
+        onUseCorrected={handleUseCorrectedText}
+      />
     </div>
   );
 };

@@ -33,6 +33,11 @@ import {
   moveToFolder,
   // AI refine text
   refineText,
+  // AI check typo
+  checkTypo,
+  // AI templates
+  getEmailTemplates,
+  generateEmailTemplate,
   removeLabelFromEmail,
   // reply to email
   replyToEmail,
@@ -584,6 +589,45 @@ export const useRefineText = () => {
     onError: (error) => {
       const errorMessage =
         error.response?.data?.message || "Gagal memproses teks dengan AI";
+      message.error(errorMessage);
+    },
+  });
+};
+
+/**
+ * Hook untuk memeriksa typo/kesalahan ejaan
+ */
+export const useCheckTypo = () => {
+  return useMutation({
+    mutationFn: checkTypo,
+    onError: (error) => {
+      const errorMessage =
+        error.response?.data?.message || "Gagal memeriksa ejaan";
+      message.error(errorMessage);
+    },
+  });
+};
+
+/**
+ * Hook untuk mendapatkan daftar template email
+ */
+export const useEmailTemplates = () => {
+  return useQuery({
+    queryKey: ["email-templates"],
+    queryFn: getEmailTemplates,
+    staleTime: 10 * 60 * 1000, // 10 minutes
+  });
+};
+
+/**
+ * Hook untuk generate template email
+ */
+export const useGenerateTemplate = () => {
+  return useMutation({
+    mutationFn: generateEmailTemplate,
+    onError: (error) => {
+      const errorMessage =
+        error.response?.data?.message || "Gagal membuat template";
       message.error(errorMessage);
     },
   });

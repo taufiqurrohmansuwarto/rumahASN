@@ -348,11 +348,37 @@ export const cleanupUnusedFiles = async (days = 7) => {
 
 /**
  * Refine/polish text using AI
- * @param {Object} data - { text: string, mode: 'professional' | 'friendly' | 'concise' | 'detailed' }
+ * @param {Object} data - { text: string, mode: 'professional' | 'friendly' | 'concise' | 'detailed' | 'surat_dinas' }
  * @returns {Promise} - { original, refined, mode, tokens_used }
  */
 export const refineText = async (data) => {
   return api.post("/ai/refine-text", data).then((res) => res?.data);
+};
+
+/**
+ * Check typo/spelling errors in text
+ * @param {Object} data - { text: string }
+ * @returns {Promise} - { original, hasErrors, errors[], correctedText, summary }
+ */
+export const checkTypo = async (data) => {
+  return api.post("/ai/check-typo", data).then((res) => res?.data);
+};
+
+/**
+ * Get available email templates
+ * @returns {Promise} - Array of template definitions
+ */
+export const getEmailTemplates = async () => {
+  return api.get("/ai/templates").then((res) => res?.data);
+};
+
+/**
+ * Generate email template content
+ * @param {Object} data - { templateType: string, context?: object }
+ * @returns {Promise} - { templateType, templateName, content, placeholders }
+ */
+export const generateEmailTemplate = async (data) => {
+  return api.post("/ai/templates/generate", data).then((res) => res?.data);
 };
 
 // ==========================================
