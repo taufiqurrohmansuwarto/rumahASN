@@ -1,7 +1,9 @@
 // ========================================
-// POLYFILL ReadableStream untuk Node.js 16
+// POLYFILL untuk Node.js 16 (ReadableStream, fetch, Headers, etc.)
 // HARUS di paling atas, SEBELUM require apapun!
 // ========================================
+
+// 1. Polyfill ReadableStream, TransformStream, WritableStream
 if (typeof globalThis.ReadableStream === "undefined") {
   try {
     const {
@@ -15,9 +17,21 @@ if (typeof globalThis.ReadableStream === "undefined") {
     console.log("✅ ReadableStream polyfill loaded successfully");
   } catch (e) {
     console.error("❌ Failed to polyfill ReadableStream:", e.message);
-    console.error(
-      "   Please upgrade to Node.js 18+ or install web-streams-polyfill"
-    );
+  }
+}
+
+// 2. Polyfill fetch, Headers, Request, Response dari undici
+if (typeof globalThis.fetch === "undefined") {
+  try {
+    const { fetch, Headers, Request, Response, FormData } = require("undici");
+    globalThis.fetch = fetch;
+    globalThis.Headers = Headers;
+    globalThis.Request = Request;
+    globalThis.Response = Response;
+    globalThis.FormData = FormData;
+    console.log("✅ Fetch polyfill loaded successfully (undici)");
+  } catch (e) {
+    console.error("❌ Failed to polyfill fetch:", e.message);
   }
 }
 
