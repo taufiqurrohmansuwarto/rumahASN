@@ -30,6 +30,17 @@ if (typeof window === "undefined") {
   React.useLayoutEffect = React.useEffect;
 }
 
+// Polyfill ReadableStream untuk server-side
+if (typeof ReadableStream === "undefined") {
+  global.ReadableStream =
+    global.ReadableStream ||
+    class ReadableStream {
+      constructor() {
+        throw new Error("ReadableStream is not available in this environment");
+      }
+    };
+}
+
 // check user role and organization start with 123
 function Auth({ children, action, subject }) {
   dayjs.locale("id");

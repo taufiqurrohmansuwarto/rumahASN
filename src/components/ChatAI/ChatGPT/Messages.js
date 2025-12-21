@@ -3,11 +3,10 @@ import { AssistantAIServices } from "@/services/assistant-ai.services";
 import { Comment } from "@ant-design/compatible";
 import { RobotOutlined } from "@ant-design/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Avatar, Spin, Tooltip } from "antd";
+import { Avatar, Spin, Tooltip, List } from "antd";
 import dayjs from "dayjs";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
-import List from "rc-virtual-list";
 import { useRef, useState } from "react";
 
 const Messages = () => {
