@@ -2,7 +2,7 @@ import ReactMarkdownCustom from "@/components/MarkdownEditor/ReactMarkdownCustom
 import { deleteSummary, getSolution } from "@/services/admin.services";
 import { IconCopy, IconTrash, IconBrain } from "@tabler/icons-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Button, Modal, message, Collapse } from "antd";
+import { Button, Modal, message, Collapse, Tooltip } from "antd";
 import { Text, Badge, Divider, Stack, Group, Box, Paper } from "@mantine/core";
 import { useSession } from "next-auth/react";
 import { useCallback, useState } from "react";
@@ -12,7 +12,7 @@ const { Panel } = Collapse;
 function AISummarize({ item }) {
   const queryClient = useQueryClient();
   const { data } = useSession();
-  const [activeKey, setActiveKey] = useState(["ai-summary"]);
+  const [activeKey, setActiveKey] = useState([]);
 
   const { mutate, isLoading } = useMutation((data) => getSolution(data), {
     onSuccess: () => {
@@ -159,23 +159,25 @@ function AISummarize({ item }) {
                   )}
 
                   {/* Action Buttons */}
-                  <Group spacing="sm">
-                    <Button
-                      type="primary"
-                      onClick={handleGetSolution}
-                      loading={isLoading}
-                      icon={<IconBrain size={16} />}
-                    >
-                      {isLoading ? "Membuat..." : "Buat Rekomendasi"}
-                    </Button>
-                    <Button
-                      danger
-                      icon={<IconTrash size={16} />}
-                      onClick={handleRemoveSummary}
-                      loading={isDeleting}
-                    >
-                      {isDeleting ? "Menghapus..." : "Hapus"}
-                    </Button>
+                  <Group spacing="xs">
+                    <Tooltip title="Buat Rekomendasi">
+                      <Button
+                        type="primary"
+                        icon={<IconBrain size={16} />}
+                        onClick={handleGetSolution}
+                        loading={isLoading}
+                        shape="circle"
+                      />
+                    </Tooltip>
+                    <Tooltip title="Hapus">
+                      <Button
+                        danger
+                        icon={<IconTrash size={16} />}
+                        onClick={handleRemoveSummary}
+                        loading={isDeleting}
+                        shape="circle"
+                      />
+                    </Tooltip>
                   </Group>
                 </Stack>
               </Paper>
