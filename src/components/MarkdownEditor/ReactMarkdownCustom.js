@@ -1,5 +1,4 @@
-import { Blockquote, Table, Title, Text, Image } from "@mantine/core";
-import { Typography } from "antd";
+import { Blockquote, Table, Title, Text, Image, Code } from "@mantine/core";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import remarkBreaks from "remark-breaks";
@@ -8,25 +7,49 @@ import remarkGfm from "remark-gfm";
 function ReactMarkdownCustom({ children, withCustom = true }) {
   const components = {
     a({ node, ...props }) {
-      return <a {...props} target="_blank" />;
+      return (
+        <a
+          {...props}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            color: "#228be6",
+            textDecoration: "none",
+            fontWeight: 500,
+            transition: "color 0.15s ease",
+          }}
+          onMouseEnter={(e) => {
+            e.target.style.color = "#1971c2";
+            e.target.style.textDecoration = "underline";
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.color = "#228be6";
+            e.target.style.textDecoration = "none";
+          }}
+        />
+      );
     },
     img({ node, ...props }) {
       return (
-        <div style={{
-          margin: "16px 0",
-          width: "100%",
-          display: "block",
-          textAlign: "center",
-          position: "relative",
-          zIndex: 1,
-          clearfix: "both",
-          overflow: "hidden"
-        }}>
-          <div style={{
-            display: "inline-block",
-            maxWidth: "100%",
-            position: "relative"
-          }}>
+        <div
+          style={{
+            margin: "16px 0",
+            width: "100%",
+            display: "block",
+            textAlign: "center",
+            position: "relative",
+            zIndex: 1,
+            clearfix: "both",
+            overflow: "hidden",
+          }}
+        >
+          <div
+            style={{
+              display: "inline-block",
+              maxWidth: "100%",
+              position: "relative",
+            }}
+          >
             <Image
               src={props.src}
               alt={props.alt || "Image"}
@@ -45,52 +68,54 @@ function ReactMarkdownCustom({ children, withCustom = true }) {
                 backgroundColor: "#f8f9fa",
                 display: "block",
                 position: "relative",
-                zIndex: 2
+                zIndex: 2,
               }}
               styles={{
                 root: {
-                  maxWidth: '100%',
-                  display: 'block',
-                  position: 'relative'
+                  maxWidth: "100%",
+                  display: "block",
+                  position: "relative",
                 },
                 image: {
-                  maxWidth: '100%',
-                  maxHeight: '70vh',
-                  width: 'auto',
-                  height: 'auto',
-                  objectFit: 'contain',
-                  display: 'block',
-                  position: 'relative',
-                  '&:hover': {
-                    transform: 'scale(1.01)',
-                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-                    zIndex: 3
-                  }
+                  maxWidth: "100%",
+                  maxHeight: "70vh",
+                  width: "auto",
+                  height: "auto",
+                  objectFit: "contain",
+                  display: "block",
+                  position: "relative",
+                  "&:hover": {
+                    transform: "scale(1.01)",
+                    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+                    zIndex: 3,
+                  },
                 },
                 placeholder: {
-                  backgroundColor: '#f1f3f4',
-                  color: '#666',
-                  minHeight: '120px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  position: 'relative'
-                }
+                  backgroundColor: "#f1f3f4",
+                  color: "#666",
+                  minHeight: "120px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  position: "relative",
+                },
               }}
               onClick={() => {
                 if (props.src) {
-                  window.open(props.src, '_blank', 'noopener,noreferrer');
+                  window.open(props.src, "_blank", "noopener,noreferrer");
                 }
               }}
             />
           </div>
           {props.alt && (
-            <div style={{
-              marginTop: 8,
-              width: "100%",
-              position: "relative",
-              zIndex: 1
-            }}>
+            <div
+              style={{
+                marginTop: 8,
+                width: "100%",
+                position: "relative",
+                zIndex: 1,
+              }}
+            >
               <Text
                 size="sm"
                 color="dimmed"
@@ -99,7 +124,7 @@ function ReactMarkdownCustom({ children, withCustom = true }) {
                   lineHeight: 1.4,
                   textAlign: "center",
                   display: "block",
-                  padding: "0 8px"
+                  padding: "0 8px",
                 }}
               >
                 {props.alt}
@@ -113,47 +138,56 @@ function ReactMarkdownCustom({ children, withCustom = true }) {
       return (
         <Blockquote
           style={{
-            borderRadius: 8,
-            margin: "16px 0",
-            backgroundColor: "#fafafa",
-            border: "1px solid #e8e8e8"
+            margin: "20px 0",
+            padding: "16px 20px",
+            backgroundColor: "rgba(34, 139, 230, 0.04)",
+            borderRadius: "8px",
+            border: "none",
           }}
-          fz={14}
           styles={{
             root: {
-              borderLeft: "3px solid #ff7a45",
-              boxShadow: "none"
-            }
+              borderLeft: "3px solid #228be6",
+              boxShadow: "none",
+            },
           }}
         >
-          <Typography.Text style={{ fontSize: "14px", lineHeight: "1.6", color: "#555" }}>
+          <Text
+            size="sm"
+            style={{
+              color: "#495057",
+              lineHeight: 1.4,
+              fontStyle: "italic",
+            }}
+          >
             {props.children}
-          </Typography.Text>
+          </Text>
         </Blockquote>
       );
     },
     p({ node, ...props }) {
-      // Auto-link URLs in paragraph text
       const processTextWithLinks = (children) => {
-        if (typeof children === 'string') {
-          // Very specific regex - support subdomains and common TLDs
-          const urlRegex = /(https?:\/\/[^\s]+|www\.[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}[^\s]*|\b[a-zA-Z0-9.-]+\.(?:com|org|net|gov|edu|id|co\.id|go\.id)\b(?:\/[^\s]*)?)/gi;
+        if (typeof children === "string") {
+          const urlRegex =
+            /(https?:\/\/[^\s]+|www\.[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}[^\s]*|\b[a-zA-Z0-9.-]+\.(?:com|org|net|gov|edu|id|co\.id|go\.id)\b(?:\/[^\s]*)?)/gi;
 
           return children.split(urlRegex).map((part, index) => {
             const trimmedPart = part.trim();
 
-            // Very strict validation - support subdomains
-            const isValidUrl = (
-              /^https?:\/\//i.test(trimmedPart) ||
-              /^www\./i.test(trimmedPart) ||
-              /^[a-zA-Z0-9.-]+\.(?:com|org|net|gov|edu|id|co\.id|go\.id)(?:\/|$)/i.test(trimmedPart)
-            ) && !trimmedPart.includes(' ') && trimmedPart.length > 6;
+            const isValidUrl =
+              (/^https?:\/\//i.test(trimmedPart) ||
+                /^www\./i.test(trimmedPart) ||
+                /^[a-zA-Z0-9.-]+\.(?:com|org|net|gov|edu|id|co\.id|go\.id)(?:\/|$)/i.test(
+                  trimmedPart
+                )) &&
+              !trimmedPart.includes(" ") &&
+              trimmedPart.length > 6;
 
             if (isValidUrl) {
-              // Clean the URL and ensure it has protocol
               let url = trimmedPart;
-              if (!url.startsWith('http')) {
-                url = url.startsWith('www.') ? `https://${url}` : `https://${url}`;
+              if (!url.startsWith("http")) {
+                url = url.startsWith("www.")
+                  ? `https://${url}`
+                  : `https://${url}`;
               }
 
               return (
@@ -163,18 +197,9 @@ function ReactMarkdownCustom({ children, withCustom = true }) {
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{
-                    color: '#1890ff',
-                    textDecoration: 'none',
-                    borderBottom: '1px solid transparent',
-                    transition: 'all 0.2s ease'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.target.style.borderBottomColor = '#1890ff';
-                    e.target.style.color = '#40a9ff';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.target.style.borderBottomColor = 'transparent';
-                    e.target.style.color = '#1890ff';
+                    color: "#228be6",
+                    textDecoration: "none",
+                    fontWeight: 500,
                   }}
                 >
                   {trimmedPart}
@@ -185,10 +210,9 @@ function ReactMarkdownCustom({ children, withCustom = true }) {
           });
         }
 
-        // Handle React children recursively
         if (Array.isArray(children)) {
           return children.map((child) => {
-            if (typeof child === 'string') {
+            if (typeof child === "string") {
               return processTextWithLinks(child);
             }
             return child;
@@ -200,13 +224,12 @@ function ReactMarkdownCustom({ children, withCustom = true }) {
 
       return (
         <Text
+          component="p"
           style={{
-            whiteSpace: "normal",
-            overflowWrap: "break-word",
-            wordWrap: "break-word",
-            marginBottom: "12px",
-            lineHeight: "1.6",
-            fontSize: "14px"
+            margin: "0 0 8px 0",
+            lineHeight: 1.4,
+            fontSize: "14px",
+            color: "#343a40",
           }}
         >
           {processTextWithLinks(props.children)}
@@ -214,53 +237,174 @@ function ReactMarkdownCustom({ children, withCustom = true }) {
       );
     },
     h1({ node, ...props }) {
-      return <Title mb="md" mt="lg" order={2} {...props} />;
+      return (
+        <Title
+          order={2}
+          style={{
+            margin: "32px 0 16px 0",
+            fontWeight: 700,
+            color: "#212529",
+            letterSpacing: "-0.02em",
+          }}
+          {...props}
+        />
+      );
     },
     h2({ node, ...props }) {
-      return <Title mb="sm" mt="md" order={3} {...props} />;
+      return (
+        <Title
+          order={3}
+          style={{
+            margin: "28px 0 14px 0",
+            fontWeight: 600,
+            color: "#212529",
+            letterSpacing: "-0.01em",
+          }}
+          {...props}
+        />
+      );
     },
     h3({ node, ...props }) {
-      return <Title mb="sm" mt="md" order={4} {...props} />;
+      return (
+        <Title
+          order={4}
+          style={{
+            margin: "24px 0 12px 0",
+            fontWeight: 600,
+            color: "#343a40",
+          }}
+          {...props}
+        />
+      );
     },
     h4({ node, ...props }) {
-      return <Title mb="xs" mt="sm" order={5} {...props} />;
+      return (
+        <Title
+          order={5}
+          style={{
+            margin: "20px 0 10px 0",
+            fontWeight: 600,
+            color: "#495057",
+          }}
+          {...props}
+        />
+      );
     },
     h5({ node, ...props }) {
-      return <Title mb="xs" mt="sm" order={6} {...props} />;
+      return (
+        <Title
+          order={6}
+          style={{
+            margin: "16px 0 8px 0",
+            fontWeight: 600,
+            color: "#495057",
+          }}
+          {...props}
+        />
+      );
     },
     h6({ node, ...props }) {
-      return <Text mb="xs" mt="sm" weight={600} size="sm" {...props} />;
-    },
-    code({ inline, children }) {
       return (
-        <Typography.Text
-          code
+        <Text
+          fw={600}
+          size="sm"
           style={{
-            whiteSpace: "pre-wrap",
-            overflowWrap: "break-word",
-            wordWrap: "break-word",
-            backgroundColor: "#f6f8fa",
-            padding: inline ? "2px 4px" : "8px 12px",
-            borderRadius: "4px",
+            margin: "14px 0 8px 0",
+            color: "#868e96",
+            textTransform: "uppercase",
+            letterSpacing: "0.05em",
+          }}
+          {...props}
+        />
+      );
+    },
+    code({ inline, className, children }) {
+      if (inline) {
+        return (
+          <Code
+            style={{
+              padding: "2px 6px",
+              fontSize: "13px",
+              fontFamily: "'JetBrains Mono', 'Fira Code', Consolas, monospace",
+              backgroundColor: "#f1f3f5",
+              color: "#e64980",
+              borderRadius: "4px",
+            }}
+          >
+            {children}
+          </Code>
+        );
+      }
+
+      return (
+        <Code
+          block
+          style={{
+            margin: "16px 0",
+            padding: "16px",
             fontSize: "13px",
-            fontFamily: "Consolas, Monaco, 'Courier New', monospace"
+            fontFamily: "'JetBrains Mono', 'Fira Code', Consolas, monospace",
+            backgroundColor: "#1e1e1e",
+            color: "#d4d4d4",
+            borderRadius: "8px",
+            lineHeight: 1.4,
+            overflowX: "auto",
           }}
         >
           {children}
-        </Typography.Text>
+        </Code>
+      );
+    },
+    pre({ node, ...props }) {
+      return (
+        <div
+          style={{
+            margin: "16px 0",
+            borderRadius: "8px",
+            overflow: "hidden",
+          }}
+        >
+          {props.children}
+        </div>
       );
     },
     table({ node, ...props }) {
       return (
-        <div style={{ margin: "16px 0", overflowX: "auto" }}>
-          <Table 
-            {...props} 
-            style={{ 
-              fontSize: "14px",
-              width: "100%"
-            }}
+        <div
+          style={{
+            margin: "20px 0",
+            overflowX: "auto",
+            borderRadius: "8px",
+            border: "1px solid #e9ecef",
+          }}
+        >
+          <Table
+            {...props}
             striped
             highlightOnHover
+            withBorder={false}
+            style={{
+              fontSize: "14px",
+              minWidth: "100%",
+            }}
+            styles={{
+              root: {
+                borderCollapse: "collapse",
+              },
+              thead: {
+                backgroundColor: "#f8f9fa",
+              },
+              th: {
+                fontWeight: 600,
+                color: "#495057",
+                padding: "12px 16px",
+                borderBottom: "2px solid #dee2e6",
+              },
+              td: {
+                padding: "12px 16px",
+                borderBottom: "1px solid #f1f3f5",
+              },
+            }}
           />
         </div>
       );
@@ -269,12 +413,10 @@ function ReactMarkdownCustom({ children, withCustom = true }) {
       return (
         <ol
           style={{
-            whiteSpace: "normal",
-            overflowWrap: "break-word",
-            wordWrap: "break-word",
-            margin: "8px 0",
-            paddingLeft: "20px",
-            lineHeight: "1.6"
+            margin: "4px 0",
+            paddingLeft: "24px",
+            lineHeight: 1.4,
+            color: "#343a40",
           }}
         >
           {props.children}
@@ -285,12 +427,11 @@ function ReactMarkdownCustom({ children, withCustom = true }) {
       return (
         <ul
           style={{
-            whiteSpace: "normal",
-            overflowWrap: "break-word",
-            wordWrap: "break-word",
-            margin: "8px 0",
-            paddingLeft: "20px",
-            lineHeight: "1.6"
+            margin: "4px 0",
+            paddingLeft: "24px",
+            lineHeight: 1.4,
+            color: "#343a40",
+            listStyleType: "disc",
           }}
         >
           {props.children}
@@ -301,12 +442,10 @@ function ReactMarkdownCustom({ children, withCustom = true }) {
       return (
         <li
           style={{
-            whiteSpace: "normal",
-            overflowWrap: "break-word",
-            wordWrap: "break-word",
-            margin: "4px 0",
-            padding: 0,
-            fontSize: "14px"
+            margin: "2px 0",
+            fontSize: "14px",
+            paddingLeft: "4px",
+            lineHeight: 1.4,
           }}
         >
           {props.children}
@@ -317,10 +456,44 @@ function ReactMarkdownCustom({ children, withCustom = true }) {
       return (
         <div
           style={{
-            margin: "24px 0",
+            margin: "32px 0",
             height: "1px",
-            background: "linear-gradient(90deg, transparent, #e8e8e8 20%, #e8e8e8 80%, transparent)",
-            border: "none"
+            background:
+              "linear-gradient(90deg, transparent, #dee2e6 15%, #dee2e6 85%, transparent)",
+            border: "none",
+          }}
+          {...props}
+        />
+      );
+    },
+    strong({ node, ...props }) {
+      return (
+        <strong
+          style={{
+            fontWeight: 600,
+            color: "#212529",
+          }}
+          {...props}
+        />
+      );
+    },
+    em({ node, ...props }) {
+      return (
+        <em
+          style={{
+            fontStyle: "italic",
+            color: "#495057",
+          }}
+          {...props}
+        />
+      );
+    },
+    del({ node, ...props }) {
+      return (
+        <del
+          style={{
+            textDecoration: "line-through",
+            color: "#868e96",
           }}
           {...props}
         />
@@ -330,21 +503,24 @@ function ReactMarkdownCustom({ children, withCustom = true }) {
 
   const custom = (markdownSource) => {
     let md = markdownSource;
-    // Handle code blocks
     md = markdownSource?.replace(/```[\s\S]*?```/g, (m) =>
       m?.replace(/\n/g, "\n ")
     );
-    // Mengurangi multiple newlines
     md = md?.replace(/\n{3,}/g, "\n\n");
-    // Handle list items agar tidak terlalu lebar spacing-nya
     md = md?.replace(/(\n\s*[-*+])/g, "\n$1");
-    // Add proper line endings
     md = md?.replace(/(\n)/gm, "  \n");
     return md;
   };
 
   return (
-    <>
+    <div
+      style={{
+        fontFamily:
+          "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
+        WebkitFontSmoothing: "antialiased",
+        MozOsxFontSmoothing: "grayscale",
+      }}
+    >
       <ReactMarkdown
         remarkPlugins={[remarkGfm, remarkBreaks]}
         rehypePlugins={[rehypeRaw]}
@@ -352,7 +528,7 @@ function ReactMarkdownCustom({ children, withCustom = true }) {
       >
         {withCustom ? custom(children) : children}
       </ReactMarkdown>
-    </>
+    </div>
   );
 }
 

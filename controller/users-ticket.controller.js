@@ -1,6 +1,7 @@
 const Tickets = require("../models/tickets.model");
 const Notification = require("../models/notifications.model");
 const { sendingNotificationToAdmin } = require("@/utils/tickets-utilities");
+const { addTicketAIJob } = require("@/jobs/queue");
 const axios = require("axios");
 const captchaKey = process.env.RECAPTCHA_SECRET_KEY;
 
@@ -125,8 +126,17 @@ const create = async (req, res) => {
     const data = { ...payload, requester: customId, status_code: "DIAJUKAN" };
     const result = await Tickets.query().insert(data).returning("*");
 
-    // disini gunakan ringkasan dan menjawab pertanyaan yang dibuat di qdrant services atau openai services
-    // update kolom summarize_ai dan recomendation_answer
+    // Tambahkan job ke queue untuk AI processing (ringkasan + rekomendasi jawaban)
+    // Job akan berjalan di background sehingga user tidak perlu menunggu
+    try {
+      await addTicketAIJob(result?.id);
+    } catch (jobError) {
+      // Log error tapi jangan gagalkan pembuatan ticket
+      console.error(
+        `⚠️ Failed to add AI processing job for ticket ${result?.id}:`,
+        jobError.message
+      );
+    }
 
     await sendingNotificationToAdmin(result?.id, customId);
     res.status(201).json(result);

@@ -1,12 +1,19 @@
 // Register module aliases for Node.js context only
 require("module-alias/register");
 
-const { sealQueue, siasnQueue, proxyQueue, shutdown } = require("./queue");
+const {
+  sealQueue,
+  siasnQueue,
+  proxyQueue,
+  ticketQueue,
+  shutdown,
+} = require("./queue");
 
 const sealProcessor = require("./processors/seal");
 const siasnProcessor = require("./processors/siasn");
 const proxyProcessor = require("./processors/proxy");
 const cleanupProcessor = require("./processors/cleanup");
+const ticketProcessor = require("./processors/ticket");
 
 // Process jobs with enhanced error handling
 sealQueue.process("refresh-totp", async (job) => {
@@ -212,6 +219,47 @@ proxyQueue.process("sync-proxy", 1, async (job) => {
   }
 });
 
+// Process ticket AI jobs (summarize dan rekomendasi jawaban)
+console.log(
+  "📋 Registering ticketQueue.process('summarize-ticket') with concurrency 2..."
+);
+
+// Add Redis connection event listeners for ticket queue
+ticketQueue.client.on("connect", () => {
+  console.log("✅ [TICKET] Redis client connected");
+});
+
+ticketQueue.client.on("ready", () => {
+  console.log("✅ [TICKET] Redis client ready");
+});
+
+ticketQueue.client.on("error", (err) => {
+  console.error("❌ [TICKET] Redis client error:", err.message);
+});
+
+ticketQueue.process("summarize-ticket", 2, async (job) => {
+  const startTime = Date.now();
+
+  console.log(
+    `🎫 [TICKET WORKER] Picked up summarize job: ${job.id} for ticket: ${job.data.ticketId}`
+  );
+
+  try {
+    const result = await ticketProcessor.processSummarizeTicket(job);
+
+    const duration = Date.now() - startTime;
+
+    console.log(
+      `✅ [TICKET WORKER] Completed: ${job.id} | Duration: ${duration}ms | Summary: ${result?.hasSummary}, Recommendation: ${result?.hasRecommendation}`
+    );
+
+    return result;
+  } catch (error) {
+    console.error(`❌ [TICKET WORKER] Failed job ${job.id}:`, error.message);
+    throw error;
+  }
+});
+
 // Give some time for all processors to register
 setTimeout(() => {
   console.log("🔄 Worker started and processing jobs...");
@@ -222,6 +270,9 @@ setTimeout(() => {
   );
   console.log(
     "   - PROXY: sync-proxy (pangkat, pensiun, pg_akademik, pg_profesi, skk)"
+  );
+  console.log(
+    "   - TICKET: summarize-ticket (AI summarization + recommendation)"
   );
   console.log(`📊 Worker PID: ${process.pid}`);
   console.log(
