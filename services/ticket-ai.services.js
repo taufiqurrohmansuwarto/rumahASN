@@ -7,8 +7,10 @@
  */
 
 const axios = require("axios");
-const { QdrantClient } = require("@qdrant/js-client-rest");
 const FaqQna = require("@/models/faq-qna.model");
+
+// Note: Tidak menggunakan QdrantClient karena masalah fetch di Node.js 16
+// Menggunakan axios langsung untuk API calls ke Qdrant
 
 // ========================================
 // CONFIGURATION
@@ -34,9 +36,6 @@ const MAX_CONTEXT_ITEMS = parseInt(process.env.MAX_CONTEXT_ITEMS || "3");
 
 // Diversity threshold untuk menghindari duplikat (sama dengan search.services.js)
 const SIMILARITY_DIVERSITY_THRESHOLD = 0.95;
-
-// Initialize Qdrant client only
-let qdrantClient = null;
 
 // ========================================
 // HELPER: Calculate text similarity (Jaccard) - sama dengan search.services.js
@@ -65,16 +64,26 @@ const calculateTextSimilarity = (text1, text2) => {
   return union.size > 0 ? intersection.size / union.size : 0;
 };
 
-const getQdrantClient = () => {
-  if (!qdrantClient) {
-    qdrantClient = new QdrantClient({
-      url: QDRANT_URL,
-      // Skip version check untuk Node.js 16 compatibility
-      checkCompatibility: false,
-    });
-    console.log("✅ [TICKET-AI] Qdrant client initialized:", QDRANT_URL);
+// ========================================
+// QDRANT: Direct API call via Axios (Node.js 16 compatible)
+// Menggunakan axios langsung karena Qdrant client memiliki masalah fetch di Node.js 16
+// ========================================
+const qdrantSearch = async (collectionName, searchParams) => {
+  try {
+    const response = await axios.post(
+      `${QDRANT_URL}/collections/${collectionName}/points/search`,
+      searchParams,
+      {
+        headers: { "Content-Type": "application/json" },
+        timeout: 30000,
+      }
+    );
+    return response.data.result || [];
+  } catch (error) {
+    const errMsg = error.response?.data?.status?.error || error.message;
+    console.error("❌ [TICKET-AI] Qdrant axios error:", errMsg);
+    throw new Error(errMsg);
   }
-  return qdrantClient;
 };
 
 // ========================================
@@ -347,7 +356,7 @@ STRUKTUR JAWABAN:
 };
 
 // ========================================
-// QDRANT: Search Similar (sama dengan search.services.js)
+// QDRANT: Search Similar (menggunakan axios untuk Node.js 16 compatibility)
 // ========================================
 const searchWithQdrant = async (
   query,
@@ -368,8 +377,6 @@ const searchWithQdrant = async (
     if (!embeddingResult.success) {
       throw new Error(embeddingResult.error);
     }
-
-    const client = getQdrantClient();
 
     // Build filters (sama dengan buildQdrantFilter di qdrant.services.js)
     const must = [];
@@ -412,7 +419,8 @@ const searchWithQdrant = async (
       limit: searchParams.limit,
     });
 
-    const searchResult = await client.search(COLLECTION_NAME, searchParams);
+    // Menggunakan axios langsung (bukan Qdrant client) untuk Node.js 16 compatibility
+    const searchResult = await qdrantSearch(COLLECTION_NAME, searchParams);
 
     // Log similarity scores dari Qdrant
     const qdrantScores = searchResult.map((r) => ({
