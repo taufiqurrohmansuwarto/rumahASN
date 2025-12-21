@@ -32,8 +32,38 @@ const SIMILARITY_THRESHOLD_HIGH = parseFloat(
 );
 const MAX_CONTEXT_ITEMS = parseInt(process.env.MAX_CONTEXT_ITEMS || "3");
 
+// Diversity threshold untuk menghindari duplikat (sama dengan search.services.js)
+const SIMILARITY_DIVERSITY_THRESHOLD = 0.95;
+
 // Initialize Qdrant client only
 let qdrantClient = null;
+
+// ========================================
+// HELPER: Calculate text similarity (Jaccard) - sama dengan search.services.js
+// ========================================
+const calculateTextSimilarity = (text1, text2) => {
+  if (!text1 || !text2) return 0;
+
+  // Tokenize and normalize
+  const tokens1 = new Set(
+    text1
+      .toLowerCase()
+      .split(/\s+/)
+      .filter((t) => t.length > 2)
+  );
+  const tokens2 = new Set(
+    text2
+      .toLowerCase()
+      .split(/\s+/)
+      .filter((t) => t.length > 2)
+  );
+
+  // Jaccard similarity: intersection / union
+  const intersection = new Set([...tokens1].filter((t) => tokens2.has(t)));
+  const union = new Set([...tokens1, ...tokens2]);
+
+  return union.size > 0 ? intersection.size / union.size : 0;
+};
 
 const getQdrantClient = () => {
   if (!qdrantClient) {
@@ -335,8 +365,8 @@ const searchWithQdrant = async (
       `📊 [TICKET-AI] PostgreSQL returned ${qnaData.length} valid FAQs (from ${qnaIds.length} Qdrant IDs)`
     );
 
-    // Merge with similarity scores
-    const results = qnaData
+    // Merge with similarity scores and apply threshold filtering
+    let results = qnaData
       .map((qna) => {
         const vector = searchResult.find((v) => v.payload?.qna_id === qna.id);
         const similarity = vector ? vector.score : 0;
@@ -350,23 +380,55 @@ const searchWithQdrant = async (
         };
       })
       .filter((qna) => {
-        const passed = qna.similarity >= SIMILARITY_THRESHOLD;
-        if (!passed) {
+        // Filter out results below threshold
+        if (qna.similarity < SIMILARITY_THRESHOLD) {
           console.log(
-            `⚠️ [TICKET-AI] FAQ ${
+            `⚠️ [TICKET-AI] Filtered out FAQ ${
               qna.id
-            } filtered out: similarity ${qna.similarity?.toFixed(
-              3
-            )} < threshold ${SIMILARITY_THRESHOLD}`
+            } due to low similarity: ${qna.similarity?.toFixed(3)}`
           );
+          return false;
         }
-        return passed;
+        return true;
       })
-      .sort((a, b) => b.similarity - a.similarity)
-      .slice(0, MAX_CONTEXT_ITEMS);
+      .sort((a, b) => b.similarity - a.similarity);
+
+    // Diversity check: remove near-duplicate results (sama dengan search.services.js)
+    const diverseResults = [];
+
+    for (const result of results) {
+      let isDuplicate = false;
+
+      for (const selected of diverseResults) {
+        // Simple diversity check: compare question text similarity
+        const similarity = calculateTextSimilarity(
+          result.question,
+          selected.question
+        );
+
+        if (similarity > SIMILARITY_DIVERSITY_THRESHOLD) {
+          console.log(
+            `⚠️ [TICKET-AI] Skipped FAQ ${result.id} due to high similarity with FAQ ${selected.id}`
+          );
+          isDuplicate = true;
+          break;
+        }
+      }
+
+      if (!isDuplicate) {
+        diverseResults.push(result);
+      }
+
+      // Stop if we have enough diverse results
+      if (diverseResults.length >= MAX_CONTEXT_ITEMS) {
+        break;
+      }
+    }
+
+    results = diverseResults;
 
     console.log(
-      `📊 [TICKET-AI] After similarity filter: ${results.length} FAQs passed threshold ${SIMILARITY_THRESHOLD}`
+      `📊 [TICKET-AI] Applied reranking: ${results.length} diverse results (threshold: ${SIMILARITY_THRESHOLD}, max: ${MAX_CONTEXT_ITEMS})`
     );
 
     return { success: true, data: results };
@@ -377,7 +439,7 @@ const searchWithQdrant = async (
 };
 
 // ========================================
-// FULLTEXT: Search with PostgreSQL
+// FULLTEXT: Search with PostgreSQL (sama dengan search.services.js)
 // ========================================
 const searchWithFullText = async (query, subCategoryIds = [], limit = 5) => {
   try {
@@ -385,12 +447,13 @@ const searchWithFullText = async (query, subCategoryIds = [], limit = 5) => {
 
     const results = await FaqQna.fullTextSearch(query, subCategoryIds, limit);
 
+    console.log(`✅ [TICKET-AI] Fulltext: ${results.length} results`);
+
     return {
       success: true,
       data: results.map((qna) => ({
         ...qna,
-        similarity: qna.rank || 0.5,
-        similarity_level: "medium",
+        similarity: qna.rank, // Gunakan rank langsung, sama dengan search.services.js
         search_method: "fulltext",
       })),
     };
@@ -401,9 +464,7 @@ const searchWithFullText = async (query, subCategoryIds = [], limit = 5) => {
 };
 
 // ========================================
-// KEYWORD: Fallback search
-// PENTING: Untuk ticket recommendation, jangan gunakan keyword search
-// karena tidak bisa memberikan similarity score yang akurat
+// KEYWORD: Fallback search (sama dengan search.services.js)
 // ========================================
 const searchWithKeyword = async (query, subCategoryIds = [], limit = 5) => {
   try {
@@ -414,21 +475,8 @@ const searchWithKeyword = async (query, subCategoryIds = [], limit = 5) => {
       .split(" ")
       .filter((k) => k.length > 2);
 
-    // Jika tidak ada sub_category_id, jangan search sama sekali
-    // karena akan terlalu banyak hasil yang tidak relevan
-    if (!subCategoryIds || subCategoryIds.length === 0) {
-      console.log(
-        "⚠️ [TICKET-AI] Keyword search skipped: no sub_category filter"
-      );
-      return { success: true, data: [] };
-    }
-
     let qb = FaqQna.query()
       .where("is_active", true)
-      .where("effective_date", "<=", new Date())
-      .where(function () {
-        this.whereNull("expired_date").orWhere("expired_date", ">", new Date());
-      })
       .withGraphFetched("sub_categories.[category]")
       .limit(limit);
 
@@ -442,22 +490,22 @@ const searchWithKeyword = async (query, subCategoryIds = [], limit = 5) => {
       });
     }
 
-    // WAJIB filter by sub_category
-    qb = qb
-      .joinRelated("sub_categories")
-      .whereIn("sub_categories.id", subCategoryIds);
+    // Filter by multiple sub categories
+    if (subCategoryIds && subCategoryIds.length > 0) {
+      qb = qb
+        .joinRelated("sub_categories")
+        .whereIn("sub_categories.id", subCategoryIds);
+    }
 
     const results = await qb;
 
-    // Keyword search tidak bisa memberikan similarity yang akurat
-    // Jadi kita set similarity rendah (0.4) agar tidak selalu lolos threshold
-    // Hasil keyword hanya digunakan jika benar-benar match sub_category
+    console.log(`✅ [TICKET-AI] Keyword: ${results.length} results`);
+
     return {
       success: true,
       data: results.map((qna) => ({
         ...qna,
-        similarity: 0.4, // Dibawah threshold 0.5 - tidak akan lolos!
-        similarity_level: "low",
+        similarity: 0.5, // Sama dengan search.services.js
         search_method: "keyword",
       })),
     };
@@ -490,6 +538,7 @@ const smartSearch = async (
       (SEARCH_STRATEGY === "qdrant" || SEARCH_STRATEGY === "hybrid")
     ) {
       try {
+        console.log("🔍 [TICKET-AI] Attempting Qdrant search...");
         const result = await searchWithQdrant(
           query,
           subCategoryIds,
@@ -498,38 +547,43 @@ const smartSearch = async (
         );
         if (result.success && result.data.length > 0) {
           console.log(
-            `✅ [TICKET-AI] Qdrant success: ${result.data.length} results`
+            `✅ [TICKET-AI] Qdrant search success: ${result.data.length} results`
           );
           return { success: true, method: "qdrant", data: result.data };
         }
-        console.log(
-          "⚠️ [TICKET-AI] Qdrant returned no results, falling back..."
-        );
+        console.log("⚠️ [TICKET-AI] Qdrant search returned no results");
       } catch (qdrantError) {
-        console.error("⚠️ [TICKET-AI] Qdrant failed:", qdrantError.message);
-      }
-    }
-
-    // Strategy 2: Try Full-text
-    try {
-      const result = await searchWithFullText(query, subCategoryIds, limit);
-      if (result.success && result.data.length > 0) {
-        console.log(
-          `✅ [TICKET-AI] Fulltext success: ${result.data.length} results`
+        console.error(
+          "⚠️ [TICKET-AI] Qdrant search failed, falling back:",
+          qdrantError.message
         );
-        return { success: true, method: "fulltext", data: result.data };
       }
-    } catch (ftError) {
-      console.error("⚠️ [TICKET-AI] Fulltext failed:", ftError.message);
     }
 
-    // Strategy 3: Keyword fallback
-    const result = await searchWithKeyword(query, subCategoryIds, limit);
-    console.log(`✅ [TICKET-AI] Keyword: ${result.data?.length || 0} results`);
-    return { success: true, method: "keyword", data: result.data };
+    // Strategy 2: Fallback to Full-Text (sama dengan search.services.js)
+    console.log("🔍 [TICKET-AI] Attempting Full-text search...");
+    const result = await searchWithFullText(query, subCategoryIds, limit);
+    console.log(
+      `✅ [TICKET-AI] Full-text search: ${result.data?.length || 0} results`
+    );
+    return {
+      success: true,
+      method: "fulltext",
+      data: result.data,
+    };
   } catch (error) {
+    // Strategy 3: Emergency keyword (sama dengan search.services.js - hanya di catch)
     console.error("❌ [TICKET-AI] All search methods failed:", error.message);
-    return { success: false, method: "none", data: [], error: error.message };
+    console.log("🔍 [TICKET-AI] Attempting Keyword search (fallback)...");
+    const result = await searchWithKeyword(query, subCategoryIds, limit);
+    console.log(
+      `✅ [TICKET-AI] Keyword search: ${result.data?.length || 0} results`
+    );
+    return {
+      success: true,
+      method: "keyword",
+      data: result.data,
+    };
   }
 };
 
