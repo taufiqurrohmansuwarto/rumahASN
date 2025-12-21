@@ -1,3 +1,26 @@
+// ========================================
+// POLYFILL ReadableStream untuk Node.js 16
+// HARUS di paling atas, SEBELUM require apapun!
+// ========================================
+if (typeof globalThis.ReadableStream === "undefined") {
+  try {
+    const {
+      ReadableStream,
+      TransformStream,
+      WritableStream,
+    } = require("stream/web");
+    globalThis.ReadableStream = ReadableStream;
+    globalThis.TransformStream = TransformStream;
+    globalThis.WritableStream = WritableStream;
+    console.log("✅ ReadableStream polyfill loaded successfully");
+  } catch (e) {
+    console.error("❌ Failed to polyfill ReadableStream:", e.message);
+    console.error(
+      "   Please upgrade to Node.js 18+ or install web-streams-polyfill"
+    );
+  }
+}
+
 // Register module aliases for Node.js context only
 require("module-alias/register");
 
