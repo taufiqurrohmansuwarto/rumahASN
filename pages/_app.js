@@ -13,6 +13,7 @@ import Head from "next/head";
 import Script from "next/script";
 import React, { useState } from "react";
 import Loading from "../src/components/Loading";
+import GlobalVideoConference from "../src/components/VideoConference/GlobalVideoConference";
 import "../styles/globals.css";
 
 import "antd/dist/reset.css";
@@ -145,6 +146,7 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }) {
                     <Component {...pageProps} />
                   )}
                 </Hydrate>
+                <GlobalVideoConference />
               </ThemeProvider>
             </MantineProvider>
           </QueryClientProvider>

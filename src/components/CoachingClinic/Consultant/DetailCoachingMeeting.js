@@ -1,20 +1,27 @@
-import JitsiMeeting from "@/components/VideoConference/JitsiMeeting";
 import {
   addParticipant,
   detailMeeting,
   removeParticipant,
   startMeeting,
-  updateMeeting,
 } from "@/services/coaching-clinics.services";
 import {
-  DeleteOutlined,
-  DragOutlined,
-  EditOutlined,
-  QuestionCircleTwoTone,
-  UserAddOutlined,
-  VideoCameraOutlined,
-} from "@ant-design/icons";
-import { Group, ScrollArea, Stack } from "@mantine/core";
+  IconArrowsMaximize,
+  IconEdit,
+  IconInfoCircle,
+  IconTrash,
+  IconUserPlus,
+  IconUsers,
+  IconVideo,
+} from "@tabler/icons-react";
+import {
+  Box,
+  Flex,
+  Group,
+  Indicator,
+  ScrollArea,
+  Stack,
+  Text,
+} from "@mantine/core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Avatar,
@@ -38,7 +45,6 @@ import {
 } from "antd";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { createPortal } from "react-dom";
 import EditCoachingClinicModal from "./EditCoachingClinicModal";
 import FormParticipants from "./FormParticipants";
 
@@ -46,7 +52,6 @@ import useVideoConferenceStore from "@/store/useVideoConference";
 import dayjs from "dayjs";
 import "dayjs/locale/id";
 import relativeTime from "dayjs/plugin/relativeTime";
-import Draggable from "react-draggable";
 dayjs.locale("id");
 dayjs.extend(relativeTime);
 
@@ -114,7 +119,7 @@ const DaftarPeserta = ({ data, meeting, openDrawer, handleCancelDrawer }) => {
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
-  const { mutateAsync: remove, isLoading: isLoadingRemove } = useMutation(
+  const { mutateAsync: remove } = useMutation(
     (data) => removeParticipant(data),
     {
       onSuccess: () => {
@@ -155,22 +160,23 @@ const DaftarPeserta = ({ data, meeting, openDrawer, handleCancelDrawer }) => {
       title="Daftar Peserta"
       width={600}
     >
-      <Stack>
+      <Stack spacing="md">
         <Group position="apart">
           <Tooltip title="Tambah Peserta">
             <Button
               shape="circle"
               onClick={handleOpen}
               type="primary"
-              icon={<UserAddOutlined />}
+              icon={<IconUserPlus size={16} />}
             />
           </Tooltip>
-          <Typography.Text strong>
+          <Text weight={500} color="dimmed">
             {data?.length} dari {meeting?.max_participants} Peserta
-          </Typography.Text>
+          </Text>
         </Group>
         <Input.Search
           allowClear
+          placeholder="Cari peserta..."
           onChange={(e) => {
             const value = e.target.value;
             if (!value) {
@@ -185,7 +191,7 @@ const DaftarPeserta = ({ data, meeting, openDrawer, handleCancelDrawer }) => {
           }}
         />
       </Stack>
-      <ScrollArea h={450}>
+      <ScrollArea h={450} mt="md">
         <ModalAddParticipant open={open} onClose={handleClose} />
         <List
           size="small"
@@ -197,8 +203,9 @@ const DaftarPeserta = ({ data, meeting, openDrawer, handleCancelDrawer }) => {
                 <Button
                   key="hapus"
                   size="small"
+                  danger
                   onClick={() => handleRemove(item)}
-                  icon={<DeleteOutlined />}
+                  icon={<IconTrash size={14} />}
                 />,
               ]}
             >
@@ -206,13 +213,6 @@ const DaftarPeserta = ({ data, meeting, openDrawer, handleCancelDrawer }) => {
                 title={<Space>{item?.participant?.username}</Space>}
                 description={
                   <Space direction="vertical" size="small">
-                    {/* <>
-                    {item?.participant?.info?.jabatan?.jabatan && (
-                      <Tag color="blue">
-                        {item?.participant?.info?.jabatan?.jabatan}
-                      </Tag>
-                    )}
-                  </> */}
                     <>
                       {item?.participant?.info?.perangkat_daerah?.detail && (
                         <Typography.Text
@@ -278,101 +278,48 @@ const ModalInformation = ({ open, onClose, item }) => {
   );
 };
 
-function FloatingVideoConference({ data, closeMeeting }) {
-  const {
-    isOpen,
-    position,
-    size,
-    isMinimized,
-    updatePosition,
-    updateSize,
-    toggleMinimize,
-  } = useVideoConferenceStore();
-  const [renderKey, setRenderKey] = useState(0);
-
-  const handleDrag = (e, data) => {
-    updatePosition({ x: data.x, y: data.y });
-  };
-
-  if (!isOpen) return null;
-
-  return createPortal(
-    <Draggable position={position} onStop={handleDrag} handle=".drag-handle">
-      <div
-        style={{
-          position: "fixed",
-          zIndex: 1000,
-          width: size.width,
-          height: size.height,
-          transition: "width 0.3s, height 0.3s",
-          boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
-          border: "1px solid #d9d9d9",
-          borderRadius: "4px",
-          overflow: "hidden",
-          resize: isMinimized ? "none" : "both",
-        }}
-      >
-        <div
-          className="drag-handle"
+// Live Meeting Status Banner
+function LiveMeetingBanner({ data, onMaximize }) {
+  return (
+    <Box
+      sx={{
+        background: "linear-gradient(135deg, #40c057 0%, #2f9e44 100%)",
+        borderRadius: 12,
+        padding: 24,
+        marginBottom: 16,
+      }}
+    >
+      <Flex align="center" justify="space-between" wrap="wrap" gap="md">
+        <Group spacing="md">
+          <Indicator color="white" processing size={14}>
+            <IconVideo size={28} color="white" />
+          </Indicator>
+          <Box>
+            <Text color="white" weight={600} size="lg">
+              Meeting Sedang Berlangsung
+            </Text>
+            <Text color="rgba(255,255,255,0.9)" size="sm">
+              {data?.title} • Anda bisa minimize video dan navigasi ke halaman
+              lain
+            </Text>
+          </Box>
+        </Group>
+        <Button
+          type="primary"
+          ghost
+          size="large"
+          icon={<IconArrowsMaximize size={18} />}
+          onClick={onMaximize}
           style={{
-            padding: "8px",
-            background: "#f0f0f0",
-            cursor: "move",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
+            borderColor: "white",
+            color: "white",
+            fontWeight: 600,
           }}
         >
-          <Space>
-            <DragOutlined style={{ cursor: "move" }} />
-            <Typography.Text strong>Coaching & Mentoring</Typography.Text>
-          </Space>
-          <Space>
-            <Button size="small" onClick={toggleMinimize}>
-              {isMinimized ? "Maximize" : "Minimize"}
-            </Button>
-            <Button size="small" onClick={closeMeeting}>
-              Close
-            </Button>
-          </Space>
-        </div>
-        <div style={{ height: "calc(100% - 40px)", overflow: "hidden" }}>
-          <JitsiMeeting
-            key={renderKey}
-            domain="coaching-online.site"
-            jwt={data?.jwt}
-            roomName={data?.id}
-            getIFrameRef={(iframeRef) => {
-              iframeRef.style.height = "100%";
-              iframeRef.style.width = "100%";
-            }}
-            configOverwrite={{
-              prejoinPageEnabled: false,
-              startWithAudioMuted: true,
-              startScreenSharing: true,
-              enableEmailInStats: false,
-              whiteboard: {
-                enabled: true,
-                collabServerBaseUrl:
-                  "https://siasn.bkd.jatimprov.go.id/whiteboard",
-              },
-            }}
-            interfaceConfigOverwrite={{
-              DISABLE_JOIN_LEAVE_NOTIFICATIONS: false,
-              APP_NAME: "Coaching & Mentoring",
-            }}
-            userInfo={{
-              displayName: data?.coach?.username,
-              role: "moderator",
-            }}
-            onReadyToClose={() => {
-              closeMeeting();
-            }}
-          />
-        </div>
-      </div>
-    </Draggable>,
-    document.body
+          Buka Video
+        </Button>
+      </Flex>
+    </Box>
   );
 }
 
@@ -380,49 +327,44 @@ function DetailCoachingMeeting() {
   const router = useRouter();
   const { id } = router.query;
 
-  const [renderKey, setRenderKey] = useState(0);
-
   const queryClient = useQueryClient();
 
-  const { data, isLoading } = useQuery(
+  // Global video conference store
+  const { startMeeting: startGlobalMeeting, isOpen, maximizeFromPip } =
+    useVideoConferenceStore();
+
+  const { data, isLoading, refetch } = useQuery(
     ["meeting", id],
     () => detailMeeting(id),
     {
       enabled: !!id,
-      onSuccess: () => {
-        if (data?.status === "live") {
-          openVideoConference();
-        }
-      },
+      refetchOnWindowFocus: false,
     }
   );
 
-  const { openVideoConference, closeVideoConference } =
-    useVideoConferenceStore();
+  // Check if current meeting is the one in global store
+  const { meetingData } = useVideoConferenceStore();
+  const isCurrentMeetingLive = isOpen && meetingData?.id === id;
 
   const { mutateAsync: start, isLoading: isLoadingStart } = useMutation(
-    (data) => startMeeting(data),
+    (meetingId) => startMeeting(meetingId),
     {
-      onSuccess: () => {
-        message.success("Meeting started");
-        queryClient.invalidateQueries(["meeting", id]);
-        setRenderKey((prev) => prev + 1);
-        openVideoConference();
-      },
-      onSettled: () => {
-        queryClient.invalidateQueries(["meeting", id]);
-      },
-    }
-  );
-
-  const { mutateAsync: updateData, isLoading: isLoadingUpdate } = useMutation(
-    (data) => updateMeeting(data),
-    {
-      onSuccess: () => {
-        message.success("Coaching clinic berhasil diupdate");
+      onSuccess: async () => {
+        message.success("Meeting dimulai!");
+        // Refetch to get JWT
+        const updatedData = await refetch();
+        // Start global video conference with meeting data
+        if (updatedData?.data) {
+          startGlobalMeeting({
+            ...updatedData.data,
+            id: id,
+          });
+        }
         queryClient.invalidateQueries(["meeting", id]);
         queryClient.invalidateQueries(["meetings"]);
-        router.push("/coaching-clinic-consultant");
+      },
+      onError: (error) => {
+        message.error(error?.response?.data?.message || "Gagal memulai meeting");
       },
     }
   );
@@ -431,8 +373,8 @@ function DetailCoachingMeeting() {
     Modal.confirm({
       title: "Mulai Coaching & Mentoring",
       content: "Apakah anda yakin ingin memulai coaching & mentoring ini?",
-      okText: "Ya",
-      cancelText: "Tidak",
+      okText: "Ya, Mulai",
+      cancelText: "Batal",
       centered: true,
       onOk: async () => {
         await start(id);
@@ -440,27 +382,19 @@ function DetailCoachingMeeting() {
     });
   };
 
-  const closeMeeting = () => {
-    Modal.info({
-      title: "Coaching Clinic telah selesai",
-      content:
-        "Terima kasih telah menggunakan layanan coaching clinic Rumah ASN",
-      okText: "Tutup",
-      centered: true,
-      onOk: async () => {
-        await updateData({
-          id,
-          data: {
-            status: "end",
-          },
-        });
-        closeVideoConference();
-      },
-    });
+  const handleMaximize = () => {
+    if (isCurrentMeetingLive) {
+      maximizeFromPip();
+    } else if (data?.status === "live" && data?.jwt) {
+      // If meeting is live but not in global store, start it
+      startGlobalMeeting({
+        ...data,
+        id: id,
+      });
+    }
   };
 
   const [open, setOpen] = useState(false);
-  const [api, setApi] = useState(null);
   const [openEditModal, setOpenEditModal] = useState(false);
   const [openDrawer, setOpenDrawer] = useState(false);
 
@@ -478,6 +412,16 @@ function DetailCoachingMeeting() {
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
+  // Auto-start global video if meeting is live and has JWT
+  useEffect(() => {
+    if (data?.status === "live" && data?.jwt && !isOpen) {
+      startGlobalMeeting({
+        ...data,
+        id: id,
+      });
+    }
+  }, [data?.status, data?.jwt, id]);
+
   return (
     <>
       <FloatButton.BackTop />
@@ -489,40 +433,70 @@ function DetailCoachingMeeting() {
       <Card
         extra={
           <Space>
-            <QuestionCircleTwoTone
-              onClick={handleOpen}
-              style={{
-                cursor: "pointer",
-              }}
-            />
-            <Button type="primary" onClick={handleOpenDrawer}>
+            <Tooltip title="Info">
+              <Button
+                type="text"
+                icon={<IconInfoCircle size={18} />}
+                onClick={handleOpen}
+              />
+            </Tooltip>
+            <Button
+              type="primary"
+              icon={<IconUsers size={16} />}
+              onClick={handleOpenDrawer}
+            >
               Peserta
             </Button>
           </Space>
         }
         title={
-          <Space>
-            <Typography.Text>{data?.title}</Typography.Text>
-            <EditOutlined
-              onClick={handleEdit}
-              style={{
-                cursor: "pointer",
-              }}
-            />
-          </Space>
+          <Group spacing="sm">
+            <Typography.Text strong>{data?.title}</Typography.Text>
+            <Tooltip title="Edit">
+              <Button
+                type="text"
+                size="small"
+                icon={<IconEdit size={16} />}
+                onClick={handleEdit}
+              />
+            </Tooltip>
+            {(data?.status === "live" || isCurrentMeetingLive) && (
+              <Tag color="green">🔴 LIVE</Tag>
+            )}
+          </Group>
         }
         loading={isLoading}
       >
         <ModalInformation open={open} item={data} onClose={handleClose} />
-        {data?.status === "live" ? (
+
+        {/* Show Live Banner if meeting is live */}
+        {(data?.status === "live" || isCurrentMeetingLive) && (
+          <LiveMeetingBanner data={data} onMaximize={handleMaximize} />
+        )}
+
+        {data?.status === "live" || isCurrentMeetingLive ? (
           <Row gutter={[16, 16]}>
-            <Col md={24} xs={24}>
-              <FloatingVideoConference
-                data={data}
-                closeMeeting={closeMeeting}
-              />
+            <Col span={24}>
+              <Card size="small">
+                <Stack spacing="sm">
+                  <Text color="dimmed" size="sm">
+                    Video conference sedang berjalan di latar belakang. Anda
+                    dapat mengakses menu lain dan video akan tetap ada. Untuk
+                    mengakhiri meeting, klik tombol "Akhiri Meeting" di video.
+                  </Text>
+                  <Group>
+                    <Button
+                      type="primary"
+                      icon={<IconArrowsMaximize size={16} />}
+                      onClick={handleMaximize}
+                    >
+                      Buka Video Fullscreen
+                    </Button>
+                  </Group>
+                </Stack>
+              </Card>
             </Col>
-            <Col md={6} xs={24}>
+            <Col md={24} xs={24}>
               <DaftarPeserta
                 meeting={data}
                 data={data?.participants}
@@ -535,33 +509,50 @@ function DetailCoachingMeeting() {
           <>
             <Row gutter={[32, 32]}>
               <Col md={24} xs={24}>
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    borderRadius: 8,
+                <Flex
+                  align="center"
+                  justify="center"
+                  sx={{
+                    borderRadius: 12,
                     height: "50vh",
-                    backgroundColor: "#eee",
+                    background:
+                      "linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)",
                   }}
                 >
                   <Empty
-                    description={`Hmmm... sepertinya coaching clinic belum dimulai atau coaching clinic sudah berakhir`}
+                    image={<IconVideo size={64} color="#667eea" stroke={1.5} />}
+                    description={
+                      <Stack align="center" spacing={4}>
+                        <Text weight={600} size="lg">
+                          Coaching Clinic Belum Dimulai
+                        </Text>
+                        <Text color="dimmed" size="sm">
+                          Klik tombol di bawah untuk memulai sesi coaching
+                        </Text>
+                      </Stack>
+                    }
                   >
                     <Button
-                      shape="round"
+                      size="large"
                       onClick={handleStartMeeting}
                       loading={isLoadingStart}
                       disabled={isLoading}
                       type="primary"
-                      icon={<VideoCameraOutlined />}
+                      icon={<IconVideo size={18} />}
+                      style={{
+                        height: 48,
+                        paddingLeft: 32,
+                        paddingRight: 32,
+                        borderRadius: 24,
+                        fontWeight: 600,
+                      }}
                     >
-                      Mulai
+                      Mulai Coaching Clinic
                     </Button>
                   </Empty>
-                </div>
+                </Flex>
               </Col>
-              <Col md={6} xs={24}>
+              <Col md={24} xs={24}>
                 <DaftarPeserta
                   meeting={data}
                   data={data?.participants}
