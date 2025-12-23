@@ -99,6 +99,7 @@ function ModalTransferSKP22Personal({
           </Form.Item>
           <Form.Item name="tahun" label="Tahun Penilaian" required>
             <Select disabled>
+              <Select.Option value="2025">TAHUN PENILAIAN 2025</Select.Option>
               <Select.Option value="2024">TAHUN PENILAIAN 2024</Select.Option>
               <Select.Option value="2023">TAHUN PENILAIAN 2023</Select.Option>
               <Select.Option value="2022">TAHUN PENILAIAN 2022</Select.Option>

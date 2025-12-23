@@ -151,6 +151,7 @@ const FormSKP22 = ({ visible, onCancel, nip }) => {
         </Form.Item>
         <Form.Item name="tahun" label="Tahun Penilaian" required>
           <Select>
+            <Select.Option value="2025">TAHUN PENILAIAN 2025</Select.Option>
             <Select.Option value="2024">TAHUN PENILAIAN 2024</Select.Option>
             <Select.Option value="2023">TAHUN PENILAIAN 2023</Select.Option>
             <Select.Option value="2022">TAHUN PENILAIAN 2022</Select.Option>
@@ -429,23 +430,23 @@ function CompareSKP22ByNip({ nip }) {
           </Space>
         }
       >
-      <ModalTransferSKP22
-        nip={nip}
-        open={openTransfer}
-        data={currentData}
-        onCancel={handleCloseTransfer}
-        file={file}
-        loadingFile={loadingFile}
-      />
-      <Stack>
-        <FormSKP22 visible={visible} onCancel={handleCancel} nip={nip} />
-        <div id="kinerja-siasn">
-          <Alert
-            showIcon
-            type="info"
-            description="Jika terjadi kesalahan pada data SKP SIASN, gunakan tahun yang sama dengan data yang baru. Data yang lama akan direplace dengan data yang baru."
+        <ModalTransferSKP22
+          nip={nip}
+          open={openTransfer}
+          data={currentData}
+          onCancel={handleCloseTransfer}
+          file={file}
+          loadingFile={loadingFile}
+        />
+        <Stack>
+          <FormSKP22 visible={visible} onCancel={handleCancel} nip={nip} />
+          <div id="kinerja-siasn">
+            <Alert
+              showIcon
+              type="info"
+              description="Jika terjadi kesalahan pada data SKP SIASN, gunakan tahun yang sama dengan data yang baru. Data yang lama akan direplace dengan data yang baru."
               style={{ marginBottom: 16 }}
-          />
+            />
             <Flex
               justify="space-between"
               align="center"
@@ -459,32 +460,32 @@ function CompareSKP22ByNip({ nip }) {
                   {data?.length || 0}
                 </MantineBadge>
               </Space>
-            <Button
+              <Button
                 icon={<IconPlus size={16} />}
-              type="primary"
-              onClick={handleVisible}
-            >
-              Tambah
-            </Button>
-          </Flex>
-          <Table
+                type="primary"
+                onClick={handleVisible}
+              >
+                Tambah
+              </Button>
+            </Flex>
+            <Table
               title={null}
-            pagination={false}
-            columns={columns}
-            loading={isLoading}
-            rowKey={(row) => row?.id}
-            dataSource={data}
+              pagination={false}
+              columns={columns}
+              loading={isLoading}
+              rowKey={(row) => row?.id}
+              dataSource={data}
               size="middle"
               scroll={{ x: 900 }}
               rowClassName={(record, index) =>
                 index % 2 === 0 ? "table-row-light" : "table-row-dark"
               }
-          />
-        </div>
+            />
+          </div>
 
           <Divider />
 
-        <div id="kinerja-simaster">
+          <div id="kinerja-simaster">
             <Space style={{ marginBottom: 16 }}>
               <MantineText fw={600} size="sm">
                 SIMASTER
@@ -493,22 +494,22 @@ function CompareSKP22ByNip({ nip }) {
                 {dataMaster?.length || 0}
               </MantineBadge>
             </Space>
-          <Table
+            <Table
               title={null}
-            pagination={false}
-            columns={columnMaster}
-            loading={isLoadingMaster}
-            rowKey={(row) => row?.skp_id}
-            dataSource={dataMaster}
+              pagination={false}
+              columns={columnMaster}
+              loading={isLoadingMaster}
+              rowKey={(row) => row?.skp_id}
+              dataSource={dataMaster}
               size="middle"
               scroll={{ x: 600 }}
               rowClassName={(record, index) =>
                 index % 2 === 0 ? "table-row-light" : "table-row-dark"
               }
-          />
-        </div>
-      </Stack>
-    </Card>
+            />
+          </div>
+        </Stack>
+      </Card>
     </div>
   );
 }
