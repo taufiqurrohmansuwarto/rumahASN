@@ -174,8 +174,9 @@ const ModalUbahPendidikan = ({
       setSelectedMasterData(null); // Reset selected master data
       setSelectedMasterId(null); // Reset dropdown value
 
-      // Reset state pendidikan pertama dari row
-      setIsPendidikanPertama(formatBoolean(row?.isPendidikanPertama));
+      // Reset state pendidikan pertama ke false (user harus pilih manual)
+      // Tidak mengambil dari row karena ini form ubah, user input ulang
+      setIsPendidikanPertama(false);
 
       // Reset uploaded files
       setUploadedFiles({
@@ -259,18 +260,8 @@ const ModalUbahPendidikan = ({
   });
 
   // State untuk toggle pendidikan pertama
-  // Inisialisasi langsung dari row jika tersedia
-  const [isPendidikanPertama, setIsPendidikanPertama] = useState(() => {
-    if (row?.isPendidikanPertama) {
-      return (
-        row.isPendidikanPertama === true ||
-        row.isPendidikanPertama === "true" ||
-        row.isPendidikanPertama === "1" ||
-        row.isPendidikanPertama === 1
-      );
-    }
-    return false;
-  });
+  // Tidak perlu lazy initialization karena useEffect akan handle saat modal dibuka
+  const [isPendidikanPertama, setIsPendidikanPertama] = useState(false);
 
   // State untuk preview file dengan iframe
   const [previewModal, setPreviewModal] = useState({
@@ -413,8 +404,15 @@ const ModalUbahPendidikan = ({
         return;
       }
 
-      // Simpan values dari step 1
-      setStep1Values(values);
+      // Simpan values dari step 1 termasuk isPendidikanPertama
+      console.log(
+        "DEBUG handleNext - isPendidikanPertama:",
+        isPendidikanPertama
+      );
+      setStep1Values({
+        ...values,
+        isPendidikanPertama: isPendidikanPertama,
+      });
       setStep(2);
     } catch (error) {
       message.error("Lengkapi form terlebih dahulu");
@@ -439,6 +437,14 @@ const ModalUbahPendidikan = ({
       // Combine values dari step 1 dan step 2
       const allValues = { ...step1Values, ...step2Values };
 
+      // Gunakan nilai isPendidikanPertama yang disimpan di step1Values
+      const isPendidikanPertamaFinal =
+        step1Values?.isPendidikanPertama || false;
+      console.log(
+        "DEBUG handleSubmit - isPendidikanPertamaFinal:",
+        isPendidikanPertamaFinal
+      );
+
       const payload = {
         usulan_id: usulanId,
         tipe: "U",
@@ -454,7 +460,7 @@ const ModalUbahPendidikan = ({
           : "",
         pendidikan_id: allValues?.pendidikanId,
         pendidikan_nama: "",
-        is_pendidikan_pertama: isPendidikanPertama ? "1" : "0",
+        is_pendidikan_pertama: isPendidikanPertamaFinal ? "1" : "0",
         pencantuman_gelar: allValues?.pencantumanGelar || "",
         tingkat_pendidikan_id: row?.tkPendidikanId || "",
         tingkat_pendidikan_nama: row?.tkPendidikanNama || "",
