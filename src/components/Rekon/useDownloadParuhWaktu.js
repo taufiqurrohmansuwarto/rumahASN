@@ -66,6 +66,7 @@ export const useDownloadParuhWaktu = (query) => {
           "Unit Kerja SIMASTER Text": item?.unor_simaster_text || "-",
           "Unit Kerja SIMASTER ID": item?.unor_id_simaster || "-",
           "Unit Kerja Perjanjian Kerja": item?.unor_pk_text || "-",
+          "Unit Kerja Perjanjian Kerja ID": item?.unor_pk || "-",
           "Luar Perangkat Daerah": item?.luar_perangkat_daerah ? "Ya" : "Tidak",
           BLUD: item?.is_blud ? "Ya" : "Tidak",
           "Status UNOR":
@@ -136,6 +137,7 @@ export const useDownloadParuhWaktu = (query) => {
         { wch: 50 }, // Unit Kerja SIMASTER Text
         { wch: 20 }, // Unit Kerja SIMASTER ID
         { wch: 50 }, // Unit Kerja Perjanjian Kerja
+        { wch: 20 }, // Unit Kerja PK ID
         { wch: 20 }, // Luar Perangkat Daerah
         { wch: 10 }, // BLUD
         { wch: 25 }, // Status UNOR
