@@ -134,7 +134,10 @@ export const updateDataPeremajaanPendidikanSIASN = async (token, data) => {
 
   Object.entries(data).forEach(([key, value]) => {
     if (key === "is_pendidikan_pertama") {
-      formData.append(key, !!value ? "1" : "0");
+      // Handle berbagai format: boolean, string "1"/"0", number 1/0
+      const isPendidikanPertama =
+        value === true || value === "1" || value === 1;
+      formData.append(key, isPendidikanPertama ? "1" : "0");
       return;
     }
 
