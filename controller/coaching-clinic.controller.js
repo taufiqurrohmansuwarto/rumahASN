@@ -97,21 +97,26 @@ const createJWT = (user, id) => {
 };
 
 const createJwtParticipant = (user, id) => {
+  const now = Math.floor(Date.now() / 1000); // detik (UTC)
+  const skew = 60; // toleransi 60 detik
+  const ttl = 60 * 60; // 1 jam
+
   const payload = {
     context: {
       user: {
         avatar: user?.image,
-        name: `${user?.name}|Peserta`,
+        name: `${user?.name} | Peserta`,
         email: user?.email,
         id: user?.customId,
       },
     },
+    nbf: now - skew,
+    exp: now + ttl,
     moderator: false,
     aud: appId,
     iss: appId,
     sub: "coaching-online.site",
     room: id,
-    exp: 1753498815,
   };
 
   const jwt = jsonwebtoken.sign(payload, appSecret);
