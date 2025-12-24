@@ -51,15 +51,38 @@ const useVideoConferenceStore = create(
       position: calculateCenterPosition(DEFAULT_SIZE.width, DEFAULT_SIZE.height),
       size: DEFAULT_SIZE,
       isMinimized: false,
+      
+      // Track meetings that were manually ended/left to prevent auto-restart
+      // This is cleared after a short timeout or page refresh
+      endedMeetingIds: [],
 
       // Actions - Start meeting with data
-      startMeeting: (data) =>
+      startMeeting: (data) => {
+        const endedIds = get().endedMeetingIds;
+        // Don't start if this meeting was recently ended/left
+        if (endedIds.includes(data?.id)) {
+          return false;
+        }
         set({
           meetingData: data,
           viewMode: "fullscreen",
           isOpen: true,
           isMinimized: false,
-        }),
+        });
+        return true;
+      },
+
+      // Check if a meeting was manually ended/left
+      wasMeetingEnded: (meetingId) => {
+        return get().endedMeetingIds.includes(meetingId);
+      },
+
+      // Clear ended meeting ID (for when user explicitly wants to rejoin)
+      clearEndedMeeting: (meetingId) => {
+        set({
+          endedMeetingIds: get().endedMeetingIds.filter((id) => id !== meetingId),
+        });
+      },
 
       // Switch to specific view mode
       setViewMode: (mode) => {
@@ -103,14 +126,38 @@ const useVideoConferenceStore = create(
           size: VIEW_MODE_SIZES.standard,
         }),
 
-      // End meeting completely
-      endMeeting: () =>
+      // End meeting completely (marks it as ended to prevent auto-restart)
+      endMeeting: () => {
+        const currentMeetingId = get().meetingData?.id;
+        const currentEndedIds = get().endedMeetingIds;
+        
         set({
           meetingData: null,
           viewMode: "hidden",
           isOpen: false,
           isMinimized: false,
-        }),
+          // Add to ended list to prevent auto-restart
+          endedMeetingIds: currentMeetingId 
+            ? [...currentEndedIds.filter(id => id !== currentMeetingId), currentMeetingId]
+            : currentEndedIds,
+        });
+      },
+
+      // Leave meeting (for participants) - same as end but marked differently
+      leaveMeeting: () => {
+        const currentMeetingId = get().meetingData?.id;
+        const currentEndedIds = get().endedMeetingIds;
+        
+        set({
+          meetingData: null,
+          viewMode: "hidden",
+          isOpen: false,
+          isMinimized: false,
+          endedMeetingIds: currentMeetingId 
+            ? [...currentEndedIds.filter(id => id !== currentMeetingId), currentMeetingId]
+            : currentEndedIds,
+        });
+      },
 
       // Update PiP/compact size (for resize)
       updatePipSize: (newSize) =>
@@ -128,12 +175,19 @@ const useVideoConferenceStore = create(
       openVideoConference: () =>
         set({ isOpen: true, isMinimized: false, viewMode: "fullscreen" }),
 
-      closeVideoConference: () =>
+      closeVideoConference: () => {
+        const currentMeetingId = get().meetingData?.id;
+        const currentEndedIds = get().endedMeetingIds;
+        
         set({
           isOpen: false,
           meetingData: null,
           viewMode: "hidden",
-        }),
+          endedMeetingIds: currentMeetingId 
+            ? [...currentEndedIds.filter(id => id !== currentMeetingId), currentMeetingId]
+            : currentEndedIds,
+        });
+      },
 
       updatePosition: (newPosition) => set({ position: newPosition }),
 
@@ -187,6 +241,7 @@ const useVideoConferenceStore = create(
       partialize: (state) => ({
         pipSize: state.pipSize,
         pipPosition: state.pipPosition,
+        // Don't persist endedMeetingIds - should reset on page refresh
       }),
     }
   )

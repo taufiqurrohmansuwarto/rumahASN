@@ -210,6 +210,9 @@ function DetailMeetingParticipant() {
     startMeeting: startGlobalMeeting,
     isOpen,
     maximizeFromPip,
+    meetingData,
+    wasMeetingEnded,
+    clearEndedMeeting,
   } = useVideoConferenceStore();
 
   const handleOpenParticipant = () => setOpenParticipant(true);
@@ -228,8 +231,10 @@ function DetailMeetingParticipant() {
   );
 
   // Check if current meeting is the one in global store
-  const { meetingData } = useVideoConferenceStore();
   const isCurrentMeetingLive = isOpen && meetingData?.id === data?.meeting?.id;
+  
+  // Check if this meeting was manually left (to prevent auto-restart)
+  const wasMeetingManuallyLeft = wasMeetingEnded(data?.meeting?.id);
 
   // Get current participant info from participants list
   const currentParticipant = data?.participants?.find(
@@ -240,6 +245,10 @@ function DetailMeetingParticipant() {
     if (isCurrentMeetingLive) {
       maximizeFromPip();
     } else if (data?.meeting?.status === "live" && data?.jwt) {
+      // Clear the left state so we can rejoin
+      if (wasMeetingManuallyLeft) {
+        clearEndedMeeting(data?.meeting?.id);
+      }
       // Start global video conference with meeting data
       startGlobalMeeting({
         ...data?.meeting,
@@ -252,8 +261,14 @@ function DetailMeetingParticipant() {
   };
 
   // Auto-start global video if meeting is live and has JWT
+  // But NOT if user manually left the meeting
   useEffect(() => {
-    if (data?.meeting?.status === "live" && data?.jwt && !isOpen) {
+    if (
+      data?.meeting?.status === "live" &&
+      data?.jwt &&
+      !isOpen &&
+      !wasMeetingManuallyLeft
+    ) {
       startGlobalMeeting({
         ...data?.meeting,
         jwt: data?.jwt,
@@ -262,7 +277,15 @@ function DetailMeetingParticipant() {
         participant: currentParticipant?.participant || { username: "Peserta" },
       });
     }
-  }, [data?.meeting?.status, data?.jwt, data?.meeting?.id, currentParticipant]);
+  }, [
+    data?.meeting?.status,
+    data?.jwt,
+    data?.meeting?.id,
+    currentParticipant,
+    isOpen,
+    wasMeetingManuallyLeft,
+    startGlobalMeeting,
+  ]);
 
   return (
     <>

@@ -330,8 +330,14 @@ function DetailCoachingMeeting() {
   const queryClient = useQueryClient();
 
   // Global video conference store
-  const { startMeeting: startGlobalMeeting, isOpen, maximizeFromPip } =
-    useVideoConferenceStore();
+  const {
+    startMeeting: startGlobalMeeting,
+    isOpen,
+    maximizeFromPip,
+    meetingData,
+    wasMeetingEnded,
+    clearEndedMeeting,
+  } = useVideoConferenceStore();
 
   const { data, isLoading, refetch } = useQuery(
     ["meeting", id],
@@ -343,8 +349,10 @@ function DetailCoachingMeeting() {
   );
 
   // Check if current meeting is the one in global store
-  const { meetingData } = useVideoConferenceStore();
   const isCurrentMeetingLive = isOpen && meetingData?.id === id;
+  
+  // Check if this meeting was manually ended (to prevent auto-restart)
+  const wasMeetingManuallyEnded = wasMeetingEnded(id);
 
   const { mutateAsync: start, isLoading: isLoadingStart } = useMutation(
     (meetingId) => startMeeting(meetingId),
@@ -386,6 +394,10 @@ function DetailCoachingMeeting() {
     if (isCurrentMeetingLive) {
       maximizeFromPip();
     } else if (data?.status === "live" && data?.jwt) {
+      // Clear the ended state so we can rejoin
+      if (wasMeetingManuallyEnded) {
+        clearEndedMeeting(id);
+      }
       // If meeting is live but not in global store, start it
       startGlobalMeeting({
         ...data,
@@ -413,14 +425,20 @@ function DetailCoachingMeeting() {
   const handleClose = () => setOpen(false);
 
   // Auto-start global video if meeting is live and has JWT
+  // But NOT if meeting was manually ended by user
   useEffect(() => {
-    if (data?.status === "live" && data?.jwt && !isOpen) {
+    if (
+      data?.status === "live" &&
+      data?.jwt &&
+      !isOpen &&
+      !wasMeetingManuallyEnded
+    ) {
       startGlobalMeeting({
         ...data,
         id: id,
       });
     }
-  }, [data?.status, data?.jwt, id]);
+  }, [data?.status, data?.jwt, id, isOpen, wasMeetingManuallyEnded, startGlobalMeeting]);
 
   return (
     <>

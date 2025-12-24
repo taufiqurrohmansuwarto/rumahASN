@@ -31,6 +31,7 @@ import dynamic from "next/dynamic";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/router";
 
 const JitsiMeeting = dynamic(
   () => import("@jitsi/react-sdk").then((mod) => mod.JitsiMeeting),
@@ -75,12 +76,14 @@ function GlobalVideoConference() {
     switchToStandard,
     setViewMode,
     endMeeting,
+    leaveMeeting,
     updatePipSize,
     updatePipPosition,
     getPipPositionStyles,
   } = useVideoConferenceStore();
 
   const queryClient = useQueryClient();
+  const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [isEnding, setIsEnding] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
@@ -218,11 +221,13 @@ function GlobalVideoConference() {
         onOk: () => {
           message.info("Anda telah keluar dari meeting");
           queryClient.invalidateQueries(["detailMeetingParticipant"]);
-          endMeeting();
+          leaveMeeting();
+          // Redirect participant to coaching clinic list
+          router.push("/coaching-clinic/my-coaching");
         },
       });
     }, 100);
-  }, [endMeeting, minimizeToPip, viewMode, queryClient]);
+  }, [leaveMeeting, minimizeToPip, viewMode, queryClient, router]);
 
   // Handle Jitsi API ready
   const handleJitsiApiReady = useCallback((api) => {
@@ -234,10 +239,12 @@ function GlobalVideoConference() {
       if (isParticipant) {
         message.info("Meeting telah diakhiri oleh coach");
         queryClient.invalidateQueries(["detailMeetingParticipant"]);
-        endMeeting();
+        leaveMeeting();
+        // Redirect participant to coaching clinic list
+        router.push("/coaching-clinic/my-coaching");
       }
     });
-  }, [isParticipant, endMeeting, queryClient]);
+  }, [isParticipant, leaveMeeting, queryClient, router]);
 
   // Don't render on server or if not open
   if (!mounted || !isOpen || !meetingData || viewMode === "hidden") {
