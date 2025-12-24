@@ -209,10 +209,10 @@ function DetailMeetingParticipant() {
   const {
     startMeeting: startGlobalMeeting,
     isOpen,
-    maximizeFromPip,
+    setViewMode,
     meetingData,
     wasMeetingEnded,
-    clearEndedMeeting,
+    allowRejoin,
   } = useVideoConferenceStore();
 
   const handleOpenParticipant = () => setOpenParticipant(true);
@@ -243,11 +243,11 @@ function DetailMeetingParticipant() {
 
   const handleMaximize = () => {
     if (isCurrentMeetingLive) {
-      maximizeFromPip();
+      setViewMode("fullscreen");
     } else if (data?.meeting?.status === "live" && data?.jwt) {
       // Clear the left state so we can rejoin
       if (wasMeetingManuallyLeft) {
-        clearEndedMeeting(data?.meeting?.id);
+        allowRejoin(data?.meeting?.id);
       }
       // Start global video conference with meeting data
       startGlobalMeeting({

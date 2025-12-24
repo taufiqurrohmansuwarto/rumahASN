@@ -1,27 +1,13 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-const calculateCenterPosition = (width, height) => {
-  if (typeof window === "undefined") {
-    return { x: 0, y: 0 };
-  }
-  const windowWidth = window.innerWidth;
-  const windowHeight = window.innerHeight;
-  const x = Math.max(0, Math.floor((windowWidth - width) / 2));
-  const y = Math.max(0, Math.floor((windowHeight - height) / 2));
-  return { x, y };
-};
-
 // Size configurations for different view modes
 const VIEW_MODE_SIZES = {
-  fullscreen: { width: "100%", height: "100%" },
+  fullscreen: null, // Uses 100% viewport
   standard: { width: 800, height: 600 },
   compact: { width: 400, height: 300 },
   mini: { width: 200, height: 150 },
 };
-
-// Default sizes for legacy compatibility
-const DEFAULT_SIZE = { width: 800, height: 600 };
 
 // PiP position configs
 const PIP_POSITIONS = {
@@ -31,217 +17,88 @@ const PIP_POSITIONS = {
   "top-left": { top: 80, left: 20 },
 };
 
-// View mode labels in Indonesian
-const VIEW_MODE_LABELS = {
-  fullscreen: "Layar Penuh",
-  standard: "Jendela Standar",
-  compact: "Kompak",
-  mini: "Mini",
-};
-
 const useVideoConferenceStore = create(
   persist(
     (set, get) => ({
-      // State
+      // Core state - simplified
       isOpen: false,
-      meetingData: null, // { jwt, roomName, id, coach, title, isParticipant, ... }
+      meetingData: null,
       viewMode: "hidden", // 'fullscreen' | 'standard' | 'compact' | 'mini' | 'hidden'
-      pipSize: VIEW_MODE_SIZES.compact,
       pipPosition: "bottom-right",
-      position: calculateCenterPosition(DEFAULT_SIZE.width, DEFAULT_SIZE.height),
-      size: DEFAULT_SIZE,
-      isMinimized: false,
-      
-      // Track meetings that were manually ended/left to prevent auto-restart
-      // This is cleared after a short timeout or page refresh
-      endedMeetingIds: [],
 
-      // Actions - Start meeting with data
+      // Track last ended meeting to prevent auto-restart (single ID, not array)
+      lastEndedMeetingId: null,
+
+      // Start meeting
       startMeeting: (data) => {
-        const endedIds = get().endedMeetingIds;
-        // Don't start if this meeting was recently ended/left
-        if (endedIds.includes(data?.id)) {
+        const { lastEndedMeetingId, isOpen } = get();
+
+        // Prevent re-start if already open with same meeting
+        if (isOpen && get().meetingData?.id === data?.id) {
           return false;
         }
+
+        // Prevent auto-restart of just-ended meeting
+        if (lastEndedMeetingId === data?.id) {
+          return false;
+        }
+
         set({
           meetingData: data,
           viewMode: "fullscreen",
           isOpen: true,
-          isMinimized: false,
         });
         return true;
       },
 
-      // Check if a meeting was manually ended/left
+      // Check if meeting was just ended
       wasMeetingEnded: (meetingId) => {
-        return get().endedMeetingIds.includes(meetingId);
+        return get().lastEndedMeetingId === meetingId;
       },
 
-      // Clear ended meeting ID (for when user explicitly wants to rejoin)
-      clearEndedMeeting: (meetingId) => {
-        set({
-          endedMeetingIds: get().endedMeetingIds.filter((id) => id !== meetingId),
-        });
-      },
-
-      // Switch to specific view mode
-      setViewMode: (mode) => {
-        const size = VIEW_MODE_SIZES[mode] || VIEW_MODE_SIZES.compact;
-        set({
-          viewMode: mode,
-          isMinimized: mode !== "fullscreen" && mode !== "standard",
-          size: typeof size.width === "number" ? size : get().size,
-        });
-      },
-
-      // Minimize to compact (PiP) mode
-      minimizeToPip: () =>
-        set({
-          viewMode: "compact",
-          isMinimized: true,
-          size: VIEW_MODE_SIZES.compact,
-        }),
-
-      // Minimize to mini mode
-      minimizeToMini: () =>
-        set({
-          viewMode: "mini",
-          isMinimized: true,
-          size: VIEW_MODE_SIZES.mini,
-        }),
-
-      // Maximize to fullscreen
-      maximizeFromPip: () =>
-        set({
-          viewMode: "fullscreen",
-          isMinimized: false,
-          size: DEFAULT_SIZE,
-        }),
-
-      // Switch to standard window mode
-      switchToStandard: () =>
-        set({
-          viewMode: "standard",
-          isMinimized: false,
-          size: VIEW_MODE_SIZES.standard,
-        }),
-
-      // End meeting completely (marks it as ended to prevent auto-restart)
-      endMeeting: () => {
-        const currentMeetingId = get().meetingData?.id;
-        const currentEndedIds = get().endedMeetingIds;
-        
-        set({
-          meetingData: null,
-          viewMode: "hidden",
-          isOpen: false,
-          isMinimized: false,
-          // Add to ended list to prevent auto-restart
-          endedMeetingIds: currentMeetingId 
-            ? [...currentEndedIds.filter(id => id !== currentMeetingId), currentMeetingId]
-            : currentEndedIds,
-        });
-      },
-
-      // Leave meeting (for participants) - same as end but marked differently
-      leaveMeeting: () => {
-        const currentMeetingId = get().meetingData?.id;
-        const currentEndedIds = get().endedMeetingIds;
-        
-        set({
-          meetingData: null,
-          viewMode: "hidden",
-          isOpen: false,
-          isMinimized: false,
-          endedMeetingIds: currentMeetingId 
-            ? [...currentEndedIds.filter(id => id !== currentMeetingId), currentMeetingId]
-            : currentEndedIds,
-        });
-      },
-
-      // Update PiP/compact size (for resize)
-      updatePipSize: (newSize) =>
-        set({
-          pipSize: { ...get().pipSize, ...newSize },
-        }),
-
-      // Change PiP position
-      updatePipPosition: (position) =>
-        set({
-          pipPosition: position,
-        }),
-
-      // Legacy actions for backwards compatibility
-      openVideoConference: () =>
-        set({ isOpen: true, isMinimized: false, viewMode: "fullscreen" }),
-
-      closeVideoConference: () => {
-        const currentMeetingId = get().meetingData?.id;
-        const currentEndedIds = get().endedMeetingIds;
-        
-        set({
-          isOpen: false,
-          meetingData: null,
-          viewMode: "hidden",
-          endedMeetingIds: currentMeetingId 
-            ? [...currentEndedIds.filter(id => id !== currentMeetingId), currentMeetingId]
-            : currentEndedIds,
-        });
-      },
-
-      updatePosition: (newPosition) => set({ position: newPosition }),
-
-      updateSize: (newSize) =>
-        set((state) => {
-          const updatedSize = { ...state.size, ...newSize };
-          return {
-            size: updatedSize,
-            position: calculateCenterPosition(
-              updatedSize.width,
-              updatedSize.height
-            ),
-          };
-        }),
-
-      toggleMinimize: () => {
-        const state = get();
-        if (state.isMinimized) {
-          set({
-            isMinimized: false,
-            viewMode: "fullscreen",
-            size: DEFAULT_SIZE,
-          });
-        } else {
-          set({
-            isMinimized: true,
-            viewMode: "compact",
-            size: VIEW_MODE_SIZES.compact,
-          });
+      // Allow rejoining (clears ended state)
+      allowRejoin: (meetingId) => {
+        if (get().lastEndedMeetingId === meetingId) {
+          set({ lastEndedMeetingId: null });
         }
       },
 
-      // Get PiP position styles
+      // Set view mode
+      setViewMode: (mode) => {
+        if (mode === "hidden") {
+          set({ viewMode: "hidden", isOpen: false });
+        } else {
+          set({ viewMode: mode });
+        }
+      },
+
+      // Close meeting (cleanup)
+      closeMeeting: () => {
+        const meetingId = get().meetingData?.id;
+        set({
+          meetingData: null,
+          viewMode: "hidden",
+          isOpen: false,
+          lastEndedMeetingId: meetingId || null,
+        });
+      },
+
+      // Update PiP position
+      updatePipPosition: (position) => set({ pipPosition: position }),
+
+      // Get position styles
       getPipPositionStyles: () => {
         const position = get().pipPosition;
         return PIP_POSITIONS[position] || PIP_POSITIONS["bottom-right"];
       },
 
-      // Get view mode size
-      getViewModeSize: (mode) => {
-        return VIEW_MODE_SIZES[mode] || VIEW_MODE_SIZES.compact;
-      },
-
-      // Get view mode label
-      getViewModeLabel: (mode) => {
-        return VIEW_MODE_LABELS[mode] || mode;
-      },
+      // Get size for view mode
+      getViewModeSize: (mode) => VIEW_MODE_SIZES[mode] || VIEW_MODE_SIZES.compact,
     }),
     {
       name: "video-conference-storage",
       partialize: (state) => ({
-        pipSize: state.pipSize,
         pipPosition: state.pipPosition,
-        // Don't persist endedMeetingIds - should reset on page refresh
       }),
     }
   )

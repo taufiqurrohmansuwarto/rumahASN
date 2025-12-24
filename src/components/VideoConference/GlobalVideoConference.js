@@ -24,7 +24,6 @@ import {
   Badge,
   Indicator,
   Menu,
-  Divider,
 } from "@mantine/core";
 import { Button, Modal, Tooltip, message } from "antd";
 import dynamic from "next/dynamic";
@@ -38,7 +37,7 @@ const JitsiMeeting = dynamic(
   { ssr: false }
 );
 
-// Position buttons config
+// Position options
 const POSITION_OPTIONS = [
   { key: "top-left", icon: IconCornerUpLeft, label: "Kiri Atas" },
   { key: "top-right", icon: IconCornerUpRight, label: "Kanan Atas" },
@@ -46,7 +45,7 @@ const POSITION_OPTIONS = [
   { key: "bottom-right", icon: IconCornerDownRight, label: "Kanan Bawah" },
 ];
 
-// View mode options with icons and labels
+// View mode options
 const VIEW_MODE_OPTIONS = [
   { key: "fullscreen", icon: IconMaximize, label: "Layar Penuh" },
   { key: "standard", icon: IconWindow, label: "Jendela Standar" },
@@ -54,166 +53,130 @@ const VIEW_MODE_OPTIONS = [
   { key: "mini", icon: IconMinimize, label: "Mini" },
 ];
 
-// Size configurations for each view mode
+// Size configurations
 const VIEW_MODE_SIZES = {
-  fullscreen: null, // Will use 100% viewport
+  fullscreen: null,
   standard: { width: 800, height: 600 },
   compact: { width: 400, height: 300 },
   mini: { width: 200, height: 150 },
 };
 
-// Main Global Video Conference Component - Single Jitsi Instance
 function GlobalVideoConference() {
   const {
     isOpen,
     viewMode,
     meetingData,
-    pipSize,
     pipPosition,
-    minimizeToPip,
-    minimizeToMini,
-    maximizeFromPip,
-    switchToStandard,
     setViewMode,
-    endMeeting,
-    leaveMeeting,
-    updatePipSize,
+    closeMeeting,
     updatePipPosition,
     getPipPositionStyles,
   } = useVideoConferenceStore();
 
   const queryClient = useQueryClient();
   const router = useRouter();
-  const [mounted, setMounted] = useState(false);
-  const [isEnding, setIsEnding] = useState(false);
-  const [isResizing, setIsResizing] = useState(false);
-  const [size, setSize] = useState(pipSize);
-  const containerRef = useRef(null);
-  const jitsiApiRef = useRef(null);
 
+  const [mounted, setMounted] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const jitsiApiRef = useRef(null);
+  const containerRef = useRef(null);
+
+  // Cleanup ref for timeouts
+  const timeoutRef = useRef(null);
+
+  // Mount effect
   useEffect(() => {
     setMounted(true);
-  }, []);
-
-  // Sync size with view mode
-  useEffect(() => {
-    const modeSize = VIEW_MODE_SIZES[viewMode];
-    if (modeSize) {
-      setSize(modeSize);
-    }
-  }, [viewMode]);
-
-  // Handle resize for compact/mini mode
-  const handleMouseDown = useCallback((e) => {
-    e.preventDefault();
-    setIsResizing(true);
-  }, []);
-
-  useEffect(() => {
-    const handleMouseMove = (e) => {
-      if (!isResizing || !containerRef.current) return;
-
-      const rect = containerRef.current.getBoundingClientRect();
-      const newWidth = Math.max(180, Math.min(800, e.clientX - rect.left + 10));
-      const newHeight = Math.max(120, Math.min(600, e.clientY - rect.top + 10));
-
-      setSize({ width: newWidth, height: newHeight });
-    };
-
-    const handleMouseUp = () => {
-      if (isResizing) {
-        setIsResizing(false);
-        updatePipSize(size);
+    return () => {
+      // Cleanup timeout on unmount
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
       }
     };
-
-    if (isResizing) {
-      document.addEventListener("mousemove", handleMouseMove);
-      document.addEventListener("mouseup", handleMouseUp);
-    }
-
-    return () => {
-      document.removeEventListener("mousemove", handleMouseMove);
-      document.removeEventListener("mouseup", handleMouseUp);
-    };
-  }, [isResizing, size, updatePipSize]);
-
-  // Check if user is participant (not coach)
-  const isParticipant = meetingData?.isParticipant === true;
-
-  // Share screen function - uses Jitsi API
-  const handleShareScreen = useCallback(() => {
-    if (jitsiApiRef.current) {
-      jitsiApiRef.current.executeCommand("toggleShareScreen");
-    }
   }, []);
 
-  // Handle end meeting - calls API and cleans up (for coach only)
-  const handleEndMeeting = useCallback(async () => {
+  // Cleanup Jitsi API listeners on unmount or meeting change
+  useEffect(() => {
+    return () => {
+      if (jitsiApiRef.current) {
+        try {
+          jitsiApiRef.current.dispose();
+        } catch (e) {
+          // Ignore disposal errors
+        }
+        jitsiApiRef.current = null;
+      }
+    };
+  }, [meetingData?.id]);
+
+  const isParticipant = meetingData?.isParticipant === true;
+
+  // Handle share screen
+  const handleShareScreen = useCallback(() => {
+    jitsiApiRef.current?.executeCommand?.("toggleShareScreen");
+  }, []);
+
+  // Handle end meeting (Coach only)
+  const handleEndMeeting = useCallback(() => {
     if (!meetingData?.id) {
-      endMeeting();
+      closeMeeting();
       return;
     }
 
-    // Minimize first so modal appears on top
+    // Minimize first for modal visibility
     if (viewMode === "fullscreen" || viewMode === "standard") {
-      minimizeToPip();
+      setViewMode("compact");
     }
 
-    // Small delay to ensure minimize animation completes
-    setTimeout(() => {
+    timeoutRef.current = setTimeout(() => {
       Modal.confirm({
         title: "Akhiri Meeting",
-        content:
-          "Apakah Anda yakin ingin mengakhiri coaching clinic ini? Semua peserta akan otomatis dikeluarkan.",
+        content: "Semua peserta akan otomatis dikeluarkan. Lanjutkan?",
         okText: "Ya, Akhiri",
         cancelText: "Batal",
-        okButtonProps: { danger: true, loading: isEnding },
+        okButtonProps: { danger: true },
         centered: true,
         zIndex: 10001,
         onOk: async () => {
+          setIsProcessing(true);
           try {
-            setIsEnding(true);
-
-            // Kick all participants via Jitsi API before ending
-            if (jitsiApiRef.current) {
-              jitsiApiRef.current.executeCommand("endConference");
-            }
+            // End conference via Jitsi API
+            jitsiApiRef.current?.executeCommand?.("endConference");
 
             await endMeetingApi(meetingData.id);
             message.success("Meeting berhasil diakhiri");
+
             queryClient.invalidateQueries(["meeting", meetingData.id]);
             queryClient.invalidateQueries(["meetings"]);
             queryClient.invalidateQueries(["detailMeetingParticipant"]);
-            endMeeting();
+
+            closeMeeting();
           } catch (error) {
             console.error("Error ending meeting:", error);
             message.error("Gagal mengakhiri meeting");
           } finally {
-            setIsEnding(false);
+            setIsProcessing(false);
           }
         },
+        onCancel: () => {
+          // Return to previous view mode
+          setViewMode("fullscreen");
+        },
       });
-    }, 100);
-  }, [
-    meetingData?.id,
-    endMeeting,
-    queryClient,
-    isEnding,
-    minimizeToPip,
-    viewMode,
-  ]);
+    }, 150);
+  }, [meetingData?.id, viewMode, setViewMode, closeMeeting, queryClient]);
 
-  // Handle leave meeting - for participant only (just close video, don't end meeting)
+  // Handle leave meeting (Participant only)
   const handleLeaveMeeting = useCallback(() => {
     if (viewMode === "fullscreen" || viewMode === "standard") {
-      minimizeToPip();
+      setViewMode("compact");
     }
 
-    setTimeout(() => {
+    timeoutRef.current = setTimeout(() => {
       Modal.confirm({
         title: "Keluar dari Meeting",
-        content: "Apakah Anda yakin ingin keluar dari coaching clinic ini?",
+        content: "Anda yakin ingin keluar?",
         okText: "Ya, Keluar",
         cancelText: "Batal",
         centered: true,
@@ -221,32 +184,43 @@ function GlobalVideoConference() {
         onOk: () => {
           message.info("Anda telah keluar dari meeting");
           queryClient.invalidateQueries(["detailMeetingParticipant"]);
-          leaveMeeting();
-          // Redirect participant to coaching clinic list
+          closeMeeting();
           router.push("/coaching-clinic/my-coaching");
         },
+        onCancel: () => {
+          setViewMode("fullscreen");
+        },
       });
-    }, 100);
-  }, [leaveMeeting, minimizeToPip, viewMode, queryClient, router]);
+    }, 150);
+  }, [viewMode, setViewMode, closeMeeting, queryClient, router]);
 
   // Handle Jitsi API ready
-  const handleJitsiApiReady = useCallback((api) => {
-    jitsiApiRef.current = api;
+  const handleJitsiApiReady = useCallback(
+    (api) => {
+      jitsiApiRef.current = api;
 
-    // Listen for conference terminated (moderator ended)
-    api.addListener("videoConferenceLeft", () => {
-      // If participant and conference was ended by moderator
-      if (isParticipant) {
-        message.info("Meeting telah diakhiri oleh coach");
-        queryClient.invalidateQueries(["detailMeetingParticipant"]);
-        leaveMeeting();
-        // Redirect participant to coaching clinic list
-        router.push("/coaching-clinic/my-coaching");
-      }
-    });
-  }, [isParticipant, leaveMeeting, queryClient, router]);
+      // Listen for conference ended by moderator
+      const handleConferenceLeft = () => {
+        // Only auto-handle for participants
+        if (meetingData?.isParticipant) {
+          message.info("Meeting telah diakhiri oleh coach");
+          queryClient.invalidateQueries(["detailMeetingParticipant"]);
+          closeMeeting();
+          router.push("/coaching-clinic/my-coaching-clinic");
+        }
+      };
 
-  // Don't render on server or if not open
+      api.addListener("videoConferenceLeft", handleConferenceLeft);
+
+      // Return cleanup function
+      return () => {
+        api.removeListener("videoConferenceLeft", handleConferenceLeft);
+      };
+    },
+    [meetingData?.isParticipant, closeMeeting, queryClient, router]
+  );
+
+  // Don't render if not ready
   if (!mounted || !isOpen || !meetingData || viewMode === "hidden") {
     return null;
   }
@@ -255,26 +229,21 @@ function GlobalVideoConference() {
   const isStandard = viewMode === "standard";
   const isCompact = viewMode === "compact";
   const isMini = viewMode === "mini";
-  const isFloating = isCompact || isMini; // Both compact and mini are floating modes
+  const isFloating = isCompact || isMini;
+
   const positionStyles = getPipPositionStyles();
+  const currentSize = VIEW_MODE_SIZES[viewMode];
 
-  // Get current size based on view mode
-  const currentSize = VIEW_MODE_SIZES[viewMode] || size;
-
-  // Dynamic styles based on viewMode
+  // Container styles
   const getContainerStyles = () => {
     if (isFullscreen) {
       return {
         position: "fixed",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
+        inset: 0,
         zIndex: 9998,
         backgroundColor: "rgba(0, 0, 0, 0.95)",
         display: "flex",
         flexDirection: "column",
-        transition: "all 0.3s ease",
       };
     }
 
@@ -291,98 +260,69 @@ function GlobalVideoConference() {
         borderRadius: 12,
         overflow: "hidden",
         boxShadow: "0 16px 48px rgba(0, 0, 0, 0.5)",
-        border: "1px solid rgba(255, 255, 255, 0.1)",
         display: "flex",
         flexDirection: "column",
-        transition: "all 0.3s ease",
       };
     }
 
-    // Compact or Mini (floating modes)
     return {
       position: "fixed",
       ...positionStyles,
-      width: currentSize.width,
-      height: currentSize.height,
+      width: currentSize?.width || 400,
+      height: currentSize?.height || 300,
       zIndex: 9999,
       backgroundColor: "#1a1a1a",
       borderRadius: isMini ? 8 : 12,
       overflow: "hidden",
       boxShadow: "0 8px 32px rgba(0, 0, 0, 0.4)",
-      border: "1px solid rgba(255, 255, 255, 0.1)",
-      transition: isResizing ? "none" : "all 0.3s ease",
     };
   };
 
-  const getHeaderStyles = () => {
-    if (isFullscreen || isStandard) {
-      return {
-        height: isFullscreen ? 60 : 52,
-        backgroundColor: "#fff",
-        padding: isFullscreen ? "0 24px" : "0 16px",
-        boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
-        borderBottom: "1px solid #f0f0f0",
-      };
-    }
-
-    // Compact or Mini
-    return {
-      height: isMini ? 32 : 44,
-      backgroundColor: "#fff",
-      padding: isMini ? "0 8px" : "0 12px",
-      borderBottom: "1px solid #f0f0f0",
-    };
+  // Header styles
+  const headerHeight = isMini ? 32 : isFullscreen ? 60 : isStandard ? 52 : 44;
+  const headerStyles = {
+    height: headerHeight,
+    backgroundColor: "#fff",
+    padding: isMini ? "0 8px" : isFullscreen ? "0 24px" : "0 12px",
+    borderBottom: "1px solid #f0f0f0",
+    flexShrink: 0,
   };
 
-  // Toolbar buttons config based on view mode
+  // Toolbar config
   const getToolbarButtons = () => {
-    if (isFullscreen || isStandard) {
-      return undefined; // All buttons
-    }
-    if (isCompact) {
+    if (isFullscreen || isStandard) return undefined;
+    if (isCompact)
       return ["microphone", "camera", "hangup", "chat", "raisehand"];
-    }
-    // Mini - minimal buttons
     return ["microphone", "camera", "hangup"];
   };
 
   const content = (
     <Box ref={containerRef} sx={getContainerStyles()}>
       {/* Header */}
-      <Flex align="center" justify="space-between" sx={getHeaderStyles()}>
-        <Group spacing={isFullscreen ? "md" : isMini ? 4 : 8}>
-          <Indicator
-            color="green"
-            processing
-            size={isMini ? 6 : isFullscreen ? 12 : 10}
-          >
-            <IconVideo
-              size={isMini ? 14 : isFullscreen ? 24 : 18}
-              color="#1890ff"
-            />
+      <Flex align="center" justify="space-between" sx={headerStyles}>
+        <Group spacing={isMini ? 4 : 8}>
+          <Indicator color="green" processing size={isMini ? 6 : 10}>
+            <IconVideo size={isMini ? 14 : 18} color="#1890ff" />
           </Indicator>
           {!isMini && (
-            <>
-              {isFullscreen || isStandard ? (
-                <Box>
-                  <Text color="dark" weight={600} size={isFullscreen ? "lg" : "md"}>
-                    {meetingData?.title || "Coaching & Mentoring"}
-                  </Text>
-                  <Badge color="green" variant="filled" size="sm">
-                    LIVE
-                  </Badge>
-                </Box>
-              ) : (
-                <Text color="dark" weight={500} size="xs" lineClamp={1}>
-                  {meetingData?.title || "Live"}
-                </Text>
-              )}
-            </>
+            <Text
+              color="dark"
+              weight={500}
+              size={isFullscreen ? "md" : "sm"}
+              lineClamp={1}
+            >
+              {meetingData?.title || "Meeting"}
+            </Text>
+          )}
+          {(isFullscreen || isStandard) && (
+            <Badge color="green" variant="filled" size="sm">
+              LIVE
+            </Badge>
           )}
         </Group>
 
-        <Group spacing={isMini ? 2 : isFullscreen ? "sm" : 4}>
-          {/* Position buttons - only in floating modes */}
+        <Group spacing={isMini ? 2 : 4}>
+          {/* Position buttons - floating modes only */}
           {isFloating && !isMini && (
             <Group spacing={2}>
               {POSITION_OPTIONS.map((opt) => {
@@ -406,31 +346,27 @@ function GlobalVideoConference() {
             </Group>
           )}
 
-          {/* Share Screen button - in compact mode */}
+          {/* Share screen - compact mode */}
           {isCompact && (
             <Tooltip title="Bagikan Layar">
               <ActionIcon
                 size="sm"
                 variant="subtle"
                 onClick={handleShareScreen}
-                sx={{
-                  color: "#52c41a",
-                  "&:hover": { backgroundColor: "rgba(82,196,26,0.1)" },
-                }}
+                sx={{ color: "#52c41a" }}
               >
                 <IconScreenShare size={14} />
               </ActionIcon>
             </Tooltip>
           )}
 
-          {/* View Mode Menu */}
-          {(isFullscreen || isStandard) ? (
+          {/* View mode controls */}
+          {isFullscreen || isStandard ? (
             <Menu shadow="md" width={180} position="bottom-end">
               <Menu.Target>
-                <Button icon={<IconWindow size={16} />}>Ubah Tampilan</Button>
+                <Button icon={<IconWindow size={16} />}>Tampilan</Button>
               </Menu.Target>
               <Menu.Dropdown>
-                <Menu.Label>Mode Tampilan</Menu.Label>
                 {VIEW_MODE_OPTIONS.map((opt) => {
                   const IconComp = opt.icon;
                   return (
@@ -452,48 +388,36 @@ function GlobalVideoConference() {
               </Menu.Dropdown>
             </Menu>
           ) : (
-            // In floating modes - quick actions
             <>
               <Tooltip title="Layar Penuh">
                 <ActionIcon
                   size={isMini ? "xs" : "sm"}
                   variant="subtle"
-                  onClick={maximizeFromPip}
-                  sx={{
-                    color: "#1890ff",
-                    "&:hover": { backgroundColor: "rgba(24,144,255,0.1)" },
-                  }}
+                  onClick={() => setViewMode("fullscreen")}
+                  sx={{ color: "#1890ff" }}
                 >
-                  <IconArrowsMaximize size={isMini ? 12 : 16} />
+                  <IconArrowsMaximize size={isMini ? 12 : 14} />
                 </ActionIcon>
               </Tooltip>
-
               {isCompact && (
-                <Tooltip title="Mode Mini">
+                <Tooltip title="Mini">
                   <ActionIcon
                     size="sm"
                     variant="subtle"
-                    onClick={minimizeToMini}
-                    sx={{
-                      color: "#722ed1",
-                      "&:hover": { backgroundColor: "rgba(114,46,209,0.1)" },
-                    }}
+                    onClick={() => setViewMode("mini")}
+                    sx={{ color: "#722ed1" }}
                   >
                     <IconMinimize size={14} />
                   </ActionIcon>
                 </Tooltip>
               )}
-
               {isMini && (
-                <Tooltip title="Mode Kompak">
+                <Tooltip title="Kompak">
                   <ActionIcon
                     size="xs"
                     variant="subtle"
-                    onClick={minimizeToPip}
-                    sx={{
-                      color: "#722ed1",
-                      "&:hover": { backgroundColor: "rgba(114,46,209,0.1)" },
-                    }}
+                    onClick={() => setViewMode("compact")}
+                    sx={{ color: "#722ed1" }}
                   >
                     <IconArrowsMinimize size={12} />
                   </ActionIcon>
@@ -502,11 +426,14 @@ function GlobalVideoConference() {
             </>
           )}
 
-          {/* End/Leave Meeting button */}
+          {/* End/Leave button */}
           {isParticipant ? (
-            // Participant: Leave button
             isFullscreen || isStandard ? (
-              <Button danger icon={<IconDoorExit size={16} />} onClick={handleLeaveMeeting}>
+              <Button
+                danger
+                icon={<IconDoorExit size={16} />}
+                onClick={handleLeaveMeeting}
+              >
                 Keluar
               </Button>
             ) : (
@@ -515,47 +442,42 @@ function GlobalVideoConference() {
                   size={isMini ? "xs" : "sm"}
                   variant="subtle"
                   onClick={handleLeaveMeeting}
-                  sx={{
-                    color: "#fa8c16",
-                    "&:hover": { backgroundColor: "rgba(250,140,22,0.1)" },
-                  }}
+                  sx={{ color: "#fa8c16" }}
                 >
-                  <IconDoorExit size={isMini ? 12 : 16} />
+                  <IconDoorExit size={isMini ? 12 : 14} />
                 </ActionIcon>
               </Tooltip>
             )
+          ) : isFullscreen || isStandard ? (
+            <Button
+              type="primary"
+              danger
+              icon={<IconX size={16} />}
+              onClick={handleEndMeeting}
+              loading={isProcessing}
+            >
+              Akhiri
+            </Button>
           ) : (
-            // Coach: End meeting button
-            isFullscreen || isStandard ? (
-              <Button type="primary" danger icon={<IconX size={16} />} onClick={handleEndMeeting}>
-                Akhiri
-              </Button>
-            ) : (
-              <Tooltip title="Akhiri Meeting">
-                <ActionIcon
-                  size={isMini ? "xs" : "sm"}
-                  variant="subtle"
-                  onClick={handleEndMeeting}
-                  sx={{
-                    color: "#ff4d4f",
-                    "&:hover": { backgroundColor: "rgba(255,77,79,0.1)" },
-                  }}
-                >
-                  <IconX size={isMini ? 12 : 16} />
-                </ActionIcon>
-              </Tooltip>
-            )
+            <Tooltip title="Akhiri">
+              <ActionIcon
+                size={isMini ? "xs" : "sm"}
+                variant="subtle"
+                onClick={handleEndMeeting}
+                sx={{ color: "#ff4d4f" }}
+              >
+                <IconX size={isMini ? 12 : 14} />
+              </ActionIcon>
+            </Tooltip>
           )}
         </Group>
       </Flex>
 
-      {/* Video Container - Single Jitsi Instance */}
+      {/* Video Container */}
       <Box
         sx={{
-          flex: isFullscreen || isStandard ? 1 : undefined,
-          height: isFloating
-            ? `calc(100% - ${isMini ? 32 : 44}px)`
-            : undefined,
+          flex: 1,
+          height: isFloating ? `calc(100% - ${headerHeight}px)` : undefined,
           position: "relative",
         }}
       >
@@ -570,17 +492,11 @@ function GlobalVideoConference() {
           onApiReady={handleJitsiApiReady}
           configOverwrite={{
             prejoinPageEnabled: false,
-            // Only mute audio for coach by default, participant should have audio on
             startWithAudioMuted: !isParticipant,
             startWithVideoMuted: false,
-            startScreenSharing: false,
-            enableEmailInStats: false,
-            // Moderator management - kick all when moderator ends
             enableModeratorManagementInConference: true,
             disableRemoteMute: false,
-            // When moderator leaves, end conference for all
             enableClosePage: true,
-            // Toolbar buttons based on view mode
             toolbarButtons: getToolbarButtons(),
             whiteboard: {
               enabled: true,
@@ -592,7 +508,7 @@ function GlobalVideoConference() {
             DISABLE_JOIN_LEAVE_NOTIFICATIONS: isFloating,
             FILM_STRIP_MAX_HEIGHT: isMini ? 0 : isCompact ? 80 : undefined,
             TILE_VIEW_MAX_COLUMNS: isMini ? 1 : isCompact ? 2 : undefined,
-            TOOLBAR_ALWAYS_VISIBLE: isFloating ? false : true,
+            TOOLBAR_ALWAYS_VISIBLE: !isFloating,
             APP_NAME: "Coaching & Mentoring",
           }}
           userInfo={{
@@ -603,29 +519,10 @@ function GlobalVideoConference() {
           }}
           onReadyToClose={isParticipant ? handleLeaveMeeting : handleEndMeeting}
         />
-
-        {/* Resize Handle - only in compact mode */}
-        {isCompact && (
-          <Box
-            onMouseDown={handleMouseDown}
-            sx={{
-              position: "absolute",
-              bottom: 0,
-              right: 0,
-              width: 20,
-              height: 20,
-              cursor: "se-resize",
-              background:
-                "linear-gradient(135deg, transparent 50%, rgba(255,255,255,0.3) 50%)",
-              borderRadius: "0 0 12px 0",
-            }}
-          />
-        )}
       </Box>
     </Box>
   );
 
-  // Use portal to render at document.body level
   return createPortal(content, document.body);
 }
 

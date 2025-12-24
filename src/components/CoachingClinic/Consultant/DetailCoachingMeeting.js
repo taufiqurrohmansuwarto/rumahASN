@@ -333,10 +333,10 @@ function DetailCoachingMeeting() {
   const {
     startMeeting: startGlobalMeeting,
     isOpen,
-    maximizeFromPip,
+    setViewMode,
     meetingData,
     wasMeetingEnded,
-    clearEndedMeeting,
+    allowRejoin,
   } = useVideoConferenceStore();
 
   const { data, isLoading, refetch } = useQuery(
@@ -392,11 +392,11 @@ function DetailCoachingMeeting() {
 
   const handleMaximize = () => {
     if (isCurrentMeetingLive) {
-      maximizeFromPip();
+      setViewMode("fullscreen");
     } else if (data?.status === "live" && data?.jwt) {
       // Clear the ended state so we can rejoin
       if (wasMeetingManuallyEnded) {
-        clearEndedMeeting(id);
+        allowRejoin(id);
       }
       // If meeting is live but not in global store, start it
       startGlobalMeeting({
