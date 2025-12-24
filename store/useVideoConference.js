@@ -12,8 +12,16 @@ const calculateCenterPosition = (width, height) => {
   return { x, y };
 };
 
+// Size configurations for different view modes
+const VIEW_MODE_SIZES = {
+  fullscreen: { width: "100%", height: "100%" },
+  standard: { width: 800, height: 600 },
+  compact: { width: 400, height: 300 },
+  mini: { width: 200, height: 150 },
+};
+
+// Default sizes for legacy compatibility
 const DEFAULT_SIZE = { width: 800, height: 600 };
-const MINIMIZED_SIZE = { width: 400, height: 300 };
 
 // PiP position configs
 const PIP_POSITIONS = {
@@ -23,14 +31,22 @@ const PIP_POSITIONS = {
   "top-left": { top: 80, left: 20 },
 };
 
+// View mode labels in Indonesian
+const VIEW_MODE_LABELS = {
+  fullscreen: "Layar Penuh",
+  standard: "Jendela Standar",
+  compact: "Kompak",
+  mini: "Mini",
+};
+
 const useVideoConferenceStore = create(
   persist(
     (set, get) => ({
       // State
       isOpen: false,
-      meetingData: null, // { jwt, roomName, id, coach, title, ... }
-      viewMode: "hidden", // 'fullscreen' | 'pip' | 'hidden'
-      pipSize: MINIMIZED_SIZE,
+      meetingData: null, // { jwt, roomName, id, coach, title, isParticipant, ... }
+      viewMode: "hidden", // 'fullscreen' | 'standard' | 'compact' | 'mini' | 'hidden'
+      pipSize: VIEW_MODE_SIZES.compact,
       pipPosition: "bottom-right",
       position: calculateCenterPosition(DEFAULT_SIZE.width, DEFAULT_SIZE.height),
       size: DEFAULT_SIZE,
@@ -45,20 +61,46 @@ const useVideoConferenceStore = create(
           isMinimized: false,
         }),
 
-      // Minimize to PiP mode
+      // Switch to specific view mode
+      setViewMode: (mode) => {
+        const size = VIEW_MODE_SIZES[mode] || VIEW_MODE_SIZES.compact;
+        set({
+          viewMode: mode,
+          isMinimized: mode !== "fullscreen" && mode !== "standard",
+          size: typeof size.width === "number" ? size : get().size,
+        });
+      },
+
+      // Minimize to compact (PiP) mode
       minimizeToPip: () =>
         set({
-          viewMode: "pip",
+          viewMode: "compact",
           isMinimized: true,
-          size: get().pipSize,
+          size: VIEW_MODE_SIZES.compact,
         }),
 
-      // Maximize from PiP to fullscreen
+      // Minimize to mini mode
+      minimizeToMini: () =>
+        set({
+          viewMode: "mini",
+          isMinimized: true,
+          size: VIEW_MODE_SIZES.mini,
+        }),
+
+      // Maximize to fullscreen
       maximizeFromPip: () =>
         set({
           viewMode: "fullscreen",
           isMinimized: false,
           size: DEFAULT_SIZE,
+        }),
+
+      // Switch to standard window mode
+      switchToStandard: () =>
+        set({
+          viewMode: "standard",
+          isMinimized: false,
+          size: VIEW_MODE_SIZES.standard,
         }),
 
       // End meeting completely
@@ -70,7 +112,7 @@ const useVideoConferenceStore = create(
           isMinimized: false,
         }),
 
-      // Update PiP size (for resize)
+      // Update PiP/compact size (for resize)
       updatePipSize: (newSize) =>
         set({
           pipSize: { ...get().pipSize, ...newSize },
@@ -118,8 +160,8 @@ const useVideoConferenceStore = create(
         } else {
           set({
             isMinimized: true,
-            viewMode: "pip",
-            size: MINIMIZED_SIZE,
+            viewMode: "compact",
+            size: VIEW_MODE_SIZES.compact,
           });
         }
       },
@@ -128,6 +170,16 @@ const useVideoConferenceStore = create(
       getPipPositionStyles: () => {
         const position = get().pipPosition;
         return PIP_POSITIONS[position] || PIP_POSITIONS["bottom-right"];
+      },
+
+      // Get view mode size
+      getViewModeSize: (mode) => {
+        return VIEW_MODE_SIZES[mode] || VIEW_MODE_SIZES.compact;
+      },
+
+      // Get view mode label
+      getViewModeLabel: (mode) => {
+        return VIEW_MODE_LABELS[mode] || mode;
       },
     }),
     {

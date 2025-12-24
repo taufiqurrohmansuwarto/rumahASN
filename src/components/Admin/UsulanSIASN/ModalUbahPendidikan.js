@@ -111,8 +111,12 @@ const ModalUbahPendidikan = ({
 
   // Helper function untuk boolean conversion
   const formatBoolean = (value) => {
-    const result = value === true || value === "1" || value === 1;
-    return result;
+    // Handle berbagai format nilai boolean
+    if (value === true || value === "true" || value === "1" || value === 1) {
+      return true;
+    }
+    // Secara eksplisit return false untuk nilai lainnya
+    return false;
   };
 
   // Helper function untuk mengubah null/empty menjadi "-"
@@ -255,7 +259,18 @@ const ModalUbahPendidikan = ({
   });
 
   // State untuk toggle pendidikan pertama
-  const [isPendidikanPertama, setIsPendidikanPertama] = useState(false);
+  // Inisialisasi langsung dari row jika tersedia
+  const [isPendidikanPertama, setIsPendidikanPertama] = useState(() => {
+    if (row?.isPendidikanPertama) {
+      return (
+        row.isPendidikanPertama === true ||
+        row.isPendidikanPertama === "true" ||
+        row.isPendidikanPertama === "1" ||
+        row.isPendidikanPertama === 1
+      );
+    }
+    return false;
+  });
 
   // State untuk preview file dengan iframe
   const [previewModal, setPreviewModal] = useState({
