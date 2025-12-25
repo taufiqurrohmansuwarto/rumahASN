@@ -406,6 +406,18 @@ const getFileByNip = async (req, res) => {
   }
 };
 
+const getFilePersonal = async (req, res) => {
+  try {
+    const { fetcher } = req;
+    const { employee_number: nip } = req.user;
+    const result = await getFile(fetcher, nip);
+    res.json(result?.data);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ code: 500, message: "Internal Server Error" });
+  }
+};
+
 export const rwAnakMaster = async (req, res) => {
   try {
     const { fetcher } = req;
@@ -638,4 +650,5 @@ module.exports = {
   rwPasanganMaster,
   rwAnakMaster,
   getFileByNip,
+  getFilePersonal,
 };

@@ -5,6 +5,10 @@ const api = axios.create({
   baseURL: "/helpdesk/api/master/ws",
 });
 
+export const getFilePersonalServices = () => {
+  return api.get("/file").then((res) => res.data);
+};
+
 export const getDisparitasByNip = (nip) => {
   return api.get(`/admin/${nip}/disparitas`).then((res) => res.data);
 };

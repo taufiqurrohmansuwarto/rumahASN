@@ -25,7 +25,12 @@ import { Tag } from "antd";
 import { toLower } from "lodash";
 
 import { getTokenSIASNService } from "@/services/siasn-services";
-import { IconGavel, IconReplaceUser, IconTarget } from "@tabler/icons-react";
+import {
+  IconFile,
+  IconGavel,
+  IconReplaceUser,
+  IconTarget,
+} from "@tabler/icons-react";
 import axios from "axios";
 import dayjs from "dayjs";
 import "dayjs/locale/id";
@@ -61,6 +66,12 @@ export const mysapkMenu = [
     icon: IconUserSearch,
     color: "violet",
     path: "/data-utama",
+  },
+  {
+    title: "File Personal",
+    icon: IconFile,
+    color: "blue",
+    path: "/file-personal",
   },
   {
     title: "Ubah Biodata",
