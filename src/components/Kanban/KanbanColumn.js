@@ -1,11 +1,7 @@
 import { useState } from "react";
-import { Button, Badge, Dropdown, Typography, Flex, Tooltip } from "antd";
+import { Button, Badge, Typography, Flex, Tooltip } from "antd";
 import {
   IconPlus,
-  IconDots,
-  IconEdit,
-  IconTrash,
-  IconSettings,
   IconChevronDown,
   IconChevronUp,
 } from "@tabler/icons-react";
@@ -14,14 +10,7 @@ import KanbanCard from "./KanbanCard";
 
 const { Text } = Typography;
 
-function KanbanColumn({
-  column,
-  onAddTask,
-  onTaskClick,
-  onEditColumn,
-  onDeleteColumn,
-  isMobile = false,
-}) {
+function KanbanColumn({ column, onAddTask, onTaskClick, isMobile = false }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const taskCount = column.tasks?.length || 0;
   const wipLimit = column.wip_limit;
@@ -30,31 +19,6 @@ function KanbanColumn({
   const { setNodeRef, isOver } = useDroppable({
     id: column.id,
   });
-
-  const menuItems = [
-    {
-      key: "edit",
-      label: "Edit Kolom",
-      icon: <IconEdit size={14} />,
-      onClick: () => onEditColumn?.(column),
-    },
-    {
-      key: "settings",
-      label: "Pengaturan",
-      icon: <IconSettings size={14} />,
-      onClick: () => onEditColumn?.(column),
-    },
-    {
-      type: "divider",
-    },
-    {
-      key: "delete",
-      label: "Hapus Kolom",
-      icon: <IconTrash size={14} />,
-      danger: true,
-      onClick: () => onDeleteColumn?.(column),
-    },
-  ];
 
   return (
     <div
@@ -145,19 +109,6 @@ function KanbanColumn({
                 style={{ color: "#8c8c8c" }}
               />
             </Tooltip>
-            <Dropdown
-              menu={{ items: menuItems }}
-              trigger={["click"]}
-              placement="bottomRight"
-            >
-              <Button
-                type="text"
-                size="small"
-                icon={<IconDots size={14} />}
-                onClick={(e) => e.stopPropagation()}
-                style={{ color: "#8c8c8c" }}
-              />
-            </Dropdown>
           </Flex>
         </Flex>
 

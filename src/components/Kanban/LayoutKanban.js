@@ -4,6 +4,7 @@ import {
   IconLayoutKanban,
   IconSettings,
   IconChartBar,
+  IconUserCheck,
 } from "@tabler/icons-react";
 
 function LayoutKanban({ children, projectId, active = "board" }) {
@@ -12,6 +13,8 @@ function LayoutKanban({ children, projectId, active = "board" }) {
   const handleChangeTab = (key) => {
     if (key === "board") {
       router.push(`/kanban/${projectId}`);
+    } else if (key === "my-tasks") {
+      router.push(`/kanban/${projectId}/my-tasks`);
     } else if (key === "settings") {
       router.push(`/kanban/${projectId}/settings`);
     } else if (key === "reports") {
@@ -26,6 +29,15 @@ function LayoutKanban({ children, projectId, active = "board" }) {
         <Space size={6}>
           <IconLayoutKanban size={16} />
           <span>Board</span>
+        </Space>
+      ),
+    },
+    {
+      key: "my-tasks",
+      label: (
+        <Space size={6}>
+          <IconUserCheck size={16} />
+          <span>Task Saya</span>
         </Space>
       ),
     },

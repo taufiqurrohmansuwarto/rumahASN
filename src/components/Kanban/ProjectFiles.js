@@ -1,15 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import {
-  Table,
-  Input,
-  Select,
-  Empty,
-  Flex,
-  Button,
-  Space,
-  Tooltip,
-} from "antd";
+import { Table, Input, Select, Empty, Flex, Button } from "antd";
 import { Stack, Text, Badge, Group, Avatar } from "@mantine/core";
 import {
   IconSearch,
@@ -17,8 +8,6 @@ import {
   IconLink,
   IconPhoto,
   IconFileText,
-  IconDownload,
-  IconExternalLink,
   IconFolder,
 } from "@tabler/icons-react";
 import dayjs from "dayjs";
@@ -103,10 +92,22 @@ function ProjectFiles({ projectId }) {
       dataIndex: "filename",
       key: "filename",
       render: (filename, record) => (
-        <Group gap={10} wrap="nowrap">
+        <Group
+          gap={10}
+          wrap="nowrap"
+          style={{ cursor: "pointer" }}
+          onClick={() => handleDownload(record)}
+        >
           {getFileIcon(record.file_type, record.attachment_type)}
           <Stack gap={0}>
-            <Text size="sm" fw={500} lineClamp={1} style={{ maxWidth: 300 }}>
+            <Text
+              size="sm"
+              fw={500}
+              lineClamp={1}
+              style={{ maxWidth: 300 }}
+              c="blue"
+              td="hover:underline"
+            >
               {filename}
             </Text>
             {record.attachment_type === "link" && (
@@ -184,31 +185,6 @@ function ProjectFiles({ projectId }) {
         <Text size="xs" c="dimmed">
           {dayjs(date).format("DD MMM YYYY")}
         </Text>
-      ),
-    },
-    {
-      title: "Aksi",
-      key: "action",
-      width: 80,
-      render: (_, record) => (
-        <Space>
-          <Tooltip
-            title={record.attachment_type === "link" ? "Buka Link" : "Download"}
-          >
-            <Button
-              type="text"
-              size="small"
-              icon={
-                record.attachment_type === "link" ? (
-                  <IconExternalLink size={16} />
-                ) : (
-                  <IconDownload size={16} />
-                )
-              }
-              onClick={() => handleDownload(record)}
-            />
-          </Tooltip>
-        </Space>
       ),
     },
   ];

@@ -106,47 +106,57 @@ class KanbanTaskAttachment extends Model {
   static async getByProject({ projectId, page = 1, limit = 20, search = "", type = "" }) {
     const offset = (page - 1) * limit;
 
-    let query = KanbanTaskAttachment.query()
-      .join("kanban.tasks", "kanban.task_attachments.task_id", "kanban.tasks.id")
-      .where("kanban.tasks.project_id", projectId)
+    // Build base conditions
+    const buildConditions = (query) => {
+      query = query
+        .join("kanban.tasks", "kanban.task_attachments.task_id", "kanban.tasks.id")
+        .where("kanban.tasks.project_id", projectId);
+
+      // Apply search filter
+      if (search) {
+        query = query.where((builder) => {
+          builder
+            .where("kanban.task_attachments.filename", "ilike", `%${search}%`)
+            .orWhere("kanban.tasks.title", "ilike", `%${search}%`)
+            .orWhere("kanban.tasks.task_number", "ilike", `%${search}%`);
+        });
+      }
+
+      // Apply type filter
+      if (type) {
+        if (type === "file") {
+          query = query.where((builder) => {
+            builder
+              .where("kanban.task_attachments.attachment_type", "file")
+              .orWhereNull("kanban.task_attachments.attachment_type");
+          });
+        } else if (type === "link") {
+          query = query.where("kanban.task_attachments.attachment_type", "link");
+        }
+      }
+
+      return query;
+    };
+
+    // Get total count (separate query)
+    let countQuery = KanbanTaskAttachment.query();
+    countQuery = buildConditions(countQuery);
+    const totalResult = await countQuery.count("kanban.task_attachments.id as count").first();
+    const total = parseInt(totalResult?.count) || 0;
+
+    // Get data with pagination
+    let dataQuery = KanbanTaskAttachment.query();
+    dataQuery = buildConditions(dataQuery);
+    const attachments = await dataQuery
       .select(
         "kanban.task_attachments.*",
         "kanban.tasks.title as task_title",
         "kanban.tasks.task_number"
       )
       .withGraphFetched("uploader(simpleWithImage)")
-      .orderBy("kanban.task_attachments.created_at", "desc");
-
-    // Apply search filter
-    if (search) {
-      query = query.where((builder) => {
-        builder
-          .where("kanban.task_attachments.filename", "ilike", `%${search}%`)
-          .orWhere("kanban.tasks.title", "ilike", `%${search}%`)
-          .orWhere("kanban.tasks.task_number", "ilike", `%${search}%`);
-      });
-    }
-
-    // Apply type filter
-    if (type) {
-      if (type === "file") {
-        query = query.where((builder) => {
-          builder
-            .where("kanban.task_attachments.attachment_type", "file")
-            .orWhereNull("kanban.task_attachments.attachment_type");
-        });
-      } else if (type === "link") {
-        query = query.where("kanban.task_attachments.attachment_type", "link");
-      }
-    }
-
-    // Get total count
-    const countQuery = query.clone();
-    const totalResult = await countQuery.count("kanban.task_attachments.id as count").first();
-    const total = parseInt(totalResult?.count) || 0;
-
-    // Apply pagination
-    const attachments = await query.limit(limit).offset(offset);
+      .orderBy("kanban.task_attachments.created_at", "desc")
+      .limit(limit)
+      .offset(offset);
 
     return {
       data: attachments,
