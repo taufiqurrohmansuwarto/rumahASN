@@ -163,12 +163,14 @@ function WebinarAll() {
                   cover={
                     <>
                       {item?.image_url && (
-                        <Image
-                          width={breakpoint.md ? 500 : 400}
-                          height={breakpoint.md ? 150 : 160}
-                          src={item?.image_url}
-                          alt="images"
-                        />
+                        <div style={{ position: "relative", width: "100%", aspectRatio: "16/9" }}>
+                          <Image
+                            src={item?.image_url}
+                            alt="images"
+                            fill
+                            style={{ objectFit: "cover" }}
+                          />
+                        </div>
                       )}
                     </>
                   }

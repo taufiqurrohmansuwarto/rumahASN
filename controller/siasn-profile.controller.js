@@ -265,3 +265,36 @@ module.exports.getCVProxyByNip = async (req, res) => {
     handleError(res, error);
   }
 };
+
+module.exports.getCVProxyPersonal = async (req, res) => {
+  try {
+    const { employee_number: nip } = req?.user;
+    const { token } = req;
+
+    const currentPnsId = await SiasnEmployees.query()
+      .where("nip_baru", nip)
+      .first()
+      .select("pns_id");
+
+    if (!currentPnsId?.pns_id) {
+      return res.json({ data: null });
+    }
+
+    const result = await getCVProxyByPnsId(token, currentPnsId.pns_id);
+
+    if (!result) {
+      return res.json({ data: null });
+    }
+
+    const pdfBuffer = Buffer.from(result);
+
+    const base64 = pdfBuffer.toString("base64");
+
+    res.json({
+      data: `data:application/pdf;base64,${base64}`,
+      filename: `CV_${nip}.pdf`,
+    });
+  } catch (error) {
+    handleError(res, error);
+  }
+};

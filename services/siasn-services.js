@@ -181,6 +181,11 @@ export const dataRiwayatPengadaanPersonalByNip = (nip) => {
   return api.get(`/admin/${nip}/rw-pengadaan`).then((res) => res.data);
 };
 
+// cv
+export const getCVProxyPersonal = () => {
+  return api.get(`/pns/cv`).then((res) => res.data);
+};
+
 // data pendidikan
 export const dataPendidikan = () => {
   return api.get("/pns/rw-pendidikan").then((res) => res.data);
