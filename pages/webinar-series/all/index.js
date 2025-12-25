@@ -156,23 +156,24 @@ function WebinarAll() {
             loading={isLoading || isFetching}
             dataSource={data?.data}
             renderItem={(item) => (
-              <List.Item>
+              <List.Item key={item?.id}>
                 <Card
                   hoverable
                   onClick={() => handleClick(item?.id)}
                   cover={
-                    <>
-                      {item?.image_url && (
-                        <div style={{ position: "relative", width: "100%", aspectRatio: "16/9" }}>
-                          <Image
-                            src={item?.image_url}
-                            alt="images"
-                            fill
-                            style={{ objectFit: "cover" }}
-                          />
-                        </div>
-                      )}
-                    </>
+                    item?.image_url && (
+                      <div style={{ position: "relative", width: "100%", aspectRatio: "16/9", overflow: "hidden" }}>
+                        <Image
+                          key={item?.image_url}
+                          src={item?.image_url}
+                          alt={item?.title || "webinar"}
+                          fill
+                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 25vw, 20vw"
+                          style={{ objectFit: "cover" }}
+                          loading="lazy"
+                        />
+                      </div>
+                    )
                   }
                   actions={[
                     <Button
