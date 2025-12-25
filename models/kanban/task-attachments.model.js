@@ -101,6 +101,63 @@ class KanbanTaskAttachment extends Model {
 
     return parseInt(result?.total_size) || 0;
   }
+
+  // Get all attachments for a project with pagination and filters
+  static async getByProject({ projectId, page = 1, limit = 20, search = "", type = "" }) {
+    const offset = (page - 1) * limit;
+
+    let query = KanbanTaskAttachment.query()
+      .join("kanban.tasks", "kanban.task_attachments.task_id", "kanban.tasks.id")
+      .where("kanban.tasks.project_id", projectId)
+      .select(
+        "kanban.task_attachments.*",
+        "kanban.tasks.title as task_title",
+        "kanban.tasks.task_number"
+      )
+      .withGraphFetched("uploader(simpleWithImage)")
+      .orderBy("kanban.task_attachments.created_at", "desc");
+
+    // Apply search filter
+    if (search) {
+      query = query.where((builder) => {
+        builder
+          .where("kanban.task_attachments.filename", "ilike", `%${search}%`)
+          .orWhere("kanban.tasks.title", "ilike", `%${search}%`)
+          .orWhere("kanban.tasks.task_number", "ilike", `%${search}%`);
+      });
+    }
+
+    // Apply type filter
+    if (type) {
+      if (type === "file") {
+        query = query.where((builder) => {
+          builder
+            .where("kanban.task_attachments.attachment_type", "file")
+            .orWhereNull("kanban.task_attachments.attachment_type");
+        });
+      } else if (type === "link") {
+        query = query.where("kanban.task_attachments.attachment_type", "link");
+      }
+    }
+
+    // Get total count
+    const countQuery = query.clone();
+    const totalResult = await countQuery.count("kanban.task_attachments.id as count").first();
+    const total = parseInt(totalResult?.count) || 0;
+
+    // Apply pagination
+    const attachments = await query.limit(limit).offset(offset);
+
+    return {
+      data: attachments,
+      meta: {
+        total,
+        page,
+        limit,
+        total_pages: Math.ceil(total / limit),
+      },
+    };
+  }
 }
 
 module.exports = KanbanTaskAttachment;

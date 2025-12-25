@@ -41,6 +41,7 @@ const nextConfig = {
     forceSwcTransforms: true,
     scrollRestoration: true,
     esmExternals: "loose",
+    serverComponentsExternalPackages: ["knex", "objection", "better-sqlite3"], // Tambahkan ini
   },
   images: {
     // Enable optimization dengan safety features

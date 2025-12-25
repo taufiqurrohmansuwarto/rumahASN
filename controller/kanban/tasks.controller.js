@@ -438,6 +438,75 @@ const getOverdueTasks = async (req, res) => {
   }
 };
 
+/**
+ * Get tasks created by me
+ */
+const getMyCreatedTasks = async (req, res) => {
+  try {
+    const { customId: userId } = req?.user;
+    const { projectId } = req?.query;
+
+    let query = KanbanTask.query()
+      .where("created_by", userId)
+      .withGraphFetched(
+        "[project(simpleSelect), column, labels, assignees(simpleWithImage)]"
+      )
+      .modifiers({
+        simpleSelect(builder) {
+          builder.select("id", "name", "icon", "color");
+        },
+      })
+      .orderBy("created_at", "desc");
+
+    if (projectId) {
+      query = query.where("project_id", projectId);
+    }
+
+    const tasks = await query;
+
+    res.json(tasks);
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+/**
+ * Get my completed tasks (assigned to me and completed)
+ */
+const getMyCompletedTasks = async (req, res) => {
+  try {
+    const { customId: userId } = req?.user;
+    const { projectId } = req?.query;
+
+    let query = KanbanTask.query()
+      .whereExists(
+        KanbanTaskAssignee.query()
+          .whereRaw("kanban.task_assignees.task_id = kanban.tasks.id")
+          .where("user_id", userId)
+      )
+      .whereNotNull("completed_at")
+      .withGraphFetched(
+        "[project(simpleSelect), column, labels, assignees(simpleWithImage)]"
+      )
+      .modifiers({
+        simpleSelect(builder) {
+          builder.select("id", "name", "icon", "color");
+        },
+      })
+      .orderBy("completed_at", "desc");
+
+    if (projectId) {
+      query = query.where("project_id", projectId);
+    }
+
+    const tasks = await query;
+
+    res.json(tasks);
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
 // ==========================================
 // SUBTASKS
 // ==========================================
@@ -583,6 +652,8 @@ module.exports = {
   deleteTask,
   moveTask,
   getMyTasks,
+  getMyCreatedTasks,
+  getMyCompletedTasks,
   getOverdueTasks,
   // Subtasks
   createSubtask,

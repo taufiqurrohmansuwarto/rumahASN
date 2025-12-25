@@ -174,6 +174,16 @@ export const getMyTasks = async (params = {}) => {
   return data;
 };
 
+export const getMyCreatedTasks = async (params = {}) => {
+  const { data } = await api.get("/me/created-tasks", { params });
+  return data;
+};
+
+export const getMyCompletedTasks = async (params = {}) => {
+  const { data } = await api.get("/me/completed-tasks", { params });
+  return data;
+};
+
 export const getOverdueTasks = async (projectId) => {
   const { data } = await api.get(`/projects/${projectId}/tasks/overdue`);
   return data;
@@ -291,6 +301,19 @@ export const getAttachmentUrl = async ({ taskId, attachmentId }) => {
 
 export const getProjectStorageUsage = async (projectId) => {
   const { data } = await api.get(`/projects/${projectId}/storage`);
+  return data;
+};
+
+export const getProjectAttachments = async ({
+  projectId,
+  page = 1,
+  limit = 20,
+  search = "",
+  type = "",
+}) => {
+  const { data } = await api.get(`/projects/${projectId}/attachments`, {
+    params: { page, limit, search, type },
+  });
   return data;
 };
 

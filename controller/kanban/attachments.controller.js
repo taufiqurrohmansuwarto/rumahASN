@@ -180,6 +180,40 @@ const getAttachmentUrl = async (req, res) => {
 };
 
 /**
+ * Get all attachments for a project with pagination and filters
+ */
+const getProjectAttachments = async (req, res) => {
+  try {
+    const { customId: userId } = req?.user;
+    const { projectId } = req?.query;
+    const {
+      page = 1,
+      limit = 20,
+      search = "",
+      type = "", // file, link, or empty for all
+    } = req?.query;
+
+    // Check permission
+    const isMember = await KanbanProjectMember.isMember(projectId, userId);
+    if (!isMember) {
+      return res.status(403).json({ message: "Anda tidak memiliki akses" });
+    }
+
+    const result = await KanbanTaskAttachment.getByProject({
+      projectId,
+      page: parseInt(page),
+      limit: parseInt(limit),
+      search,
+      type,
+    });
+
+    res.json(result);
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+/**
  * Get total storage used by project
  */
 const getProjectStorageUsage = async (req, res) => {
@@ -298,6 +332,7 @@ module.exports = {
   deleteAttachment,
   getAttachmentUrl,
   getProjectStorageUsage,
+  getProjectAttachments,
   downloadAllAttachments,
 };
 

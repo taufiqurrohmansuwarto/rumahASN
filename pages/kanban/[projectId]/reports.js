@@ -19,6 +19,7 @@ import {
   IconTrendingUp,
   IconChartBar,
   IconFileText,
+  IconFiles,
 } from "@tabler/icons-react";
 import Head from "next/head";
 import Link from "next/link";
@@ -28,6 +29,7 @@ import PageContainer from "@/components/PageContainer";
 import LayoutKanban from "@/components/Kanban/LayoutKanban";
 import AIProjectSummary from "@/components/Kanban/AIProjectSummary";
 import LaporanKegiatan from "@/components/Kanban/LaporanKegiatan";
+import ProjectFiles from "@/components/Kanban/ProjectFiles";
 import {
   getProject,
   getProjectOverview,
@@ -382,6 +384,18 @@ function ReportsPage() {
                   </span>
                 ),
                 children: <LaporanKegiatan projectId={projectId} />,
+              },
+              {
+                key: "daftar-file",
+                label: (
+                  <span
+                    style={{ display: "flex", alignItems: "center", gap: 6 }}
+                  >
+                    <IconFiles size={14} />
+                    Daftar File
+                  </span>
+                ),
+                children: <ProjectFiles projectId={projectId} />,
               },
             ]}
           />
