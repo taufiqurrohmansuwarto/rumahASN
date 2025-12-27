@@ -28,6 +28,8 @@ import {
   requestReviewWithOptions,
   resolveIssue,
   bulkResolveIssues,
+  // User preferences
+  getUsersWithPreferences,
 } from "@/services/rasn-naskah.services";
 
 // Documents hooks
@@ -259,5 +261,16 @@ export const useBulkResolveIssues = () => {
       queryClient.invalidateQueries(["rasn-naskah-review-issues", variables.reviewId]);
       queryClient.invalidateQueries(["rasn-naskah-review-issues-grouped", variables.reviewId]);
     },
+  });
+};
+
+// ==========================================
+// USER PREFERENCES FOR TARGETING
+// ==========================================
+
+export const useRasnNaskahUsersWithPreferences = () => {
+  return useQuery({
+    queryKey: ["rasn-naskah-users-with-preferences"],
+    queryFn: () => getUsersWithPreferences(),
   });
 };

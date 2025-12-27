@@ -15,11 +15,16 @@ const { addDocumentReviewJob } = require("@/jobs/queue");
 /**
  * Request AI review for document
  * This creates a pending review and adds job to queue
+ * Supports targeting specific user preferences for AI review
  */
 const requestReview = async (req, res) => {
   try {
     const { customId: userId } = req?.user;
     const { documentId } = req?.query;
+    const { targetUserId, targetSuperiorId } = req?.body || {};
+
+    console.log(`📝 [REVIEW] Request body:`, req?.body);
+    console.log(`📝 [REVIEW] Target User ID: ${targetUserId}, Target Superior ID: ${targetSuperiorId}`);
 
     const document = await Documents.query().findById(documentId);
 
@@ -92,6 +97,8 @@ const requestReview = async (req, res) => {
       const job = await addDocumentReviewJob(documentId, review.id, {
         userId,
         priority: 0,
+        targetUserId: targetUserId || null,
+        targetSuperiorId: targetSuperiorId || null,
       });
       jobId = job?.id || null;
 
@@ -111,8 +118,13 @@ const requestReview = async (req, res) => {
       documentId,
       userId,
       "review_requested",
-      { review_id: review.id, job_id: jobId },
-      "Review AI diminta"
+      {
+        review_id: review.id,
+        job_id: jobId,
+        target_user_id: targetUserId || null,
+        target_superior_id: targetSuperiorId || null,
+      },
+      targetUserId ? "Review AI diminta dengan preferensi target" : "Review AI diminta"
     );
 
     res.status(202).json({
@@ -120,6 +132,7 @@ const requestReview = async (req, res) => {
       review_id: review.id,
       job_id: jobId,
       status: "pending",
+      target_user_id: targetUserId || null,
     });
   } catch (error) {
     handleError(res, error);

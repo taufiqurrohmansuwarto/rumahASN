@@ -7,7 +7,11 @@ import { createRouter } from "next-connect";
 
 const router = createRouter();
 
-router.use(auth).get(getPreferences).put(updatePreferences);
+router
+  .use(auth)
+  .get(getPreferences)
+  .put(updatePreferences)
+  .patch(updatePreferences); // Also support PATCH method
 
 export default router.handler({});
 

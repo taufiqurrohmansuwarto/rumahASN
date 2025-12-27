@@ -23,12 +23,17 @@ const getPreferences = async (req, res) => {
 
 /**
  * Update user preferences
+ * Supports both old complex format and new simplified format
  */
 const updatePreferences = async (req, res) => {
   try {
     const { customId: userId } = req?.user;
     const {
+      // New simplified format
       language_style,
+      preferred_phrases,
+      avoided_phrases,
+      // Old complex format (still supported)
       custom_rules,
       forbidden_words,
       preferred_terms,
@@ -41,7 +46,12 @@ const updatePreferences = async (req, res) => {
 
     const updateData = {};
 
+    // New simplified fields
     if (language_style !== undefined) updateData.language_style = language_style;
+    if (preferred_phrases !== undefined) updateData.preferred_phrases = preferred_phrases;
+    if (avoided_phrases !== undefined) updateData.avoided_phrases = avoided_phrases;
+
+    // Old complex fields (still supported for backwards compatibility)
     if (custom_rules !== undefined) updateData.custom_rules = custom_rules;
     if (forbidden_words !== undefined) updateData.forbidden_words = forbidden_words;
     if (preferred_terms !== undefined) updateData.preferred_terms = preferred_terms;
@@ -264,16 +274,32 @@ const getLanguageStyles = async (req, res) => {
   try {
     const styles = [
       {
+        key: "formal_lengkap",
+        value: "formal_lengkap",
+        label: "Formal Lengkap",
+        description: "Gaya bahasa formal dengan kalimat detail dan komprehensif",
+      },
+      {
+        key: "formal_ringkas",
+        value: "formal_ringkas",
+        label: "Formal Ringkas",
+        description: "Gaya bahasa formal tapi ringkas, langsung ke pokok permasalahan",
+      },
+      {
+        key: "semi_formal",
+        value: "semi_formal",
+        label: "Semi-formal",
+        description: "Gaya bahasa semi-formal, lebih fleksibel tapi tetap sopan",
+      },
+      // Legacy styles (for backwards compatibility)
+      {
+        key: "formal",
         value: "formal",
         label: "Formal",
         description: "Sangat formal, cocok untuk surat ke atasan/pejabat tinggi",
       },
       {
-        value: "semi_formal",
-        label: "Semi Formal",
-        description: "Semi formal, cocok untuk surat ke rekan sejawat",
-      },
-      {
+        key: "standar",
         value: "standar",
         label: "Standar",
         description: "Gaya standar sesuai Pergub Tata Naskah Dinas",
@@ -281,6 +307,82 @@ const getLanguageStyles = async (req, res) => {
     ];
 
     res.json(styles);
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+/**
+ * Get all users with preferences (for target selection)
+ * Returns list of users who have set up their preferences
+ */
+const getUsersWithPreferences = async (req, res) => {
+  try {
+    const { customId: currentUserId } = req?.user;
+
+    console.log("[PREFERENCES] Getting users with preferences for:", currentUserId);
+
+    // Get all users who have preferences (including current user)
+    const usersWithPrefs = await UserPreferences.query()
+      .withGraphFetched("user(simpleWithImage)")
+      .orderBy("updated_at", "desc");
+
+    console.log("[PREFERENCES] Found users:", usersWithPrefs.length);
+
+    // Format response
+    const result = usersWithPrefs.map((pref) => {
+      const isCurrentUser = pref.user_id === currentUserId;
+      return {
+        id: pref.id,
+        user_id: pref.user_id,
+        user_name: isCurrentUser
+          ? `${pref.user?.username || pref.user?.custom_id} (Saya)`
+          : (pref.user?.username || pref.user?.custom_id),
+        user_image: pref.user?.image,
+        language_style: pref.language_style,
+        is_current_user: isCurrentUser,
+        has_preferences:
+          (pref.preferred_phrases?.length > 0) ||
+          (pref.avoided_phrases?.length > 0) ||
+          (pref.custom_rules?.length > 0),
+        ai_context: pref.generateAIContext?.() || null,
+      };
+    });
+
+    console.log("[PREFERENCES] Returning result:", result);
+
+    res.json(result);
+  } catch (error) {
+    console.error("[PREFERENCES] Error getting users:", error);
+    handleError(res, error);
+  }
+};
+
+/**
+ * Get specific user's preferences (for AI context)
+ */
+const getUserPreferencesById = async (req, res) => {
+  try {
+    const { userId } = req?.query;
+
+    if (!userId) {
+      return res.status(400).json({ message: "User ID diperlukan" });
+    }
+
+    const preferences = await UserPreferences.query()
+      .where("user_id", userId)
+      .withGraphFetched("user(simpleWithImage)")
+      .first();
+
+    if (!preferences) {
+      return res.status(404).json({ message: "Preferensi tidak ditemukan" });
+    }
+
+    // Return with AI context
+    res.json({
+      ...preferences,
+      ai_context: preferences.generateAIContext?.() || null,
+    });
   } catch (error) {
     handleError(res, error);
   }
@@ -296,5 +398,8 @@ module.exports = {
   addPreferredTerm,
   removePreferredTerm,
   getLanguageStyles,
+  // New endpoints for user preferences targeting
+  getUsersWithPreferences,
+  getUserPreferencesById,
 };
 

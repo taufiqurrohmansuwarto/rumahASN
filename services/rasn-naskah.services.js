@@ -332,6 +332,22 @@ export const getLanguageStyles = async () => {
   return data;
 };
 
+/**
+ * Get all users with preferences (for target selection when creating documents)
+ */
+export const getUsersWithPreferences = async () => {
+  const { data } = await api.get("/preferences/users");
+  return data;
+};
+
+/**
+ * Get specific user's preferences (for AI context)
+ */
+export const getUserPreferencesById = async (userId) => {
+  const { data } = await api.get(`/preferences/users?userId=${userId}`);
+  return data;
+};
+
 // ==========================================
 // ADMIN - PERGUB
 // ==========================================

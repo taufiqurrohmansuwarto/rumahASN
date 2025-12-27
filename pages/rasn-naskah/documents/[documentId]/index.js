@@ -4,12 +4,13 @@ import ReactMarkdownCustom from "@/components/MarkdownEditor/ReactMarkdownCustom
 import {
   useRasnNaskahDocumentDetail,
   useRasnNaskahDocumentReview,
-  useRasnNaskahSuperiorPreferences,
+  useRasnNaskahUsersWithPreferences,
 } from "@/hooks/useRasnNaskah";
 import {
   startReview,
   addBookmark,
   removeBookmark,
+  requestReviewWithOptions,
 } from "@/services/rasn-naskah.services";
 import {
   IconArrowLeft,
@@ -190,44 +191,226 @@ const IssueCard = ({ issue }) => {
   );
 };
 
-// Superior Style Feedback Component
-const SuperiorStyleFeedback = ({ superior, feedback }) => {
-  if (!superior || !feedback) return null;
+// Target Style Feedback Component - supports both user preferences and superior preferences
+const TargetStyleFeedback = ({ target, feedback }) => {
+  if (!feedback) return null;
+
+  // Get target name from various sources
+  const targetName = feedback?.target_name || 
+    target?.user_name || 
+    target?.superior_name || 
+    "Target";
+
+  // Get language style description
+  const getStyleDescription = (style) => {
+    const descriptions = {
+      formal_lengkap: "Formal Lengkap - Detail & Komprehensif",
+      formal_ringkas: "Formal Ringkas - Langsung ke Pokok",
+      semi_formal: "Semi-Formal - Fleksibel & Sopan",
+      formal: "Formal Standar",
+      standar: "Standar Pergub",
+      ringkas: "Ringkas & To The Point",
+    };
+    return descriptions[style] || style;
+  };
+
+  const styleRequested = feedback?.style_requested || target?.language_style;
+  const complianceScore = feedback?.compliance_score;
+  const styleAnalysis = feedback?.style_analysis;
 
   return (
     <Card
       size="small"
       style={{
         marginTop: 12,
-        background: "#f6ffed",
-        borderColor: "#b7eb8f",
+        background: feedback.is_compliant ? "#f6ffed" : "#fffbe6",
+        borderColor: feedback.is_compliant ? "#b7eb8f" : "#ffe58f",
       }}
     >
-      <Space align="center" style={{ marginBottom: 8 }}>
-        <IconUser size={14} color="#52c41a" />
-        <Text strong style={{ fontSize: 12 }}>GAYA BAHASA - {superior.superior_name}</Text>
-      </Space>
+      {/* Header */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+        <Space align="center">
+          <IconUser size={14} color={feedback.is_compliant ? "#52c41a" : "#faad14"} />
+          <Text strong style={{ fontSize: 12 }}>
+            ANALISIS GAYA BAHASA - {targetName}
+          </Text>
+        </Space>
+        <Space>
+          {complianceScore !== undefined && (
+            <Tag color={complianceScore >= 80 ? "success" : complianceScore >= 60 ? "warning" : "error"}>
+              Kesesuaian: {complianceScore}%
+            </Tag>
+          )}
+          {feedback.is_compliant && (
+            <Tag color="success" style={{ fontSize: 10 }}>✓ Sesuai</Tag>
+          )}
+        </Space>
+      </div>
 
-      <Text type="secondary" style={{ fontSize: 12, display: "block", marginBottom: 8 }}>
-        {superior.superior_position && `${superior.superior_position} - `}
-        {superior.notes || `Prefer kalimat ${superior.language_style === "ringkas" ? "ringkas dan to the point" : superior.language_style}`}
-      </Text>
+      {/* Style Requested */}
+      {styleRequested && (
+        <div style={{ marginBottom: 10, padding: "6px 10px", background: "#fff", borderRadius: 4 }}>
+          <Text type="secondary" style={{ fontSize: 11 }}>Gaya yang diminta: </Text>
+          <Tag color="blue" style={{ fontSize: 11 }}>{getStyleDescription(styleRequested)}</Tag>
+        </div>
+      )}
 
-      {feedback.suggestions?.map((item, index) => (
-        <Alert
-          key={index}
-          type={feedback.is_compliant ? "success" : "warning"}
-          message={<Text style={{ fontSize: 12 }}>{item.issue}</Text>}
-          description={<Text style={{ fontSize: 11 }}>{item.suggestion}</Text>}
-          showIcon
-          style={{ marginBottom: 6, padding: "6px 10px" }}
-        />
-      ))}
+      {/* Custom Rules Check */}
+      {feedback.custom_rules_check?.length > 0 && (
+        <div style={{ marginBottom: 10, padding: 8, background: "#fff7e6", borderRadius: 4, border: "1px solid #ffd591" }}>
+          <Text strong style={{ fontSize: 11, display: "block", marginBottom: 6 }}>📋 Status Aturan Khusus:</Text>
+          {feedback.custom_rules_check.map((rule, idx) => (
+            <div key={idx} style={{ 
+              marginBottom: 6, 
+              padding: 6, 
+              background: rule.status === "terpenuhi" ? "#f6ffed" : rule.status === "sebagian" ? "#fffbe6" : "#fff1f0",
+              borderRadius: 4,
+              borderLeft: `3px solid ${rule.status === "terpenuhi" ? "#52c41a" : rule.status === "sebagian" ? "#faad14" : "#ff4d4f"}`
+            }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
+                <Text style={{ fontSize: 11 }}>
+                  {rule.status === "terpenuhi" ? "✅" : rule.status === "sebagian" ? "⚠️" : "❌"} 
+                  {" "}{rule.rule}
+                </Text>
+                <Tag 
+                  color={rule.status === "terpenuhi" ? "success" : rule.status === "sebagian" ? "warning" : "error"} 
+                  style={{ fontSize: 9 }}
+                >
+                  {rule.status === "terpenuhi" ? "Terpenuhi" : rule.status === "sebagian" ? "Sebagian" : "Tidak Terpenuhi"}
+                </Tag>
+              </div>
+              <Text type="secondary" style={{ fontSize: 10, display: "block" }}>{rule.detail}</Text>
+              {rule.found_in_document && (
+                <Text style={{ fontSize: 10, color: "#52c41a", display: "block", marginTop: 2 }}>
+                  📍 Ditemukan: "{rule.found_in_document}"
+                </Text>
+              )}
+              {rule.missing_element && (
+                <Text style={{ fontSize: 10, color: "#ff4d4f", display: "block", marginTop: 2 }}>
+                  ⚠️ Kurang: {rule.missing_element}
+                </Text>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
 
+      {/* Forbidden Words Found */}
+      {feedback.forbidden_words_found?.length > 0 && (
+        <div style={{ marginBottom: 10, padding: 8, background: "#fff1f0", borderRadius: 4, border: "1px solid #ffa39e" }}>
+          <Text strong style={{ fontSize: 11, display: "block", marginBottom: 6 }}>🚫 Kata Terlarang Ditemukan:</Text>
+          {feedback.forbidden_words_found.map((item, idx) => (
+            <div key={idx} style={{ marginBottom: 4, padding: 4, background: "#fff", borderRadius: 4 }}>
+              <Tag color="red" style={{ fontSize: 10 }}>"{item.word}"</Tag>
+              <Text style={{ fontSize: 10 }}> → ganti dengan </Text>
+              <Tag color="green" style={{ fontSize: 10 }}>"{item.replacement}"</Tag>
+              {item.location && (
+                <Text type="secondary" style={{ fontSize: 9, display: "block", marginTop: 2 }}>
+                  Konteks: {item.location}
+                </Text>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Terms to Replace */}
+      {feedback.terms_to_replace?.length > 0 && (
+        <div style={{ marginBottom: 10, padding: 8, background: "#e6f7ff", borderRadius: 4, border: "1px solid #91d5ff" }}>
+          <Text strong style={{ fontSize: 11, display: "block", marginBottom: 6 }}>🔄 Istilah yang Harus Diganti:</Text>
+          {feedback.terms_to_replace.map((item, idx) => (
+            <div key={idx} style={{ marginBottom: 4, padding: 4, background: "#fff", borderRadius: 4 }}>
+              <Tag color="orange" style={{ fontSize: 10 }}>"{item.original}"</Tag>
+              <Text style={{ fontSize: 10 }}> → </Text>
+              <Tag color="blue" style={{ fontSize: 10 }}>"{item.preferred}"</Tag>
+              {item.location && (
+                <Text type="secondary" style={{ fontSize: 9, display: "block", marginTop: 2 }}>
+                  Konteks: {item.location}
+                </Text>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Style Analysis */}
+      {styleAnalysis && (
+        <div style={{ marginBottom: 10, padding: 8, background: "#fafafa", borderRadius: 4 }}>
+          <Text strong style={{ fontSize: 11, display: "block", marginBottom: 6 }}>📊 Analisis Gaya:</Text>
+          <Row gutter={[8, 4]}>
+            {styleAnalysis.sentence_length && (
+              <Col span={12}>
+                <Text style={{ fontSize: 10 }}>📏 Panjang Kalimat: </Text>
+                <Text type="secondary" style={{ fontSize: 10 }}>{styleAnalysis.sentence_length}</Text>
+              </Col>
+            )}
+            {styleAnalysis.formality_level && (
+              <Col span={12}>
+                <Text style={{ fontSize: 10 }}>🎩 Formalitas: </Text>
+                <Text type="secondary" style={{ fontSize: 10 }}>{styleAnalysis.formality_level}</Text>
+              </Col>
+            )}
+            {styleAnalysis.word_choice && (
+              <Col span={12}>
+                <Text style={{ fontSize: 10 }}>📝 Pilihan Kata: </Text>
+                <Text type="secondary" style={{ fontSize: 10 }}>{styleAnalysis.word_choice}</Text>
+              </Col>
+            )}
+            {styleAnalysis.overall_tone && (
+              <Col span={12}>
+                <Text style={{ fontSize: 10 }}>🎯 Nada: </Text>
+                <Text type="secondary" style={{ fontSize: 10 }}>{styleAnalysis.overall_tone}</Text>
+              </Col>
+            )}
+          </Row>
+        </div>
+      )}
+
+      {/* Suggestions with before/after */}
+      {feedback.suggestions?.length > 0 && (
+        <div style={{ marginBottom: 10 }}>
+          <Text strong style={{ fontSize: 11, display: "block", marginBottom: 6 }}>💡 Saran Penyesuaian Gaya:</Text>
+          {feedback.suggestions.map((item, index) => (
+            <div key={index} style={{ 
+              marginBottom: 8, 
+              padding: 8, 
+              background: "#fff", 
+              borderRadius: 4,
+              border: "1px solid #f0f0f0"
+            }}>
+              <Text strong style={{ fontSize: 11, color: "#fa8c16" }}>{item.issue}</Text>
+              
+              {/* Show original and suggested sentences if available */}
+              {item.original_sentence && (
+                <div style={{ marginTop: 6 }}>
+                  <div style={{ marginBottom: 4 }}>
+                    <Tag color="red" style={{ fontSize: 9 }}>SEBELUM</Tag>
+                    <Text delete style={{ fontSize: 11, color: "#999" }}> {item.original_sentence}</Text>
+                  </div>
+                  {item.suggested_sentence && (
+                    <div>
+                      <Tag color="green" style={{ fontSize: 9 }}>SESUDAH</Tag>
+                      <Text style={{ fontSize: 11, color: "#52c41a" }}> {item.suggested_sentence}</Text>
+                    </div>
+                  )}
+                </div>
+              )}
+              
+              {item.suggestion && (
+                <Text type="secondary" style={{ fontSize: 10, display: "block", marginTop: 4 }}>
+                  ℹ️ {item.suggestion}
+                </Text>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Overall Note */}
       {feedback.overall_note && (
-        <div style={{ marginTop: 6, padding: 6, background: "#fff", borderRadius: 4 }}>
+        <div style={{ padding: 8, background: "#fff", borderRadius: 4, borderLeft: "3px solid #52c41a" }}>
           <IconCheck size={12} color="#52c41a" style={{ marginRight: 4 }} />
-          <Text type="secondary" style={{ fontSize: 11 }}>{feedback.overall_note}</Text>
+          <Text style={{ fontSize: 11 }}>{feedback.overall_note}</Text>
         </div>
       )}
     </Card>
@@ -381,12 +564,19 @@ const RasnNaskahDocumentDetail = () => {
   const router = useRouter();
   const { documentId } = router.query;
   const queryClient = useQueryClient();
-  const [selectedSuperior, setSelectedSuperior] = useState(null);
+  const [selectedTargetUser, setSelectedTargetUser] = useState(null);
   const [activeTab, setActiveTab] = useState("content");
 
   const { data: doc, isLoading, refetch } = useRasnNaskahDocumentDetail(documentId);
   const { data: reviewData, isLoading: reviewLoading } = useRasnNaskahDocumentReview(documentId);
-  const { data: superiors } = useRasnNaskahSuperiorPreferences();
+  const { data: usersWithPrefs, isLoading: usersLoading, error: usersError } = useRasnNaskahUsersWithPreferences();
+
+  // Debug logging
+  useEffect(() => {
+    console.log("[DOCUMENT DETAIL] Users with prefs:", usersWithPrefs);
+    console.log("[DOCUMENT DETAIL] Users loading:", usersLoading);
+    console.log("[DOCUMENT DETAIL] Users error:", usersError);
+  }, [usersWithPrefs, usersLoading, usersError]);
 
   // Poll for updates when content is being formatted
   useEffect(() => {
@@ -444,7 +634,15 @@ const RasnNaskahDocumentDetail = () => {
   });
 
   const reviewMutation = useMutation({
-    mutationFn: () => startReview(documentId),
+    mutationFn: () => {
+      // Use requestReviewWithOptions if target user is selected
+      if (selectedTargetUser) {
+        return requestReviewWithOptions(documentId, {
+          targetUserId: selectedTargetUser,
+        });
+      }
+      return startReview(documentId);
+    },
     onSuccess: () => {
       message.success("Review dimulai");
       queryClient.invalidateQueries(["rasn-naskah-document", documentId]);
@@ -551,6 +749,50 @@ const RasnNaskahDocumentDetail = () => {
                   </div>
                 </div>
               )}
+
+              {/* Target User Selector */}
+              <div style={{ minWidth: 200 }}>
+                <Text type="secondary" style={{ fontSize: 11, display: "block", marginBottom: 4 }}>
+                  Tujuan:
+                </Text>
+                <Select
+                  size="small"
+                  placeholder="Tanpa preferensi"
+                  allowClear
+                  value={selectedTargetUser}
+                  onChange={setSelectedTargetUser}
+                  style={{ width: "100%" }}
+                  optionLabelProp="label"
+                >
+                  <Select.Option value={null} label="Tanpa preferensi">
+                    <Text style={{ fontSize: 12 }}>Tanpa preferensi</Text>
+                  </Select.Option>
+                  {usersWithPrefs?.map((user) => (
+                    <Select.Option
+                      key={user.id}
+                      value={user.user_id}
+                      label={user.user_name}
+                    >
+                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <IconUser size={14} />
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontSize: 12, fontWeight: 500 }}>
+                            {user.user_name}
+                          </div>
+                          <div style={{ fontSize: 11, color: "#999" }}>
+                            {user.language_style === "formal_lengkap" && "Formal lengkap"}
+                            {user.language_style === "formal_ringkas" && "Ringkas"}
+                            {user.language_style === "semi_formal" && "Semi-formal"}
+                            {user.language_style === "formal" && "Formal"}
+                            {user.language_style === "standar" && "Standar"}
+                          </div>
+                        </div>
+                      </div>
+                    </Select.Option>
+                  ))}
+                </Select>
+              </div>
+
               <Button
                 icon={doc?.is_bookmarked ? <IconBookmarkFilled size={16} /> : <IconBookmark size={16} />}
                 onClick={() => bookmarkMutation.mutate()}
@@ -690,38 +932,6 @@ const RasnNaskahDocumentDetail = () => {
                       </div>
                     )}
 
-                    {/* Superior Selector */}
-                    <div
-                      style={{
-                        padding: "8px 12px",
-                        background: "#fafafa",
-                        borderRadius: 6,
-                        marginBottom: 12,
-                      }}
-                    >
-                      <Space wrap>
-                        <Text style={{ fontSize: 12 }}>Tujuan:</Text>
-                        <Select
-                          placeholder="Pilih atasan"
-                          size="small"
-                          style={{ minWidth: 150 }}
-                          allowClear
-                          value={selectedSuperior}
-                          onChange={setSelectedSuperior}
-                          options={[
-                            { value: null, label: "Tanpa preferensi" },
-                            ...(superiors?.data || []).map((s) => ({
-                              value: s.id,
-                              label: s.superior_name,
-                            })),
-                          ]}
-                        />
-                        <Text type="secondary" style={{ fontSize: 11 }}>
-                          → saran gaya bahasa
-                        </Text>
-                      </Space>
-                    </div>
-
                     {/* Issues Count */}
                     <div style={{ marginBottom: 8 }}>
                       <Text strong style={{ fontSize: 12 }}>
@@ -765,10 +975,10 @@ const RasnNaskahDocumentDetail = () => {
                       )}
                     </div>
 
-                    {/* Superior Style Feedback */}
+                    {/* Target Style Feedback - shows feedback based on target user preferences */}
                     {review.includes_superior_analysis && review.superior_style_suggestions && (
-                      <SuperiorStyleFeedback
-                        superior={review.targetSuperior || superiors?.data?.find((s) => s.id === selectedSuperior)}
+                      <TargetStyleFeedback
+                        target={usersWithPrefs?.find((u) => u.user_id === selectedTargetUser)}
                         feedback={review.superior_style_suggestions}
                       />
                     )}

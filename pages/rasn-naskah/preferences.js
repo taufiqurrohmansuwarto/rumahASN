@@ -2,532 +2,261 @@ import LayoutRasnNaskah from "@/components/RasnNaskah/LayoutRasnNaskah";
 import PageContainer from "@/components/PageContainer";
 import {
   useRasnNaskahPreferences,
-  useRasnNaskahLanguageStyles,
 } from "@/hooks/useRasnNaskah";
 import {
   updatePreferences,
-  addCustomRule,
-  deleteCustomRule,
-  addForbiddenWord,
-  deleteForbiddenWord,
-  addPreferredTerm,
-  deletePreferredTerm,
 } from "@/services/rasn-naskah.services";
 import {
-  IconAlertCircle,
   IconCheck,
-  IconLanguage,
   IconPlus,
   IconSettings,
-  IconTrash,
   IconX,
+  IconFile,
 } from "@tabler/icons-react";
 import {
   Breadcrumb,
   Button,
   Card,
-  Col,
   Divider,
-  Form,
   Input,
-  List,
   message,
-  Popconfirm,
-  Row,
-  Select,
+  Radio,
   Space,
   Spin,
-  Switch,
-  Tabs,
   Tag,
   Typography,
 } from "antd";
 import Head from "next/head";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 const { Text, Paragraph } = Typography;
-const { TextArea } = Input;
+
+// Editable Tag List Component
+const EditableTagList = ({ items = [], onAdd, onRemove, placeholder, color = "default" }) => {
+  const [inputValue, setInputValue] = useState("");
+  const [inputVisible, setInputVisible] = useState(false);
+
+  const handleAdd = () => {
+    if (inputValue.trim() && !items.includes(inputValue.trim())) {
+      onAdd(inputValue.trim());
+      setInputValue("");
+      setInputVisible(false);
+    }
+  };
+
+  return (
+    <div style={{
+      border: "1px solid #d9d9d9",
+      borderRadius: 6,
+      padding: 12,
+      minHeight: 60,
+      background: "#fafafa"
+    }}>
+      <Space wrap size={[8, 8]}>
+        {items.map((item, index) => (
+          <Tag
+            key={index}
+            closable
+            onClose={() => onRemove(item)}
+            color={color}
+            style={{
+              padding: "4px 8px",
+              fontSize: 13,
+              display: "flex",
+              alignItems: "center",
+              gap: 4
+            }}
+          >
+            {item}
+          </Tag>
+        ))}
+        {inputVisible ? (
+          <Input
+            size="small"
+            style={{ width: 150 }}
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            onBlur={handleAdd}
+            onPressEnter={handleAdd}
+            placeholder={placeholder}
+            autoFocus
+          />
+        ) : (
+          <Tag
+            onClick={() => setInputVisible(true)}
+            style={{
+              borderStyle: "dashed",
+              cursor: "pointer",
+              padding: "4px 8px",
+              background: "#fff"
+            }}
+          >
+            <IconPlus size={12} style={{ marginRight: 4 }} />
+            Tambah frasa
+          </Tag>
+        )}
+      </Space>
+    </div>
+  );
+};
+
+// Editable Rule List Component
+const EditableRuleList = ({ items = [], onAdd, onRemove }) => {
+  const [inputValue, setInputValue] = useState("");
+  const [inputVisible, setInputVisible] = useState(false);
+
+  const handleAdd = () => {
+    if (inputValue.trim() && !items.includes(inputValue.trim())) {
+      onAdd(inputValue.trim());
+      setInputValue("");
+      setInputVisible(false);
+    }
+  };
+
+  return (
+    <div style={{
+      border: "1px solid #d9d9d9",
+      borderRadius: 6,
+      padding: 12,
+      minHeight: 60,
+      background: "#fafafa"
+    }}>
+      <Space direction="vertical" style={{ width: "100%" }} size={8}>
+        {items.map((item, index) => (
+          <div
+            key={index}
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              padding: "6px 10px",
+              background: "#fff",
+              borderRadius: 4,
+              border: "1px solid #f0f0f0"
+            }}
+          >
+            <Text style={{ fontSize: 13 }}>{item}</Text>
+            <Button
+              type="text"
+              size="small"
+              danger
+              icon={<IconX size={14} />}
+              onClick={() => onRemove(item)}
+            />
+          </div>
+        ))}
+        {inputVisible ? (
+          <Input
+            size="small"
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            onBlur={handleAdd}
+            onPressEnter={handleAdd}
+            placeholder="Tulis aturan baru..."
+            autoFocus
+          />
+        ) : (
+          <Button
+            type="dashed"
+            size="small"
+            icon={<IconPlus size={14} />}
+            onClick={() => setInputVisible(true)}
+            style={{ width: "100%" }}
+          >
+            Tambah aturan
+          </Button>
+        )}
+      </Space>
+    </div>
+  );
+};
 
 const RasnNaskahPreferences = () => {
   const queryClient = useQueryClient();
-  const [customRuleForm] = Form.useForm();
-  const [forbiddenWordForm] = Form.useForm();
-  const [preferredTermForm] = Form.useForm();
 
   const { data: preferences, isLoading } = useRasnNaskahPreferences();
-  const { data: languageStyles } = useRasnNaskahLanguageStyles();
 
-  // Mutations
-  const updatePrefMutation = useMutation({
-    mutationFn: (data) => updatePreferences(data),
-    onSuccess: () => {
-      message.success("Preferensi berhasil diperbarui");
+  // Local state for editing
+  const [writingStyle, setWritingStyle] = useState("formal_ringkas");
+  const [preferredPhrases, setPreferredPhrases] = useState([]);
+  const [avoidedPhrases, setAvoidedPhrases] = useState([]);
+  const [customRules, setCustomRules] = useState([]);
+
+  // Sync from server
+  useEffect(() => {
+    if (preferences) {
+      setWritingStyle(preferences.language_style || "formal_ringkas");
+      setPreferredPhrases(preferences.preferred_phrases || []);
+      setAvoidedPhrases(preferences.avoided_phrases || []);
+      setCustomRules(preferences.custom_rules?.map(r => r.name || r) || []);
+    }
+  }, [preferences]);
+
+  // Save mutation
+  const saveMutation = useMutation({
+    mutationFn: (data) => {
+      console.log("Saving preferences:", data);
+      return updatePreferences(data);
+    },
+    onSuccess: (data) => {
+      console.log("Save success:", data);
+      message.success("Preferensi berhasil disimpan");
       queryClient.invalidateQueries(["rasn-naskah-preferences"]);
     },
-    onError: () => {
-      message.error("Gagal memperbarui preferensi");
+    onError: (error) => {
+      console.error("Save error:", error);
+      console.error("Error response:", error?.response);
+      const errorMessage = error?.response?.data?.message || error?.message || "Gagal menyimpan preferensi";
+      message.error(errorMessage);
     },
   });
 
-  const addCustomRuleMutation = useMutation({
-    mutationFn: (data) => addCustomRule(data),
-    onSuccess: () => {
-      message.success("Aturan kustom berhasil ditambahkan");
-      queryClient.invalidateQueries(["rasn-naskah-preferences"]);
-      customRuleForm.resetFields();
-    },
-    onError: () => {
-      message.error("Gagal menambahkan aturan");
-    },
-  });
-
-  const deleteCustomRuleMutation = useMutation({
-    mutationFn: (ruleId) => deleteCustomRule(ruleId),
-    onSuccess: () => {
-      message.success("Aturan berhasil dihapus");
-      queryClient.invalidateQueries(["rasn-naskah-preferences"]);
-    },
-    onError: () => {
-      message.error("Gagal menghapus aturan");
-    },
-  });
-
-  const addForbiddenWordMutation = useMutation({
-    mutationFn: (data) => addForbiddenWord(data),
-    onSuccess: () => {
-      message.success("Kata terlarang berhasil ditambahkan");
-      queryClient.invalidateQueries(["rasn-naskah-preferences"]);
-      forbiddenWordForm.resetFields();
-    },
-    onError: () => {
-      message.error("Gagal menambahkan kata");
-    },
-  });
-
-  const deleteForbiddenWordMutation = useMutation({
-    mutationFn: (wordId) => deleteForbiddenWord(wordId),
-    onSuccess: () => {
-      message.success("Kata berhasil dihapus");
-      queryClient.invalidateQueries(["rasn-naskah-preferences"]);
-    },
-    onError: () => {
-      message.error("Gagal menghapus kata");
-    },
-  });
-
-  const addPreferredTermMutation = useMutation({
-    mutationFn: (data) => addPreferredTerm(data),
-    onSuccess: () => {
-      message.success("Istilah preferensi berhasil ditambahkan");
-      queryClient.invalidateQueries(["rasn-naskah-preferences"]);
-      preferredTermForm.resetFields();
-    },
-    onError: () => {
-      message.error("Gagal menambahkan istilah");
-    },
-  });
-
-  const deletePreferredTermMutation = useMutation({
-    mutationFn: (termId) => deletePreferredTerm(termId),
-    onSuccess: () => {
-      message.success("Istilah berhasil dihapus");
-      queryClient.invalidateQueries(["rasn-naskah-preferences"]);
-    },
-    onError: () => {
-      message.error("Gagal menghapus istilah");
-    },
-  });
-
-  const handleUpdateSettings = (key, value) => {
-    updatePrefMutation.mutate({ [key]: value });
+  const handleSave = () => {
+    const payload = {
+      language_style: writingStyle,
+      preferred_phrases: preferredPhrases,
+      avoided_phrases: avoidedPhrases,
+      custom_rules: customRules.map(rule => ({ name: rule })),
+    };
+    console.log("Sending payload:", payload);
+    saveMutation.mutate(payload);
   };
 
-  const tabItems = [
-    {
-      key: "general",
-      label: (
-        <Space>
-          <IconSettings size={16} />
-          Umum
-        </Space>
-      ),
-      children: (
-        <Card>
-          <Form layout="vertical">
-            <Form.Item label="Gaya Bahasa Default">
-              <Select
-                value={preferences?.language_style || "formal"}
-                onChange={(value) =>
-                  handleUpdateSettings("default_language_style", value)
-                }
-                style={{ width: 300 }}
-                options={
-                  languageStyles?.map?.((style) => ({
-                    value: style.key,
-                    label: style.label,
-                  })) || [
-                    { value: "formal", label: "Formal" },
-                    { value: "semi_formal", label: "Semi Formal" },
-                    { value: "informal", label: "Informal" },
-                  ]
-                }
-              />
-            </Form.Item>
+  // Handlers for phrase/rule management
+  const addPreferredPhrase = (phrase) => {
+    setPreferredPhrases([...preferredPhrases, phrase]);
+  };
 
-            <Divider />
+  const removePreferredPhrase = (phrase) => {
+    setPreferredPhrases(preferredPhrases.filter(p => p !== phrase));
+  };
 
-            <Form.Item label="Notifikasi">
-              <Space direction="vertical">
-                <Space>
-                  <Switch
-                    checked={preferences?.email_notification !== false}
-                    onChange={(checked) =>
-                      handleUpdateSettings("email_notification", checked)
-                    }
-                  />
-                  <Text>Terima notifikasi email saat review selesai</Text>
-                </Space>
-                <Space>
-                  <Switch
-                    checked={preferences?.auto_review !== false}
-                    onChange={(checked) =>
-                      handleUpdateSettings("auto_review", checked)
-                    }
-                  />
-                  <Text>Otomatis review saat upload dokumen</Text>
-                </Space>
-              </Space>
-            </Form.Item>
+  const addAvoidedPhrase = (phrase) => {
+    setAvoidedPhrases([...avoidedPhrases, phrase]);
+  };
 
-            <Divider />
+  const removeAvoidedPhrase = (phrase) => {
+    setAvoidedPhrases(avoidedPhrases.filter(p => p !== phrase));
+  };
 
-            <Form.Item label="Tingkat Keketatan Review">
-              <Select
-                value={preferences?.strictness_level || "medium"}
-                onChange={(value) =>
-                  handleUpdateSettings("strictness_level", value)
-                }
-                style={{ width: 300 }}
-                options={[
-                  { value: "low", label: "Rendah - Toleransi tinggi" },
-                  { value: "medium", label: "Sedang - Seimbang" },
-                  { value: "high", label: "Tinggi - Ketat" },
-                ]}
-              />
-              <Paragraph type="secondary" style={{ marginTop: 8, fontSize: 12 }}>
-                Tingkat keketatan mempengaruhi sensitivitas AI dalam mendeteksi
-                kesalahan.
-              </Paragraph>
-            </Form.Item>
-          </Form>
-        </Card>
-      ),
-    },
-    {
-      key: "custom-rules",
-      label: (
-        <Space>
-          <IconAlertCircle size={16} />
-          Aturan Kustom
-        </Space>
-      ),
-      children: (
-        <Row gutter={[16, 16]}>
-          <Col xs={24} lg={12}>
-            <Card title="Tambah Aturan Baru">
-              <Form
-                form={customRuleForm}
-                layout="vertical"
-                onFinish={(values) => addCustomRuleMutation.mutate(values)}
-              >
-                <Form.Item
-                  name="name"
-                  label="Nama Aturan"
-                  rules={[{ required: true, message: "Nama aturan wajib diisi" }]}
-                >
-                  <Input placeholder="Contoh: Gunakan kalimat aktif" />
-                </Form.Item>
-                <Form.Item
-                  name="description"
-                  label="Deskripsi"
-                  rules={[{ required: true, message: "Deskripsi wajib diisi" }]}
-                >
-                  <TextArea
-                    rows={3}
-                    placeholder="Jelaskan aturan ini secara detail..."
-                  />
-                </Form.Item>
-                <Form.Item
-                  name="severity"
-                  label="Tingkat Keparahan"
-                  initialValue="warning"
-                >
-                  <Select
-                    options={[
-                      { value: "info", label: "Info" },
-                      { value: "warning", label: "Peringatan" },
-                      { value: "error", label: "Error" },
-                    ]}
-                  />
-                </Form.Item>
-                <Form.Item>
-                  <Button
-                    type="primary"
-                    htmlType="submit"
-                    icon={<IconPlus size={16} />}
-                    loading={addCustomRuleMutation.isLoading}
-                  >
-                    Tambah Aturan
-                  </Button>
-                </Form.Item>
-              </Form>
-            </Card>
-          </Col>
-          <Col xs={24} lg={12}>
-            <Card title="Aturan Kustom Anda">
-              <List
-                dataSource={preferences?.custom_rules || []}
-                locale={{ emptyText: "Belum ada aturan kustom" }}
-                renderItem={(rule) => (
-                  <List.Item
-                    actions={[
-                      <Popconfirm
-                        key="delete"
-                        title="Hapus aturan ini?"
-                        onConfirm={() => deleteCustomRuleMutation.mutate(rule.id)}
-                        okText="Ya"
-                        cancelText="Tidak"
-                      >
-                        <Button
-                          type="text"
-                          danger
-                          icon={<IconTrash size={16} />}
-                          loading={deleteCustomRuleMutation.isLoading}
-                        />
-                      </Popconfirm>,
-                    ]}
-                  >
-                    <List.Item.Meta
-                      title={
-                        <Space>
-                          {rule.name}
-                          <Tag
-                            color={
-                              rule.severity === "error"
-                                ? "red"
-                                : rule.severity === "warning"
-                                ? "orange"
-                                : "blue"
-                            }
-                          >
-                            {rule.severity}
-                          </Tag>
-                        </Space>
-                      }
-                      description={rule.description}
-                    />
-                  </List.Item>
-                )}
-              />
-            </Card>
-          </Col>
-        </Row>
-      ),
-    },
-    {
-      key: "forbidden-words",
-      label: (
-        <Space>
-          <IconX size={16} />
-          Kata Terlarang
-        </Space>
-      ),
-      children: (
-        <Row gutter={[16, 16]}>
-          <Col xs={24} lg={12}>
-            <Card title="Tambah Kata Terlarang">
-              <Form
-                form={forbiddenWordForm}
-                layout="vertical"
-                onFinish={(values) => addForbiddenWordMutation.mutate(values)}
-              >
-                <Form.Item
-                  name="word"
-                  label="Kata/Frasa"
-                  rules={[{ required: true, message: "Kata wajib diisi" }]}
-                >
-                  <Input placeholder="Kata yang ingin dihindari" />
-                </Form.Item>
-                <Form.Item name="replacement" label="Pengganti (Opsional)">
-                  <Input placeholder="Kata pengganti yang disarankan" />
-                </Form.Item>
-                <Form.Item name="reason" label="Alasan (Opsional)">
-                  <Input placeholder="Mengapa kata ini harus dihindari?" />
-                </Form.Item>
-                <Form.Item>
-                  <Button
-                    type="primary"
-                    htmlType="submit"
-                    icon={<IconPlus size={16} />}
-                    loading={addForbiddenWordMutation.isLoading}
-                  >
-                    Tambah
-                  </Button>
-                </Form.Item>
-              </Form>
-            </Card>
-          </Col>
-          <Col xs={24} lg={12}>
-            <Card title="Daftar Kata Terlarang">
-              <List
-                dataSource={preferences?.forbidden_words || []}
-                locale={{ emptyText: "Belum ada kata terlarang" }}
-                renderItem={(item) => (
-                  <List.Item
-                    actions={[
-                      <Popconfirm
-                        key="delete"
-                        title="Hapus kata ini?"
-                        onConfirm={() =>
-                          deleteForbiddenWordMutation.mutate(item.id)
-                        }
-                        okText="Ya"
-                        cancelText="Tidak"
-                      >
-                        <Button
-                          type="text"
-                          danger
-                          icon={<IconTrash size={16} />}
-                          loading={deleteForbiddenWordMutation.isLoading}
-                        />
-                      </Popconfirm>,
-                    ]}
-                  >
-                    <List.Item.Meta
-                      title={
-                        <Space>
-                          <Tag color="red">{item.word}</Tag>
-                          {item.replacement && (
-                            <>
-                              <Text type="secondary">→</Text>
-                              <Tag color="green">{item.replacement}</Tag>
-                            </>
-                          )}
-                        </Space>
-                      }
-                      description={item.reason}
-                    />
-                  </List.Item>
-                )}
-              />
-            </Card>
-          </Col>
-        </Row>
-      ),
-    },
-    {
-      key: "preferred-terms",
-      label: (
-        <Space>
-          <IconCheck size={16} />
-          Istilah Preferensi
-        </Space>
-      ),
-      children: (
-        <Row gutter={[16, 16]}>
-          <Col xs={24} lg={12}>
-            <Card title="Tambah Istilah Preferensi">
-              <Form
-                form={preferredTermForm}
-                layout="vertical"
-                onFinish={(values) => addPreferredTermMutation.mutate(values)}
-              >
-                <Form.Item
-                  name="original"
-                  label="Istilah Asli"
-                  rules={[{ required: true, message: "Istilah asli wajib diisi" }]}
-                >
-                  <Input placeholder="Istilah yang sering salah digunakan" />
-                </Form.Item>
-                <Form.Item
-                  name="preferred"
-                  label="Istilah yang Benar"
-                  rules={[{ required: true, message: "Istilah benar wajib diisi" }]}
-                >
-                  <Input placeholder="Istilah yang seharusnya digunakan" />
-                </Form.Item>
-                <Form.Item name="context" label="Konteks (Opsional)">
-                  <Input placeholder="Kapan aturan ini berlaku?" />
-                </Form.Item>
-                <Form.Item>
-                  <Button
-                    type="primary"
-                    htmlType="submit"
-                    icon={<IconPlus size={16} />}
-                    loading={addPreferredTermMutation.isLoading}
-                  >
-                    Tambah
-                  </Button>
-                </Form.Item>
-              </Form>
-            </Card>
-          </Col>
-          <Col xs={24} lg={12}>
-            <Card title="Daftar Istilah Preferensi">
-              <List
-                dataSource={preferences?.preferred_terms || []}
-                locale={{ emptyText: "Belum ada istilah preferensi" }}
-                renderItem={(item) => (
-                  <List.Item
-                    actions={[
-                      <Popconfirm
-                        key="delete"
-                        title="Hapus istilah ini?"
-                        onConfirm={() =>
-                          deletePreferredTermMutation.mutate(item.id)
-                        }
-                        okText="Ya"
-                        cancelText="Tidak"
-                      >
-                        <Button
-                          type="text"
-                          danger
-                          icon={<IconTrash size={16} />}
-                          loading={deletePreferredTermMutation.isLoading}
-                        />
-                      </Popconfirm>,
-                    ]}
-                  >
-                    <List.Item.Meta
-                      title={
-                        <Space>
-                          <Tag>{item.original}</Tag>
-                          <Text type="secondary">→</Text>
-                          <Tag color="blue">{item.preferred}</Tag>
-                        </Space>
-                      }
-                      description={item.context}
-                    />
-                  </List.Item>
-                )}
-              />
-            </Card>
-          </Col>
-        </Row>
-      ),
-    },
-  ];
+  const addCustomRule = (rule) => {
+    setCustomRules([...customRules, rule]);
+  };
+
+  const removeCustomRule = (rule) => {
+    setCustomRules(customRules.filter(r => r !== rule));
+  };
 
   return (
     <>
       <Head>
-        <title>SAKTI Naskah - Preferensi</title>
+        <title>SAKTI Naskah - Preferensi Saya</title>
       </Head>
       <PageContainer
-        title="Preferensi Review"
-        subTitle="Sesuaikan pengaturan review dokumen Anda"
+        title="Preferensi Saya"
+        subTitle="Atur gaya penulisan yang Anda sukai untuk review naskah"
         breadcrumbRender={() => (
           <Breadcrumb>
             <Breadcrumb.Item>
@@ -541,7 +270,111 @@ const RasnNaskahPreferences = () => {
         )}
       >
         <Spin spinning={isLoading}>
-          <Tabs items={tabItems} defaultActiveKey="general" />
+          <Card
+            title={
+              <Space>
+                <IconSettings size={18} />
+                <span>Preferensi Saya</span>
+              </Space>
+            }
+          >
+            {/* Writing Style */}
+            <div style={{ marginBottom: 24 }}>
+              <Text strong style={{ display: "block", marginBottom: 12 }}>
+                Gaya Penulisan
+              </Text>
+              <Radio.Group
+                value={writingStyle}
+                onChange={(e) => setWritingStyle(e.target.value)}
+                optionType="button"
+                buttonStyle="solid"
+              >
+                <Radio.Button value="formal_lengkap">Formal Lengkap</Radio.Button>
+                <Radio.Button value="formal_ringkas">Formal Ringkas</Radio.Button>
+                <Radio.Button value="semi_formal">Semi-formal</Radio.Button>
+              </Radio.Group>
+            </div>
+
+            <Divider />
+
+            {/* Preferred Phrases */}
+            <div style={{ marginBottom: 24 }}>
+              <Space style={{ marginBottom: 12 }}>
+                <IconCheck size={16} color="#52c41a" />
+                <Text strong>Frasa yang saya suka</Text>
+              </Space>
+              <EditableTagList
+                items={preferredPhrases}
+                onAdd={addPreferredPhrase}
+                onRemove={removePreferredPhrase}
+                placeholder="Contoh: Demikian disampaikan"
+                color="green"
+              />
+            </div>
+
+            <Divider />
+
+            {/* Avoided Phrases */}
+            <div style={{ marginBottom: 24 }}>
+              <Space style={{ marginBottom: 12 }}>
+                <IconX size={16} color="#ff4d4f" />
+                <Text strong>Frasa yang saya hindari</Text>
+              </Space>
+              <EditableTagList
+                items={avoidedPhrases}
+                onAdd={addAvoidedPhrase}
+                onRemove={removeAvoidedPhrase}
+                placeholder="Contoh: Mohon maklum"
+                color="red"
+              />
+            </div>
+
+            <Divider />
+
+            {/* Custom Rules */}
+            <div style={{ marginBottom: 24 }}>
+              <Space style={{ marginBottom: 12 }}>
+                <IconFile size={16} color="#1890ff" />
+                <Text strong>Aturan khusus</Text>
+              </Space>
+              <EditableRuleList
+                items={customRules}
+                onAdd={addCustomRule}
+                onRemove={removeCustomRule}
+              />
+            </div>
+
+            <Divider />
+
+            {/* Save Button */}
+            <Button
+              type="primary"
+              size="large"
+              block
+              onClick={handleSave}
+              loading={saveMutation.isLoading}
+            >
+              Simpan Preferensi
+            </Button>
+
+            {/* Info */}
+            <div
+              style={{
+                marginTop: 16,
+                padding: 12,
+                background: "#e6f7ff",
+                borderRadius: 6,
+                border: "1px solid #91d5ff"
+              }}
+            >
+              <Paragraph style={{ margin: 0, fontSize: 12, color: "#1890ff" }}>
+                <strong>Bagaimana ini bekerja?</strong>
+                <br />
+                Preferensi Anda akan disimpan dan digunakan saat orang lain membuat naskah
+                dengan tujuan ke Anda. AI akan memberikan saran sesuai preferensi yang Anda atur.
+              </Paragraph>
+            </div>
+          </Card>
         </Spin>
       </PageContainer>
     </>

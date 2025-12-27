@@ -17,6 +17,8 @@ const {
   SuperiorPreferences,
 } = require("@/models/rasn-naskah");
 
+const UserPreferences = require("@/models/rasn-naskah/user-preferences.model");
+
 const {
   searchSimilar,
   upsertVector,
@@ -58,14 +60,17 @@ const generateEmbedding = async (text) => {
 
 /**
  * Main processor untuk document review
- * Enhanced version with superior preferences support
+ * Enhanced version with user preferences and superior preferences support
  */
 const processDocumentReview = async (job) => {
-  const { documentId, reviewId, options = {} } = job.data;
-  const { targetSuperiorId } = options;
+  const { documentId, reviewId, ...jobOptions } = job.data;
+  // Support both nested options and flat options format
+  const options = jobOptions.options || jobOptions;
+  const { targetSuperiorId, targetUserId } = options;
   const startTime = Date.now();
 
   console.log(`📝 [RASN-NASKAH] Starting document review: ${documentId}`);
+  console.log(`📝 [RASN-NASKAH] Options:`, { targetUserId, targetSuperiorId });
 
   try {
     // 1. Get document
@@ -77,14 +82,38 @@ const processDocumentReview = async (job) => {
       throw new Error(`Document not found: ${documentId}`);
     }
 
-    // 2. Get target superior preferences if provided
+    // 2. Get target preferences (user preferences or superior preferences)
     let targetSuperior = null;
-    if (targetSuperiorId) {
-      targetSuperior = await SuperiorPreferences.query().findById(targetSuperiorId);
-      console.log(`📋 [RASN-NASKAH] Using superior preferences: ${targetSuperior?.superior_name || "Not found"}`);
+    let targetUserPrefs = null;
+    let targetContext = null;
+
+    // Priority: targetUserId (new) > targetSuperiorId (legacy)
+    if (targetUserId) {
+      targetUserPrefs = await UserPreferences.query()
+        .where("user_id", targetUserId)
+        .withGraphFetched("user(simpleWithImage)")
+        .first();
+
+      if (targetUserPrefs) {
+        targetContext = targetUserPrefs.generateAIContext?.() || null;
+        console.log(
+          `📋 [RASN-NASKAH] Using user preferences: ${
+            targetUserPrefs.user?.username || targetUserId
+          }`
+        );
+      }
+    } else if (targetSuperiorId) {
+      targetSuperior = await SuperiorPreferences.query().findById(
+        targetSuperiorId
+      );
+      console.log(
+        `📋 [RASN-NASKAH] Using superior preferences: ${
+          targetSuperior?.superior_name || "Not found"
+        }`
+      );
     }
 
-    // 3. Update review status to processing with target_superior_id
+    // 3. Update review status to processing
     await DocumentReviews.query()
       .findById(reviewId)
       .patch({
@@ -103,15 +132,25 @@ const processDocumentReview = async (job) => {
     job.progress(20);
 
     // 5. Search for relevant rules from Qdrant
-    const relevantRules = await searchRelevantRules(content, document.category || document.document_type);
+    const relevantRules = await searchRelevantRules(
+      content,
+      document.category || document.document_type
+    );
     job.progress(40);
 
-    // 6. Generate AI review with superior context
+    // 6. Generate AI review with user/superior context
     const reviewOptions = {
       ...options,
       targetSuperior,
+      targetUserPrefs,
+      targetContext,
     };
-    const reviewResult = await generateDocumentReview(content, relevantRules, document, reviewOptions);
+    const reviewResult = await generateDocumentReview(
+      content,
+      relevantRules,
+      document,
+      reviewOptions
+    );
     job.progress(70);
 
     // 7. Save issues to database
@@ -122,10 +161,14 @@ const processDocumentReview = async (job) => {
     const processingTime = Date.now() - startTime;
 
     // Count issues by severity
-    const criticalIssues = issues.filter((i) => i.severity === "critical").length;
+    const criticalIssues = issues.filter(
+      (i) => i.severity === "critical"
+    ).length;
     const majorIssues = issues.filter((i) => i.severity === "major").length;
     const minorIssues = issues.filter((i) => i.severity === "minor").length;
-    const suggestionIssues = issues.filter((i) => i.severity === "suggestion").length;
+    const suggestionIssues = issues.filter(
+      (i) => i.severity === "suggestion"
+    ).length;
 
     await DocumentReviews.query()
       .findById(reviewId)
@@ -137,8 +180,10 @@ const processDocumentReview = async (job) => {
         ai_suggestions: reviewResult.recommendations?.join("\n") || null,
         // New structured fields
         ai_suggestions_structured: reviewResult.aiSuggestionsStructured || null,
-        superior_style_suggestions: reviewResult.superiorStyleSuggestions || null,
-        includes_superior_analysis: reviewResult.includesSuperiorAnalysis || false,
+        superior_style_suggestions:
+          reviewResult.superiorStyleSuggestions || null,
+        includes_superior_analysis:
+          reviewResult.includesSuperiorAnalysis || false,
         // Existing fields
         score_breakdown: reviewResult.scoreBreakdown,
         total_issues: issues.length,
@@ -150,15 +195,15 @@ const processDocumentReview = async (job) => {
       });
 
     // 9. Update document status
-    await Documents.query()
-      .findById(documentId)
-      .patch({
-        status: "reviewed",
-        latest_score: reviewResult.overallScore,
-        updated_at: new Date().toISOString(),
-      });
+    await Documents.query().findById(documentId).patch({
+      status: "reviewed",
+      latest_score: reviewResult.overallScore,
+      updated_at: new Date().toISOString(),
+    });
 
     // 10. Log activity
+    const targetName =
+      targetUserPrefs?.user?.username || targetSuperior?.superior_name || null;
     await DocumentActivities.log(
       documentId,
       document.user_id,
@@ -167,14 +212,19 @@ const processDocumentReview = async (job) => {
         review_id: reviewId,
         score: reviewResult.overallScore,
         issues_count: issues.length,
+        target_user: targetUserPrefs?.user?.username || null,
         target_superior: targetSuperior?.superior_name || null,
       },
-      `Dokumen direview dengan skor ${reviewResult.overallScore}${targetSuperior ? ` (untuk ${targetSuperior.superior_name})` : ""}`
+      `Dokumen direview dengan skor ${reviewResult.overallScore}${
+        targetName ? ` (untuk ${targetName})` : ""
+      }`
     );
 
     job.progress(100);
 
-    console.log(`✅ [RASN-NASKAH] Document review completed: ${documentId}, Score: ${reviewResult.overallScore}`);
+    console.log(
+      `✅ [RASN-NASKAH] Document review completed: ${documentId}, Score: ${reviewResult.overallScore}`
+    );
 
     return {
       documentId,
@@ -182,26 +232,26 @@ const processDocumentReview = async (job) => {
       overallScore: reviewResult.overallScore,
       issuesCount: issues.length,
       processingTime,
+      targetUser: targetUserPrefs?.user?.username || null,
       targetSuperior: targetSuperior?.superior_name || null,
     };
   } catch (error) {
-    console.error(`❌ [RASN-NASKAH] Document review failed: ${documentId}`, error.message);
+    console.error(
+      `❌ [RASN-NASKAH] Document review failed: ${documentId}`,
+      error.message
+    );
 
     // Update review status to failed
-    await DocumentReviews.query()
-      .findById(reviewId)
-      .patch({
-        status: "failed",
-        error_message: error.message,
-      });
+    await DocumentReviews.query().findById(reviewId).patch({
+      status: "failed",
+      error_message: error.message,
+    });
 
     // Update document status back
-    await Documents.query()
-      .findById(documentId)
-      .patch({
-        status: "draft",
-        updated_at: new Date().toISOString(),
-      });
+    await Documents.query().findById(documentId).patch({
+      status: "draft",
+      updated_at: new Date().toISOString(),
+    });
 
     throw error;
   }
@@ -256,29 +306,98 @@ const searchRelevantRules = async (content, documentType) => {
 /**
  * Generate document review using OpenAI
  * Enhanced version with structured suggestions for better UI display
+ * Supports both user preferences (new) and superior preferences (legacy)
  */
-const generateDocumentReview = async (content, relevantRules, document, options) => {
-  const { targetSuperior } = options;
+const generateDocumentReview = async (
+  content,
+  relevantRules,
+  document,
+  options
+) => {
+  const { targetSuperior, targetUserPrefs, targetContext } = options;
 
   const rulesContext = relevantRules
     .map((rule) => {
       const payload = rule.payload || {};
-      return `- [${payload.rule_type || "General"}] ${payload.title || ""}: ${payload.content || ""} (Sumber: ${payload.source || "Aturan umum"})`;
+      return `- [${payload.rule_type || "General"}] ${payload.title || ""}: ${
+        payload.content || ""
+      } (Sumber: ${payload.source || "Aturan umum"})`;
     })
     .join("\n");
 
-  // Build superior context if provided
-  let superiorContext = "";
-  if (targetSuperior) {
-    superiorContext = `
+  // Build target preferences context
+  // Priority: targetContext (from user preferences) > targetSuperior (legacy)
+  let preferencesContext = "";
+  const hasUserPrefs = targetContext || targetUserPrefs;
+  const hasSuperiorPrefs = targetSuperior;
+
+  if (hasUserPrefs) {
+    const userName = targetUserPrefs?.user?.username || "Target User";
+    const languageStyle = targetUserPrefs?.language_style || "standar";
+
+    // Build comprehensive context even if minimal preferences
+    const styleDescriptions = {
+      formal_lengkap:
+        "SANGAT FORMAL dengan kalimat detail, panjang, dan komprehensif. Gunakan banyak kata penghubung, kalimat majemuk, dan penjelasan lengkap.",
+      formal_ringkas:
+        "FORMAL tapi RINGKAS. Langsung ke pokok permasalahan, hindari kalimat bertele-tele, gunakan kalimat pendek dan efektif.",
+      semi_formal:
+        "SEMI-FORMAL, lebih fleksibel tapi tetap sopan. Boleh sedikit lebih santai dalam pemilihan kata.",
+      formal: "FORMAL standar sesuai kaidah tata naskah dinas.",
+      standar: "STANDAR sesuai Pergub Tata Naskah Dinas.",
+    };
+
+    preferencesContext = `
+
+=== PREFERENSI PENERIMA NASKAH: ${userName} ===
+
+GAYA BAHASA YANG DIINGINKAN:
+${styleDescriptions[languageStyle] || "Gaya standar"}
+
+${targetContext ? `PREFERENSI & ATURAN KHUSUS:\n${targetContext}` : ""}
+
+=== INSTRUKSI WAJIB UNTUK ANALISIS PREFERENSI ===
+
+1. CEK GAYA BAHASA:
+   - Analisis SETIAP paragraf/kalimat apakah sudah sesuai dengan gaya "${languageStyle}"
+   - Jika gaya "formal_ringkas" - tandai kalimat yang terlalu panjang/bertele-tele
+   - Jika gaya "formal_lengkap" - tandai bagian yang terlalu singkat dan perlu diperluas
+
+2. CEK ATURAN KHUSUS (WAJIB DILAPORKAN):
+   - Periksa SETIAP aturan khusus yang disebutkan di atas
+   - Jika ada aturan "Selalu letakkan PIC / Kontak" → CEK apakah ada nomor telepon/email/kontak di dokumen
+   - Jika aturan TIDAK terpenuhi → WAJIB masukkan ke "issues" dengan severity "major" atau "critical"
+   - Jika aturan terpenuhi → sebutkan di "overall_note"
+
+3. CEK KATA/FRASA TERLARANG:
+   - Cari semua kata/frasa yang ada di daftar "KATA/FRASA YANG DILARANG"
+   - Setiap kata terlarang yang ditemukan WAJIB dilaporkan sebagai issue
+   - Berikan saran pengganti sesuai yang ditentukan
+
+4. CEK ISTILAH YANG HARUS DIGANTI:
+   - Cari semua istilah yang ada di daftar "ISTILAH YANG HARUS DIGANTI"
+   - Setiap istilah yang ditemukan WAJIB dilaporkan dengan saran penggantinya
+
+5. LAPORAN HASIL:
+   - Berikan minimal 3-5 saran spesifik di "target_style_feedback"
+   - Untuk setiap saran, WAJIB berikan contoh SEBELUM dan SESUDAH
+   - Jika dokumen sudah memenuhi semua aturan, sebutkan secara eksplisit
+
+PENTING: Jangan abaikan aturan khusus! Setiap aturan harus dicek dan dilaporkan hasilnya.`;
+  } else if (hasSuperiorPrefs) {
+    preferencesContext = `
 
 PREFERENSI ATASAN TUJUAN:
-${targetSuperior.generateAIContext ? targetSuperior.generateAIContext() : `
+${
+  targetSuperior.generateAIContext
+    ? targetSuperior.generateAIContext()
+    : `
 - Nama: ${targetSuperior.superior_name}
 - Jabatan: ${targetSuperior.superior_position || "-"}
 - Gaya Bahasa: ${targetSuperior.language_style || "formal"}
 - Catatan: ${targetSuperior.notes || "-"}
-`}
+`
+}
 
 Berikan juga saran khusus berdasarkan preferensi atasan di atas.`;
   }
@@ -287,8 +406,11 @@ Berikan juga saran khusus berdasarkan preferensi atasan di atas.`;
 Tugas Anda adalah menganalisis dokumen dan memberikan feedback berdasarkan aturan tata naskah dinas.
 
 Aturan yang relevan untuk dokumen ini:
-${rulesContext || "Tidak ada aturan khusus ditemukan, gunakan aturan umum tata naskah dinas."}
-${superiorContext}
+${
+  rulesContext ||
+  "Tidak ada aturan khusus ditemukan, gunakan aturan umum tata naskah dinas."
+}
+${preferencesContext}
 
 PENTING: Untuk setiap temuan, Anda HARUS menyertakan:
 1. "original_text" - teks asli yang bermasalah (copy exact dari dokumen)
@@ -327,17 +449,59 @@ Berikan review dalam format JSON yang valid dengan struktur berikut:
   ],
   "recommendations": [
     "Rekomendasi umum untuk perbaikan dokumen"
-  ]${targetSuperior ? `,
-  "superior_style_feedback": {
+  ]${
+    hasUserPrefs || hasSuperiorPrefs
+      ? `,
+  "target_style_feedback": {
     "is_compliant": true/false,
-    "suggestions": [
+    "compliance_score": 0-100,
+    "target_name": "${
+      hasUserPrefs
+        ? targetUserPrefs?.user?.username || "Target User"
+        : targetSuperior?.superior_name || "Atasan"
+    }",
+    "style_requested": "${targetUserPrefs?.language_style || "standar"}",
+    "custom_rules_check": [
       {
-        "issue": "masalah terkait gaya bahasa atasan",
-        "suggestion": "saran perbaikan"
+        "rule": "Nama aturan khusus",
+        "status": "terpenuhi|tidak_terpenuhi|sebagian",
+        "detail": "Penjelasan status aturan ini",
+        "found_in_document": "Kutipan dari dokumen yang membuktikan (jika terpenuhi)",
+        "missing_element": "Apa yang kurang/tidak ada (jika tidak terpenuhi)"
       }
     ],
-    "overall_note": "Catatan umum tentang kesesuaian dengan gaya atasan"
-  }` : ""}
+    "forbidden_words_found": [
+      {
+        "word": "kata terlarang yang ditemukan",
+        "location": "konteks dimana kata ditemukan",
+        "replacement": "kata pengganti yang disarankan"
+      }
+    ],
+    "terms_to_replace": [
+      {
+        "original": "istilah yang ditemukan",
+        "preferred": "istilah yang seharusnya digunakan",
+        "location": "konteks dimana istilah ditemukan"
+      }
+    ],
+    "suggestions": [
+      {
+        "issue": "Deskripsi masalah gaya bahasa yang SPESIFIK",
+        "original_sentence": "Kalimat asli dari dokumen yang perlu diubah",
+        "suggested_sentence": "Kalimat yang sudah diperbaiki sesuai gaya bahasa target",
+        "suggestion": "Penjelasan mengapa perubahan ini diperlukan"
+      }
+    ],
+    "style_analysis": {
+      "sentence_length": "Analisis panjang kalimat (terlalu panjang/pendek/sesuai)",
+      "formality_level": "Analisis tingkat formalitas (kurang formal/terlalu formal/sesuai)",
+      "word_choice": "Analisis pemilihan kata",
+      "overall_tone": "Analisis nada keseluruhan dokumen"
+    },
+    "overall_note": "Ringkasan komprehensif. Sebutkan status SEMUA aturan khusus, kata terlarang, dan istilah yang harus diganti. Minimal 3-4 kalimat."
+  }`
+      : ""
+  }
 }
 
 Kategori severity:
@@ -358,7 +522,9 @@ Kategori issues:
 
   const userPrompt = `Review dokumen naskah dinas berikut:
 
-Jenis Dokumen: ${document.category || document.document_type || "Tidak diketahui"}
+Jenis Dokumen: ${
+    document.category || document.document_type || "Tidak diketahui"
+  }
 Judul: ${document.title || "Tidak ada judul"}
 Nomor: ${document.document_number || "-"}
 
@@ -380,14 +546,22 @@ PENTING: Untuk setiap temuan, WAJIB sertakan original_text dan suggested_text ya
 Pastikan output dalam format JSON yang valid.`;
 
   try {
+    // Use gpt-4o for better quality when analyzing preferences, otherwise gpt-4o-mini
+    const useAdvancedModel = hasUserPrefs || hasSuperiorPrefs;
+    const modelToUse = useAdvancedModel ? "gpt-4o" : "gpt-4o-mini";
+
+    console.log(
+      `🤖 [RASN-NASKAH] Using model: ${modelToUse} (preferences: ${useAdvancedModel})`
+    );
+
     const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: modelToUse,
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt },
       ],
-      temperature: 0.3,
-      max_tokens: 6000,
+      temperature: useAdvancedModel ? 0.4 : 0.3, // Slightly higher for more creative suggestions
+      max_tokens: useAdvancedModel ? 8000 : 6000,
       response_format: { type: "json_object" },
     });
 
@@ -419,12 +593,20 @@ Pastikan output dalam format JSON yang valid.`;
     }));
 
     // Generate full review text
-    const fullReview = `## Hasil Review Dokumen\n\n**Skor: ${result.overallScore || 0}/100**\n\n${result.summary || ""}\n\n### Breakdown Skor\n${Object.entries(result.scoreBreakdown || {})
+    const fullReview = `## Hasil Review Dokumen\n\n**Skor: ${
+      result.overallScore || 0
+    }/100**\n\n${result.summary || ""}\n\n### Breakdown Skor\n${Object.entries(
+      result.scoreBreakdown || {}
+    )
       .map(([key, value]) => `- ${key}: ${value}/100`)
-      .join("\n")}\n\n### Rekomendasi\n${(result.recommendations || []).map((r) => `- ${r}`).join("\n")}`;
+      .join("\n")}\n\n### Rekomendasi\n${(result.recommendations || [])
+      .map((r) => `- ${r}`)
+      .join("\n")}`;
 
     // Build ai_suggestions_structured for UI
-    const aiSuggestionsStructured = (result.suggestions_structured || transformedIssues).map((item) => ({
+    const aiSuggestionsStructured = (
+      result.suggestions_structured || transformedIssues
+    ).map((item) => ({
       category: item.category || "other",
       original: item.original || item.original_text || "",
       suggested: item.suggested || item.suggested_text || "",
@@ -433,6 +615,10 @@ Pastikan output dalam format JSON yang valid.`;
       rule_reference: item.rule_reference,
     }));
 
+    // Handle both new (target_style_feedback) and legacy (superior_style_feedback) format
+    const styleFeedback =
+      result.target_style_feedback || result.superior_style_feedback || null;
+
     return {
       overallScore: result.overallScore || 0,
       summary: result.summary || "",
@@ -440,8 +626,8 @@ Pastikan output dalam format JSON yang valid.`;
       scoreBreakdown: result.scoreBreakdown || {},
       issues: transformedIssues,
       aiSuggestionsStructured,
-      superiorStyleSuggestions: result.superior_style_feedback || null,
-      includesSuperiorAnalysis: !!targetSuperior,
+      superiorStyleSuggestions: styleFeedback,
+      includesSuperiorAnalysis: !!(hasUserPrefs || hasSuperiorPrefs),
       recommendations: result.recommendations || [],
       matchedRules: relevantRules.map((r) => r.payload?.id || r.id),
     };
@@ -452,7 +638,8 @@ Pastikan output dalam format JSON yang valid.`;
     return {
       overallScore: 0,
       summary: "Gagal memproses review dokumen",
-      fullReview: "## Review Gagal\n\nTerjadi kesalahan saat memproses review dokumen.",
+      fullReview:
+        "## Review Gagal\n\nTerjadi kesalahan saat memproses review dokumen.",
       scoreBreakdown: {},
       issues: [],
       aiSuggestionsStructured: [],
@@ -502,8 +689,13 @@ const saveReviewIssues = async (reviewId, issues) => {
         rule_reference: issue.rule_reference || null,
         is_auto_fixable: issue.is_auto_fixable || false,
         // Legacy fields (still populated for backwards compatibility)
-        issue_text: issue.original_text || issue.context || issue.message?.substring(0, 500) || "Tidak ada konteks",
-        description: issue.description || issue.message || "Tidak ada deskripsi",
+        issue_text:
+          issue.original_text ||
+          issue.context ||
+          issue.message?.substring(0, 500) ||
+          "Tidak ada konteks",
+        description:
+          issue.description || issue.message || "Tidak ada deskripsi",
         suggestion: issue.suggested_text || issue.suggestion || null,
         line_number: issue.lineNumber || issue.line_number || null,
         start_position: issue.positionStart || issue.start_position || null,
@@ -526,7 +718,9 @@ const processSyncRulesToQdrant = async (job) => {
   const { pergubId, force } = job.data;
   const startTime = Date.now();
 
-  console.log(`🔄 [RASN-NASKAH] Starting sync rules to Qdrant: ${pergubId || "all"}`);
+  console.log(
+    `🔄 [RASN-NASKAH] Starting sync rules to Qdrant: ${pergubId || "all"}`
+  );
 
   try {
     // Get rules to sync
@@ -595,12 +789,10 @@ const processSyncRulesToQdrant = async (job) => {
 
           // Update embedding_id in database
           for (const vector of vectors) {
-            await PergubRules.query()
-              .findById(vector.id)
-              .patch({
-                embedding_id: vector.id,
-                embedded_at: new Date().toISOString(),
-              });
+            await PergubRules.query().findById(vector.id).patch({
+              embedding_id: vector.id,
+              embedded_at: new Date().toISOString(),
+            });
           }
         } catch (error) {
           console.error("Failed to upsert batch to Qdrant:", error.message);
@@ -617,7 +809,9 @@ const processSyncRulesToQdrant = async (job) => {
     job.progress(100);
 
     const duration = Date.now() - startTime;
-    console.log(`✅ [RASN-NASKAH] Sync rules completed: ${synced} synced, ${failed} failed, ${duration}ms`);
+    console.log(
+      `✅ [RASN-NASKAH] Sync rules completed: ${synced} synced, ${failed} failed, ${duration}ms`
+    );
 
     return { synced, failed, duration };
   } catch (error) {
@@ -660,15 +854,15 @@ const processFormatMarkdown = async (job) => {
   const { documentId, rawContent, filename } = job.data;
   const startTime = Date.now();
 
-  console.log(`📝 [RASN-NASKAH] Starting format markdown for document: ${documentId}`);
+  console.log(
+    `📝 [RASN-NASKAH] Starting format markdown for document: ${documentId}`
+  );
 
   try {
     // Update document status to formatting
-    await Documents.query()
-      .findById(documentId)
-      .patch({
-        content_status: "formatting",
-      });
+    await Documents.query().findById(documentId).patch({
+      content_status: "formatting",
+    });
 
     job.progress(10);
 
@@ -678,13 +872,11 @@ const processFormatMarkdown = async (job) => {
     job.progress(80);
 
     // Update document with formatted content
-    await Documents.query()
-      .findById(documentId)
-      .patch({
-        content: formattedContent,
-        content_status: "ready",
-        updated_at: new Date().toISOString(),
-      });
+    await Documents.query().findById(documentId).patch({
+      content: formattedContent,
+      content_status: "ready",
+      updated_at: new Date().toISOString(),
+    });
 
     // Update document version if exists
     const DocumentVersions = require("@/models/rasn-naskah/document-versions.model");
@@ -694,17 +886,17 @@ const processFormatMarkdown = async (job) => {
       .first();
 
     if (latestVersion) {
-      await DocumentVersions.query()
-        .findById(latestVersion.id)
-        .patch({
-          content: formattedContent,
-        });
+      await DocumentVersions.query().findById(latestVersion.id).patch({
+        content: formattedContent,
+      });
     }
 
     job.progress(100);
 
     const duration = Date.now() - startTime;
-    console.log(`✅ [RASN-NASKAH] Format markdown completed: ${documentId}, duration: ${duration}ms`);
+    console.log(
+      `✅ [RASN-NASKAH] Format markdown completed: ${documentId}, duration: ${duration}ms`
+    );
 
     return {
       documentId,
@@ -713,15 +905,16 @@ const processFormatMarkdown = async (job) => {
       contentLength: formattedContent?.length || 0,
     };
   } catch (error) {
-    console.error(`❌ [RASN-NASKAH] Format markdown failed: ${documentId}`, error.message);
+    console.error(
+      `❌ [RASN-NASKAH] Format markdown failed: ${documentId}`,
+      error.message
+    );
 
     // Update document status to failed, but keep original content
-    await Documents.query()
-      .findById(documentId)
-      .patch({
-        content_status: "failed",
-        content: rawContent, // Fallback to raw content
-      });
+    await Documents.query().findById(documentId).patch({
+      content_status: "failed",
+      content: rawContent, // Fallback to raw content
+    });
 
     throw error;
   }
@@ -780,7 +973,10 @@ PENTING:
         },
         {
           role: "user",
-          content: `Rapikan format markdown dari dokumen "${filename}" berikut:\n\n${rawContent.substring(0, 20000)}`,
+          content: `Rapikan format markdown dari dokumen "${filename}" berikut:\n\n${rawContent.substring(
+            0,
+            20000
+          )}`,
         },
       ],
       temperature: 0.2,
