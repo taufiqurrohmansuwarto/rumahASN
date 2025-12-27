@@ -43,6 +43,7 @@ const {
   siasnQueue,
   proxyQueue,
   ticketQueue,
+  rasnNaskahQueue,
   shutdown,
 } = require("./queue");
 
@@ -51,6 +52,7 @@ const siasnProcessor = require("./processors/siasn");
 const proxyProcessor = require("./processors/proxy");
 const cleanupProcessor = require("./processors/cleanup");
 const ticketProcessor = require("./processors/ticket");
+const rasnNaskahProcessor = require("./processors/rasn-naskah");
 
 // Process jobs with enhanced error handling
 sealQueue.process("refresh-totp", async (job) => {
@@ -297,6 +299,94 @@ ticketQueue.process("summarize-ticket", 2, async (job) => {
   }
 });
 
+// Process RASN Naskah document review jobs
+console.log(
+  "📋 Registering rasnNaskahQueue.process('review-document') with concurrency 2..."
+);
+
+// Add Redis connection event listeners for rasn-naskah queue
+rasnNaskahQueue.client.on("connect", () => {
+  console.log("✅ [RASN-NASKAH] Redis client connected");
+});
+
+rasnNaskahQueue.client.on("ready", () => {
+  console.log("✅ [RASN-NASKAH] Redis client ready");
+});
+
+rasnNaskahQueue.client.on("error", (err) => {
+  console.error("❌ [RASN-NASKAH] Redis client error:", err.message);
+});
+
+rasnNaskahQueue.process("review-document", 2, async (job) => {
+  const startTime = Date.now();
+
+  console.log(
+    `📝 [RASN-NASKAH WORKER] Picked up review job: ${job.id} for document: ${job.data.documentId}`
+  );
+
+  try {
+    const result = await rasnNaskahProcessor.processDocumentReview(job);
+
+    const duration = Date.now() - startTime;
+
+    console.log(
+      `✅ [RASN-NASKAH WORKER] Completed: ${job.id} | Duration: ${duration}ms | Score: ${result?.overallScore}`
+    );
+
+    return result;
+  } catch (error) {
+    console.error(`❌ [RASN-NASKAH WORKER] Failed job ${job.id}:`, error.message);
+    throw error;
+  }
+});
+
+rasnNaskahQueue.process("sync-rules-qdrant", 1, async (job) => {
+  const startTime = Date.now();
+
+  console.log(
+    `🔄 [RASN-NASKAH WORKER] Picked up sync rules job: ${job.id}`
+  );
+
+  try {
+    const result = await rasnNaskahProcessor.processSyncRulesToQdrant(job);
+
+    const duration = Date.now() - startTime;
+
+    console.log(
+      `✅ [RASN-NASKAH WORKER] Sync completed: ${job.id} | Duration: ${duration}ms | Synced: ${result?.synced}`
+    );
+
+    return result;
+  } catch (error) {
+    console.error(`❌ [RASN-NASKAH WORKER] Sync failed ${job.id}:`, error.message);
+    throw error;
+  }
+});
+
+// Process format markdown jobs (background AI formatting)
+rasnNaskahQueue.process("format-markdown", 3, async (job) => {
+  const startTime = Date.now();
+
+  console.log(
+    `📝 [RASN-NASKAH WORKER] Picked up format markdown job: ${job.id} for document: ${job.data.documentId}`
+  );
+
+  try {
+    const result = await rasnNaskahProcessor.processFormatMarkdown(job);
+
+    const duration = Date.now() - startTime;
+
+    console.log(
+      `✅ [RASN-NASKAH WORKER] Format completed: ${job.id} | Duration: ${duration}ms | Length: ${result?.contentLength}`
+    );
+
+    return result;
+  } catch (error) {
+    console.error(`❌ [RASN-NASKAH WORKER] Format failed ${job.id}:`, error.message);
+    throw error;
+  }
+});
+
 // Give some time for all processors to register
 setTimeout(() => {
   console.log("🔄 Worker started and processing jobs...");
@@ -310,6 +400,9 @@ setTimeout(() => {
   );
   console.log(
     "   - TICKET: summarize-ticket (AI summarization + recommendation)"
+  );
+  console.log(
+    "   - RASN-NASKAH: review-document, sync-rules-qdrant (document review + Qdrant sync)"
   );
   console.log(`📊 Worker PID: ${process.pid}`);
   console.log(

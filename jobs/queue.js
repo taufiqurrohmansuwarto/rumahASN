@@ -35,6 +35,21 @@ const ticketQueue = new Queue(
   }
 );
 
+// RASN Naskah document review queue
+const rasnNaskahQueue = new Queue(
+  "rasn-naskah",
+  { redis },
+  {
+    ...defaultJobOptions,
+    attempts: 3,
+    timeout: 300000, // 5 minutes untuk document review dengan AI
+    backoff: {
+      type: "exponential",
+      delay: 3000,
+    },
+  }
+);
+
 function addLogging(queue, name) {
   const listeners = {
     error: (error) => {
@@ -96,6 +111,7 @@ addLogging(sealQueue, "seal");
 addLogging(siasnQueue, "siasn");
 addLogging(proxyQueue, "proxy");
 addLogging(ticketQueue, "ticket");
+addLogging(rasnNaskahQueue, "rasn-naskah");
 
 // Auto-resume queues on initialization
 proxyQueue
@@ -116,9 +132,23 @@ ticketQueue
     console.warn("⚠️  [TICKET] Failed to auto-resume queue:", err.message);
   });
 
+rasnNaskahQueue
+  .resume()
+  .then(() => {
+    console.log("▶️  [RASN-NASKAH] Queue auto-resumed on initialization");
+  })
+  .catch((err) => {
+    console.warn("⚠️  [RASN-NASKAH] Failed to auto-resume queue:", err.message);
+  });
+
 // Handle stalled jobs for ticket queue
 ticketQueue.on("stalled", (job) => {
   console.warn(`⚠️ [TICKET] Job stalled: ${job.id}, will be retried...`);
+});
+
+// Handle stalled jobs for rasn-naskah queue
+rasnNaskahQueue.on("stalled", (job) => {
+  console.warn(`⚠️ [RASN-NASKAH] Job stalled: ${job.id}, will be retried...`);
 });
 
 // Shutdown flag to prevent multiple shutdowns
@@ -161,6 +191,7 @@ const shutdown = async () => {
     if (siasnQueue._loggerCleanup) siasnQueue._loggerCleanup();
     if (proxyQueue._loggerCleanup) proxyQueue._loggerCleanup();
     if (ticketQueue._loggerCleanup) ticketQueue._loggerCleanup();
+    if (rasnNaskahQueue._loggerCleanup) rasnNaskahQueue._loggerCleanup();
     console.log("🧹 Event listeners cleaned up");
 
     // Pause queues to stop accepting new jobs
@@ -170,6 +201,7 @@ const shutdown = async () => {
         siasnQueue.pause().catch(() => {}),
         proxyQueue.pause().catch(() => {}),
         ticketQueue.pause().catch(() => {}),
+        rasnNaskahQueue.pause().catch(() => {}),
       ]);
       console.log("⏸️  All queues paused");
     } catch (error) {
@@ -184,6 +216,7 @@ const shutdown = async () => {
           siasnQueue.whenCurrentJobsFinished().catch(() => {}),
           proxyQueue.whenCurrentJobsFinished().catch(() => {}),
           ticketQueue.whenCurrentJobsFinished().catch(() => {}),
+          rasnNaskahQueue.whenCurrentJobsFinished().catch(() => {}),
         ]),
         new Promise((resolve) => setTimeout(resolve, 5000)), // 5s timeout (reduced)
       ]);
@@ -197,6 +230,7 @@ const shutdown = async () => {
     await safeCloseQueue(siasnQueue, "SIASN");
     await safeCloseQueue(proxyQueue, "PROXY");
     await safeCloseQueue(ticketQueue, "TICKET");
+    await safeCloseQueue(rasnNaskahQueue, "RASN-NASKAH");
 
     console.log("🔌 All queue connections closed");
   } catch (error) {
@@ -246,11 +280,76 @@ const addTicketAIJob = async (ticketId) => {
   return job;
 };
 
+// Helper function untuk menambahkan RASN Naskah document review job
+const addDocumentReviewJob = async (documentId, reviewId, options = {}) => {
+  const jobId = `naskah-review-${documentId}-${Date.now()}`;
+  const job = await rasnNaskahQueue.add(
+    "review-document",
+    {
+      documentId,
+      reviewId,
+      ...options,
+    },
+    {
+      jobId,
+      removeOnComplete: true,
+      removeOnFail: false,
+      priority: options.priority || 0,
+    }
+  );
+  console.log(`✅ [RASN-NASKAH] Added document review job for document ${documentId}`);
+  return job;
+};
+
+// Helper function untuk sync rules ke Qdrant
+const addSyncRulesJob = async (pergubId = null, force = false) => {
+  const jobId = `naskah-sync-rules-${pergubId || 'all'}-${Date.now()}`;
+  const job = await rasnNaskahQueue.add(
+    "sync-rules-qdrant",
+    {
+      pergubId,
+      force,
+    },
+    {
+      jobId,
+      removeOnComplete: true,
+      removeOnFail: false,
+    }
+  );
+  console.log(`✅ [RASN-NASKAH] Added sync rules job for pergub ${pergubId || 'all'}`);
+  return job;
+};
+
+// Helper function untuk format markdown dengan AI (background)
+const addFormatMarkdownJob = async (documentId, rawContent, filename) => {
+  const jobId = `naskah-format-${documentId}-${Date.now()}`;
+  const job = await rasnNaskahQueue.add(
+    "format-markdown",
+    {
+      documentId,
+      rawContent,
+      filename,
+    },
+    {
+      jobId,
+      removeOnComplete: true,
+      removeOnFail: false,
+      priority: 1, // Higher priority than review jobs
+    }
+  );
+  console.log(`✅ [RASN-NASKAH] Added format markdown job for document ${documentId}`);
+  return job;
+};
+
 module.exports = {
   sealQueue,
   siasnQueue,
   proxyQueue,
   ticketQueue,
+  rasnNaskahQueue,
   addTicketAIJob,
+  addDocumentReviewJob,
+  addSyncRulesJob,
+  addFormatMarkdownJob,
   shutdown,
 };
