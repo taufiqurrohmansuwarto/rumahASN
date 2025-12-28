@@ -10,6 +10,12 @@ const DocumentAttachments = require("@/models/rasn-naskah/document-attachments.m
 const DocumentActivities = require("@/models/rasn-naskah/document-activities.model");
 const Bookmarks = require("@/models/rasn-naskah/bookmarks.model");
 const Templates = require("@/models/rasn-naskah/templates.model");
+const OpenAI = require("openai");
+
+// OpenAI client
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
 /**
  * Get all documents for current user
@@ -23,6 +29,7 @@ const getDocuments = async (req, res) => {
       status,
       category,
       search,
+      source_type,
       sort = "created_at",
       order = "desc",
     } = req?.query;
@@ -39,6 +46,11 @@ const getDocuments = async (req, res) => {
     // Filter by category
     if (category) {
       query = query.where("category", category);
+    }
+
+    // Filter by source_type
+    if (source_type) {
+      query = query.where("source_type", source_type);
     }
 
     // Search by title
@@ -144,16 +156,25 @@ const getDocument = async (req, res) => {
 const createDocument = async (req, res) => {
   try {
     const { customId: userId } = req?.user;
-    const { title, content, category, source_type, template_id } = req?.body;
+    const {
+      title,
+      content,
+      category,
+      source_type,
+      template_id,
+      document_type,
+      description,
+      recipient,
+    } = req?.body;
 
     // Validate required fields
     if (!title) {
       return res.status(400).json({ message: "Judul dokumen wajib diisi" });
     }
 
-    if (!source_type) {
-      return res.status(400).json({ message: "Tipe sumber wajib diisi" });
-    }
+    // Determine source type - default to "ai_generated" if content exists but no source_type
+    const finalSourceType =
+      source_type || (content ? "ai_generated" : "manual");
 
     // If using template, get template content
     let templateContent = null;
@@ -172,9 +193,14 @@ const createDocument = async (req, res) => {
       template_id,
       title,
       content: content || templateContent,
-      category,
-      source_type,
+      category: category || document_type,
+      source_type: finalSourceType,
       status: "draft",
+      metadata: {
+        description,
+        recipient,
+        document_type,
+      },
     });
 
     // Create initial version if content exists
@@ -197,11 +223,11 @@ const createDocument = async (req, res) => {
       document.id,
       userId,
       "created",
-      { source_type, template_id },
+      { source_type: finalSourceType, template_id, document_type },
       `Dokumen "${title}" dibuat`
     );
 
-    res.status(201).json(document);
+    res.status(201).json({ data: document });
   } catch (error) {
     handleError(res, error);
   }
@@ -446,6 +472,128 @@ const getDocumentVersions = async (req, res) => {
   }
 };
 
+// OpenAI Vector Store ID for rules/regulations
+const OPENAI_VECTOR_STORE_ID = "vs_694f64215f1c8191a2d2491cbe8135dc";
+const ASSISTANT_ID = "asst_UwCRChfc0Cd2BlhqghohwxYW";
+
+/**
+ * Generate document content using OpenAI Assistants API
+ * Uses pre-configured assistant with vector store
+ */
+const generateDocument = async (req, res) => {
+  let threadId = null;
+
+  try {
+    const { document_type, recipient, description } = req?.body;
+
+    // Validate required fields
+    if (!document_type) {
+      return res.status(400).json({ message: "Jenis dokumen wajib diisi" });
+    }
+    if (!recipient) {
+      return res.status(400).json({ message: "Penerima wajib diisi" });
+    }
+    if (!description) {
+      return res.status(400).json({ message: "Deskripsi wajib diisi" });
+    }
+
+    // Document type labels
+    const documentTypes = {
+      nota_dinas: "Nota Dinas",
+      surat_dinas: "Surat Dinas",
+      undangan: "Surat Undangan",
+      surat_tugas: "Surat Tugas",
+      pengumuman: "Pengumuman",
+      surat_edaran: "Surat Edaran",
+      laporan: "Laporan",
+    };
+
+    const documentLabel = documentTypes[document_type] || document_type;
+
+    // User message - ketat hanya dari vector store
+    const userMessage = `Buatkan ${documentLabel} lengkap.
+
+Tujuan: ${recipient}
+Maksud: ${description}
+
+WAJIB: Gunakan HANYA informasi dari file yang tersedia. Jangan gunakan pengetahuan di luar file.`;
+
+    console.log(`🤖 [GENERATE] Creating ${documentLabel} using Assistant API`);
+
+    // Create thread
+    const thread = await openai.beta.threads.create();
+    threadId = thread.id;
+
+    // Add message to thread
+    await openai.beta.threads.messages.create(threadId, {
+      role: "user",
+      content: userMessage,
+    });
+
+    // Run assistant
+    const run = await openai.beta.threads.runs.createAndPoll(threadId, {
+      assistant_id: ASSISTANT_ID,
+    });
+
+    if (run.status !== "completed") {
+      throw new Error(`Run failed with status: ${run.status}`);
+    }
+
+    // Get messages
+    const messages = await openai.beta.threads.messages.list(threadId);
+    const assistantMessage = messages.data.find((m) => m.role === "assistant");
+
+    if (!assistantMessage) {
+      throw new Error("No response from assistant");
+    }
+
+    // Extract text content
+    let content = "";
+    for (const block of assistantMessage.content) {
+      if (block.type === "text") {
+        content = block.text.value;
+        break;
+      }
+    }
+
+    console.log(`✅ [GENERATE] Document generated successfully`);
+
+    // Clean up - remove markdown code blocks if present
+    content = content.trim();
+    if (content.startsWith("```")) {
+      content = content.replace(/^```[\w]*\n?/, "").replace(/```$/, "");
+    }
+    content = content.trim();
+
+    // Cleanup thread
+    try {
+      await openai.beta.threads.delete(threadId);
+      console.log(`🧹 [GENERATE] Thread ${threadId} deleted`);
+    } catch (cleanupError) {
+      console.warn(`⚠️ [GENERATE] Failed to delete thread: ${cleanupError.message}`);
+    }
+
+    res.json({
+      content,
+      document_type,
+      recipient,
+    });
+  } catch (error) {
+    console.error("Generate document error:", error);
+
+    // Cleanup thread on error
+    if (threadId) {
+      try {
+        await openai.beta.threads.delete(threadId);
+      } catch (cleanupError) {
+        console.warn(`⚠️ [GENERATE] Failed to delete thread on error: ${cleanupError.message}`);
+      }
+    }
+
+    handleError(res, error);
+  }
+};
+
 module.exports = {
   getDocuments,
   getDocument,
@@ -456,4 +604,5 @@ module.exports = {
   toggleBookmark,
   getDocumentActivities,
   getDocumentVersions,
+  generateDocument,
 };

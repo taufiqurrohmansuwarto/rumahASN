@@ -56,9 +56,9 @@ function LayoutRasnNaskah({ children, active = "upload", isAdmin = false }) {
         icon: <IconFileText size={16} />,
       },
       {
-        key: "/rasn-naskah/create",
-        path: "/rasn-naskah/create",
-        name: "Buat Baru",
+        key: "/rasn-naskah/generate-document",
+        path: "/rasn-naskah/generate-document",
+        name: "Generate AI",
         icon: <IconFilePlus size={16} />,
       },
       {

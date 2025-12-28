@@ -483,3 +483,12 @@ export const getReviewIssuesGrouped = async (reviewId) => {
   const { data } = await api.get(`/reviews/${reviewId}/issues/grouped`);
   return data;
 };
+
+// ==========================================
+// AI GENERATION
+// ==========================================
+
+export const generateDocument = async (payload) => {
+  const { data } = await api.post("/documents/generate", payload);
+  return data;
+};

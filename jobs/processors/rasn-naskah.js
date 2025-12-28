@@ -257,10 +257,19 @@ const processDocumentReview = async (job) => {
   }
 };
 
+// OpenAI Vector Store ID for rules/regulations (used with Responses API)
+const OPENAI_VECTOR_STORE_ID = "vs_694f64215f1c8191a2d2491cbe8135dc";
+
+/**
+ * Note: Vector Store search is integrated directly into the review process
+ * using OpenAI Responses API with file_search tool.
+ * The AI can search the vector store during review for better context.
+ */
+
 /**
  * Search for relevant rules from Qdrant
  */
-const searchRelevantRules = async (content, documentType) => {
+const searchRelevantRulesFromQdrant = async (content, documentType) => {
   try {
     // Generate embedding for document content
     const contentChunks = chunkText(content, 2000);
@@ -297,6 +306,29 @@ const searchRelevantRules = async (content, documentType) => {
     // Sort by score and take top 15
     uniqueRules.sort((a, b) => b.score - a.score);
     return uniqueRules.slice(0, 15);
+  } catch (error) {
+    console.warn("Failed to search Qdrant rules:", error.message);
+    return [];
+  }
+};
+
+/**
+ * Search for relevant rules from Qdrant
+ * Note: OpenAI Vector Store is accessed directly during review via Responses API
+ */
+const searchRelevantRules = async (content, documentType) => {
+  try {
+    // Search from Qdrant for additional rules
+    const qdrantRules = await searchRelevantRulesFromQdrant(
+      content,
+      documentType
+    );
+
+    console.log(
+      `📚 [RASN-NASKAH] Rules from Qdrant: ${qdrantRules.length} (Vector Store accessed directly in review)`
+    );
+
+    return qdrantRules;
   } catch (error) {
     console.warn("Failed to search relevant rules:", error.message);
     return [];
@@ -402,170 +434,179 @@ ${
 Berikan juga saran khusus berdasarkan preferensi atasan di atas.`;
   }
 
-  const systemPrompt = `Anda adalah asisten ahli penulisan naskah dinas yang bertugas mereview dokumen resmi pemerintahan Indonesia.
-Tugas Anda adalah menganalisis dokumen dan memberikan feedback berdasarkan aturan tata naskah dinas.
+  // Build target preferences context for prompt
+  const targetContextStr = preferencesContext || "";
 
-Aturan yang relevan untuk dokumen ini:
-${
-  rulesContext ||
-  "Tidak ada aturan khusus ditemukan, gunakan aturan umum tata naskah dinas."
-}
-${preferencesContext}
+  const systemPrompt = `Anda adalah pengkoreksi tata naskah dinas pemerintahan Indonesia yang ahli.
 
-PENTING: Untuk setiap temuan, Anda HARUS menyertakan:
-1. "original_text" - teks asli yang bermasalah (copy exact dari dokumen)
-2. "suggested_text" - teks yang disarankan sebagai pengganti
-3. "rule_reference" - referensi aturan yang dilanggar (jika ada)
+TUGAS: Berikan saran perbaikan SEBANYAK-BANYAKNYA.
 
-Berikan review dalam format JSON yang valid dengan struktur berikut:
+DATABASE FILE YANG TERSEDIA (gunakan file_search):
+1. "Pergub Jawa Timur Nomor 31 Tahun 2024" - aturan format naskah dinas, kop surat, penomoran, tanda tangan
+2. "bahan penyuluhan tata naskah dinas" - pedoman struktur dan jenis naskah dinas
+3. "SK_EYD_Edisi_V" - aturan ejaan bahasa Indonesia
+4. "Seri_Penyuluhan_Bahasa_Indonesia" - aturan kalimat, tata istilah
+5. "kbbi" - kamus besar bahasa Indonesia
+
+CARA SEARCH YANG EFEKTIF:
+- Untuk format naskah dinas: cari "nota dinas", "surat undangan", "kepala surat", "penomoran surat", "tanda tangan"
+- Untuk ejaan: cari "huruf kapital", "tanda baca", "penulisan angka"
+- Untuk kalimat: cari "kalimat efektif", "kalimat baku"
+
+${targetContextStr}
+
+PERIKSA DENGAN TELITI:
+1. Format kepala/kop surat (logo, nama instansi, alamat)
+2. Penomoran surat dan tanggal
+3. Perihal dan lampiran
+4. Salam pembuka dan penutup
+5. Bahasa formal dan baku
+6. Ejaan sesuai EYD (huruf kapital, tanda baca, singkatan)
+7. Struktur kalimat efektif
+8. Istilah resmi pemerintahan
+9. Penulisan jabatan dan nama
+10. Format tanda tangan dan tembusan
+
+Berikan MINIMAL 10-15 saran perbaikan yang SPESIFIK dengan contoh teks asli dan perbaikannya.
+
+Output dalam format JSON:
 {
   "overallScore": 0-100,
-  "summary": "Ringkasan review dalam 2-3 kalimat, sebutkan jumlah temuan perbaikan.",
-  "scoreBreakdown": {
-    "grammar": 0-100,
-    "spelling": 0-100,
-    "structure": 0-100,
-    "formatting": 0-100,
-    "terminology": 0-100
-  },
+  "summary": "Ringkasan singkat hasil review",
   "issues": [
     {
-      "category": "format|grammar|spelling|style|structure|terminology|consistency|regulation",
+      "category": "format|grammar|spelling|style|structure|terminology",
       "severity": "critical|major|minor|suggestion",
-      "original_text": "teks asli yang bermasalah (copy exact)",
-      "suggested_text": "teks yang disarankan sebagai pengganti",
-      "description": "Penjelasan singkat mengapa ini bermasalah",
-      "rule_reference": "Referensi aturan, contoh: Pergub Tata Naskah: Naskah resmi wajib cantumkan dasar hukum",
-      "is_auto_fixable": true/false
+      "original_text": "teks asli dari dokumen",
+      "suggested_text": "teks yang sudah diperbaiki",
+      "description": "penjelasan perbaikan",
+      "rule_reference": "sumber aturan (Pergub/EYD/dll)"
     }
   ],
-  "suggestions_structured": [
-    {
-      "category": "format|penulisan|saran",
-      "original": "teks asli",
-      "suggested": "teks yang disarankan",
-      "reason": "alasan singkat"
-    }
-  ],
-  "recommendations": [
-    "Rekomendasi umum untuk perbaikan dokumen"
-  ]${
-    hasUserPrefs || hasSuperiorPrefs
-      ? `,
-  "target_style_feedback": {
-    "is_compliant": true/false,
-    "compliance_score": 0-100,
-    "target_name": "${
-      hasUserPrefs
-        ? targetUserPrefs?.user?.username || "Target User"
-        : targetSuperior?.superior_name || "Atasan"
-    }",
-    "style_requested": "${targetUserPrefs?.language_style || "standar"}",
-    "custom_rules_check": [
-      {
-        "rule": "Nama aturan khusus",
-        "status": "terpenuhi|tidak_terpenuhi|sebagian",
-        "detail": "Penjelasan status aturan ini",
-        "found_in_document": "Kutipan dari dokumen yang membuktikan (jika terpenuhi)",
-        "missing_element": "Apa yang kurang/tidak ada (jika tidak terpenuhi)"
-      }
-    ],
-    "forbidden_words_found": [
-      {
-        "word": "kata terlarang yang ditemukan",
-        "location": "konteks dimana kata ditemukan",
-        "replacement": "kata pengganti yang disarankan"
-      }
-    ],
-    "terms_to_replace": [
-      {
-        "original": "istilah yang ditemukan",
-        "preferred": "istilah yang seharusnya digunakan",
-        "location": "konteks dimana istilah ditemukan"
-      }
-    ],
-    "suggestions": [
-      {
-        "issue": "Deskripsi masalah gaya bahasa yang SPESIFIK",
-        "original_sentence": "Kalimat asli dari dokumen yang perlu diubah",
-        "suggested_sentence": "Kalimat yang sudah diperbaiki sesuai gaya bahasa target",
-        "suggestion": "Penjelasan mengapa perubahan ini diperlukan"
-      }
-    ],
-    "style_analysis": {
-      "sentence_length": "Analisis panjang kalimat (terlalu panjang/pendek/sesuai)",
-      "formality_level": "Analisis tingkat formalitas (kurang formal/terlalu formal/sesuai)",
-      "word_choice": "Analisis pemilihan kata",
-      "overall_tone": "Analisis nada keseluruhan dokumen"
-    },
-    "overall_note": "Ringkasan komprehensif. Sebutkan status SEMUA aturan khusus, kata terlarang, dan istilah yang harus diganti. Minimal 3-4 kalimat."
-  }`
-      : ""
-  }
-}
+  "recommendations": ["saran umum untuk perbaikan keseluruhan"]
+}`;
 
-Kategori severity:
-- critical: Kesalahan fatal yang HARUS diperbaiki (misal: tidak ada dasar hukum, format salah total)
-- major: Kesalahan penting yang SEBAIKNYA diperbaiki (misal: tata bahasa salah)
-- minor: Kesalahan kecil (misal: typo, spasi berlebih)
-- suggestion: Saran peningkatan (misal: istilah yang lebih tepat)
+  const docType = document.category || document.document_type || "Nota Dinas";
 
-Kategori issues:
-- format: Masalah format dokumen (kop, margin, font)
-- grammar: Masalah tata bahasa
-- spelling: Masalah ejaan
-- style: Masalah gaya penulisan
-- structure: Masalah struktur naskah
-- terminology: Masalah istilah resmi
-- consistency: Masalah konsistensi
-- regulation: Tidak sesuai Pergub`;
+  const userPrompt = `KOREKSI NASKAH DINAS: ${docType}
 
-  const userPrompt = `Review dokumen naskah dinas berikut:
+Judul: ${document.title || "-"}
 
-Jenis Dokumen: ${
-    document.category || document.document_type || "Tidak diketahui"
-  }
-Judul: ${document.title || "Tidak ada judul"}
-Nomor: ${document.document_number || "-"}
+=== KONTEN DOKUMEN ===
+${content.substring(0, 15000)}
+=== AKHIR DOKUMEN ===
 
-Konten Dokumen:
----
-${content.substring(0, 12000)}
----
+LANGKAH-LANGKAH:
+1. CARI di "Pergub Jawa Timur Nomor 31 Tahun 2024" tentang format ${docType.toLowerCase()}
+2. CARI di "bahan penyuluhan tata naskah dinas" tentang struktur ${docType.toLowerCase()}
+3. CARI di "SK_EYD_Edisi_V" tentang ejaan yang benar
+4. Periksa setiap bagian dokumen dan berikan saran perbaikan
 
-Berikan review komprehensif dengan memperhatikan:
-1. Tata bahasa dan ejaan (sesuai KBBI dan PUEBI)
-2. Struktur dokumen (kop surat, pembukaan, isi, penutup)
-3. Format penulisan (margin, font, spasi)
-4. Istilah resmi dan baku
-5. Konsistensi penulisan
-6. Dasar hukum (untuk surat resmi)
+BERIKAN MINIMAL 10 SARAN PERBAIKAN dengan format:
+- Teks asli: "..."
+- Perbaikan: "..."
+- Alasan: ...
 
-PENTING: Untuk setiap temuan, WAJIB sertakan original_text dan suggested_text yang bisa di-copy.
-
-Pastikan output dalam format JSON yang valid.`;
+Output dalam format JSON yang valid.`;
 
   try {
-    // Use gpt-4o for better quality when analyzing preferences, otherwise gpt-4o-mini
     const useAdvancedModel = hasUserPrefs || hasSuperiorPrefs;
     const modelToUse = useAdvancedModel ? "gpt-4o" : "gpt-4o-mini";
 
     console.log(
-      `🤖 [RASN-NASKAH] Using model: ${modelToUse} (preferences: ${useAdvancedModel})`
+      `🤖 [RASN-NASKAH] Using Responses API with Vector Store (model: ${modelToUse})`
     );
 
-    const response = await openai.chat.completions.create({
+    // Use OpenAI Responses API with file_search
+    const response = await openai.responses.create({
       model: modelToUse,
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: userPrompt },
+      input: [
+        {
+          role: "system",
+          content: [
+            {
+              type: "input_text",
+              text: systemPrompt,
+            },
+          ],
+        },
+        {
+          role: "user",
+          content: [
+            {
+              type: "input_text",
+              text: userPrompt,
+            },
+          ],
+        },
       ],
-      temperature: useAdvancedModel ? 0.4 : 0.3, // Slightly higher for more creative suggestions
-      max_tokens: useAdvancedModel ? 8000 : 6000,
-      response_format: { type: "json_object" },
+      tools: [
+        {
+          type: "file_search",
+          vector_store_ids: [OPENAI_VECTOR_STORE_ID],
+        },
+      ],
+      temperature: 0.5,
+      max_output_tokens: 10000,
+      store: true,
     });
 
-    const result = JSON.parse(response.choices[0].message.content);
+    console.log(`✅ [RASN-NASKAH] Response received`);
+
+    // Extract response text from output
+    let resultText = "";
+    let fileSearchCount = 0;
+
+    for (const item of response.output || []) {
+      if (item.type === "file_search_call") {
+        fileSearchCount++;
+        console.log(
+          `📚 [RASN-NASKAH] File search executed with ${
+            item.queries?.length || 0
+          } queries`
+        );
+      }
+      if (item.type === "message" && item.content) {
+        for (const content of item.content) {
+          if (content.type === "output_text") {
+            resultText = content.text;
+            break;
+          }
+        }
+      }
+    }
+
+    // Fallback: check output_text directly
+    if (!resultText && response.output_text) {
+      resultText = response.output_text;
+    }
+
+    console.log(`📚 [RASN-NASKAH] File search calls: ${fileSearchCount}`);
+
+    if (!resultText) {
+      console.error(
+        "Response output:",
+        JSON.stringify(response.output, null, 2)
+      );
+      throw new Error("No response text from AI");
+    }
+
+    // Parse JSON from response - handle markdown code blocks
+    let jsonText = resultText;
+
+    // Remove markdown code blocks if present
+    const jsonMatch = resultText.match(/```(?:json)?\s*([\s\S]*?)```/);
+    if (jsonMatch) {
+      jsonText = jsonMatch[1].trim();
+    }
+
+    // Try to extract JSON object if response contains extra text
+    const jsonObjectMatch = jsonText.match(/\{[\s\S]*\}/);
+    if (jsonObjectMatch) {
+      jsonText = jsonObjectMatch[0];
+    }
+
+    const result = JSON.parse(jsonText);
 
     // Map AI severity to database severity (jika masih pakai format lama)
     const mapSeverity = (severity) => {
