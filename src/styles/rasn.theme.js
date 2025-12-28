@@ -665,224 +665,10 @@ export const useGlobalStyle = createStyles(({ prefixCls, css, token }) => ({
 }));
 
 // Reddit-style Button styles dengan Ant Design rounded
-export const useButtonStyle = createStyles(({ prefixCls, css }) => ({
-  linearGradientButton: css`
-    // Primary Button - Reddit Orange Gradient dengan Ant Design style
-    &.${prefixCls}-btn-primary:not([disabled]):not(
-        .${prefixCls}-btn-dangerous
-      ) {
-      > span {
-        position: relative;
-        z-index: 1;
-      }
-
-      &::before {
-        content: "";
-        background: linear-gradient(
-          135deg,
-          #ff4500 0%,
-          #ff6b35 50%,
-          #ff4500 100%
-        ); // Reddit orange gradient
-        position: absolute;
-        inset: -1px;
-        opacity: 1;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        border-radius: inherit; // Mengikuti border-radius Ant Design
-        box-shadow: 0 2px 8px rgba(255, 69, 0, 0.25); // Soft Reddit orange shadow
-      }
-
-      &:hover::before {
-        background: linear-gradient(
-          135deg,
-          #e03d00 0%,
-          #ff5722 50%,
-          #e03d00 100%
-        ); // Darker gradient on hover
-        box-shadow: 0 4px 12px rgba(255, 69, 0, 0.35);
-        transform: translateY(-2px);
-      }
-
-      &:active::before {
-        background: linear-gradient(
-          135deg,
-          #cc3700 0%,
-          #e64a19 50%,
-          #cc3700 100%
-        ); // Even darker on active
-        transform: scale(0.98);
-        box-shadow: 0 1px 4px rgba(255, 69, 0, 0.3);
-      }
-
-      &:focus::before {
-        box-shadow: 0 0 0 3px rgba(255, 69, 0, 0.2),
-          0 2px 8px rgba(255, 69, 0, 0.25); // Orange focus ring
-      }
-
-      // Ripple effect untuk interaksi
-      &::after {
-        content: "";
-        position: absolute;
-        inset: 0;
-        background: radial-gradient(
-          circle at center,
-          rgba(255, 255, 255, 0.3) 0%,
-          transparent 70%
-        );
-        opacity: 0;
-        transition: opacity 0.3s ease;
-        border-radius: inherit; // Mengikuti border-radius Ant Design
-        pointer-events: none;
-      }
-
-      &:active::after {
-        opacity: 1;
-        animation: redditRipple 0.6s ease-out;
-      }
-
-      @keyframes redditRipple {
-        0% {
-          transform: scale(0);
-          opacity: 1;
-        }
-        100% {
-          transform: scale(2);
-          opacity: 0;
-        }
-      }
-    }
-
-    // Default Button - Ant Design style dengan Reddit colors
-    &.${prefixCls}-btn-default:not([disabled]) {
-      background: #ffffff;
-      border: 1px solid #edeff1; // Light border
-      color: #1c1c1c; // Dark text
-      font-weight: 500;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-
-      &:hover {
-        background: #f6f7f8; // Very light hover
-        border-color: #ff4500; // Reddit orange border on hover
-        color: #ff4500; // Reddit orange text on hover
-        transform: translateY(-1px);
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-      }
-
-      &:active {
-        background: #edeff1; // Light active
-        border-color: #ff4500;
-        transform: scale(0.98);
-        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-      }
-
-      &:focus {
-        border-color: #ff4500; // Orange focus
-        box-shadow: 0 0 0 3px rgba(255, 69, 0, 0.2);
-      }
-    }
-
-    // Text Button - Ant Design style dengan Reddit colors
-    &.${prefixCls}-btn-text:not([disabled]) {
-      color: #878a8c; // Reddit gray
-      font-weight: 500;
-      transition: all 0.3s ease;
-
-      &:hover {
-        background: #f6f7f8; // Very light hover
-        color: #ff4500; // Orange on hover
-        transform: translateY(-1px);
-      }
-
-      &:active {
-        background: #edeff1;
-        color: #ff4500;
-        transform: scale(0.95);
-      }
-    }
-
-    // Link Button - Reddit blue dengan Ant Design style
-    &.${prefixCls}-btn-link:not([disabled]) {
-      color: #0079d3; // Reddit blue for links
-      font-weight: 500;
-      text-decoration: none;
-      transition: all 0.3s ease;
-
-      &:hover {
-        color: #0066b3; // Darker blue on hover
-        text-decoration: underline;
-        transform: translateY(-1px);
-      }
-
-      &:active {
-        color: #004c85; // Even darker on active
-        transform: scale(0.98);
-      }
-    }
-
-    // Enhanced Danger Button - Clean & Modern
-    &.${prefixCls}-btn-dangerous:not([disabled]) {
-      background: #ffffff !important;
-      border: 1px solid #dc2626 !important; // Clean red border
-      color: #dc2626 !important; // Red text
-      font-weight: 500 !important;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important; // Subtle shadow
-      position: relative !important;
-      overflow: hidden !important;
-
-      // Remove pseudo elements
-      &::before,
-      &::after {
-        display: none !important;
-      }
-
-      &:hover {
-        background: #dc2626 !important; // Red background on hover
-        border-color: #dc2626 !important;
-        color: #ffffff !important; // White text on hover
-        transform: translateY(-1px) !important;
-        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.25) !important;
-      }
-
-      &:active {
-        background: #b91c1c !important; // Darker red on active
-        border-color: #b91c1c !important;
-        color: #ffffff !important;
-        transform: scale(0.98) !important;
-        box-shadow: 0 2px 4px rgba(220, 38, 38, 0.3) !important;
-      }
-
-      &:focus {
-        outline: none !important;
-        box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.2),
-          0 1px 2px rgba(0, 0, 0, 0.05) !important;
-        border-color: #dc2626 !important;
-      }
-
-      // Ghost style for less prominent danger actions
-      &.${prefixCls}-btn-ghost {
-        background: transparent !important;
-        border: 1px solid #dc2626 !important;
-        color: #dc2626 !important;
-
-        &:hover {
-          background: rgba(220, 38, 38, 0.1) !important;
-          border-color: #dc2626 !important;
-          color: #dc2626 !important;
-        }
-      }
-    }
-  `,
-}));
+export const useButtonStyle = createStyles(({ prefixCls, css }) => ({}));
 
 // Button configuration
-export const useButtonConfig = () => {
-  const { styles } = useButtonStyle();
-  const { styles: globalStyles } = useGlobalStyle();
-  return {
-    className: `${styles.linearGradientButton} ${globalStyles.globalStyle}`,
-  };
-};
+export const useButtonConfig = () => {};
 
 // Reddit authentic theme configuration
 export const useThemeConfig = () => {
@@ -1096,16 +882,16 @@ export const getLocaleConfig = () => {
 
 // Main hook untuk semua config
 export const useAntdConfig = () => {
-  const buttonConfig = useButtonConfig();
+  // const buttonConfig = useButtonConfig();
   const themeConfig = useThemeConfig();
   const localeConfig = getLocaleConfig();
-  const { styles } = useGlobalStyle();
+  // const { styles } = useGlobalStyle();
 
   return {
-    button: buttonConfig,
+    // button: buttonConfig,
     theme: themeConfig,
     locale: localeConfig,
-    globalStyles: styles.globalStyle,
+    // globalStyles: styles.globalStyle,
   };
 };
 

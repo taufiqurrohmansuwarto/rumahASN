@@ -31,12 +31,21 @@ const KnowledgeUserContents = ({
 
   // Use props if provided, otherwise fallback to URL parameters
   const { query } = router;
-  const searchQuery = propSearchQuery !== undefined ? propSearchQuery : (query.search || "");
-  const selectedCategory = propSelectedCategory !== undefined ? propSelectedCategory : (query.category || null);
-  const selectedTag = propSelectedTag !== undefined ? propSelectedTag : (query.tag || null);
-  const selectedSort = propSelectedSort !== undefined ? propSelectedSort : (query.sort || "created_at");
-  const selectedType = propSelectedType !== undefined ? propSelectedType : (query.type || "all");
-  
+  const searchQuery =
+    propSearchQuery !== undefined ? propSearchQuery : query.search || "";
+  const selectedCategory =
+    propSelectedCategory !== undefined
+      ? propSelectedCategory
+      : query.category || null;
+  const selectedTag =
+    propSelectedTag !== undefined ? propSelectedTag : query.tag || null;
+  const selectedSort =
+    propSelectedSort !== undefined
+      ? propSelectedSort
+      : query.sort || "created_at";
+  const selectedType =
+    propSelectedType !== undefined ? propSelectedType : query.type || "all";
+
   const [debouncedSearch] = useDebouncedValue(searchQuery, 500);
   const [likingItems, setLikingItems] = useState(new Set());
   const [bookmarkingItems, setBookmarkingItems] = useState(new Set());
@@ -44,7 +53,6 @@ const KnowledgeUserContents = ({
   // Responsive breakpoints
   const screens = useBreakpoint();
   const isMobile = !screens.md;
-
 
   const {
     data,
@@ -169,7 +177,6 @@ const KnowledgeUserContents = ({
     }
   };
 
-
   const renderContentCard = (content) => (
     <ContentCard
       key={content.id}
@@ -197,7 +204,6 @@ const KnowledgeUserContents = ({
 
   return (
     <div>
-
       {/* Content List */}
       <Row gutter={[0, 0]}>
         <Col span={24}>
@@ -264,11 +270,6 @@ const KnowledgeUserContents = ({
         .ant-input-search .ant-input-focused {
           border-color: #ff4500 !important;
           box-shadow: 0 0 0 2px rgba(255, 69, 0, 0.2) !important;
-        }
-
-        .ant-btn:hover {
-          border-color: #ff4500 !important;
-          color: #ff4500 !important;
         }
 
         .ant-avatar {

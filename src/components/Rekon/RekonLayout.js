@@ -346,7 +346,7 @@ function RekonLayout({ children, active = "rekon-unor" }) {
       appList={appList(data?.user)}
     >
       {children}
-      <FloatingSurveyButton />
+      {/* <FloatingSurveyButton /> */}
     </ProLayout>
   );
 }

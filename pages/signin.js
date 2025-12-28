@@ -396,49 +396,52 @@ const SignIn = ({ providers }) => {
                     size={breakPoint.xs ? 8 : 10}
                     style={{ width: "100%" }}
                   >
-                    {providers && Object.values(providers).map((provider) => (
-                      <div key={provider.id}>
-                        {provider?.id !== "google" && (
-                          <Button
-                            size="large"
-                            onClick={(e) => {
-                              e?.preventDefault();
-                              signIn(provider.id);
-                            }}
-                            style={{
-                              width: "100%",
-                              height: breakPoint.xs ? "48px" : "44px",
-                              borderRadius: "12px",
-                              border: "1px solid #E5E7EB",
-                              backgroundColor: "white",
-                              color: "#374151",
-                              fontWeight: 500,
-                              fontSize: breakPoint.xs ? "16px" : "15px",
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              transition: "all 0.3s ease",
-                            }}
-                            onMouseEnter={(e) => {
-                              e.currentTarget.style.backgroundColor = "#FFF7ED";
-                              e.currentTarget.style.borderColor = "#EA580C";
-                              e.currentTarget.style.transform =
-                                "translateY(-1px)";
-                              e.currentTarget.style.boxShadow =
-                                "0 4px 12px rgba(234, 88, 12, 0.15)";
-                            }}
-                            onMouseLeave={(e) => {
-                              e.currentTarget.style.backgroundColor = "white";
-                              e.currentTarget.style.borderColor = "#E5E7EB";
-                              e.currentTarget.style.transform = "translateY(0)";
-                              e.currentTarget.style.boxShadow = "none";
-                            }}
-                          >
-                            Masuk dengan akun {provider.name}
-                          </Button>
-                        )}
-                      </div>
-                    ))}
+                    {providers &&
+                      Object.values(providers).map((provider) => (
+                        <div key={provider.id}>
+                          {provider?.id !== "google" && (
+                            <Button
+                              size="large"
+                              onClick={(e) => {
+                                e?.preventDefault();
+                                signIn(provider.id);
+                              }}
+                              style={{
+                                width: "100%",
+                                height: breakPoint.xs ? "48px" : "44px",
+                                borderRadius: "12px",
+                                border: "1px solid #E5E7EB",
+                                backgroundColor: "white",
+                                color: "#374151",
+                                fontWeight: 500,
+                                fontSize: breakPoint.xs ? "16px" : "15px",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                transition: "all 0.3s ease",
+                              }}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.backgroundColor =
+                                  "#FFF7ED";
+                                e.currentTarget.style.borderColor = "#EA580C";
+                                e.currentTarget.style.transform =
+                                  "translateY(-1px)";
+                                e.currentTarget.style.boxShadow =
+                                  "0 4px 12px rgba(234, 88, 12, 0.15)";
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.backgroundColor = "white";
+                                e.currentTarget.style.borderColor = "#E5E7EB";
+                                e.currentTarget.style.transform =
+                                  "translateY(0)";
+                                e.currentTarget.style.boxShadow = "none";
+                              }}
+                            >
+                              Masuk dengan akun {provider.name}
+                            </Button>
+                          )}
+                        </div>
+                      ))}
                   </Space>
                 </div>
               </Space>
@@ -476,7 +479,7 @@ const SignIn = ({ providers }) => {
       </div>
 
       <FloatButton.BackTop />
-      <FloatingSurveyButton />
+      {/* <FloatingSurveyButton /> */}
     </>
   );
 };

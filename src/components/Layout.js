@@ -26,11 +26,12 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { userRoutes } from "../routes";
+import FloatAIMenu from "./AITools/FloatAIMenu";
+import { NotificationBellIcon } from "./KnowledgeManagements/notifications";
 import NotifikasiASNConnect from "./Notification/NotifikasiASNConnect";
 import NotifikasiForumKepegawaian from "./Notification/NotifikasiForumKepegawaian";
 import NotifikasiPrivateMessage from "./Notification/NotifikasiPrivateMessage";
-import { NotificationBellIcon } from "./KnowledgeManagements/notifications";
-import FloatingSurveyButton from "./Survey/FloatingSurveyButton";
+
 const ProLayout = dynamic(
   () => import("@ant-design/pro-components").then((mod) => mod?.ProLayout),
   {
@@ -672,7 +673,8 @@ function Layout({ children, active, collapsed = true }) {
       >
         {children}
       </ProLayout>
-      <FloatingSurveyButton />
+      <FloatAIMenu />
+      {/* <FloatingSurveyButton /> */}
     </div>
   );
 }
