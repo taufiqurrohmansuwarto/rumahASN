@@ -27,7 +27,6 @@ import {
   Flex,
   FloatButton,
   Grid,
-  Menu,
   Row,
   Skeleton,
   Tag,
@@ -38,7 +37,7 @@ import {
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useMemo, useState } from "react";
+import { memo, useCallback, useMemo, useState } from "react";
 import ReactMarkdownCustom from "../MarkdownEditor/ReactMarkdownCustom";
 import RestrictedContent from "../RestrictedContent";
 import SimpleEmojiPicker from "../SimpleEmojiPicker";
@@ -53,24 +52,89 @@ import SideRight from "./SideRight";
 const { useBreakpoint } = Grid;
 const { Text } = Typography;
 
-const ActionWrapper = ({ attributes, name, ...props }) => {
-  return (
-    <RestrictedContent attributes={attributes} name={name} {...props}>
-      <Menu.Item {...props}>{props.children}</Menu.Item>
-    </RestrictedContent>
-  );
+// Static styles - defined outside component to prevent recreation
+const CARD_STYLE = { borderRadius: 8 };
+const CARD_ANSWER_STYLE = {
+  borderRadius: 8,
+  border: "2px solid #52c41a",
+  background: "#f6ffed",
+  transition: "all 0.2s ease",
 };
+const CARD_NORMAL_STYLE = {
+  borderRadius: 8,
+  border: "1px solid #f0f0f0",
+  background: "white",
+  transition: "all 0.2s ease",
+};
+const ANSWER_ICON_STYLE = { color: "#52c41a", fontSize: 16 };
+const ANSWER_TEXT_STYLE = { color: "#52c41a", fontSize: 13 };
+const STAFF_TAG_STYLE = { borderRadius: 4, fontSize: 11, fontWeight: 600 };
+const DATETIME_TEXT_STYLE = { fontSize: 12 };
+const AVATAR_STYLE = { border: "2px solid #f0f0f0", transition: "all 0.2s ease" };
+const CONTENT_STYLE = { padding: "8px 0", lineHeight: 1.6 };
+const MENU_STYLE = { borderRadius: 8 };
+const DROPDOWN_BUTTON_STYLE = {
+  color: "#8c8c8c",
+  border: "1px solid #f0f0f0",
+  borderRadius: 6,
+  transition: "all 0.2s ease",
+};
+const DELETE_STYLE = { color: "#ff4d4f" };
 
-const CommentTicket = ({ item, agent, customer, admin }) => {
+
+// Isolated input component to prevent re-renders of parent
+const NewTicketWrapper = memo(({ id, currentStatus, onSuccess }) => {
+  const queryClient = useQueryClient();
+  const [value, setValue] = useState(null);
+
+  const { mutate: createComment, isLoading: isLoadingCreate } = useMutation(
+    (data) => createCommentCustomer(data),
+    {
+      onSettled: () => queryClient.invalidateQueries(["publish-ticket", id]),
+      onSuccess: () => {
+        queryClient.invalidateQueries(["publish-ticket", id]);
+        setValue("");
+        message.success("✅ Komentar berhasil ditambahkan");
+        onSuccess?.();
+      },
+      onError: () => message.error("❌ Gagal menambahkan komentar"),
+    }
+  );
+
+  const handleSubmit = useCallback(() => {
+    const data = {
+      id,
+      data: {
+        comment: value,
+      },
+    };
+    createComment(data);
+  }, [id, value, createComment]);
+
+  return (
+    <NewTicket
+      submitMessage={handleSubmit}
+      currentStatus={currentStatus}
+      value={value}
+      setValue={setValue}
+      loadingSubmit={isLoadingCreate}
+    />
+  );
+});
+
+NewTicketWrapper.displayName = "NewTicketWrapper";
+
+const CommentTicket = memo(({ item, agent, customer, admin }) => {
   const queryClient = useQueryClient();
   const screens = useBreakpoint();
   const [comment, setComment] = useState(null);
-  const [id, setId] = useState(null);
+  const [editId, setEditId] = useState(null);
+  const router = useRouter();
+  const ticketId = router.query?.id;
 
   // Memoize responsive config
   const responsiveConfig = useMemo(() => {
     const isMobile = !screens.md;
-
     return {
       isMobile,
       avatarSize: isMobile ? 32 : 40,
@@ -78,23 +142,26 @@ const CommentTicket = ({ item, agent, customer, admin }) => {
     };
   }, [screens.md]);
 
-  const handleAccEdit = () => {
-    setId(item?.id);
+  // Memoize card style based on is_answer
+  const cardStyle = useMemo(() => {
+    return item?.is_answer ? CARD_ANSWER_STYLE : CARD_NORMAL_STYLE;
+  }, [item?.is_answer]);
+
+  const handleAccEdit = useCallback(() => {
+    setEditId(item?.id);
     setComment(item?.commentMarkdown);
-  };
+  }, [item?.id, item?.commentMarkdown]);
 
-  const handleCancelEdit = () => {
-    setId(null);
-  };
-
-  const router = useRouter();
+  const handleCancelEdit = useCallback(() => {
+    setEditId(null);
+    setComment(null);
+  }, []);
 
   const { mutate: hapus, isLoading: isLoadingHapus } = useMutation(
     (data) => hapusCommentCustomer(data),
     {
       onSuccess: () => {
-        const id = router.query?.id;
-        queryClient.invalidateQueries(["publish-ticket", id]);
+        queryClient.invalidateQueries(["publish-ticket", ticketId]);
         message.success("✅ Berhasil menghapus komentar");
       },
       onError: () => message.error("❌ Gagal menghapus komentar"),
@@ -105,9 +172,8 @@ const CommentTicket = ({ item, agent, customer, admin }) => {
     (data) => updateCommentCustomer(data),
     {
       onSuccess: () => {
-        const id = router.query?.id;
-        queryClient.invalidateQueries(["publish-ticket", id]);
-        setId(null);
+        queryClient.invalidateQueries(["publish-ticket", ticketId]);
+        setEditId(null);
         setComment(null);
         message.success("✅ Berhasil mengubah komentar");
       },
@@ -115,289 +181,229 @@ const CommentTicket = ({ item, agent, customer, admin }) => {
     }
   );
 
-  const { mutate: markAnswer, isLoading: isLoadingMarkAnswer } = useMutation(
+  const { mutate: markAnswer } = useMutation(
     (data) => markAnswerTicket(data),
     {
       onSuccess: () => {
-        const id = router.query?.id;
-        queryClient.invalidateQueries(["publish-ticket", id]);
+        queryClient.invalidateQueries(["publish-ticket", ticketId]);
         message.success("✅ Berhasil menandai jawaban");
       },
       onError: () => message.error("❌ Gagal menandai jawaban"),
     }
   );
 
-  const { mutate: unmarkAnswer, isLoading: isLoadingUnmarkAnswer } =
-    useMutation((data) => unmarkAnswerTicket(data), {
+  const { mutate: unmarkAnswer } = useMutation(
+    (data) => unmarkAnswerTicket(data),
+    {
       onSuccess: () => {
-        const id = router.query?.id;
-        queryClient.invalidateQueries(["publish-ticket", id]);
+        queryClient.invalidateQueries(["publish-ticket", ticketId]);
         message.success("✅ Berhasil membatalkan tanda jawaban");
       },
       onError: () => message.error("❌ Gagal membatalkan tanda jawaban"),
+    }
+  );
+
+  const handleMarkAnswer = useCallback(() => {
+    markAnswer({ id: ticketId, commentId: item?.id });
+  }, [ticketId, item?.id, markAnswer]);
+
+  const handleUnmarkAnswer = useCallback(() => {
+    unmarkAnswer({ id: ticketId, commentId: item?.id });
+  }, [ticketId, item?.id, unmarkAnswer]);
+
+  const handleHapus = useCallback(() => {
+    hapus({ ticketId, commentId: item?.id });
+  }, [ticketId, item?.id, hapus]);
+
+  const handleUpdate = useCallback(() => {
+    editData({
+      ticketId,
+      commentId: item?.id,
+      data: { comment },
     });
+  }, [ticketId, item?.id, comment, editData]);
 
-  const handleMarkAnswer = () => {
-    const data = {
-      id: router.query?.id,
-      commentId: item?.id,
-    };
-    markAnswer(data);
-  };
+  // Create dropdown menu items using Ant Design v5 API
+  const dropdownMenuItems = useMemo(
+    () => ({
+      items: [
+        {
+          key: "mark-answer",
+          label: (
+            <RestrictedContent name="mark-answer" attributes={{ agent }}>
+              <Flex align="center" gap={8}>
+                <CheckCircleOutlined style={{ color: "#52c41a" }} />
+                <span>
+                  {item?.is_answer
+                    ? "Hapus Tanda Jawaban"
+                    : "Tandai Sebagai Jawaban"}
+                </span>
+              </Flex>
+            </RestrictedContent>
+          ),
+          onClick: item?.is_answer ? handleUnmarkAnswer : handleMarkAnswer,
+        },
+        {
+          key: "edit-comment",
+          label: (
+            <RestrictedContent name="edit-comment" attributes={{ comment: item }}>
+              <Flex align="center" gap={8}>
+                <EditOutlined style={{ color: "#1890ff" }} />
+                <span>Edit Komentar</span>
+              </Flex>
+            </RestrictedContent>
+          ),
+          onClick: handleAccEdit,
+        },
+        {
+          key: "remove-comment",
+          danger: true,
+          label: (
+            <RestrictedContent name="remove-comment" attributes={{ comment: item }}>
+              <Flex align="center" gap={8}>
+                <DeleteOutlined />
+                <span>Hapus Komentar</span>
+              </Flex>
+            </RestrictedContent>
+          ),
+          onClick: handleHapus,
+        },
+      ],
+      style: MENU_STYLE,
+    }),
+    [agent, item, handleMarkAnswer, handleUnmarkAnswer, handleAccEdit, handleHapus]
+  );
 
-  const handleUnmarkAnswer = () => {
-    const data = {
-      id: router.query?.id,
-      commentId: item?.id,
-    };
-    unmarkAnswer(data);
-  };
+  // Memoize comment actions
+  const commentActions = useMemo(
+    () => [
+      <SimpleEmojiPicker ticketId={ticketId} comment={item} key="emoji" />,
+      <ReactionsEmoji key="reaction-emoji" reactions={item?.reactions} />,
+    ],
+    [ticketId, item]
+  );
 
-  const handleHapus = () => {
-    const data = {
-      ticketId: router.query?.id,
-      commentId: item?.id,
-    };
 
-    hapus(data);
-  };
+  const isEditing = item?.id === editId && item?.id !== null;
 
-  const handleUpdate = async () => {
-    const data = {
-      ticketId: router.query?.id,
-      commentId: item?.id,
-      data: {
-        comment,
-      },
-    };
-
-    editData(data);
-  };
+  if (isEditing) {
+    return (
+      <Card size="small" style={CARD_STYLE}>
+        <NewTicket
+          handleCancel={handleCancelEdit}
+          setValue={setComment}
+          loadingSubmit={isLoadingEdit}
+          value={comment}
+          submitMessage={handleUpdate}
+          withCancel={true}
+        />
+      </Card>
+    );
+  }
 
   return (
     <>
-      {item?.id === id && item?.id !== null ? (
-        <Card
-          size="small"
-          style={{
-            borderRadius: 8,
-          }}
-        >
-          <NewTicket
-            handleCancel={handleCancelEdit}
-            setValue={setComment}
-            loadingSubmit={isLoadingEdit}
-            value={comment}
-            submitMessage={handleUpdate}
-            withCancel={true}
-          />
-        </Card>
-      ) : (
-        <>
-          {item?.type === "comment" && item?.id !== null && (
-            <Card
-              size="small"
-              style={{
-                borderRadius: 8,
-                border: item?.is_answer
-                  ? "2px solid #52c41a"
-                  : "1px solid #f0f0f0",
-                background: item?.is_answer ? "#f6ffed" : "white",
-                transition: "all 0.2s ease",
-              }}
-            >
-              <Flex justify="space-between" align="flex-start" gap={8}>
-                <Flex flex={1} vertical gap={8}>
-                  {item?.is_answer && (
-                    <Flex align="center" gap={8}>
-                      <CheckCircleOutlined
-                        style={{ color: "#52c41a", fontSize: 16 }}
-                      />
-                      <Text strong style={{ color: "#52c41a", fontSize: 13 }}>
-                        ✅ Jawaban Terpilih
-                      </Text>
-                    </Flex>
-                  )}
-
-                  <Comment
-                    actions={[
-                      <SimpleEmojiPicker
-                        ticketId={router?.query?.id}
-                        comment={item}
-                        key="emoji"
-                      />,
-                      <ReactionsEmoji
-                        key="reaction-emoji"
-                        reactions={item?.reactions}
-                      />,
-                    ]}
-                    author={
-                      <Link href={`/users/${item?.user?.custom_id}`}>
-                        <Flex align="center" gap={8}>
-                          <Typography.Link style={{ fontWeight: 600 }}>
-                            {item?.user?.username}
-                          </Typography.Link>
-                          {(item?.user?.current_role === "agent" ||
-                            item?.user?.current_role === "admin") && (
-                            <Tag
-                              icon={<FireOutlined />}
-                              color="orange"
-                              style={{
-                                borderRadius: 4,
-                                fontSize: 11,
-                                fontWeight: 600,
-                              }}
-                            >
-                              🔥 Staff BKD
-                            </Tag>
-                          )}
-                        </Flex>
-                      </Link>
-                    }
-                    datetime={
-                      <Tooltip title={formatDate(item?.created_at)}>
-                        <Flex align="center" gap={4}>
-                          <Text type="secondary" style={{ fontSize: 12 }}>
-                            {item?.is_edited
-                              ? formatDateFromNow(item?.updated_at)
-                              : formatDateFromNow(item?.created_at)}
-                          </Text>
-                          {item?.is_edited && (
-                            <Text type="secondary" style={{ fontSize: 12 }}>
-                              • ✏️ diedit
-                            </Text>
-                          )}
-                        </Flex>
-                      </Tooltip>
-                    }
-                    avatar={
-                      <Link href={`/users/${item?.user?.custom_id}`}>
-                        <Avatar
-                          src={item?.user?.image}
-                          size={responsiveConfig.avatarSize}
-                          style={{
-                            border: "2px solid #f0f0f0",
-                            transition: "all 0.2s ease",
-                          }}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.borderColor = "#1890ff";
-                            e.currentTarget.style.transform = "scale(1.05)";
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.borderColor = "#f0f0f0";
-                            e.currentTarget.style.transform = "scale(1)";
-                          }}
-                        />
-                      </Link>
-                    }
-                    content={
-                      <div
-                        style={{
-                          padding: "8px 0",
-                          lineHeight: 1.6,
-                        }}
-                      >
-                        <ReactMarkdownCustom>
-                          {item?.commentMarkdown}
-                        </ReactMarkdownCustom>
-                      </div>
-                    }
-                  />
+      {item?.type === "comment" && item?.id !== null && (
+        <Card size="small" style={cardStyle}>
+          <Flex justify="space-between" align="flex-start" gap={8}>
+            <Flex flex={1} vertical gap={8} style={{ overflow: "hidden" }}>
+              {item?.is_answer && (
+                <Flex align="center" gap={8}>
+                  <CheckCircleOutlined style={ANSWER_ICON_STYLE} />
+                  <Text strong style={ANSWER_TEXT_STYLE}>
+                    ✅ Jawaban Terpilih
+                  </Text>
                 </Flex>
+              )}
 
-                <Dropdown
-                  trigger={["click"]}
-                  placement="bottomRight"
-                  overlay={
-                    <Menu
-                      style={{
-                        borderRadius: 8,
-                      }}
-                    >
-                      <ActionWrapper
-                        key="mark-answer"
-                        name="mark-answer"
-                        attributes={{ agent }}
-                      >
-                        <Flex
-                          align="center"
-                          gap={8}
-                          onClick={
-                            item?.is_answer
-                              ? handleUnmarkAnswer
-                              : handleMarkAnswer
-                          }
+              <Comment
+                actions={commentActions}
+                author={
+                  <Link href={`/users/${item?.user?.custom_id}`}>
+                    <Flex align="center" gap={8}>
+                      <Typography.Link style={{ fontWeight: 600 }}>
+                        {item?.user?.username}
+                      </Typography.Link>
+                      {(item?.user?.current_role === "agent" ||
+                        item?.user?.current_role === "admin") && (
+                        <Tag
+                          icon={<FireOutlined />}
+                          color="orange"
+                          style={STAFF_TAG_STYLE}
                         >
-                          <CheckCircleOutlined style={{ color: "#52c41a" }} />
-                          <span>
-                            {item?.is_answer
-                              ? "❌ Hapus Tanda Jawaban"
-                              : "✅ Tandai Sebagai Jawaban"}
-                          </span>
-                        </Flex>
-                      </ActionWrapper>
-                      <ActionWrapper
-                        key="edit-comment"
-                        name="edit-comment"
-                        attributes={{ comment: item }}
-                      >
-                        <Flex align="center" gap={8} onClick={handleAccEdit}>
-                          <EditOutlined style={{ color: "#1890ff" }} />
-                          <span>✏️ Edit Komentar</span>
-                        </Flex>
-                      </ActionWrapper>
-                      <ActionWrapper
-                        key="remove-comment"
-                        name="remove-comment"
-                        attributes={{ comment: item }}
-                      >
-                        <Flex
-                          align="center"
-                          gap={8}
-                          onClick={handleHapus}
-                          style={{ color: "#ff4d4f" }}
-                        >
-                          <DeleteOutlined />
-                          <span>🗑️ Hapus Komentar</span>
-                        </Flex>
-                      </ActionWrapper>
-                    </Menu>
-                  }
-                >
-                  <Button
-                    type="text"
-                    icon={<EllipsisOutlined />}
-                    size="small"
-                    style={{
-                      color: "#8c8c8c",
-                      border: "1px solid #f0f0f0",
-                      borderRadius: 6,
-                      transition: "all 0.2s ease",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.color = "#1890ff";
-                      e.currentTarget.style.borderColor = "#1890ff";
-                      e.currentTarget.style.background = "#f0f9ff";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.color = "#8c8c8c";
-                      e.currentTarget.style.borderColor = "#f0f0f0";
-                      e.currentTarget.style.background = "transparent";
-                    }}
-                  />
-                </Dropdown>
-              </Flex>
-            </Card>
-          )}
-          <TimelineTicket timelineItems={item?.timelineItems} />
-        </>
+                          🔥 Staff BKD
+                        </Tag>
+                      )}
+                    </Flex>
+                  </Link>
+                }
+                datetime={
+                  <Tooltip title={formatDate(item?.created_at)}>
+                    <Flex align="center" gap={4}>
+                      <Text type="secondary" style={DATETIME_TEXT_STYLE}>
+                        {item?.is_edited
+                          ? formatDateFromNow(item?.updated_at)
+                          : formatDateFromNow(item?.created_at)}
+                      </Text>
+                      {item?.is_edited && (
+                        <Text type="secondary" style={DATETIME_TEXT_STYLE}>
+                          • ✏️ diedit
+                        </Text>
+                      )}
+                    </Flex>
+                  </Tooltip>
+                }
+                avatar={
+                  <Link href={`/users/${item?.user?.custom_id}`}>
+                    <Avatar
+                      src={item?.user?.image}
+                      size={responsiveConfig.avatarSize}
+                      style={AVATAR_STYLE}
+                    />
+                  </Link>
+                }
+                content={
+                  <div style={CONTENT_STYLE}>
+                    <ReactMarkdownCustom>
+                      {item?.commentMarkdown}
+                    </ReactMarkdownCustom>
+                  </div>
+                }
+              />
+            </Flex>
+
+            <Dropdown
+              trigger={["click"]}
+              placement="bottomRight"
+              menu={dropdownMenuItems}
+              getPopupContainer={(triggerNode) => triggerNode.parentNode}
+            >
+              <Button
+                type="text"
+                icon={<EllipsisOutlined />}
+                size="small"
+                style={DROPDOWN_BUTTON_STYLE}
+              />
+            </Dropdown>
+          </Flex>
+        </Card>
       )}
+      <TimelineTicket timelineItems={item?.timelineItems} />
     </>
   );
-};
+});
+
+CommentTicket.displayName = "CommentTicket";
+
+// Static styles for DetailTicketPublish
+const CONTAINER_MOBILE_STYLE = { padding: "16px", background: "#fafafa" };
+const CONTAINER_DESKTOP_STYLE = { padding: "24px", background: "#fafafa" };
+const MAX_WIDTH_STYLE = { maxWidth: 1200, margin: "0 auto" };
+const AFFIX_CARD_STYLE = { borderRadius: 8, background: "white" };
+const DESCRIPTION_CARD_STYLE = { marginTop: 8, marginBottom: 8 };
+const COMMENT_CARD_STYLE = { borderRadius: 8 };
 
 const DetailTicketPublish = ({ id }) => {
-  const queryClient = useQueryClient();
   const screens = useBreakpoint();
 
   // Memoize responsive config
@@ -415,41 +421,43 @@ const DetailTicketPublish = ({ id }) => {
   const { data, isLoading } = useQuery(
     ["publish-ticket", id],
     () => detailPublishTickets(id),
-    {}
-  );
-
-  const { mutate: createComment, isLoading: isLoadingCreate } = useMutation(
-    (data) => createCommentCustomer(data),
     {
-      onSettled: () => queryClient.invalidateQueries(["publish-ticket", id]),
-      onSuccess: () => {
-        queryClient.invalidateQueries(["publish-ticket", id]);
-        setValue("");
-        message.success("✅ Komentar berhasil ditambahkan");
-      },
-      onError: () => message.error("❌ Gagal menambahkan komentar"),
+      refetchOnWindowFocus: false,
     }
   );
 
-  const handleSubmit = () => {
-    const data = {
-      id,
-      data: {
-        comment: value,
-      },
-    };
-    createComment(data);
-  };
+  // Memoize container style
+  const containerStyle = useMemo(
+    () => (responsiveConfig.isMobile ? CONTAINER_MOBILE_STYLE : CONTAINER_DESKTOP_STYLE),
+    [responsiveConfig.isMobile]
+  );
 
-  const [value, setValue] = useState(null);
+  // Memoize sidebar style
+  const sidebarStyle = useMemo(
+    () => ({
+      position: responsiveConfig.isMobile ? "static" : "sticky",
+      top: responsiveConfig.isMobile ? "auto" : 100,
+    }),
+    [responsiveConfig.isMobile]
+  );
+
+  // Memoize comments list to prevent unnecessary re-renders
+  const commentsList = useMemo(
+    () =>
+      data?.data?.map((item) => (
+        <CommentTicket
+          key={item?.id || item?.custom_id}
+          customer={data?.customer}
+          agent={data?.agent}
+          admin={data?.admin}
+          item={item}
+        />
+      )),
+    [data?.data, data?.customer, data?.agent, data?.admin]
+  );
 
   return (
-    <div
-      style={{
-        padding: responsiveConfig.isMobile ? "16px" : "24px",
-        background: "#fafafa",
-      }}
-    >
+    <div style={containerStyle}>
       <Skeleton loading={isLoading}>
         <Head>
           <title>{data?.title}</title>
@@ -457,17 +465,11 @@ const DetailTicketPublish = ({ id }) => {
         {data && (
           <>
             <FloatButton.BackTop />
-            <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+            <div style={MAX_WIDTH_STYLE}>
               <Row gutter={[8, 16]}>
                 <Col span={24}>
                   <Affix offsetTop={54}>
-                    <Card
-                      size="small"
-                      style={{
-                        borderRadius: 8,
-                        background: "white",
-                      }}
-                    >
+                    <Card size="small" style={AFFIX_CARD_STYLE}>
                       <ChangeTicketTitle
                         name="edit-ticket-title"
                         attributes={{ ticket: data }}
@@ -485,27 +487,11 @@ const DetailTicketPublish = ({ id }) => {
                   order={responsiveConfig.isMobile ? 2 : 1}
                 >
                   <Flex vertical gap={8}>
-                    <Card
-                      size="small"
-                      style={{
-                        marginTop: 8,
-                        marginBottom: 8,
-                      }}
-                    >
+                    <Card size="small" style={DESCRIPTION_CARD_STYLE}>
                       <ChangeTicketDescription item={data} />
                     </Card>
 
-                    {data?.data?.map((item, index) => {
-                      return (
-                        <CommentTicket
-                          key={item?.id || item?.custom_id}
-                          customer={data?.customer}
-                          agent={data?.agent}
-                          admin={data?.admin}
-                          item={item}
-                        />
-                      );
-                    })}
+                    {commentsList}
 
                     <RestrictedContent
                       name="create-comment"
@@ -514,16 +500,11 @@ const DetailTicketPublish = ({ id }) => {
                       <Card
                         size="small"
                         title="💬 Tambah Komentar"
-                        style={{
-                          borderRadius: 8,
-                        }}
+                        style={COMMENT_CARD_STYLE}
                       >
-                        <NewTicket
-                          submitMessage={handleSubmit}
+                        <NewTicketWrapper
+                          id={id}
                           currentStatus={data?.status_code}
-                          value={value}
-                          setValue={setValue}
-                          loadingSubmit={isLoadingCreate}
                         />
                       </Card>
                     </RestrictedContent>
@@ -537,12 +518,7 @@ const DetailTicketPublish = ({ id }) => {
                   xs={24}
                   order={responsiveConfig.isMobile ? 1 : 2}
                 >
-                  <div
-                    style={{
-                      position: responsiveConfig.isMobile ? "static" : "sticky",
-                      top: responsiveConfig.isMobile ? "auto" : 100,
-                    }}
-                  >
+                  <div style={sidebarStyle}>
                     <SideRight item={data} />
                   </div>
                 </Col>
@@ -555,4 +531,4 @@ const DetailTicketPublish = ({ id }) => {
   );
 };
 
-export default DetailTicketPublish;
+export default memo(DetailTicketPublish);

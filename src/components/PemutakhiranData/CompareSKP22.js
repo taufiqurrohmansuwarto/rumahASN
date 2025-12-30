@@ -188,6 +188,7 @@ const FormSKP22 = ({ visible, onCancel, nip }) => {
         </Form.Item>
         <Form.Item name="tahun" label="Tahun Penilaian" required>
           <Select>
+            <Select.Option value="2025">TAHUN PENILAIAN 2025</Select.Option>
             <Select.Option value="2025">TAHUN PENILAIAN 2024</Select.Option>
             <Select.Option value="2024">TAHUN PENILAIAN 2024</Select.Option>
             <Select.Option value="2023">TAHUN PENILAIAN 2023</Select.Option>
@@ -425,7 +426,10 @@ function CompareSKP22({ nip, id }) {
       key: "aksi",
       render: (_, row) => {
         const tahunAktif =
-          row?.tahun === 2024 || row?.tahun === 2023 || row?.tahun === 2022;
+          row?.tahun === 2024 ||
+          row?.tahun === 2023 ||
+          row?.tahun === 2022 ||
+          row?.tahun === 2025;
 
         if (tahunAktif) {
           return <a onClick={() => handleModalTransfer(row)}>Transfer SIASN</a>;
