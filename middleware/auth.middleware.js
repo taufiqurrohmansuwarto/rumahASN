@@ -68,7 +68,7 @@ const auth = async (req, res, next) => {
       const customId = data?.user?.id;
 
       if (bannedUserId.includes(customId)) {
-        res.status(401).json({ code: 401, message: "Unauthorized" });
+        return res.status(401).json({ code: 401, message: "Unauthorized" });
       }
 
       const result = await User.query()
@@ -116,10 +116,11 @@ const auth = async (req, res, next) => {
       req.mc = mc;
       next();
     } else {
-      res.status(401).json({ code: 401, message: "Unauthorized" });
+      return res.status(401).json({ code: 401, message: "Unauthorized" });
     }
   } catch (error) {
     console.log(error);
+    return res.status(500).json({ code: 500, message: "Internal Server Error" });
   }
 };
 

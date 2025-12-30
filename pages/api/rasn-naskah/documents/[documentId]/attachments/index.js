@@ -3,6 +3,7 @@ import {
   uploadAttachment,
 } from "@/controller/rasn-naskah/upload.controller";
 import auth from "@/middleware/auth.middleware";
+import asnNonAsnMiddleware from "@/middleware/asn-non-asn.middleware";
 import { createRouter } from "next-connect";
 import multer from "multer";
 
@@ -15,7 +16,7 @@ const upload = multer({
 
 const router = createRouter();
 
-router.use(auth).get(getAttachments).post(upload.single("file"), uploadAttachment);
+router.use(auth).use(asnNonAsnMiddleware).get(getAttachments).post(upload.single("file"), uploadAttachment);
 
 export default router.handler({});
 

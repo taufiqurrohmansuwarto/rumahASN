@@ -11,10 +11,12 @@ import { RBACProvider } from "context/RBACContext";
 import { SessionProvider, signIn, useSession } from "next-auth/react";
 import Head from "next/head";
 import Script from "next/script";
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Loading from "../src/components/Loading";
 import GlobalVideoConference from "../src/components/VideoConference/GlobalVideoConference";
 import "../styles/globals.css";
+import { getActiveVideoSession } from "@/services/coaching-clinics.services";
+import useVideoConferenceStore from "@/store/useVideoConference";
 
 import "antd/dist/reset.css";
 import dayjs from "dayjs";
@@ -51,6 +53,27 @@ function Auth({ children, action, subject }) {
     required: true,
     onUnauthenticated: () => signIn(),
   });
+
+  const { resumeMeeting, isOpen } = useVideoConferenceStore();
+  const hasCheckedSession = useRef(false);
+
+  // Auto-resume active video session on login/refresh
+  useEffect(() => {
+    // Only check once per mount, and only if not already in a meeting
+    if (data?.user && !isOpen && !hasCheckedSession.current) {
+      hasCheckedSession.current = true;
+
+      getActiveVideoSession()
+        .then((response) => {
+          if (response?.hasActiveSession && response?.meetingData) {
+            resumeMeeting(response.meetingData);
+          }
+        })
+        .catch((error) => {
+          console.error("Failed to check active video session:", error);
+        });
+    }
+  }, [data?.user, isOpen, resumeMeeting]);
 
   if (status === "loading") {
     return <Loading />;

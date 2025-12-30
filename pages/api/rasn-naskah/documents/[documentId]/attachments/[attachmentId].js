@@ -1,10 +1,11 @@
 import { deleteAttachment } from "@/controller/rasn-naskah/upload.controller";
 import auth from "@/middleware/auth.middleware";
+import asnNonAsnMiddleware from "@/middleware/asn-non-asn.middleware";
 import { createRouter } from "next-connect";
 
 const router = createRouter();
 
-router.use(auth).delete(deleteAttachment);
+router.use(auth).use(asnNonAsnMiddleware).delete(deleteAttachment);
 
 export default router.handler({});
 

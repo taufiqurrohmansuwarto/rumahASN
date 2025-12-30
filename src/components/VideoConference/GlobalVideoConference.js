@@ -1,5 +1,8 @@
 import useVideoConferenceStore from "@/store/useVideoConference";
-import { endMeeting as endMeetingApi } from "@/services/coaching-clinics.services";
+import {
+  endMeeting as endMeetingApi,
+  heartbeatVideoSession,
+} from "@/services/coaching-clinics.services";
 import {
   IconArrowsMaximize,
   IconArrowsMinimize,
@@ -61,6 +64,9 @@ const VIEW_MODE_SIZES = {
   mini: { width: 200, height: 150 },
 };
 
+// Heartbeat interval in milliseconds (30 seconds)
+const HEARTBEAT_INTERVAL_MS = 30 * 1000;
+
 function GlobalVideoConference() {
   const {
     isOpen,
@@ -69,6 +75,7 @@ function GlobalVideoConference() {
     pipPosition,
     setViewMode,
     closeMeeting,
+    endMeetingAsConsultant,
     updatePipPosition,
     getPipPositionStyles,
   } = useVideoConferenceStore();
@@ -78,12 +85,16 @@ function GlobalVideoConference() {
 
   const [mounted, setMounted] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [jitsiKey, setJitsiKey] = useState(null); // Unique key for Jitsi instance
 
   const jitsiApiRef = useRef(null);
   const containerRef = useRef(null);
+  const isEndingRef = useRef(false); // Prevent double end calls
+  const listenerCleanupRef = useRef(null); // Store listener cleanup function
 
-  // Cleanup ref for timeouts
+  // Cleanup refs
   const timeoutRef = useRef(null);
+  const heartbeatRef = useRef(null);
 
   // Mount effect
   useEffect(() => {
@@ -96,9 +107,61 @@ function GlobalVideoConference() {
     };
   }, []);
 
+  // Generate unique Jitsi key when meeting changes to prevent duplicate instances
+  useEffect(() => {
+    if (meetingData?.id) {
+      setJitsiKey(`jitsi-${meetingData.id}-${Date.now()}`);
+    } else {
+      setJitsiKey(null);
+    }
+  }, [meetingData?.id]);
+
+  // Heartbeat effect - keep session alive
+  useEffect(() => {
+    // Clear previous interval
+    if (heartbeatRef.current) {
+      clearInterval(heartbeatRef.current);
+      heartbeatRef.current = null;
+    }
+
+    if (!isOpen || !meetingData?.id) return;
+
+    // Send initial heartbeat
+    heartbeatVideoSession(meetingData.id).catch((error) => {
+      console.error("Initial heartbeat failed:", error);
+    });
+
+    // Set up interval for subsequent heartbeats
+    heartbeatRef.current = setInterval(() => {
+      heartbeatVideoSession(meetingData.id).catch((error) => {
+        console.error("Heartbeat failed:", error);
+        // If heartbeat fails consistently, session might be invalid
+        // Let backend handle cleanup via timeout
+      });
+    }, HEARTBEAT_INTERVAL_MS);
+
+    return () => {
+      if (heartbeatRef.current) {
+        clearInterval(heartbeatRef.current);
+        heartbeatRef.current = null;
+      }
+    };
+  }, [isOpen, meetingData?.id]);
+
   // Cleanup Jitsi API listeners on unmount or meeting change
   useEffect(() => {
     return () => {
+      // Cleanup listener first
+      if (listenerCleanupRef.current) {
+        try {
+          listenerCleanupRef.current();
+        } catch (e) {
+          // Ignore cleanup errors
+        }
+        listenerCleanupRef.current = null;
+      }
+      
+      // Then dispose Jitsi
       if (jitsiApiRef.current) {
         try {
           jitsiApiRef.current.dispose();
@@ -107,6 +170,9 @@ function GlobalVideoConference() {
         }
         jitsiApiRef.current = null;
       }
+      
+      // Reset ending flag
+      isEndingRef.current = false;
     };
   }, [meetingData?.id]);
 
@@ -119,10 +185,18 @@ function GlobalVideoConference() {
 
   // Handle end meeting (Coach only)
   const handleEndMeeting = useCallback(() => {
+    // Prevent double calls
+    if (isEndingRef.current) return;
+
     if (!meetingData?.id) {
       closeMeeting();
       return;
     }
+
+    isEndingRef.current = true;
+
+    // Store current view mode before minimizing
+    const previousViewMode = viewMode;
 
     // Minimize first for modal visibility
     if (viewMode === "fullscreen" || viewMode === "standard") {
@@ -141,34 +215,47 @@ function GlobalVideoConference() {
         onOk: async () => {
           setIsProcessing(true);
           try {
-            // End conference via Jitsi API
+            // End conference via Jitsi API (kick all participants)
             jitsiApiRef.current?.executeCommand?.("endConference");
 
+            // Update meeting status in backend
             await endMeetingApi(meetingData.id);
             message.success("Meeting berhasil diakhiri");
 
+            // Invalidate queries
             queryClient.invalidateQueries(["meeting", meetingData.id]);
             queryClient.invalidateQueries(["meetings"]);
             queryClient.invalidateQueries(["detailMeetingParticipant"]);
 
-            closeMeeting();
+            // End all video sessions (consultant + all participants)
+            await endMeetingAsConsultant();
           } catch (error) {
             console.error("Error ending meeting:", error);
             message.error("Gagal mengakhiri meeting");
+            // Still try to close local state
+            closeMeeting();
           } finally {
             setIsProcessing(false);
+            isEndingRef.current = false;
           }
         },
         onCancel: () => {
           // Return to previous view mode
-          setViewMode("fullscreen");
+          setViewMode(previousViewMode !== "hidden" ? previousViewMode : "fullscreen");
+          isEndingRef.current = false;
         },
       });
     }, 150);
-  }, [meetingData?.id, viewMode, setViewMode, closeMeeting, queryClient]);
+  }, [meetingData?.id, viewMode, setViewMode, closeMeeting, endMeetingAsConsultant, queryClient]);
 
   // Handle leave meeting (Participant only)
   const handleLeaveMeeting = useCallback(() => {
+    // Prevent double calls
+    if (isEndingRef.current) return;
+    isEndingRef.current = true;
+
+    const previousViewMode = viewMode;
+
     if (viewMode === "fullscreen" || viewMode === "standard") {
       setViewMode("compact");
     }
@@ -185,10 +272,12 @@ function GlobalVideoConference() {
           message.info("Anda telah keluar dari meeting");
           queryClient.invalidateQueries(["detailMeetingParticipant"]);
           closeMeeting();
-          router.push("/coaching-clinic/my-coaching");
+          router.push("/coaching-clinic/my-coaching-clinic");
+          isEndingRef.current = false;
         },
         onCancel: () => {
-          setViewMode("fullscreen");
+          setViewMode(previousViewMode !== "hidden" ? previousViewMode : "fullscreen");
+          isEndingRef.current = false;
         },
       });
     }, 150);
@@ -199,12 +288,23 @@ function GlobalVideoConference() {
     (api) => {
       jitsiApiRef.current = api;
 
+      // Clean up previous listener if exists
+      if (listenerCleanupRef.current) {
+        try {
+          listenerCleanupRef.current();
+        } catch (e) {
+          // Ignore
+        }
+      }
+
       // Listen for conference ended by moderator
       const handleConferenceLeft = () => {
-        // Only auto-handle for participants
-        if (meetingData?.isParticipant) {
+        // Only auto-handle for participants - check current state
+        const currentMeetingData = useVideoConferenceStore.getState().meetingData;
+        if (currentMeetingData?.isParticipant) {
           message.info("Meeting telah diakhiri oleh coach");
           queryClient.invalidateQueries(["detailMeetingParticipant"]);
+          isEndingRef.current = false; // Reset flag
           closeMeeting();
           router.push("/coaching-clinic/my-coaching-clinic");
         }
@@ -212,16 +312,20 @@ function GlobalVideoConference() {
 
       api.addListener("videoConferenceLeft", handleConferenceLeft);
 
-      // Return cleanup function
-      return () => {
-        api.removeListener("videoConferenceLeft", handleConferenceLeft);
+      // Store cleanup function
+      listenerCleanupRef.current = () => {
+        try {
+          api.removeListener("videoConferenceLeft", handleConferenceLeft);
+        } catch (e) {
+          // Ignore - api might be disposed
+        }
       };
     },
-    [meetingData?.isParticipant, closeMeeting, queryClient, router]
+    [closeMeeting, queryClient, router]
   );
 
   // Don't render if not ready
-  if (!mounted || !isOpen || !meetingData || viewMode === "hidden") {
+  if (!mounted || !isOpen || !meetingData || viewMode === "hidden" || !jitsiKey) {
     return null;
   }
 
@@ -482,6 +586,7 @@ function GlobalVideoConference() {
         }}
       >
         <JitsiMeeting
+          key={jitsiKey}
           domain="coaching-online.site"
           jwt={meetingData?.jwt}
           roomName={meetingData?.id}
@@ -496,7 +601,7 @@ function GlobalVideoConference() {
             startWithVideoMuted: false,
             enableModeratorManagementInConference: true,
             disableRemoteMute: false,
-            enableClosePage: true,
+            enableClosePage: false, // Disable Jitsi's own close - use our button
             toolbarButtons: getToolbarButtons(),
             whiteboard: {
               enabled: true,
@@ -517,7 +622,6 @@ function GlobalVideoConference() {
               : meetingData?.coach?.username || "Coach",
             role: isParticipant ? "participant" : "moderator",
           }}
-          onReadyToClose={isParticipant ? handleLeaveMeeting : handleEndMeeting}
         />
       </Box>
     </Box>

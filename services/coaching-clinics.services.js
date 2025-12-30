@@ -124,3 +124,103 @@ export const ratingMeetingConsultant = async (id) => {
   const url = `/consultants/meetings/${id}/rating`;
   return coachingClinicApi.get(url).then((res) => res?.data);
 };
+
+// ==========================================
+// VIDEO SESSION MANAGEMENT (Persistence)
+// ==========================================
+
+/**
+ * Cek apakah user punya active video session
+ * Digunakan saat login/refresh untuk auto-resume
+ */
+export const getActiveVideoSession = () => {
+  const url = "/sessions/active";
+  return coachingClinicApi.get(url).then((res) => res?.data);
+};
+
+/**
+ * Buat video session saat join/start meeting
+ * @param {Object} data - { meetingId: string, role: 'consultant' | 'participant' }
+ */
+export const createVideoSession = (data) => {
+  const url = "/sessions/join";
+  return coachingClinicApi.post(url, data).then((res) => res?.data);
+};
+
+/**
+ * End video session saat leave meeting (participant)
+ * @param {string} meetingId
+ */
+export const endVideoSession = (meetingId) => {
+  const url = "/sessions/end";
+  return coachingClinicApi.post(url, { meetingId }).then((res) => res?.data);
+};
+
+/**
+ * End all sessions for a meeting (consultant only - when ending meeting)
+ * @param {string} meetingId
+ */
+export const endAllMeetingVideoSessions = (meetingId) => {
+  const url = "/sessions/end-all";
+  return coachingClinicApi.post(url, { meetingId }).then((res) => res?.data);
+};
+
+/**
+ * Update heartbeat untuk keep session alive
+ * @param {string} meetingId
+ */
+export const heartbeatVideoSession = (meetingId) => {
+  const url = "/sessions/heartbeat";
+  return coachingClinicApi.post(url, { meetingId }).then((res) => res?.data);
+};
+
+/**
+ * Cek apakah user punya active session (untuk prevent multiple meetings)
+ */
+export const checkUserHasActiveSession = () => {
+  const url = "/sessions/check-active";
+  return coachingClinicApi.get(url).then((res) => res?.data);
+};
+
+// ==========================================
+// NOTULA / REKAP DISKUSI MANAGEMENT
+// ==========================================
+
+/**
+ * Get notula untuk meeting
+ * @param {string} meetingId
+ */
+export const getNotula = (meetingId) => {
+  const url = `/consultants/meetings/${meetingId}/notula`;
+  return coachingClinicApi.get(url).then((res) => res?.data);
+};
+
+/**
+ * Update/simpan notula
+ * @param {string} meetingId
+ * @param {string} notula - konten notula
+ */
+export const updateNotula = (meetingId, notula) => {
+  const url = `/consultants/meetings/${meetingId}/notula`;
+  return coachingClinicApi.patch(url, { notula }).then((res) => res?.data);
+};
+
+/**
+ * Kirim notula ke semua peserta via rasn_mail
+ * @param {string} meetingId
+ * @param {string} subject - optional custom subject
+ */
+export const sendNotulaToParticipants = (meetingId, subject) => {
+  const url = `/consultants/meetings/${meetingId}/notula`;
+  return coachingClinicApi.post(url, { subject }).then((res) => res?.data);
+};
+
+/**
+ * Rapikan notula dengan AI
+ * @param {string} meetingId
+ * @param {string} text - teks yang akan dirapikan
+ */
+export const refineNotula = (meetingId, text) => {
+  const url = `/consultants/meetings/${meetingId}/notula-refine`;
+  return coachingClinicApi.post(url, { text }).then((res) => res?.data);
+};

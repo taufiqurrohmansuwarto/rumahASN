@@ -13,11 +13,32 @@ const ComposeMail = () => {
   const [visible, setVisible] = useState(false);
 
   // Get query parameters
-  const { reply, forward, replyAll, draft, to, toName } = router.query;
+  const { reply, forward, replyAll, draft, to, toName, subject, body, from } = router.query;
   const originalEmailId = reply || forward || draft;
 
-  // Initial recipient dari query param (untuk japri dari profile)
-  const initialRecipient = to ? { value: to, label: toName || to } : null;
+  // Initial recipients dari query param
+  // Support multiple recipients: to=id1,id2,id3&toName=name1,name2,name3
+  const getInitialRecipients = () => {
+    if (!to) return null;
+    
+    const ids = to.split(",");
+    const names = toName ? toName.split(",") : [];
+    
+    // Single recipient
+    if (ids.length === 1) {
+      return { value: ids[0], label: names[0] || ids[0] };
+    }
+    
+    // Multiple recipients
+    return ids.map((id, idx) => ({
+      value: id,
+      label: names[idx] || id,
+    }));
+  };
+
+  const initialRecipient = getInitialRecipients();
+  const initialSubject = subject || "";
+  const initialBody = body || "";
 
   // Fetch original email jika ada ID
   const {
@@ -94,6 +115,8 @@ const ComposeMail = () => {
         replyAll={replyAll === "true"}
         title={getTitle()}
         initialRecipient={initialRecipient}
+        initialSubject={initialSubject}
+        initialBody={initialBody}
       />
     </>
   );

@@ -963,7 +963,9 @@ const ComposeModal = ({
   originalEmail = null,
   replyAll = false,
   title = "Tulis Email",
-  initialRecipient = null, // { value: userId, label: username }
+  initialRecipient = null, // { value: userId, label: username } atau array [{value, label}]
+  initialSubject = "",
+  initialBody = "",
 }) => {
   const [form] = Form.useForm();
   const [recipients, setRecipients] = useState({ to: [], cc: [], bcc: [] });
@@ -979,12 +981,39 @@ const ComposeModal = ({
   const saveDraft = useSaveDraft();
   const replyToEmail = useReplyToEmail();
 
-  // Handle initialRecipient untuk japri dari profile
+  // Track if initial values have been set to prevent re-setting on every render
+  const initialValuesSetRef = useRef(false);
+
+  // Handle initial values untuk compose mode (dari japri profile atau coaching clinic notula)
   useEffect(() => {
-    if (mode === "compose" && initialRecipient && visible) {
-      setRecipients({ to: [initialRecipient], cc: [], bcc: [] });
+    // Only set initial values once when modal becomes visible
+    if (mode === "compose" && visible && !initialValuesSetRef.current) {
+      // Handle recipients (single or multiple)
+      if (initialRecipient) {
+        const toRecipients = Array.isArray(initialRecipient)
+          ? initialRecipient
+          : [initialRecipient];
+        setRecipients({ to: toRecipients, cc: [], bcc: [] });
+      }
+
+      // Handle initial subject
+      if (initialSubject) {
+        form.setFieldsValue({ subject: initialSubject });
+      }
+
+      // Handle initial body
+      if (initialBody) {
+        setMessageContent(initialBody);
+      }
+
+      initialValuesSetRef.current = true;
     }
-  }, [mode, initialRecipient, visible]);
+
+    // Reset flag when modal closes
+    if (!visible) {
+      initialValuesSetRef.current = false;
+    }
+  }, [mode, initialRecipient, initialSubject, initialBody, visible, form]);
 
   useEffect(() => {
     if (mode === "reply" && originalEmail) {

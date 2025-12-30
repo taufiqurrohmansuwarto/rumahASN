@@ -28,16 +28,17 @@ import {
   FloatButton,
   Input,
   List,
-  Modal,
   Row,
   Skeleton,
   Space,
   Tag,
   Tooltip,
   Typography,
+  Modal,
+  message,
 } from "antd";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import AddRating from "./CoachingClinicRating";
 import useVideoConferenceStore from "@/store/useVideoConference";
 
@@ -211,8 +212,6 @@ function DetailMeetingParticipant() {
     isOpen,
     setViewMode,
     meetingData,
-    wasMeetingEnded,
-    allowRejoin,
   } = useVideoConferenceStore();
 
   const handleOpenParticipant = () => setOpenParticipant(true);
@@ -232,58 +231,68 @@ function DetailMeetingParticipant() {
 
   // Check if current meeting is the one in global store
   const isCurrentMeetingLive = isOpen && meetingData?.id === data?.meeting?.id;
-  
-  // Check if this meeting was manually left (to prevent auto-restart)
-  const wasMeetingManuallyLeft = wasMeetingEnded(data?.meeting?.id);
 
   // Get current participant info from participants list
   const currentParticipant = data?.participants?.find(
     (p) => p?.id === id
   );
 
-  const handleMaximize = () => {
+  const handleMaximize = async () => {
     if (isCurrentMeetingLive) {
       setViewMode("fullscreen");
     } else if (data?.meeting?.status === "live" && data?.jwt) {
-      // Clear the left state so we can rejoin
-      if (wasMeetingManuallyLeft) {
-        allowRejoin(data?.meeting?.id);
-      }
       // Start global video conference with meeting data
-      startGlobalMeeting({
+      const result = await startGlobalMeeting({
         ...data?.meeting,
         jwt: data?.jwt,
         id: data?.meeting?.id,
         isParticipant: true,
         participant: currentParticipant?.participant || { username: "Peserta" },
       });
+      if (result?.error) {
+        message.error(result.error);
+      }
     }
   };
 
+  // Ref to track if auto-start has been attempted
+  const autoStartAttemptedRef = useRef(false);
+
   // Auto-start global video if meeting is live and has JWT
-  // But NOT if user manually left the meeting
+  // Session persistence is now handled by _app.js via getActiveVideoSession API
   useEffect(() => {
-    if (
-      data?.meeting?.status === "live" &&
-      data?.jwt &&
-      !isOpen &&
-      !wasMeetingManuallyLeft
-    ) {
-      startGlobalMeeting({
+    // Reset flag when meeting id changes
+    if (!data?.meeting?.id) {
+      autoStartAttemptedRef.current = false;
+      return;
+    }
+
+    const autoStart = async () => {
+      // Only attempt auto-start once per meeting
+      if (autoStartAttemptedRef.current) return;
+      if (data?.meeting?.status !== "live" || !data?.jwt || isOpen) return;
+
+      autoStartAttemptedRef.current = true;
+      
+      const result = await startGlobalMeeting({
         ...data?.meeting,
         jwt: data?.jwt,
         id: data?.meeting?.id,
         isParticipant: true,
         participant: currentParticipant?.participant || { username: "Peserta" },
       });
-    }
+      if (result?.error) {
+        // Don't show error for auto-start, just log it
+        console.log("Auto-start skipped:", result.error);
+      }
+    };
+    autoStart();
   }, [
     data?.meeting?.status,
     data?.jwt,
     data?.meeting?.id,
     currentParticipant,
     isOpen,
-    wasMeetingManuallyLeft,
     startGlobalMeeting,
   ]);
 

@@ -12,7 +12,9 @@ import {
   IconUserPlus,
   IconUsers,
   IconVideo,
+  IconFileText,
 } from "@tabler/icons-react";
+import NotulaEditor from "./NotulaEditor";
 import {
   Box,
   Flex,
@@ -44,7 +46,7 @@ import {
   message,
 } from "antd";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import EditCoachingClinicModal from "./EditCoachingClinicModal";
 import FormParticipants from "./FormParticipants";
 
@@ -335,8 +337,6 @@ function DetailCoachingMeeting() {
     isOpen,
     setViewMode,
     meetingData,
-    wasMeetingEnded,
-    allowRejoin,
   } = useVideoConferenceStore();
 
   const { data, isLoading, refetch } = useQuery(
@@ -350,9 +350,6 @@ function DetailCoachingMeeting() {
 
   // Check if current meeting is the one in global store
   const isCurrentMeetingLive = isOpen && meetingData?.id === id;
-  
-  // Check if this meeting was manually ended (to prevent auto-restart)
-  const wasMeetingManuallyEnded = wasMeetingEnded(id);
 
   const { mutateAsync: start, isLoading: isLoadingStart } = useMutation(
     (meetingId) => startMeeting(meetingId),
@@ -363,10 +360,14 @@ function DetailCoachingMeeting() {
         const updatedData = await refetch();
         // Start global video conference with meeting data
         if (updatedData?.data) {
-          startGlobalMeeting({
+          const result = await startGlobalMeeting({
             ...updatedData.data,
             id: id,
           });
+          // Check if there was an error starting the meeting
+          if (result?.error) {
+            message.error(result.error);
+          }
         }
         queryClient.invalidateQueries(["meeting", id]);
         queryClient.invalidateQueries(["meetings"]);
@@ -390,19 +391,18 @@ function DetailCoachingMeeting() {
     });
   };
 
-  const handleMaximize = () => {
+  const handleMaximize = async () => {
     if (isCurrentMeetingLive) {
       setViewMode("fullscreen");
     } else if (data?.status === "live" && data?.jwt) {
-      // Clear the ended state so we can rejoin
-      if (wasMeetingManuallyEnded) {
-        allowRejoin(id);
-      }
       // If meeting is live but not in global store, start it
-      startGlobalMeeting({
+      const result = await startGlobalMeeting({
         ...data,
         id: id,
       });
+      if (result?.error) {
+        message.error(result.error);
+      }
     }
   };
 
@@ -424,21 +424,36 @@ function DetailCoachingMeeting() {
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
+  // Ref to track if auto-start has been attempted
+  const autoStartAttemptedRef = useRef(false);
+
   // Auto-start global video if meeting is live and has JWT
-  // But NOT if meeting was manually ended by user
+  // Session persistence is now handled by _app.js via getActiveVideoSession API
   useEffect(() => {
-    if (
-      data?.status === "live" &&
-      data?.jwt &&
-      !isOpen &&
-      !wasMeetingManuallyEnded
-    ) {
-      startGlobalMeeting({
+    // Reset flag when meeting id changes
+    if (!id) {
+      autoStartAttemptedRef.current = false;
+      return;
+    }
+
+    const autoStart = async () => {
+      // Only attempt auto-start once per meeting
+      if (autoStartAttemptedRef.current) return;
+      if (data?.status !== "live" || !data?.jwt || isOpen) return;
+
+      autoStartAttemptedRef.current = true;
+
+      const result = await startGlobalMeeting({
         ...data,
         id: id,
       });
-    }
-  }, [data?.status, data?.jwt, id, isOpen, wasMeetingManuallyEnded, startGlobalMeeting]);
+      if (result?.error) {
+        // Don't show error for auto-start, just log it
+        console.log("Auto-start skipped:", result.error);
+      }
+    };
+    autoStart();
+  }, [data?.status, data?.jwt, id, isOpen, startGlobalMeeting]);
 
   return (
     <>
@@ -492,8 +507,9 @@ function DetailCoachingMeeting() {
           <LiveMeetingBanner data={data} onMaximize={handleMaximize} />
         )}
 
-        {data?.status === "live" || isCurrentMeetingLive ? (
-          <Row gutter={[16, 16]}>
+        <Row gutter={[16, 16]}>
+          {/* Status Info Card */}
+          {data?.status === "live" || isCurrentMeetingLive ? (
             <Col span={24}>
               <Card size="small">
                 <Stack spacing="sm">
@@ -514,73 +530,85 @@ function DetailCoachingMeeting() {
                 </Stack>
               </Card>
             </Col>
-            <Col md={24} xs={24}>
-              <DaftarPeserta
-                meeting={data}
-                data={data?.participants}
-                openDrawer={openDrawer}
-                handleCancelDrawer={handleCancelDrawer}
-              />
+          ) : data?.status === "finished" ? (
+            <Col span={24}>
+              <Card size="small">
+                <Stack spacing="sm">
+                  <Group spacing="xs">
+                    <IconFileText size={20} color="#667eea" />
+                    <Text weight={600}>Meeting Telah Selesai</Text>
+                  </Group>
+                  <Text color="dimmed" size="sm">
+                    Meeting ini telah selesai. Anda dapat menulis dan mengirimkan
+                    notula/rekap diskusi kepada para peserta.
+                  </Text>
+                </Stack>
+              </Card>
             </Col>
-          </Row>
-        ) : (
-          <>
-            <Row gutter={[32, 32]}>
-              <Col md={24} xs={24}>
-                <Flex
-                  align="center"
-                  justify="center"
-                  sx={{
-                    borderRadius: 12,
-                    height: "50vh",
-                    background:
-                      "linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)",
-                  }}
+          ) : (
+            <Col span={24}>
+              <Flex
+                align="center"
+                justify="center"
+                sx={{
+                  borderRadius: 12,
+                  height: "30vh",
+                  background:
+                    "linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)",
+                }}
+              >
+                <Empty
+                  image={<IconVideo size={48} color="#667eea" stroke={1.5} />}
+                  description={
+                    <Stack align="center" spacing={4}>
+                      <Text weight={600} size="md">
+                        Coaching Clinic Belum Dimulai
+                      </Text>
+                      <Text color="dimmed" size="sm">
+                        Klik tombol di bawah untuk memulai sesi coaching
+                      </Text>
+                    </Stack>
+                  }
                 >
-                  <Empty
-                    image={<IconVideo size={64} color="#667eea" stroke={1.5} />}
-                    description={
-                      <Stack align="center" spacing={4}>
-                        <Text weight={600} size="lg">
-                          Coaching Clinic Belum Dimulai
-                        </Text>
-                        <Text color="dimmed" size="sm">
-                          Klik tombol di bawah untuk memulai sesi coaching
-                        </Text>
-                      </Stack>
-                    }
+                  <Button
+                    size="large"
+                    onClick={handleStartMeeting}
+                    loading={isLoadingStart}
+                    disabled={isLoading}
+                    type="primary"
+                    icon={<IconVideo size={18} />}
+                    style={{
+                      height: 44,
+                      paddingLeft: 24,
+                      paddingRight: 24,
+                      borderRadius: 22,
+                      fontWeight: 600,
+                    }}
                   >
-                    <Button
-                      size="large"
-                      onClick={handleStartMeeting}
-                      loading={isLoadingStart}
-                      disabled={isLoading}
-                      type="primary"
-                      icon={<IconVideo size={18} />}
-                      style={{
-                        height: 48,
-                        paddingLeft: 32,
-                        paddingRight: 32,
-                        borderRadius: 24,
-                        fontWeight: 600,
-                      }}
-                    >
-                      Mulai Coaching Clinic
-                    </Button>
-                  </Empty>
-                </Flex>
-              </Col>
-              <Col md={24} xs={24}>
-                <DaftarPeserta
-                  meeting={data}
-                  data={data?.participants}
-                  openDrawer={openDrawer}
-                  handleCancelDrawer={handleCancelDrawer}
-                />
-              </Col>
-            </Row>
-          </>
-        )}
+                    Mulai Coaching Clinic
+                  </Button>
+                </Empty>
+              </Flex>
+            </Col>
+          )}
+
+          {/* Notula Editor - SELALU tampil untuk consultant */}
+          <Col span={24}>
+            <NotulaEditor
+              meetingId={id}
+              participants={data?.participants}
+              meetingTitle={data?.title}
+            />
+          </Col>
+        </Row>
+
+        {/* Drawer Peserta */}
+        <DaftarPeserta
+          meeting={data}
+          data={data?.participants}
+          openDrawer={openDrawer}
+          handleCancelDrawer={handleCancelDrawer}
+        />
       </Card>
     </>
   );

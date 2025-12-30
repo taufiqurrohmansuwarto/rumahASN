@@ -1,10 +1,11 @@
 import { addCustomRule } from "@/controller/rasn-naskah/preferences.controller";
 import auth from "@/middleware/auth.middleware";
+import asnNonAsnMiddleware from "@/middleware/asn-non-asn.middleware";
 import { createRouter } from "next-connect";
 
 const router = createRouter();
 
-router.use(auth).post(addCustomRule);
+router.use(auth).use(asnNonAsnMiddleware).post(addCustomRule);
 
 export default router.handler({});
 
