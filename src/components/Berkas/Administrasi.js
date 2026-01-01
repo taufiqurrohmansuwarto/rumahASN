@@ -6,6 +6,7 @@ import { useState } from "react";
 
 const list_tmt = [
   "01032019",
+  "01022022",
   "01042024",
   "01052024",
   "01062024",
@@ -17,7 +18,7 @@ const list_tmt = [
   "01072025",
   "01082025",
   "01102025",
-  "01022022",
+  "01012026",
 ];
 
 const dokumen = ["SK", "PERTEK", "SPMT", "PK"];

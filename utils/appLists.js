@@ -219,14 +219,16 @@ export const getUserType = (user) => {
   const syaratAsn =
     statusKepegawaian === "PNS" ||
     statusKepegawaian === "PPPK" ||
-    statusKepegawaian === "CPNS";
+    statusKepegawaian === "CPNS" ||
+    statusKepegawaian === "PPPK PARUH WAKTU";
   const asnBkd = bkd && syaratAsn;
 
   const userTypes = [];
   if (
     statusKepegawaian === "PNS" ||
     statusKepegawaian === "PPPK" ||
-    statusKepegawaian === "CPNS"
+    statusKepegawaian === "CPNS" ||
+    statusKepegawaian === "PPPK PARUH WAKTU"
   ) {
     userTypes.push("asn");
   }
