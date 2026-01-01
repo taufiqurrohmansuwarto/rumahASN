@@ -12,7 +12,8 @@ const ChatAI = () => {
   const asn =
     data?.user?.status_kepegawaian === "PNS" ||
     data?.user?.status_kepegawaian === "PPPK" ||
-    data?.user?.status_kepegawaian === "CPNS";
+    data?.user?.status_kepegawaian === "CPNS" ||
+    data?.user?.status_kepegawaian === "PPPK PARUH WAKTU";
 
   const breakPoint = Grid.useBreakpoint();
 

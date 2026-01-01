@@ -2,7 +2,13 @@ module.exports = async (req, res, next) => {
   try {
     const { status_kepegawaian } = req.user;
 
-    const validStatusKepegawaian = ["PNS", "PPPK", "CPNS", "NON ASN"];
+    const validStatusKepegawaian = [
+      "PNS",
+      "PPPK",
+      "CPNS",
+      "NON ASN",
+      "PPPK PARUH WAKTU",
+    ];
     const isAuthorized = validStatusKepegawaian.includes(status_kepegawaian);
 
     if (!isAuthorized) {

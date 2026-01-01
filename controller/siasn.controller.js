@@ -48,6 +48,7 @@ const {
   proxyKeluargaPasangan,
   cariPnsKinerja,
   getDataUtamaASNProxy,
+  getFileAsn,
 } = require("@/utils/siasn-proxy.utils");
 const { getRwPangkat } = require("@/utils/master.utils");
 const { createLogSIASN } = require("@/utils/logs");
@@ -1167,10 +1168,40 @@ const getRefSubJabatan = async (req, res) => {
 const downloadDocument = async (req, res) => {
   try {
     const { filePath } = req?.query;
-
     const { siasnRequest } = req;
 
-    const hasil = await downloadDokumenAPI(siasnRequest, filePath);
+    let hasil;
+
+    // Helper function untuk download dengan timeout
+    const downloadWithTimeout = (promise, timeoutMs = 30000) => {
+      return Promise.race([
+        promise,
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error("Download timeout")), timeoutMs)
+        ),
+      ]);
+    };
+
+    try {
+      // Coba download menggunakan API utama dengan timeout 30 detik
+      hasil = await downloadWithTimeout(
+        downloadDokumenAPI(siasnRequest, filePath),
+        30000
+      );
+    } catch (primaryError) {
+      console.log(
+        "Primary download failed or timeout, trying fallback:",
+        primaryError?.message
+      );
+
+      // Fallback ke getFileAsn jika API utama error/timeout
+      try {
+        hasil = await downloadWithTimeout(getFileAsn(filePath), 30000);
+      } catch (fallbackError) {
+        console.log("Fallback download also failed:", fallbackError?.message);
+        throw fallbackError;
+      }
+    }
 
     // Set response headers untuk PDF view
     res.setHeader("Content-Type", "application/pdf");

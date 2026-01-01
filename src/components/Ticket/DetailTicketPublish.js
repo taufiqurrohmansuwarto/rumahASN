@@ -70,7 +70,10 @@ const ANSWER_ICON_STYLE = { color: "#52c41a", fontSize: 16 };
 const ANSWER_TEXT_STYLE = { color: "#52c41a", fontSize: 13 };
 const STAFF_TAG_STYLE = { borderRadius: 4, fontSize: 11, fontWeight: 600 };
 const DATETIME_TEXT_STYLE = { fontSize: 12 };
-const AVATAR_STYLE = { border: "2px solid #f0f0f0", transition: "all 0.2s ease" };
+const AVATAR_STYLE = {
+  border: "2px solid #f0f0f0",
+  transition: "all 0.2s ease",
+};
 const CONTENT_STYLE = { padding: "8px 0", lineHeight: 1.6 };
 const MENU_STYLE = { borderRadius: 8 };
 const DROPDOWN_BUTTON_STYLE = {
@@ -80,7 +83,6 @@ const DROPDOWN_BUTTON_STYLE = {
   transition: "all 0.2s ease",
 };
 const DELETE_STYLE = { color: "#ff4d4f" };
-
 
 // Isolated input component to prevent re-renders of parent
 const NewTicketWrapper = memo(({ id, currentStatus, onSuccess }) => {
@@ -181,16 +183,13 @@ const CommentTicket = memo(({ item, agent, customer, admin }) => {
     }
   );
 
-  const { mutate: markAnswer } = useMutation(
-    (data) => markAnswerTicket(data),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries(["publish-ticket", ticketId]);
-        message.success("✅ Berhasil menandai jawaban");
-      },
-      onError: () => message.error("❌ Gagal menandai jawaban"),
-    }
-  );
+  const { mutate: markAnswer } = useMutation((data) => markAnswerTicket(data), {
+    onSuccess: () => {
+      queryClient.invalidateQueries(["publish-ticket", ticketId]);
+      message.success("✅ Berhasil menandai jawaban");
+    },
+    onError: () => message.error("❌ Gagal menandai jawaban"),
+  });
 
   const { mutate: unmarkAnswer } = useMutation(
     (data) => unmarkAnswerTicket(data),
@@ -246,7 +245,10 @@ const CommentTicket = memo(({ item, agent, customer, admin }) => {
         {
           key: "edit-comment",
           label: (
-            <RestrictedContent name="edit-comment" attributes={{ comment: item }}>
+            <RestrictedContent
+              name="edit-comment"
+              attributes={{ comment: item }}
+            >
               <Flex align="center" gap={8}>
                 <EditOutlined style={{ color: "#1890ff" }} />
                 <span>Edit Komentar</span>
@@ -259,7 +261,10 @@ const CommentTicket = memo(({ item, agent, customer, admin }) => {
           key: "remove-comment",
           danger: true,
           label: (
-            <RestrictedContent name="remove-comment" attributes={{ comment: item }}>
+            <RestrictedContent
+              name="remove-comment"
+              attributes={{ comment: item }}
+            >
               <Flex align="center" gap={8}>
                 <DeleteOutlined />
                 <span>Hapus Komentar</span>
@@ -271,7 +276,14 @@ const CommentTicket = memo(({ item, agent, customer, admin }) => {
       ],
       style: MENU_STYLE,
     }),
-    [agent, item, handleMarkAnswer, handleUnmarkAnswer, handleAccEdit, handleHapus]
+    [
+      agent,
+      item,
+      handleMarkAnswer,
+      handleUnmarkAnswer,
+      handleAccEdit,
+      handleHapus,
+    ]
   );
 
   // Memoize comment actions
@@ -282,7 +294,6 @@ const CommentTicket = memo(({ item, agent, customer, admin }) => {
     ],
     [ticketId, item]
   );
-
 
   const isEditing = item?.id === editId && item?.id !== null;
 
@@ -428,7 +439,10 @@ const DetailTicketPublish = ({ id }) => {
 
   // Memoize container style
   const containerStyle = useMemo(
-    () => (responsiveConfig.isMobile ? CONTAINER_MOBILE_STYLE : CONTAINER_DESKTOP_STYLE),
+    () =>
+      responsiveConfig.isMobile
+        ? CONTAINER_MOBILE_STYLE
+        : CONTAINER_DESKTOP_STYLE,
     [responsiveConfig.isMobile]
   );
 

@@ -33,7 +33,8 @@ export const checkRole = (req, res, next) => {
   const asn =
     status_kepegawaian === "PNS" ||
     status_kepegawaian === "PPPK" ||
-    status_kepegawaian === "CPNS";
+    status_kepegawaian === "CPNS" ||
+    status_kepegawaian === "PPPK PARUH WAKTU";
 
   if (!asn) {
     res.status(403).json({ success: false, message: "Forbidden" });
