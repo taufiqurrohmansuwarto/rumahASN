@@ -1,80 +1,74 @@
 import { checkDocument, downloadDocument } from "@/services/berkas.services";
-import { CloudDownloadOutlined } from "@ant-design/icons";
+import { Box, Group, Paper, Stack, Text, Tooltip } from "@mantine/core";
+import { IconDownload, IconFileText, IconLoader } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
-import { Button, Space, Typography } from "antd";
+import { Button, message } from "antd";
 import { useState } from "react";
 
-const list_tmt = ["PELAKSANA25"];
-const dokumen = ["SK"];
-
-const Tombol = ({ tmt, file }) => {
-  const { data, isLoading } = useQuery(
-    ["check-document-perbaikan", `${tmt}-${file}`],
+const TombolDokumen = ({ tmt, file }) => {
+  const { data } = useQuery(
+    ["check-document-pelaksana", `${tmt}-${file}`],
     () => checkDocument({ tmt, file }),
-    {
-      refetchOnWindowFocus: false,
-    }
+    { refetchOnWindowFocus: false, retry: 1 }
   );
 
-  const [loading, setLoading] = useState(false);
+  const [downloading, setDownloading] = useState(false);
 
   const downloadFile = async () => {
     try {
-      setLoading(true);
-      const payload = {
-        tmt,
-        file,
-      };
-      const result = await downloadDocument(payload);
-
+      setDownloading(true);
+      message.loading({ content: `Mengunduh ${file}...`, key: "download" });
+      const result = await downloadDocument({ tmt, file });
       if (result) {
         const url = `data:application/pdf;base64,${result}`;
         const link = document.createElement("a");
         link.href = url;
         link.download = `${file}_${tmt}.pdf`;
         link.click();
+        message.success({ content: `${file} berhasil diunduh`, key: "download" });
+      } else {
+        message.error({ content: `${file} tidak tersedia`, key: "download" });
       }
     } catch (error) {
+      message.error({ content: `Gagal mengunduh ${file}`, key: "download" });
     } finally {
-      setLoading(false);
+      setDownloading(false);
     }
   };
 
   return (
-    <>
+    <Tooltip label={data ? `Unduh ${file}` : "Tidak tersedia"} withArrow>
       <Button
+        size="small"
+        type={data ? "primary" : "default"}
+        icon={downloading ? <IconLoader size={12} /> : <IconDownload size={12} />}
         onClick={downloadFile}
-        disabled={isLoading || !data}
-        loading={loading}
-        type="primary"
-        icon={<CloudDownloadOutlined />}
+        disabled={!data || downloading}
+        loading={downloading}
+        style={{ fontSize: 12, padding: "0 8px", height: 24 }}
       >
-        Unduh {file}
+        {file}
       </Button>
-    </>
-  );
-};
-
-const Dokumen = ({ tmt }) => {
-  return (
-    <Space>
-      {dokumen?.map((dok) => {
-        return <Tombol key={tmt} tmt={tmt} file={dok} />;
-      })}
-    </Space>
+    </Tooltip>
   );
 };
 
 function BerkasJabatanPelaksanaBaru() {
   return (
-    <Space direction="vertical" size="large">
-      {list_tmt?.map((tmt) => (
-        <>
-          <Typography.Text strong>SK Jabatan Pelaksana 2025</Typography.Text>
-          <Dokumen key={tmt} tmt={tmt} />
-        </>
-      ))}
-    </Space>
+    <Stack spacing="xs">
+      <Paper p="xs" radius="sm" withBorder>
+        <Group justify="space-between" align="center">
+          <Box>
+            <Text fw={600} size="sm">SK Jabatan Pelaksana 2025</Text>
+            <Text size="xs" c="dimmed">Unduh SK pengangkatan jabatan pelaksana</Text>
+          </Box>
+          <Group spacing={4} align="center">
+            <IconFileText size={14} color="#868e96" />
+            <TombolDokumen tmt="PELAKSANA25" file="SK" />
+          </Group>
+        </Group>
+      </Paper>
+    </Stack>
   );
 }
 

@@ -1,7 +1,6 @@
 import Administrasi from "@/components/Berkas/Administrasi";
 import AdministrasiPerbaikan from "@/components/Berkas/AdministrasiPerbaikan";
 import BerkasJabatanPelaksanaBaru from "@/components/Berkas/BerkasJabatanPelaksanaBaru";
-import BerkasPNS from "@/components/Berkas/BerkasPNS";
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import { Stack } from "@mantine/core";
@@ -13,7 +12,7 @@ const DokumenAdministrasi = () => {
   return (
     <>
       <Head>
-        <title>Berkas - PNS</title>
+        <title>Berkas - ASN</title>
       </Head>
       <PageContainer
         header={{

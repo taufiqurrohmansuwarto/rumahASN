@@ -2,78 +2,50 @@ import {
   checkDocumentByNip,
   downloadDocumentByNip,
 } from "@/services/master.services";
+import { Alert, Box, Group, Paper, Stack, Text, Tooltip } from "@mantine/core";
 import {
-  Alert,
-  Badge,
-  Box,
-  Group,
-  Paper,
-  Stack,
-  Text,
-  Title,
-  Tooltip,
-} from "@mantine/core";
-import {
-  IconDownload,
-  IconFileText,
-  IconCalendar,
-  IconCheck,
-  IconX,
   IconAlertTriangle,
-  IconLoader,
+  IconCalendar,
+  IconDownload,
   IconFileExport,
+  IconLoader,
 } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
 import { Button, message } from "antd";
 import { useRouter } from "next/router";
 import { useState } from "react";
 
-// Data TMT dengan keterangan yang lebih jelas
+// Data TMT
 const list_tmt = [
-  { value: "01032019", label: "1 Maret 2019" },
-  { value: "01022022", label: "1 Februari 2022" },
-  { value: "01042024", label: "1 April 2024" },
+  { value: "01032019", label: "1 Mar 2019" },
+  { value: "01022022", label: "1 Feb 2022" },
+  { value: "01042024", label: "1 Apr 2024" },
   { value: "01052024", label: "1 Mei 2024" },
-  { value: "01062024", label: "1 Juni 2024" },
-  { value: "01072024", label: "1 Juli 2024" },
-  { value: "01082024", label: "1 Agustus 2024" },
-  { value: "01012025", label: "1 Januari 2025" },
-  { value: "01032025", label: "1 Maret 2025" },
-  { value: "01062025", label: "1 Juni 2025" },
-  { value: "01072025", label: "1 Juli 2025" },
-  { value: "01082025", label: "1 Agustus 2025" },
-  { value: "01102025", label: "1 Oktober 2025" },
-  { value: "01012026", label: "1 Januari 2026" },
+  { value: "01062024", label: "1 Jun 2024" },
+  { value: "01072024", label: "1 Jul 2024" },
+  { value: "01082024", label: "1 Ags 2024" },
+  { value: "01012025", label: "1 Jan 2025" },
+  { value: "01032025", label: "1 Mar 2025" },
+  { value: "01062025", label: "1 Jun 2025" },
+  { value: "01072025", label: "1 Jul 2025" },
+  { value: "01082025", label: "1 Ags 2025" },
+  { value: "01102025", label: "1 Okt 2025" },
+  { value: "01012026", label: "1 Jan 2026" },
 ];
 
-// Data dokumen dengan keterangan yang lebih jelas
+// Jenis dokumen
 const dokumen = [
-  { code: "SK", name: "Surat Keputusan", icon: <IconFileText size={16} /> },
-  {
-    code: "PERTEK",
-    name: "Pertimbangan Teknis",
-    icon: <IconFileText size={16} />,
-  },
-  {
-    code: "SPMT",
-    name: "Surat Pernyataan Melaksanakan Tugas",
-    icon: <IconFileText size={16} />,
-  },
-  {
-    code: "PK",
-    name: "Perjanjian Kinerja (PPPK)",
-    icon: <IconFileText size={16} />,
-  },
+  { code: "SK", name: "SK", fullName: "Surat Keputusan" },
+  { code: "PERTEK", name: "PERTEK", fullName: "Pertimbangan Teknis" },
+  { code: "SPMT", name: "SPMT", fullName: "Surat Pernyataan Melaksanakan Tugas" },
+  { code: "PK", name: "PK", fullName: "Perjanjian Kinerja" },
 ];
 
-const DocumentButton = ({ tmt, file, nip, fileName, icon }) => {
-  const { data, isLoading, error } = useQuery(
-    ["check-document", `${tmt}-${file.code}`],
-    () => checkDocumentByNip({ tmt: tmt, file: file.code, nip }),
-    {
-      refetchOnWindowFocus: false,
-      retry: 1,
-    }
+const TombolDokumen = ({ tmt, file, nip }) => {
+  const { data } = useQuery(
+    ["check-document", `${tmt}-${file.code}-${nip}`],
+    () => checkDocumentByNip({ tmt, file: file.code, nip }),
+    { refetchOnWindowFocus: false, retry: 1 }
   );
 
   const [downloading, setDownloading] = useState(false);
@@ -81,181 +53,67 @@ const DocumentButton = ({ tmt, file, nip, fileName, icon }) => {
   const downloadFile = async () => {
     try {
       setDownloading(true);
-      message.loading({
-        content: `Mengunduh ${file.name}...`,
-        key: "download",
-      });
-
-      const result = await downloadDocumentByNip({
-        tmt: tmt,
-        file: file.code,
-        nip,
-      });
-
+      message.loading({ content: `Mengunduh ${file.name}...`, key: "download" });
+      const result = await downloadDocumentByNip({ tmt, file: file.code, nip });
       if (result) {
         const url = `data:application/pdf;base64,${result}`;
         const link = document.createElement("a");
         link.href = url;
         link.download = `${file.code}_${tmt}.pdf`;
         link.click();
-        message.success({
-          content: `${file.name} berhasil diunduh`,
-          key: "download",
-        });
+        message.success({ content: `${file.name} berhasil diunduh`, key: "download" });
       } else {
-        message.error({
-          content: `Gagal mengunduh ${file.name}`,
-          key: "download",
-        });
+        message.error({ content: `${file.name} tidak tersedia`, key: "download" });
       }
     } catch (error) {
-      message.error({
-        content: `Gagal mengunduh ${file.name}. Silakan coba lagi.`,
-        key: "download",
-      });
+      message.error({ content: `Gagal mengunduh ${file.name}`, key: "download" });
     } finally {
       setDownloading(false);
     }
   };
 
-  // Status dokumen
-  const getBadgeProps = () => {
-    if (isLoading)
-      return {
-        color: "gray",
-        variant: "light",
-        icon: <IconLoader size={12} />,
-        text: "Memeriksa...",
-      };
-    if (error)
-      return {
-        color: "red",
-        variant: "outline",
-        icon: <IconAlertTriangle size={12} />,
-        text: "Error",
-      };
-    if (data)
-      return {
-        color: "green",
-        variant: "filled",
-        icon: <IconCheck size={12} />,
-        text: "Tersedia",
-      };
-    return {
-      color: "red",
-      variant: "light",
-      icon: <IconX size={12} />,
-      text: "Tidak Tersedia",
-    };
-  };
-
-  const badgeProps = getBadgeProps();
-
   return (
-    <Paper
-      p="sm"
-      radius="md"
-      withBorder
-      style={{
-        borderColor: data ? "#40c057" : "#e9ecef",
-        backgroundColor: data ? "#f8fffe" : "#fff",
-        cursor: data ? "pointer" : "default",
-        transition: "all 0.2s ease",
-      }}
-    >
-      <Stack spacing="xs">
-        <Group spacing="xs" align="center">
-          {icon}
-          <Text size="sm" fw={500} style={{ flex: 1 }}>
-            {file.name}
-          </Text>
-        </Group>
-
-        <Group justify="space-between" align="center">
-          <Badge
-            color={badgeProps.color}
-            variant={badgeProps.variant}
-            leftSection={badgeProps.icon}
-            size="sm"
-          >
-            {badgeProps.text}
-          </Badge>
-
-          <Tooltip
-            label={data ? `Unduh ${file.name}` : "Dokumen tidak tersedia"}
-          >
-            <Button
-              size="small"
-              type={data ? "primary" : "default"}
-              icon={
-                downloading ? (
-                  <IconLoader size={14} />
-                ) : (
-                  <IconDownload size={14} />
-                )
-              }
-              onClick={downloadFile}
-              disabled={!data || downloading}
-              loading={downloading}
-            >
-              Unduh
-            </Button>
-          </Tooltip>
-        </Group>
-      </Stack>
-    </Paper>
+    <Tooltip label={data ? `Unduh ${file.fullName}` : "Tidak tersedia"} withArrow>
+      <Button
+        size="small"
+        type={data ? "primary" : "default"}
+        icon={downloading ? <IconLoader size={12} /> : <IconDownload size={12} />}
+        onClick={downloadFile}
+        disabled={!data || downloading}
+        loading={downloading}
+        style={{ fontSize: 12, padding: "0 8px", height: 24 }}
+      >
+        {file.name}
+      </Button>
+    </Tooltip>
   );
 };
 
-const TMTSection = ({ tmtData, nip }) => {
-  return (
-    <Paper p="sm" radius="md" withBorder>
-      <Group spacing="xs" mb="sm" wrap="nowrap">
-        <Group spacing="xs" style={{ minWidth: "200px", flexShrink: 0 }}>
-          <IconCalendar size={16} color="gray" />
-          <Text size="sm" fw={500}>
-            TMT {tmtData.label}
-          </Text>
-        </Group>
+const DokumenPerTMT = ({ tmtData, nip }) => (
+  <Group spacing={8} align="center" noWrap>
+    <Group spacing={4} style={{ minWidth: 100 }} noWrap>
+      <IconCalendar size={14} color="#868e96" />
+      <Text size="xs" fw={500}>{tmtData.label}</Text>
+    </Group>
+    <Group spacing={4}>
+      {dokumen.map((dok) => (
+        <TombolDokumen key={`${tmtData.value}-${dok.code}`} tmt={tmtData.value} file={dok} nip={nip} />
+      ))}
+    </Group>
+  </Group>
+);
 
-        <Group spacing="xs" style={{ flex: 1 }} wrap="wrap">
-          {dokumen.map((dok) => (
-            <DocumentButton
-              key={`${tmtData.value}-${dok.code}`}
-              tmt={tmtData.value}
-              file={dok}
-              nip={nip}
-              fileName={dok.name}
-              icon={dok.icon}
-            />
-          ))}
-        </Group>
-      </Group>
-    </Paper>
-  );
+// Fungsi download template
+const downloadPk = () => {
+  window.open("https://siasn.bkd.jatimprov.go.id:9000/public/PK_2_7.pdf", "_blank");
 };
 
-const downloadPk = async () => {
-  try {
-    message.loading({ content: "Membuka dokumen PK...", key: "pk" });
-    const link = "https://siasn.bkd.jatimprov.go.id:9000/public/PK_2_7.pdf";
-    window.open(link, "_blank");
-    message.success({ content: "Dokumen PK berhasil dibuka", key: "pk" });
-  } catch (error) {
-    message.error({ content: "Gagal membuka dokumen PK", key: "pk" });
-  }
+const downloadPkParuhWaktu = () => {
+  window.open("https://siasn.bkd.jatimprov.go.id:9000/public/PK_PW_2_14.pdf", "_blank");
 };
 
-const downloadPerpanjangan = async () => {
-  try {
-    message.loading({ content: "Membuka dokumen PK...", key: "pk" });
-    const link =
-      "https://siasn.bkd.jatimprov.go.id:9000/public/perpanjangan_p3k.pdf";
-    window.open(link, "_blank");
-    message.success({ content: "Dokumen PK berhasil dibuka", key: "pk" });
-  } catch (error) {
-    message.error({ content: "Gagal membuka dokumen PK", key: "pk" });
-  }
+const downloadPerpanjangan = () => {
+  window.open("https://siasn.bkd.jatimprov.go.id:9000/public/perpanjangan_p3k.pdf", "_blank");
 };
 
 function AdministrasiByNip() {
@@ -268,67 +126,66 @@ function AdministrasiByNip() {
         title="NIP tidak ditemukan"
         color="yellow"
         variant="light"
-        icon={<IconAlertTriangle size={16} />}
+        icon={<IconAlertTriangle size={14} />}
+        p="xs"
       >
-        Silakan periksa kembali URL atau kembali ke halaman sebelumnya.
+        Silakan periksa kembali URL.
       </Alert>
     );
   }
 
   return (
-    <Stack spacing="lg">
+    <Stack spacing="xs">
       {/* Header */}
-      <Paper p="md" radius="md" withBorder>
-        <Group justify="space-between" align="flex-start">
+      <Paper p="xs" radius="sm" withBorder>
+        <Group justify="space-between" align="center">
           <Box>
-            <Title order={2} mb="xs">
-              Dokumen Administrasi ASN
-            </Title>
-            <Text size="sm" c="dimmed">
-              NIP: {nip}
-            </Text>
+            <Text fw={600} size="sm">Dokumen Administrasi PNS/PPPK</Text>
+            <Text size="xs" c="dimmed">NIP: {nip}</Text>
           </Box>
-          <Group spacing="xs">
-            <Tooltip label="Unduh dokumen perpanjangan PPPK">
+          <Group spacing={4}>
+            <Tooltip label="Perpanjangan Kontrak PPPK" withArrow>
               <Button
                 type="default"
-                icon={<IconFileExport size={16} />}
+                icon={<IconFileExport size={12} />}
                 onClick={downloadPerpanjangan}
-                size="small"
+                style={{ fontSize: 11, padding: "0 6px", height: 22 }}
               >
                 Perpanjangan
               </Button>
             </Tooltip>
-            <Tooltip label="Unduh template PK halaman 2-7">
+            <Tooltip label="Template PK halaman 2-7" withArrow>
               <Button
                 type="default"
-                icon={<IconFileExport size={16} />}
+                icon={<IconFileExport size={12} />}
                 onClick={downloadPk}
-                size="small"
+                style={{ fontSize: 11, padding: "0 6px", height: 22 }}
               >
-                Template PK
+                PK
+              </Button>
+            </Tooltip>
+            <Tooltip label="PK Paruh Waktu pasal 2-14" withArrow>
+              <Button
+                type="default"
+                icon={<IconFileExport size={12} />}
+                onClick={downloadPkParuhWaktu}
+                style={{ fontSize: 11, padding: "0 6px", height: 22 }}
+              >
+                PK Paruh Waktu
               </Button>
             </Tooltip>
           </Group>
         </Group>
       </Paper>
 
-      {/* Info Panel */}
-      <Alert
-        title="Informasi"
-        variant="light"
-        icon={<IconAlertTriangle size={16} />}
-      >
-        Klik tombol 'Unduh' untuk mengunduh dokumen. Pastikan koneksi internet
-        stabil untuk proses download yang optimal.
-      </Alert>
-
-      {/* Dokumen Sections */}
-      <Stack spacing="md">
-        {list_tmt.map((tmtData) => (
-          <TMTSection key={tmtData.value} tmtData={tmtData} nip={nip} />
-        ))}
-      </Stack>
+      {/* Daftar Dokumen per TMT */}
+      <Paper p="xs" radius="sm" withBorder>
+        <Stack spacing={6}>
+          {list_tmt.map((tmtData) => (
+            <DokumenPerTMT key={tmtData.value} tmtData={tmtData} nip={nip} />
+          ))}
+        </Stack>
+      </Paper>
     </Stack>
   );
 }
