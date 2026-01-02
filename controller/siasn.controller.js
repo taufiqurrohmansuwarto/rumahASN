@@ -40,6 +40,7 @@ const {
   refSiasnUnor,
   createCpnsPns,
   downloadDokumenAPI,
+  dataUtamaParuhWaktu,
 } = require("@/utils/siasn-utils");
 
 const {
@@ -112,11 +113,25 @@ const siasnEmployeesDetail = async (req, res) => {
   try {
     const user = req.user;
     const siasnRequest = req.siasnRequest;
-    const fetcher = req?.fetcher;
 
     const nip = user?.employee_number;
 
-    const result = await dataUtama(siasnRequest, nip);
+    let result = null;
+
+    try {
+      result = await dataUtama(siasnRequest, nip);
+    } catch (error) {
+      console.log(
+        "dataUtama error, trying dataUtamaParuhWaktu:",
+        error?.message
+      );
+    }
+
+    // Jika dataUtama null atau error, gunakan dataUtamaParuhWaktu
+    if (!result) {
+      result = await dataUtamaParuhWaktu(siasnRequest, nip);
+    }
+
     res.json(result);
   } catch (error) {
     res.status(500).json({ code: 500, message: "Internal Server Error" });
@@ -168,7 +183,23 @@ const siasnEmployeeDetailByNip = async (req, res) => {
   try {
     const { nip } = req?.query;
     const siasnRequest = req.siasnRequest;
-    const result = await dataUtama(siasnRequest, nip);
+
+    let result = null;
+
+    try {
+      result = await dataUtama(siasnRequest, nip);
+    } catch (error) {
+      console.log(
+        "dataUtama error, trying dataUtamaParuhWaktu:",
+        error?.message
+      );
+    }
+
+    // Jika dataUtama null atau error, gunakan dataUtamaParuhWaktu
+    if (!result) {
+      result = await dataUtamaParuhWaktu(siasnRequest, nip);
+    }
+
     res.json(result);
   } catch (error) {
     console.log(error);

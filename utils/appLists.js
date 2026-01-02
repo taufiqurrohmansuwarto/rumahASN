@@ -220,7 +220,7 @@ export const getUserType = (user) => {
     statusKepegawaian === "PNS" ||
     statusKepegawaian === "PPPK" ||
     statusKepegawaian === "CPNS" ||
-    statusKepegawaian === "PPPK PARUH WAKTU";
+    statusKepegawaian === "PPPK Paruh Waktu";
   const asnBkd = bkd && syaratAsn;
 
   const userTypes = [];
@@ -228,7 +228,7 @@ export const getUserType = (user) => {
     statusKepegawaian === "PNS" ||
     statusKepegawaian === "PPPK" ||
     statusKepegawaian === "CPNS" ||
-    statusKepegawaian === "PPPK PARUH WAKTU"
+    statusKepegawaian === "PPPK Paruh Waktu"
   ) {
     userTypes.push("asn");
   }

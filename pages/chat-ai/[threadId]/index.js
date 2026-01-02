@@ -22,7 +22,7 @@ const ChatAIThread = () => {
     data?.user?.status_kepegawaian === "PNS" ||
     data?.user?.status_kepegawaian === "PPPK" ||
     data?.user?.status_kepegawaian === "CPNS" ||
-    data?.user?.status_kepegawaian === "PPPK PARUH WAKTU";
+    data?.user?.status_kepegawaian === "PPPK Paruh Waktu";
 
   const {
     status,

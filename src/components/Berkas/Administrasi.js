@@ -84,6 +84,11 @@ const downloadPk = async () => {
   window.open(link, "_blank");
 };
 
+const downloadPkParuhWaktu = async () => {
+  const link = "https://siasn.bkd.jatimprov.go.id:9000/public/PK_PW_2_14.pdf";
+  window.open(link, "_blank");
+};
+
 const downloadPerpanjangan = async () => {
   try {
     message.loading({ content: "Membuka dokumen PK...", key: "pk" });
@@ -116,6 +121,14 @@ function Administrasi() {
             size="small"
           >
             Download PK Halaman 2 s/d 7
+          </Button>
+          <Button
+            icon={<ExportOutlined />}
+            type="default"
+            onClick={downloadPkParuhWaktu}
+            size="small"
+          >
+            Download PK Paruh Waktu Psl 2 s/d 14
           </Button>
         </Space>
       </Flex>

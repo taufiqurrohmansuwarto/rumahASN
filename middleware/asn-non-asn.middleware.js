@@ -7,7 +7,7 @@ module.exports = async (req, res, next) => {
       "PPPK",
       "CPNS",
       "NON ASN",
-      "PPPK PARUH WAKTU",
+      "PPPK Paruh Waktu",
     ];
     const isAuthorized = validStatusKepegawaian.includes(status_kepegawaian);
 
