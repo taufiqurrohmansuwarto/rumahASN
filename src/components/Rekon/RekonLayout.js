@@ -35,6 +35,7 @@ import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import FloatingSurveyButton from "../Survey/FloatingSurveyButton";
+import NotifikasiPrivateMessage from "../Notification/NotifikasiPrivateMessage";
 
 const menuItems = [
   {
@@ -280,8 +281,13 @@ function RekonLayout({ children, active = "rekon-unor" }) {
           </div>
         );
       }}
-      actionsRender={(props) => {
+      actionsRender={() => {
         return [
+          <NotifikasiPrivateMessage
+            key="private-message"
+            url="/mails/inbox"
+            title="Inbox Pesan Pribadi"
+          />,
           <NotifikasiASNConnect
             key="asn-connect"
             url="asn-connect"
