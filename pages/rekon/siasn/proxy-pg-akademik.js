@@ -5,9 +5,13 @@ import Head from "next/head";
 import { useRouter } from "next/router";
 import { Breadcrumb } from "antd";
 import Link from "next/link";
+import useScrollRestoration from "@/hooks/useScrollRestoration";
 
 const ProxyPGAkademik = () => {
   const router = useRouter();
+
+  useScrollRestoration("proxy-pg-akademik-scroll", true, false, true);
+
   return (
     <>
       <Head>

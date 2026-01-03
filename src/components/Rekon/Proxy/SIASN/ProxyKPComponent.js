@@ -1,7 +1,7 @@
 import { useDownloadProxyExcel } from "@/components/Rekon/Proxy/hooks/useDownloadProxyExcel";
 import { getOpdFasilitator } from "@/services/master.services";
-import { refStatusUsul } from "@/services/siasn-services";
 import { getProxyPangkatList } from "@/services/siasn-proxy.services";
+import { refStatusUsul } from "@/services/siasn-services";
 import { Badge, Text } from "@mantine/core";
 import {
   IconAlertCircle,
@@ -33,7 +33,6 @@ import {
 import locale from "antd/locale/id_ID";
 import dayjs from "dayjs";
 import "dayjs/locale/id";
-import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
 const ProxyKPComponent = () => {

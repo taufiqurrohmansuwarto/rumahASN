@@ -5,9 +5,13 @@ import Head from "next/head";
 import { useRouter } from "next/router";
 import { Breadcrumb } from "antd";
 import Link from "next/link";
+import useScrollRestoration from "@/hooks/useScrollRestoration";
 
 const ProxyKenaikanPangkat = () => {
   const router = useRouter();
+
+  useScrollRestoration("proxy-kp-scroll", true, false, true);
+
   return (
     <>
       <Head>

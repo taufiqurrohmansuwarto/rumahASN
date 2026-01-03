@@ -5,9 +5,13 @@ import ProxyPensiunComponent from "@/components/Rekon/Proxy/SIASN/ProxyPensiunCo
 import { useRouter } from "next/router";
 import { Breadcrumb } from "antd";
 import Link from "next/link";
+import useScrollRestoration from "@/hooks/useScrollRestoration";
 
 const ProxyPensiun = () => {
   const router = useRouter();
+
+  useScrollRestoration("proxy-pensiun-scroll", true, false, true);
+
   return (
     <>
       <Head>
