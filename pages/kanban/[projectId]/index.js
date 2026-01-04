@@ -1,9 +1,10 @@
 import { useState, useCallback, useMemo } from "react";
 import { useRouter } from "next/router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { message, Breadcrumb, Input, Select, Space, Button } from "antd";
+import { message, Breadcrumb, Input, Select, Button, DatePicker, Flex } from "antd";
 import { Group, Avatar, Text } from "@mantine/core";
-import { IconSearch, IconX } from "@tabler/icons-react";
+import { IconSearch, IconX, IconFilter, IconChevronDown, IconChevronUp } from "@tabler/icons-react";
+import dayjs from "dayjs";
 import Head from "next/head";
 import Link from "next/link";
 import Layout from "@/components/Layout";
@@ -33,6 +34,9 @@ function KanbanBoardPage() {
   // Filter states
   const [searchText, setSearchText] = useState("");
   const [filterAssignee, setFilterAssignee] = useState(null);
+  const [filterCreatedDate, setFilterCreatedDate] = useState(null);
+  const [filterDueDate, setFilterDueDate] = useState(null);
+  const [showAdvancedFilter, setShowAdvancedFilter] = useState(false);
 
   // Fetch project details
   const { data: project, isLoading: isLoadingProject } = useQuery(
@@ -65,7 +69,7 @@ function KanbanBoardPage() {
   // Filter columns and tasks
   const filteredColumns = useMemo(() => {
     if (!columns) return columns;
-    if (!searchText && !filterAssignee) return columns;
+    if (!searchText && !filterAssignee && !filterCreatedDate && !filterDueDate) return columns;
 
     return columns.map((column) => ({
       ...column,
@@ -82,16 +86,33 @@ function KanbanBoardPage() {
           task.assignees?.some((a) => a.custom_id === filterAssignee) ||
           task.assigned_to === filterAssignee;
 
-        return matchesSearch && matchesAssignee;
+        // Filter by created date range
+        const matchesCreatedDate =
+          !filterCreatedDate ||
+          (task.created_at &&
+            dayjs(task.created_at).isAfter(dayjs(filterCreatedDate[0]).startOf("day").subtract(1, "second")) &&
+            dayjs(task.created_at).isBefore(dayjs(filterCreatedDate[1]).endOf("day").add(1, "second")));
+
+        // Filter by due date range
+        const matchesDueDate =
+          !filterDueDate ||
+          (task.due_date &&
+            dayjs(task.due_date).isAfter(dayjs(filterDueDate[0]).startOf("day").subtract(1, "second")) &&
+            dayjs(task.due_date).isBefore(dayjs(filterDueDate[1]).endOf("day").add(1, "second")));
+
+        return matchesSearch && matchesAssignee && matchesCreatedDate && matchesDueDate;
       }),
     }));
-  }, [columns, searchText, filterAssignee]);
+  }, [columns, searchText, filterAssignee, filterCreatedDate, filterDueDate]);
 
-  const hasActiveFilters = searchText || filterAssignee;
+  const hasActiveFilters = searchText || filterAssignee || filterCreatedDate || filterDueDate;
+  const advancedFilterCount = (filterCreatedDate ? 1 : 0) + (filterDueDate ? 1 : 0);
 
   const clearFilters = () => {
     setSearchText("");
     setFilterAssignee(null);
+    setFilterCreatedDate(null);
+    setFilterDueDate(null);
   };
 
   // Move task mutation
@@ -203,73 +224,104 @@ function KanbanBoardPage() {
       >
         <LayoutKanban projectId={projectId} active="board">
           {/* Filter Bar */}
-          <Space wrap style={{ marginBottom: 16 }}>
+          <Flex gap={8} wrap="wrap" align="center" style={{ marginBottom: 12 }}>
             <Input
               placeholder="Cari task..."
-              prefix={<IconSearch size={16} color="#bfbfbf" />}
+              prefix={<IconSearch size={14} color="#bfbfbf" />}
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
-              style={{ width: 250 }}
+              style={{ width: 180 }}
+              size="small"
               allowClear
             />
             <Select
-              placeholder="Filter Penugasan"
+              placeholder="Penugasan"
               value={filterAssignee}
               onChange={setFilterAssignee}
               allowClear
               showSearch
+              size="small"
               optionFilterProp="label"
               filterOption={(input, option) =>
-                option?.searchLabel
-                  ?.toLowerCase()
-                  .includes(input.toLowerCase())
+                option?.searchLabel?.toLowerCase().includes(input.toLowerCase())
               }
-              style={{ width: 280 }}
+              style={{ width: 160 }}
               options={members?.map((m) => ({
                 value: m.user?.custom_id,
                 searchLabel: m.user?.username,
                 label: (
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 8,
-                      maxWidth: 240,
-                    }}
-                  >
-                    <Avatar
-                      src={m.user?.image}
-                      size={20}
-                      radius="xl"
-                      style={{ flexShrink: 0 }}
-                    >
+                  <Flex align="center" gap={6}>
+                    <Avatar src={m.user?.image} size={18} radius="xl">
                       {m.user?.username?.charAt(0)?.toUpperCase()}
                     </Avatar>
-                    <span
-                      style={{
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
-                        fontSize: 14,
-                      }}
-                    >
-                      {m.user?.username}
-                    </span>
-                  </div>
+                    <span style={{ fontSize: 13 }}>{m.user?.username}</span>
+                  </Flex>
                 ),
               }))}
             />
+            <Button
+              type="text"
+              size="small"
+              icon={<IconFilter size={14} />}
+              onClick={() => setShowAdvancedFilter(!showAdvancedFilter)}
+              style={{
+                color: advancedFilterCount > 0 ? "#fa541c" : "#8c8c8c",
+              }}
+            >
+              {advancedFilterCount > 0 ? `Filter (${advancedFilterCount})` : "Filter"}
+              {showAdvancedFilter ? (
+                <IconChevronUp size={12} style={{ marginLeft: 2 }} />
+              ) : (
+                <IconChevronDown size={12} style={{ marginLeft: 2 }} />
+              )}
+            </Button>
             {hasActiveFilters && (
               <Button
-                type="text"
-                icon={<IconX size={14} />}
-                onClick={clearFilters}
+                type="link"
                 size="small"
+                icon={<IconX size={12} />}
+                onClick={clearFilters}
+                style={{ color: "#ff4d4f", padding: "0 4px" }}
               >
-                Reset Filter
+                Reset
               </Button>
             )}
-          </Space>
+          </Flex>
+
+          {/* Advanced Filters */}
+          {showAdvancedFilter && (
+            <Flex gap={8} wrap="wrap" align="center" style={{ marginBottom: 12 }}>
+              <DatePicker.RangePicker
+                placeholder={["Dibuat dari", "sampai"]}
+                value={filterCreatedDate}
+                onChange={setFilterCreatedDate}
+                format="DD/MM/YY"
+                size="small"
+                style={{ width: 200 }}
+                allowClear
+                presets={[
+                  { label: "Hari ini", value: [dayjs(), dayjs()] },
+                  { label: "Minggu ini", value: [dayjs().startOf("week"), dayjs()] },
+                  { label: "Bulan ini", value: [dayjs().startOf("month"), dayjs()] },
+                ]}
+              />
+              <DatePicker.RangePicker
+                placeholder={["Deadline dari", "sampai"]}
+                value={filterDueDate}
+                onChange={setFilterDueDate}
+                format="DD/MM/YY"
+                size="small"
+                style={{ width: 200 }}
+                allowClear
+                presets={[
+                  { label: "Hari ini", value: [dayjs(), dayjs()] },
+                  { label: "Minggu ini", value: [dayjs().startOf("week"), dayjs().endOf("week")] },
+                  { label: "Bulan ini", value: [dayjs().startOf("month"), dayjs().endOf("month")] },
+                  { label: "Overdue", value: [dayjs("2020-01-01"), dayjs().subtract(1, "day")] },
+                ]}
+              />
+            </Flex>
+          )}
 
           <KanbanBoard
             columns={filteredColumns}
