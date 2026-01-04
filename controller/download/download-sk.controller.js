@@ -152,7 +152,7 @@ export const downloadDokumenAdministrasi = async (req, res) => {
 
     const mc = req.mc;
 
-    // Query pegawai berdasarkan OPD
+    // Query pegawai berdasarkan OPD - hanya ambil NIP untuk Set lookup
     const employees = await SyncPegawai.query()
       .where("skpd_id", "ilike", `${opdId}%`)
       .select("nip_master as nip");
@@ -172,25 +172,42 @@ export const downloadDokumenAdministrasi = async (req, res) => {
       });
     }
 
-    // Download file secara parallel dan buffer di memory (lebih cepat)
-    const BATCH_SIZE = 20; // Download 20 file sekaligus
+    // Buat Set dari NIP untuk lookup cepat O(1)
+    const employeeNipSet = new Set(employees.map((e) => e.nip));
+
+    // OPTIMASI: Gunakan listObjects untuk list semua file dengan prefix
+    // Ini jauh lebih cepat daripada mencoba download satu-satu
+    const prefix = `sk_pns/${fileType}_${tmt}_`;
+    const existingFiles = [];
+
+    // List semua file yang ada dengan prefix
+    const listStream = mc.listObjects("bkd", prefix, false);
+    for await (const obj of listStream) {
+      // Extract NIP dari nama file: SK_01012025_199001011990011001.pdf -> 199001011990011001
+      const filename = obj.name.replace(prefix, "").replace(".pdf", "");
+      // Cek apakah NIP ini ada di daftar pegawai OPD
+      if (employeeNipSet.has(filename)) {
+        existingFiles.push({ name: obj.name, nip: filename });
+      }
+    }
+
+    // Download hanya file yang ada secara parallel
+    const BATCH_SIZE = 20;
     const allFiles = [];
 
-    for (let i = 0; i < employees.length; i += BATCH_SIZE) {
-      const batch = employees.slice(i, i + BATCH_SIZE);
+    for (let i = 0; i < existingFiles.length; i += BATCH_SIZE) {
+      const batch = existingFiles.slice(i, i + BATCH_SIZE);
       const results = await Promise.all(
-        batch.map(async (employee) => {
-          const filePath = `sk_pns/${fileType}_${tmt}_${employee.nip}.pdf`;
+        batch.map(async (file) => {
           try {
-            const stream = await mc.getObject("bkd", filePath);
-            // Buffer stream ke memory
+            const stream = await mc.getObject("bkd", file.name);
             const chunks = [];
             for await (const chunk of stream) {
               chunks.push(chunk);
             }
-            return { nip: employee.nip, buffer: Buffer.concat(chunks) };
+            return { nip: file.nip, buffer: Buffer.concat(chunks) };
           } catch (err) {
-            // File tidak ada, skip
+            console.error(`Gagal download ${file.name}:`, err.message);
             return null;
           }
         })
@@ -229,7 +246,7 @@ export const downloadDokumenAdministrasi = async (req, res) => {
     }
 
     console.log(
-      `Download ${fileType}_${tmt}: ${allFiles.length} files (dari ${employees.length} pegawai)`
+      `Download ${fileType}_${tmt}: ${allFiles.length} files ditemukan (dari ${existingFiles.length} file di MinIO, ${employees.length} pegawai OPD)`
     );
 
     archive.finalize();
