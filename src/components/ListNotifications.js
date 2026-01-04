@@ -1,9 +1,19 @@
 import {
+  clearChatsNotificatoins,
   listNotifications,
   removeNotification,
-  clearChatsNotificatoins,
 } from "@/services/index";
 import { formatDateFromNow } from "@/utils/client-utils";
+import {
+  Avatar,
+  Badge,
+  Box,
+  Center,
+  Flex,
+  Group,
+  Stack,
+  Text,
+} from "@mantine/core";
 import {
   IconBell,
   IconCheck,
@@ -15,17 +25,6 @@ import {
 } from "@tabler/icons-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button, Card, List, message } from "antd";
-import {
-  Avatar,
-  Badge,
-  Box,
-  Center,
-  Flex,
-  Group,
-  Indicator,
-  Stack,
-  Text,
-} from "@mantine/core";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useCallback, useMemo } from "react";
@@ -56,7 +55,21 @@ const useNotifications = (query) => {
   const { mutate: clearAll, isLoading: isClearing } = useMutation({
     mutationFn: clearChatsNotificatoins,
     onSuccess: () => {
+      // Optimistic update - langsung update cache lokal
+      queryClient.setQueryData(["notifications", query], (oldData) => {
+        if (!oldData) return oldData;
+        return {
+          ...oldData,
+          results: oldData.results.map((item) => ({
+            ...item,
+            read_at: item.read_at || new Date().toISOString(),
+          })),
+        };
+      });
       queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      queryClient.invalidateQueries({
+        queryKey: ["notifications-total"],
+      });
       message.success("Berhasil dibersihkan");
     },
     onError: () => message.error("Terjadi kesalahan"),

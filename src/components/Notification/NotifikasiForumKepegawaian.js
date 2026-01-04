@@ -6,11 +6,12 @@ import { Badge, Tooltip } from "antd";
 import { useRouter } from "next/router";
 
 function NotifikasiForumKepegawaian({ url, title }) {
-  const { data, isLoading } = useQuery(
-    [`notifications-total-${url}`],
-    () => listNotifications({ symbol: "yes" }),
-    {}
-  );
+  const { data, isLoading } = useQuery({
+    queryKey: ["notifications-total", url],
+    queryFn: () => listNotifications({ symbol: "yes" }),
+    staleTime: 30000,
+    refetchOnWindowFocus: false,
+  });
 
   const router = useRouter();
 

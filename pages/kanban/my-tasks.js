@@ -24,24 +24,20 @@ import {
 function MyTasksPage() {
   const [activeTab, setActiveTab] = useState("assigned");
 
-  // Fetch assigned tasks
+  // Fetch all tasks on mount to show counts immediately
   const { data: assignedTasks, isLoading: isLoadingAssigned } = useQuery(
     ["kanban-my-tasks"],
     () => getMyTasks()
   );
 
-  // Fetch created tasks
   const { data: createdTasks, isLoading: isLoadingCreated } = useQuery(
     ["kanban-my-created-tasks"],
-    () => getMyCreatedTasks(),
-    { enabled: activeTab === "created" }
+    () => getMyCreatedTasks()
   );
 
-  // Fetch completed tasks
   const { data: completedTasks, isLoading: isLoadingCompleted } = useQuery(
     ["kanban-my-completed-tasks"],
-    () => getMyCompletedTasks(),
-    { enabled: activeTab === "completed" }
+    () => getMyCompletedTasks()
   );
 
   const baseColumns = [

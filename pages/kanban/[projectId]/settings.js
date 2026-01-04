@@ -27,6 +27,8 @@ import {
   IconEye,
   IconColumns,
   IconTags,
+  IconArchive,
+  IconArchiveOff,
 } from "@tabler/icons-react";
 import Head from "next/head";
 import Link from "next/link";
@@ -38,6 +40,7 @@ import {
   getProject,
   updateProject,
   deleteProject,
+  toggleArchiveProject,
   getMembers,
   addMember,
   updateMember,
@@ -131,6 +134,22 @@ function ProjectSettingsPage() {
         router.push("/kanban");
       },
       onError: () => message.error("Gagal menghapus project"),
+    }
+  );
+
+  const { mutate: toggleArchive, isLoading: isArchiving } = useMutation(
+    () => toggleArchiveProject(projectId),
+    {
+      onSuccess: (data) => {
+        message.success(
+          data.is_archived
+            ? "Project berhasil diarsipkan"
+            : "Project berhasil diaktifkan kembali"
+        );
+        queryClient.invalidateQueries(["kanban-project", projectId]);
+        queryClient.invalidateQueries(["kanban-projects"]);
+      },
+      onError: () => message.error("Gagal mengubah status arsip project"),
     }
   );
 
@@ -329,7 +348,7 @@ function ProjectSettingsPage() {
             )}
           </Form>
 
-          {isOwner && (
+          {canEdit && (
             <div
               style={{
                 marginTop: 24,
@@ -344,18 +363,57 @@ function ProjectSettingsPage() {
               >
                 Zona Berbahaya
               </Text>
-              <Popconfirm
-                title="Yakin ingin menghapus project ini?"
-                description="Semua data akan hilang dan tidak dapat dikembalikan."
-                onConfirm={() => remove()}
-                okText="Hapus"
-                cancelText="Batal"
-                okButtonProps={{ danger: true }}
-              >
-                <Button danger loading={isDeleting}>
-                  Hapus Project
-                </Button>
-              </Popconfirm>
+              <Space>
+                <Popconfirm
+                  title={
+                    project?.is_archived
+                      ? "Aktifkan project ini?"
+                      : "Arsipkan project ini?"
+                  }
+                  description={
+                    project?.is_archived
+                      ? "Project akan kembali aktif dan muncul di daftar project aktif."
+                      : "Project yang diarsipkan tidak akan muncul di daftar project aktif."
+                  }
+                  onConfirm={() => toggleArchive()}
+                  okText={project?.is_archived ? "Aktifkan" : "Arsipkan"}
+                  cancelText="Batal"
+                  okButtonProps={{
+                    danger: !project?.is_archived,
+                    type: project?.is_archived ? "primary" : "default",
+                  }}
+                >
+                  <Button
+                    danger={!project?.is_archived}
+                    loading={isArchiving}
+                    icon={
+                      project?.is_archived ? (
+                        <IconArchiveOff size={16} />
+                      ) : (
+                        <IconArchive size={16} />
+                      )
+                    }
+                  >
+                    {project?.is_archived
+                      ? "Aktifkan Project"
+                      : "Arsipkan Project"}
+                  </Button>
+                </Popconfirm>
+                {isOwner && (
+                  <Popconfirm
+                    title="Yakin ingin menghapus project ini?"
+                    description="Semua data akan hilang dan tidak dapat dikembalikan."
+                    onConfirm={() => remove()}
+                    okText="Hapus"
+                    cancelText="Batal"
+                    okButtonProps={{ danger: true }}
+                  >
+                    <Button danger loading={isDeleting} icon={<IconTrash size={16} />}>
+                      Hapus Project
+                    </Button>
+                  </Popconfirm>
+                )}
+              </Space>
             </div>
           )}
         </Card>

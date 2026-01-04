@@ -100,14 +100,12 @@ const addLinkAttachment = async (req, res) => {
       return res.status(400).json({ message: "URL wajib diisi" });
     }
 
-    // Save to database as link type
-    const attachment = await KanbanTaskAttachment.query().insert({
-      id: nanoid(),
-      task_id: taskId,
-      filename: name || url,
-      file_url: url,
-      attachment_type: "link",
-      uploaded_by: userId,
+    // Use model method to add link and log activity
+    const attachment = await KanbanTaskAttachment.addLinkToTask({
+      taskId,
+      url,
+      name,
+      uploadedBy: userId,
     });
 
     res.json(attachment);
