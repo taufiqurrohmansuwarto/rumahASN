@@ -172,6 +172,25 @@ export const downloadDokumenAdministrasi = async (req, res) => {
       });
     }
 
+    // Cek file yang ada secara parallel (lebih cepat)
+    const fileChecks = await Promise.all(
+      employees.map(async (employee) => {
+        const filePath = `sk_pns/${fileType}_${tmt}_${employee.nip}.pdf`;
+        const exists = await checkFileMinioSK(mc, filePath);
+        return { nip: employee.nip, filePath, exists: !!exists };
+      })
+    );
+
+    // Filter hanya file yang ada
+    const existingFiles = fileChecks.filter((f) => f.exists);
+
+    if (existingFiles.length === 0) {
+      return res.status(404).json({
+        code: 404,
+        message: `Tidak ada dokumen ${fileType} dengan TMT ${tmt} yang ditemukan untuk OPD ini`,
+      });
+    }
+
     // Setup archiver
     const archive = archiver("zip", { zlib: { level: 9 } });
 
@@ -189,52 +208,20 @@ export const downloadDokumenAdministrasi = async (req, res) => {
 
     archive.pipe(res);
 
-    let filesAdded = 0;
-    let filesSkipped = 0;
-
-    // Loop untuk setiap pegawai dengan TMT dan jenis dokumen yang dipilih
-    for (const employee of employees) {
+    // Download hanya file yang ada
+    for (const file of existingFiles) {
       try {
-        // Pattern file: sk_pns/{FILE}_{TMT}_{NIP}.pdf
-        const filePath = `sk_pns/${fileType}_${tmt}_${employee.nip}.pdf`;
-
-        // Cek apakah file ada
-        const exists = await checkFileMinioSK(mc, filePath);
-
-        if (exists) {
-          const stream = await mc.getObject("bkd", filePath);
-          const archiveFilename = `${fileType}_${tmt}_${employee.nip}.pdf`;
-          archive.append(stream, { name: archiveFilename });
-          filesAdded++;
-        } else {
-          filesSkipped++;
-        }
+        const stream = await mc.getObject("bkd", file.filePath);
+        const archiveFilename = `${fileType}_${tmt}_${file.nip}.pdf`;
+        archive.append(stream, { name: archiveFilename });
       } catch (err) {
-        if (err.code === "NoSuchKey" || err.code === "NotFound") {
-          filesSkipped++;
-          continue;
-        } else {
-          console.error(
-            `Error downloading ${fileType}_${tmt}_${employee.nip}:`,
-            err
-          );
-          filesSkipped++;
-        }
+        console.error(`Error downloading ${file.filePath}:`, err);
       }
     }
 
     console.log(
-      `Download ${fileType}_${tmt}: ${filesAdded} files added, ${filesSkipped} skipped`
+      `Download ${fileType}_${tmt}: ${existingFiles.length} files (dari ${employees.length} pegawai)`
     );
-
-    if (filesAdded === 0) {
-      archive.append(
-        `Tidak ada dokumen ${fileType} dengan TMT ${tmt} yang ditemukan.`,
-        {
-          name: "README.txt",
-        }
-      );
-    }
 
     archive.finalize();
   } catch (error) {

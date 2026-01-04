@@ -5,6 +5,20 @@ import { useMutation } from "@tanstack/react-query";
 import { Button, Dropdown, Select, Space, message } from "antd";
 import { useState } from "react";
 
+// Helper untuk parse error dari arraybuffer
+const parseErrorResponse = async (error) => {
+  try {
+    if (error?.response?.data instanceof ArrayBuffer) {
+      const text = new TextDecoder().decode(error.response.data);
+      const json = JSON.parse(text);
+      return json?.message || "Gagal mengunduh dokumen";
+    }
+    return error?.response?.data?.message || "Gagal mengunduh dokumen";
+  } catch {
+    return "Gagal mengunduh dokumen";
+  }
+};
+
 function DownloadDokumenAdministrasi() {
   const [tmt, setTmt] = useState(null);
   const [fileType, setFileType] = useState(null);
@@ -12,6 +26,15 @@ function DownloadDokumenAdministrasi() {
   const mutation = useMutation(
     async (params) => {
       const response = await downloadDokumenAdministrasi(params);
+
+      // Cek jika response adalah error JSON (bukan ZIP)
+      const contentType = response.headers?.["content-type"] || "";
+      if (contentType.includes("application/json")) {
+        const text = new TextDecoder().decode(response.data);
+        const json = JSON.parse(text);
+        throw new Error(json?.message || "Gagal mengunduh");
+      }
+
       const url = window.URL.createObjectURL(
         new Blob([response.data], { type: "application/zip" })
       );
@@ -24,9 +47,8 @@ function DownloadDokumenAdministrasi() {
       link.remove();
     },
     {
-      onError: (error) => {
-        const errorMsg =
-          error?.response?.data?.message || "Gagal mengunduh dokumen";
+      onError: async (error) => {
+        const errorMsg = await parseErrorResponse(error);
         message.error(errorMsg);
       },
     }
