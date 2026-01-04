@@ -99,11 +99,17 @@ function AttachmentItem({ attachment, baseUrl, onDelete, onPreview }) {
 
   const handleDownload = (e) => {
     e.stopPropagation();
-    const link = document.createElement("a");
-    link.href = fileUrl;
-    link.download = attachment.filename || "download";
-    link.target = "_blank";
-    link.click();
+    if (isLink) {
+      // Open link in new tab
+      window.open(fileUrl, "_blank", "noopener,noreferrer");
+    } else {
+      // Download file
+      const link = document.createElement("a");
+      link.href = fileUrl;
+      link.download = attachment.filename || "download";
+      link.target = "_blank";
+      link.click();
+    }
   };
 
   return (
@@ -200,7 +206,7 @@ function AttachmentItem({ attachment, baseUrl, onDelete, onPreview }) {
 
         {/* Delete button */}
         <Popconfirm
-          title="Hapus lampiran?"
+          title={isLink ? "Hapus link?" : "Hapus lampiran?"}
           onConfirm={(e) => {
             e?.stopPropagation();
             onDelete(attachment.id);

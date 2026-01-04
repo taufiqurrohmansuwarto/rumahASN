@@ -54,7 +54,7 @@ const menuItems = [
   {
     key: "/paruh-waktu",
     icon: <IconClock size={16} />,
-    label: "Paruh Waktu",
+    label: "Upah Paruh Waktu",
     role: ["admin", "fasilitator"],
     children: [
       {

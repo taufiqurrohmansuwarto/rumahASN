@@ -36,25 +36,23 @@ function ProjectMyTasksPage() {
     { enabled: !!projectId }
   );
 
-  // Fetch assigned tasks
+  // Fetch all tasks on mount to show counts immediately
   const { data: assignedTasks, isLoading: isLoadingAssigned } = useQuery(
     ["kanban-my-tasks", projectId],
     () => getMyTasks({ projectId }),
     { enabled: !!projectId }
   );
 
-  // Fetch created tasks
   const { data: createdTasks, isLoading: isLoadingCreated } = useQuery(
     ["kanban-my-created-tasks", projectId],
     () => getMyCreatedTasks({ projectId }),
-    { enabled: !!projectId && activeTab === "created" }
+    { enabled: !!projectId }
   );
 
-  // Fetch completed tasks
   const { data: completedTasks, isLoading: isLoadingCompleted } = useQuery(
     ["kanban-my-completed-tasks", projectId],
     () => getMyCompletedTasks({ projectId }),
-    { enabled: !!projectId && activeTab === "completed" }
+    { enabled: !!projectId }
   );
 
   const baseColumns = [

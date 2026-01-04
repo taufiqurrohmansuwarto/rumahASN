@@ -66,18 +66,19 @@ class KanbanTaskAttachment extends Model {
     const attachment = await KanbanTaskAttachment.query().insert({
       task_id: taskId,
       filename: name || url,
+      file_path: `link://${url}`, // Placeholder for NOT NULL constraint
       file_url: url,
       attachment_type: "link",
       uploaded_by: uploadedBy,
     });
 
-    // Log activity
+    // Log activity (use "attachment_added" to match check constraint)
     const KanbanTaskActivity = require("@/models/kanban/task-activities.model");
     await KanbanTaskActivity.query().insert({
       task_id: taskId,
       user_id: uploadedBy,
-      action: "link_added",
-      new_value: { attachment_id: attachment.id, url },
+      action: "attachment_added",
+      new_value: { attachment_id: attachment.id, filename: name || url, type: "link" },
     });
 
     return attachment;
