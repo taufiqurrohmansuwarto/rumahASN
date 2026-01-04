@@ -191,28 +191,38 @@ export const downloadDokumenAdministrasi = async (req, res) => {
       }
     }
 
-    // Download hanya file yang ada secara parallel
-    const BATCH_SIZE = 20;
-    const allFiles = [];
+    // Download file secara parallel
+    // Jika file sedikit (<= 50), download sekaligus untuk minimalisir latency
+    // Jika banyak, gunakan batch untuk hindari terlalu banyak koneksi
+    const downloadFile = async (file) => {
+      try {
+        const stream = await mc.getObject("bkd", file.name);
+        const chunks = [];
+        for await (const chunk of stream) {
+          chunks.push(chunk);
+        }
+        return { nip: file.nip, buffer: Buffer.concat(chunks) };
+      } catch (err) {
+        console.error(`Gagal download ${file.name}:`, err.message);
+        return null;
+      }
+    };
 
-    for (let i = 0; i < existingFiles.length; i += BATCH_SIZE) {
-      const batch = existingFiles.slice(i, i + BATCH_SIZE);
-      const results = await Promise.all(
-        batch.map(async (file) => {
-          try {
-            const stream = await mc.getObject("bkd", file.name);
-            const chunks = [];
-            for await (const chunk of stream) {
-              chunks.push(chunk);
-            }
-            return { nip: file.nip, buffer: Buffer.concat(chunks) };
-          } catch (err) {
-            console.error(`Gagal download ${file.name}:`, err.message);
-            return null;
-          }
-        })
+    let allFiles;
+    if (existingFiles.length <= 50) {
+      // Download semua sekaligus - lebih cepat untuk file sedikit
+      allFiles = (await Promise.all(existingFiles.map(downloadFile))).filter(
+        Boolean
       );
-      allFiles.push(...results.filter(Boolean));
+    } else {
+      // Batch download untuk file banyak
+      const BATCH_SIZE = 50;
+      allFiles = [];
+      for (let i = 0; i < existingFiles.length; i += BATCH_SIZE) {
+        const batch = existingFiles.slice(i, i + BATCH_SIZE);
+        const results = await Promise.all(batch.map(downloadFile));
+        allFiles.push(...results.filter(Boolean));
+      }
     }
 
     if (allFiles.length === 0) {
