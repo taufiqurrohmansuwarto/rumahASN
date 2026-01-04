@@ -23,6 +23,16 @@ export const getDokumenFasilitator = () => {
   });
 };
 
+export const downloadDokumenAdministrasi = (query) => {
+  const params = queryString.stringify(query, {
+    skipEmptyString: true,
+    skipNull: true,
+  });
+  return api.get(`/fasilitator/download-dok-administrasi?${params}`, {
+    responseType: "arraybuffer",
+  });
+};
+
 const masterApi = axios.create({
   baseURL: "/helpdesk/api/master",
 });

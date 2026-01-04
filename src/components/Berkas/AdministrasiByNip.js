@@ -2,6 +2,7 @@ import {
   checkDocumentByNip,
   downloadDocumentByNip,
 } from "@/services/master.services";
+import { DOKUMEN_ADMINISTRASI, LIST_TMT } from "@/utils/client-utils";
 import { Alert, Box, Group, Paper, Stack, Text, Tooltip } from "@mantine/core";
 import {
   IconAlertTriangle,
@@ -14,32 +15,6 @@ import { useQuery } from "@tanstack/react-query";
 import { Button, message } from "antd";
 import { useRouter } from "next/router";
 import { useState } from "react";
-
-// Data TMT
-const list_tmt = [
-  { value: "01032019", label: "1 Mar 2019" },
-  { value: "01022022", label: "1 Feb 2022" },
-  { value: "01042024", label: "1 Apr 2024" },
-  { value: "01052024", label: "1 Mei 2024" },
-  { value: "01062024", label: "1 Jun 2024" },
-  { value: "01072024", label: "1 Jul 2024" },
-  { value: "01082024", label: "1 Ags 2024" },
-  { value: "01012025", label: "1 Jan 2025" },
-  { value: "01032025", label: "1 Mar 2025" },
-  { value: "01062025", label: "1 Jun 2025" },
-  { value: "01072025", label: "1 Jul 2025" },
-  { value: "01082025", label: "1 Ags 2025" },
-  { value: "01102025", label: "1 Okt 2025" },
-  { value: "01012026", label: "1 Jan 2026" },
-];
-
-// Jenis dokumen
-const dokumen = [
-  { code: "SK", name: "SK", fullName: "Surat Keputusan" },
-  { code: "PERTEK", name: "PERTEK", fullName: "Pertimbangan Teknis" },
-  { code: "SPMT", name: "SPMT", fullName: "Surat Pernyataan Melaksanakan Tugas" },
-  { code: "PK", name: "PK", fullName: "Perjanjian Kinerja" },
-];
 
 const TombolDokumen = ({ tmt, file, nip }) => {
   const { data } = useQuery(
@@ -96,7 +71,7 @@ const DokumenPerTMT = ({ tmtData, nip }) => (
       <Text size="xs" fw={500}>{tmtData.label}</Text>
     </Group>
     <Group spacing={4}>
-      {dokumen.map((dok) => (
+      {DOKUMEN_ADMINISTRASI.map((dok) => (
         <TombolDokumen key={`${tmtData.value}-${dok.code}`} tmt={tmtData.value} file={dok} nip={nip} />
       ))}
     </Group>
@@ -181,7 +156,7 @@ function AdministrasiByNip() {
       {/* Daftar Dokumen per TMT */}
       <Paper p="xs" radius="sm" withBorder>
         <Stack spacing={6}>
-          {list_tmt.map((tmtData) => (
+          {LIST_TMT.map((tmtData) => (
             <DokumenPerTMT key={tmtData.value} tmtData={tmtData} nip={nip} />
           ))}
         </Stack>

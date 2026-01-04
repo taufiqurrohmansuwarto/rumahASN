@@ -12,6 +12,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Button, Card, Space, Table, Tooltip } from "antd";
 import Image from "next/image";
 import { useRouter } from "next/router";
+import DownloadDokumenAdministrasi from "./DownloadDokumenAdministrasi";
 import DownloadDokumenFasilitator from "./DownloadDokumenFasilitator";
 import EmployeesTableFilter from "../Filter/EmployeesTableFilter";
 import React, { useState } from "react";
@@ -204,7 +205,10 @@ function EmployeesTable() {
               Data Pegawai
             </Text>
           </Group>
-          <DownloadDokumenFasilitator />
+          <Group spacing={6}>
+            <DownloadDokumenAdministrasi />
+            <DownloadDokumenFasilitator />
+          </Group>
         </Group>
 
         {/* Filter */}
