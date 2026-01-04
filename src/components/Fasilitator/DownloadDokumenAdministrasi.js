@@ -3,6 +3,7 @@ import { DOKUMEN_ADMINISTRASI, LIST_TMT } from "@/utils/client-utils";
 import { IconDownload, IconFileZip } from "@tabler/icons-react";
 import { useMutation } from "@tanstack/react-query";
 import { Button, Dropdown, Select, Space, message } from "antd";
+import { useRouter } from "next/router";
 import { useState } from "react";
 
 // Helper untuk parse error dari arraybuffer
@@ -20,6 +21,9 @@ const parseErrorResponse = async (error) => {
 };
 
 function DownloadDokumenAdministrasi() {
+  const router = useRouter();
+  const { opd_id } = router.query;
+
   const [tmt, setTmt] = useState(null);
   const [fileType, setFileType] = useState(null);
 
@@ -59,7 +63,7 @@ function DownloadDokumenAdministrasi() {
       message.warning("Pilih TMT dan Jenis Dokumen terlebih dahulu");
       return;
     }
-    mutation.mutate({ tmt, file: fileType });
+    mutation.mutate({ tmt, file: fileType, opd_id });
   };
 
   const canDownload = tmt && fileType;

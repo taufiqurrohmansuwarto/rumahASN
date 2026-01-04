@@ -172,27 +172,41 @@ export const downloadDokumenAdministrasi = async (req, res) => {
       });
     }
 
-    // Cek file yang ada secara parallel (lebih cepat)
-    const fileChecks = await Promise.all(
-      employees.map(async (employee) => {
-        const filePath = `sk_pns/${fileType}_${tmt}_${employee.nip}.pdf`;
-        const exists = await checkFileMinioSK(mc, filePath);
-        return { nip: employee.nip, filePath, exists: !!exists };
-      })
-    );
+    // Download file secara parallel dan buffer di memory (lebih cepat)
+    const BATCH_SIZE = 20; // Download 20 file sekaligus
+    const allFiles = [];
 
-    // Filter hanya file yang ada
-    const existingFiles = fileChecks.filter((f) => f.exists);
+    for (let i = 0; i < employees.length; i += BATCH_SIZE) {
+      const batch = employees.slice(i, i + BATCH_SIZE);
+      const results = await Promise.all(
+        batch.map(async (employee) => {
+          const filePath = `sk_pns/${fileType}_${tmt}_${employee.nip}.pdf`;
+          try {
+            const stream = await mc.getObject("bkd", filePath);
+            // Buffer stream ke memory
+            const chunks = [];
+            for await (const chunk of stream) {
+              chunks.push(chunk);
+            }
+            return { nip: employee.nip, buffer: Buffer.concat(chunks) };
+          } catch (err) {
+            // File tidak ada, skip
+            return null;
+          }
+        })
+      );
+      allFiles.push(...results.filter(Boolean));
+    }
 
-    if (existingFiles.length === 0) {
+    if (allFiles.length === 0) {
       return res.status(404).json({
         code: 404,
         message: `Tidak ada dokumen ${fileType} dengan TMT ${tmt} yang ditemukan untuk OPD ini`,
       });
     }
 
-    // Setup archiver
-    const archive = archiver("zip", { zlib: { level: 9 } });
+    // Setup archiver dengan kompresi rendah (lebih cepat)
+    const archive = archiver("zip", { zlib: { level: 1 } });
 
     const filename = `dokumen_${fileType}_${tmt}.zip`;
     res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
@@ -208,19 +222,14 @@ export const downloadDokumenAdministrasi = async (req, res) => {
 
     archive.pipe(res);
 
-    // Download hanya file yang ada
-    for (const file of existingFiles) {
-      try {
-        const stream = await mc.getObject("bkd", file.filePath);
-        const archiveFilename = `${fileType}_${tmt}_${file.nip}.pdf`;
-        archive.append(stream, { name: archiveFilename });
-      } catch (err) {
-        console.error(`Error downloading ${file.filePath}:`, err);
-      }
+    // Tambahkan file dari buffer (sangat cepat)
+    for (const file of allFiles) {
+      const archiveFilename = `${fileType}_${tmt}_${file.nip}.pdf`;
+      archive.append(file.buffer, { name: archiveFilename });
     }
 
     console.log(
-      `Download ${fileType}_${tmt}: ${existingFiles.length} files (dari ${employees.length} pegawai)`
+      `Download ${fileType}_${tmt}: ${allFiles.length} files (dari ${employees.length} pegawai)`
     );
 
     archive.finalize();
