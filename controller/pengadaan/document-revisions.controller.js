@@ -241,6 +241,8 @@ export const cancelDocumentRevision = async (req, res) => {
 /**
  * Get all document revision requests (Admin)
  * GET /api/pengadaan/admin/document-revisions
+ * Query params:
+ * - limit: -1 untuk mengambil semua data (untuk export)
  */
 export const getAllDocumentRevisions = async (req, res) => {
   try {
@@ -287,7 +289,17 @@ export const getAllDocumentRevisions = async (req, res) => {
       });
     }
 
-    const revisions = await query.page(parseInt(page) - 1, parseInt(limit));
+    // Jika limit = -1, ambil semua data tanpa pagination (untuk export)
+    let revisions;
+    if (parseInt(limit) === -1) {
+      const allData = await query;
+      revisions = {
+        results: allData,
+        total: allData.length,
+      };
+    } else {
+      revisions = await query.page(parseInt(page) - 1, parseInt(limit));
+    }
 
     // Get status counts
     const statusCounts = await DocumentRevisions.query()
