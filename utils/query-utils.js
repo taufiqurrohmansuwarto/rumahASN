@@ -613,7 +613,7 @@ ORDER BY
     spd.priority ASC, -- Prioritas paling tinggi berdasarkan skpd_priority
     LENGTH(spd.skpd_id) DESC, -- Panjang skpd_id untuk memperjelas urutan dalam prioritas
     sp.nama_master ASC -- Urutkan nama sebagai fallback
-LIMIT 5`;
+LIMIT 30`;
 
   const result = await knex.raw(raw);
   return result.rows;
