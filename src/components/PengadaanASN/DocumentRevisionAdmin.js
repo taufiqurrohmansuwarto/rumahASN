@@ -18,7 +18,9 @@ import {
   IconClock,
   IconDownload,
   IconEdit,
+  IconExternalLink,
   IconEye,
+  IconFile,
   IconLoader,
   IconUser,
   IconX,
@@ -175,6 +177,33 @@ const DetailModal = ({ revision, open, onClose, references }) => {
             </Descriptions.Item>
           </>
         )}
+        <Descriptions.Item label="Lampiran Bukti" span={2}>
+          {revision.attachment_url ? (
+            <a
+              href={revision.attachment_url}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Group spacing={4}>
+                {revision.attachment_type === "file" ? (
+                  <>
+                    <IconFile size={14} />
+                    <span>{revision.attachment_name || "Lihat File"}</span>
+                  </>
+                ) : (
+                  <>
+                    <IconExternalLink size={14} />
+                    <span>Buka Link</span>
+                  </>
+                )}
+              </Group>
+            </a>
+          ) : (
+            <Text c="dimmed" size="sm">
+              Tidak ada lampiran
+            </Text>
+          )}
+        </Descriptions.Item>
       </Descriptions>
     </Modal>
   );
@@ -356,6 +385,12 @@ function DocumentRevisionAdmin() {
         "Detail Perbaikan": item.reason,
         Status: getStatusLabel(item.status),
         "Tanggal Pengajuan": dayjs(item.created_at).format("DD/MM/YYYY HH:mm"),
+        "Lampiran": item.attachment_url
+          ? item.attachment_type === "file"
+            ? item.attachment_name || "File"
+            : "Link"
+          : "-",
+        "URL Lampiran": item.attachment_url || "-",
         "Catatan Admin": item.admin_notes || "-",
         "Diproses Oleh": item.admin?.username || "-",
         "Tanggal Diproses": item.processed_at
@@ -378,6 +413,8 @@ function DocumentRevisionAdmin() {
         { wch: 50 }, // Detail Perbaikan
         { wch: 12 }, // Status
         { wch: 18 }, // Tanggal Pengajuan
+        { wch: 15 }, // Lampiran
+        { wch: 50 }, // URL Lampiran
         { wch: 40 }, // Catatan Admin
         { wch: 20 }, // Diproses Oleh
         { wch: 18 }, // Tanggal Diproses
@@ -462,6 +499,39 @@ function DocumentRevisionAdmin() {
       key: "created_at",
       width: 110,
       render: (val) => dayjs(val).format("DD/MM/YYYY"),
+    },
+    {
+      title: "Lampiran",
+      key: "attachment",
+      width: 80,
+      align: "center",
+      render: (_, record) => {
+        if (record.attachment_url) {
+          return (
+            <Tooltip
+              label={
+                record.attachment_type === "file"
+                  ? record.attachment_name
+                  : "Link Eksternal"
+              }
+            >
+              <ActionIcon
+                variant="subtle"
+                color="blue"
+                size="sm"
+                onClick={() => window.open(record.attachment_url, "_blank")}
+              >
+                {record.attachment_type === "file" ? (
+                  <IconFile size={14} />
+                ) : (
+                  <IconExternalLink size={14} />
+                )}
+              </ActionIcon>
+            </Tooltip>
+          );
+        }
+        return <Text size="xs" c="dimmed">-</Text>;
+      },
     },
     {
       title: "Aksi",

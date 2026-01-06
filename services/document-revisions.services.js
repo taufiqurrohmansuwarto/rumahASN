@@ -50,6 +50,39 @@ export const cancelDocumentRevision = async (id) => {
   return api.delete(`/${id}`).then((res) => res.data);
 };
 
+/**
+ * Upload attachment file for document revision
+ */
+export const uploadAttachmentFile = async (id, file) => {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("attachment_type", "file");
+  return api
+    .post(`/${id}/attachment`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    })
+    .then((res) => res.data);
+};
+
+/**
+ * Add attachment link for document revision
+ */
+export const uploadAttachmentLink = async (id, url) => {
+  return api
+    .post(`/${id}/attachment`, {
+      attachment_type: "link",
+      attachment_url: url,
+    })
+    .then((res) => res.data);
+};
+
+/**
+ * Delete attachment from document revision
+ */
+export const deleteAttachment = async (id) => {
+  return api.delete(`/${id}/attachment`).then((res) => res.data);
+};
+
 // ===== ADMIN SERVICES =====
 
 /**

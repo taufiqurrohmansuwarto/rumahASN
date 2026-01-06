@@ -378,7 +378,7 @@ const BasicFormTransferAngkaKredit = ({
                         <InputNumber
                           min={0}
                           step={0.001}
-                          precision={2}
+                          precision={4}
                           style={{ width: "100%" }}
                         />
                       </Form.Item>

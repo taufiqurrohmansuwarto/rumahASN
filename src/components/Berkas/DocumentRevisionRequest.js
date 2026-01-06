@@ -1,8 +1,11 @@
 import {
   cancelDocumentRevision,
   createDocumentRevision,
+  deleteAttachment,
   getDocumentRevisionReferences,
   getMyDocumentRevisions,
+  uploadAttachmentFile,
+  uploadAttachmentLink,
 } from "@/services/document-revisions.services";
 import {
   ActionIcon,
@@ -16,9 +19,14 @@ import {
 import {
   IconCheck,
   IconClock,
+  IconExternalLink,
+  IconFile,
+  IconLink,
   IconLoader,
+  IconPaperclip,
   IconPlus,
   IconTrash,
+  IconUpload,
   IconX,
 } from "@tabler/icons-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -30,9 +38,12 @@ import {
   message,
   Modal,
   Popconfirm,
+  Radio,
   Select,
+  Space,
   Table,
   Tag,
+  Upload,
 } from "antd";
 import dayjs from "dayjs";
 import { useState } from "react";
@@ -161,8 +172,221 @@ const RevisionFormModal = ({ open, onClose, references, onSuccess }) => {
   );
 };
 
+// Modal untuk upload attachment
+const AttachmentModal = ({ revision, open, onClose }) => {
+  const [attachmentType, setAttachmentType] = useState("file");
+  const [linkUrl, setLinkUrl] = useState("");
+  const [file, setFile] = useState(null);
+  const queryClient = useQueryClient();
+
+  const { mutate: uploadFile, isLoading: isUploading } = useMutation(
+    ({ id, file }) => uploadAttachmentFile(id, file),
+    {
+      onSuccess: () => {
+        message.success("Lampiran berhasil diunggah");
+        queryClient.invalidateQueries(["my-document-revisions"]);
+        handleClose();
+      },
+      onError: (error) => {
+        const msg = error?.response?.data?.message || "Gagal mengunggah lampiran";
+        message.error(msg);
+      },
+    }
+  );
+
+  const { mutate: uploadLink, isLoading: isLinking } = useMutation(
+    ({ id, url }) => uploadAttachmentLink(id, url),
+    {
+      onSuccess: () => {
+        message.success("Link berhasil ditambahkan");
+        queryClient.invalidateQueries(["my-document-revisions"]);
+        handleClose();
+      },
+      onError: (error) => {
+        const msg = error?.response?.data?.message || "Gagal menambahkan link";
+        message.error(msg);
+      },
+    }
+  );
+
+  const { mutate: removeAttachment, isLoading: isDeleting } = useMutation(
+    (id) => deleteAttachment(id),
+    {
+      onSuccess: () => {
+        message.success("Lampiran berhasil dihapus");
+        queryClient.invalidateQueries(["my-document-revisions"]);
+        handleClose();
+      },
+      onError: (error) => {
+        const msg = error?.response?.data?.message || "Gagal menghapus lampiran";
+        message.error(msg);
+      },
+    }
+  );
+
+  const handleClose = () => {
+    setAttachmentType("file");
+    setLinkUrl("");
+    setFile(null);
+    onClose();
+  };
+
+  const handleSubmit = () => {
+    if (attachmentType === "file") {
+      if (!file) {
+        message.warning("Pilih file terlebih dahulu");
+        return;
+      }
+      uploadFile({ id: revision.id, file });
+    } else {
+      if (!linkUrl) {
+        message.warning("Masukkan URL link");
+        return;
+      }
+      // Validasi URL sederhana
+      try {
+        new URL(linkUrl);
+      } catch {
+        message.warning("URL tidak valid");
+        return;
+      }
+      uploadLink({ id: revision.id, url: linkUrl });
+    }
+  };
+
+  const hasAttachment = revision?.attachment_url;
+  const isLoading = isUploading || isLinking || isDeleting;
+
+  return (
+    <Modal
+      title="Lampiran Bukti"
+      open={open}
+      onCancel={handleClose}
+      footer={null}
+      width={450}
+    >
+      {hasAttachment ? (
+        <Stack spacing="md">
+          <Box>
+            <Text size="sm" fw={500} mb="xs">
+              Lampiran Saat Ini:
+            </Text>
+            {revision.attachment_type === "file" ? (
+              <Group spacing="xs">
+                <IconFile size={16} />
+                <a
+                  href={revision.attachment_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {revision.attachment_name || "Lihat File"}
+                </a>
+              </Group>
+            ) : (
+              <Group spacing="xs">
+                <IconLink size={16} />
+                <a
+                  href={revision.attachment_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {revision.attachment_url}
+                </a>
+              </Group>
+            )}
+          </Box>
+          <Popconfirm
+            title="Hapus lampiran?"
+            description="Lampiran akan dihapus permanen"
+            onConfirm={() => removeAttachment(revision.id)}
+            okText="Ya, Hapus"
+            cancelText="Tidak"
+          >
+            <Button danger icon={<IconTrash size={14} />} loading={isDeleting}>
+              Hapus Lampiran
+            </Button>
+          </Popconfirm>
+        </Stack>
+      ) : (
+        <Stack spacing="md">
+          <Radio.Group
+            value={attachmentType}
+            onChange={(e) => setAttachmentType(e.target.value)}
+          >
+            <Space direction="vertical">
+              <Radio value="file">Unggah File</Radio>
+              <Radio value="link">Tambahkan Link</Radio>
+            </Space>
+          </Radio.Group>
+
+          {attachmentType === "file" ? (
+            <Upload.Dragger
+              maxCount={1}
+              beforeUpload={(f) => {
+                // Validasi tipe file
+                const allowedTypes = [
+                  "image/jpeg",
+                  "image/png",
+                  "image/gif",
+                  "application/pdf",
+                ];
+                if (!allowedTypes.includes(f.type)) {
+                  message.error("Tipe file tidak diizinkan (JPG, PNG, GIF, PDF)");
+                  return Upload.LIST_IGNORE;
+                }
+                // Validasi ukuran (5MB)
+                if (f.size > 5 * 1024 * 1024) {
+                  message.error("Ukuran file maksimal 5MB");
+                  return Upload.LIST_IGNORE;
+                }
+                setFile(f);
+                return false;
+              }}
+              onRemove={() => setFile(null)}
+              fileList={file ? [file] : []}
+            >
+              <p className="ant-upload-drag-icon">
+                <IconUpload size={32} />
+              </p>
+              <p className="ant-upload-text">
+                Klik atau seret file ke area ini
+              </p>
+              <p className="ant-upload-hint">
+                Format: JPG, PNG, GIF, PDF. Maksimal 5MB
+              </p>
+            </Upload.Dragger>
+          ) : (
+            <Input
+              placeholder="https://drive.google.com/..."
+              value={linkUrl}
+              onChange={(e) => setLinkUrl(e.target.value)}
+              prefix={<IconLink size={14} />}
+            />
+          )}
+
+          <Group justify="flex-end" spacing="xs">
+            <Button onClick={handleClose}>Batal</Button>
+            <Button
+              type="primary"
+              onClick={handleSubmit}
+              loading={isLoading}
+              icon={<IconUpload size={14} />}
+            >
+              {attachmentType === "file" ? "Unggah" : "Simpan Link"}
+            </Button>
+          </Group>
+        </Stack>
+      )}
+    </Modal>
+  );
+};
+
 const RevisionList = ({ references }) => {
   const [status, setStatus] = useState("all");
+  const [attachmentModal, setAttachmentModal] = useState({
+    open: false,
+    data: null,
+  });
   const queryClient = useQueryClient();
 
   const { data, isLoading } = useQuery(
@@ -239,6 +463,55 @@ const RevisionList = ({ references }) => {
       render: (val) => dayjs(val).format("DD/MM/YYYY"),
     },
     {
+      title: "Lampiran",
+      key: "attachment",
+      width: 80,
+      align: "center",
+      render: (_, record) => {
+        if (record.attachment_url) {
+          return (
+            <Tooltip
+              label={
+                record.attachment_type === "file"
+                  ? record.attachment_name
+                  : "Link"
+              }
+            >
+              <ActionIcon
+                variant="subtle"
+                color="blue"
+                size="sm"
+                onClick={() => window.open(record.attachment_url, "_blank")}
+              >
+                {record.attachment_type === "file" ? (
+                  <IconFile size={14} />
+                ) : (
+                  <IconExternalLink size={14} />
+                )}
+              </ActionIcon>
+            </Tooltip>
+          );
+        }
+        if (record.status === "pending") {
+          return (
+            <Tooltip label="Tambah Lampiran">
+              <ActionIcon
+                variant="subtle"
+                color="gray"
+                size="sm"
+                onClick={() =>
+                  setAttachmentModal({ open: true, data: record })
+                }
+              >
+                <IconPaperclip size={14} />
+              </ActionIcon>
+            </Tooltip>
+          );
+        }
+        return <Text size="xs" c="dimmed">-</Text>;
+      },
+    },
+    {
       title: "Catatan Admin",
       dataIndex: "admin_notes",
       key: "admin_notes",
@@ -248,27 +521,39 @@ const RevisionList = ({ references }) => {
     {
       title: "Aksi",
       key: "action",
-      width: 60,
+      width: 100,
       render: (_, record) =>
         record.status === "pending" ? (
-          <Popconfirm
-            title="Batalkan pengajuan?"
-            description="Pengajuan yang dibatalkan tidak dapat dikembalikan"
-            onConfirm={() => cancelRevision(record.id)}
-            okText="Ya, Batalkan"
-            cancelText="Tidak"
-          >
-            <Tooltip label="Batalkan">
+          <Space size={4}>
+            <Tooltip label={record.attachment_url ? "Edit Lampiran" : "Tambah Lampiran"}>
               <ActionIcon
                 variant="subtle"
-                color="red"
+                color="blue"
                 size="sm"
-                loading={isCanceling}
+                onClick={() => setAttachmentModal({ open: true, data: record })}
               >
-                <IconTrash size={14} />
+                <IconPaperclip size={14} />
               </ActionIcon>
             </Tooltip>
-          </Popconfirm>
+            <Popconfirm
+              title="Batalkan pengajuan?"
+              description="Pengajuan yang dibatalkan tidak dapat dikembalikan"
+              onConfirm={() => cancelRevision(record.id)}
+              okText="Ya, Batalkan"
+              cancelText="Tidak"
+            >
+              <Tooltip label="Batalkan">
+                <ActionIcon
+                  variant="subtle"
+                  color="red"
+                  size="sm"
+                  loading={isCanceling}
+                >
+                  <IconTrash size={14} />
+                </ActionIcon>
+              </Tooltip>
+            </Popconfirm>
+          </Space>
         ) : null,
     },
   ];
@@ -305,6 +590,13 @@ const RevisionList = ({ references }) => {
             />
           ),
         }}
+      />
+
+      {/* Modal Attachment */}
+      <AttachmentModal
+        revision={attachmentModal.data}
+        open={attachmentModal.open}
+        onClose={() => setAttachmentModal({ open: false, data: null })}
       />
     </Stack>
   );

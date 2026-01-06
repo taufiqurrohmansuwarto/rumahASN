@@ -1,5 +1,10 @@
 const DocumentRevisions = require("@/models/pengadaan/document-revisions.model");
 const { handleError } = require("@/utils/helper/controller-helper");
+const {
+  uploadFilePublic,
+  deleteFilePublic,
+  generatePublicUrl,
+} = require("@/utils/helper/minio-helper");
 
 // Konstanta untuk jenis perbaikan
 const REVISION_TYPES = [
@@ -239,6 +244,164 @@ export const cancelDocumentRevision = async (req, res) => {
     res.json({
       code: 200,
       message: "Pengajuan berhasil dibatalkan",
+    });
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+/**
+ * Upload attachment for document revision
+ * POST /api/pengadaan/document-revisions/:id/attachment
+ * Bisa upload file atau tambahkan link
+ */
+export const uploadAttachment = async (req, res) => {
+  try {
+    const { customId } = req.user;
+    const { id } = req.query;
+    const { attachment_type, attachment_url } = req.body;
+    const file = req.file;
+
+    // Cari revision milik user
+    const revision = await DocumentRevisions.query()
+      .findById(id)
+      .where("user_id", customId);
+
+    if (!revision) {
+      return res.status(404).json({
+        code: 404,
+        message: "Pengajuan tidak ditemukan",
+      });
+    }
+
+    // Hanya bisa upload jika status pending
+    if (revision.status !== "pending") {
+      return res.status(400).json({
+        code: 400,
+        message: "Hanya pengajuan dengan status pending yang dapat diubah",
+      });
+    }
+
+    let updateData = {};
+
+    if (attachment_type === "link") {
+      // Validasi link
+      if (!attachment_url) {
+        return res.status(400).json({
+          code: 400,
+          message: "URL link wajib diisi",
+        });
+      }
+
+      updateData = {
+        attachment_type: "link",
+        attachment_url: attachment_url,
+        attachment_name: null,
+      };
+    } else if (attachment_type === "file" && file) {
+      // Upload file ke MinIO
+      const mc = req.mc;
+      const timestamp = Date.now();
+      const ext = file.originalname.split(".").pop();
+      const filename = `document-revisions/${revision.nip}/${timestamp}_${file.originalname}`;
+
+      await uploadFilePublic(
+        mc,
+        file.buffer,
+        filename,
+        file.size,
+        file.mimetype
+      );
+
+      const fileUrl = generatePublicUrl(filename);
+
+      updateData = {
+        attachment_type: "file",
+        attachment_url: fileUrl,
+        attachment_name: file.originalname,
+      };
+    } else {
+      return res.status(400).json({
+        code: 400,
+        message: "Tipe attachment tidak valid atau file tidak ditemukan",
+      });
+    }
+
+    // Update revision dengan attachment
+    const updatedRevision = await DocumentRevisions.query().patchAndFetchById(
+      id,
+      updateData
+    );
+
+    res.json({
+      code: 200,
+      message: "Lampiran berhasil ditambahkan",
+      data: updatedRevision,
+    });
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+/**
+ * Delete attachment from document revision
+ * DELETE /api/pengadaan/document-revisions/:id/attachment
+ */
+export const deleteAttachment = async (req, res) => {
+  try {
+    const { customId } = req.user;
+    const { id } = req.query;
+
+    // Cari revision milik user
+    const revision = await DocumentRevisions.query()
+      .findById(id)
+      .where("user_id", customId);
+
+    if (!revision) {
+      return res.status(404).json({
+        code: 404,
+        message: "Pengajuan tidak ditemukan",
+      });
+    }
+
+    // Hanya bisa hapus jika status pending
+    if (revision.status !== "pending") {
+      return res.status(400).json({
+        code: 400,
+        message: "Hanya pengajuan dengan status pending yang dapat diubah",
+      });
+    }
+
+    // Jika file di MinIO, hapus dari storage
+    if (revision.attachment_type === "file" && revision.attachment_url) {
+      try {
+        const mc = req.mc;
+        // Extract filename from URL
+        const baseUrl = "https://siasn.bkd.jatimprov.go.id:9000/public/";
+        if (revision.attachment_url.startsWith(baseUrl)) {
+          const filename = revision.attachment_url.replace(baseUrl, "");
+          await deleteFilePublic(mc, filename);
+        }
+      } catch (err) {
+        console.error("Error deleting file from MinIO:", err);
+        // Continue even if file deletion fails
+      }
+    }
+
+    // Update revision - hapus attachment
+    const updatedRevision = await DocumentRevisions.query().patchAndFetchById(
+      id,
+      {
+        attachment_type: null,
+        attachment_url: null,
+        attachment_name: null,
+      }
+    );
+
+    res.json({
+      code: 200,
+      message: "Lampiran berhasil dihapus",
+      data: updatedRevision,
     });
   } catch (error) {
     handleError(res, error);
