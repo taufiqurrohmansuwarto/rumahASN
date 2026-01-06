@@ -91,17 +91,6 @@ const RevisionFormModal = ({ open, onClose, references, onSuccess }) => {
     >
       <Form form={form} layout="vertical" onFinish={handleSubmit}>
         <Form.Item
-          name="nip"
-          label="NIP"
-          rules={[
-            { required: true, message: "NIP wajib diisi" },
-            { len: 18, message: "NIP harus 18 digit" },
-          ]}
-        >
-          <Input placeholder="Masukkan NIP (18 digit)" maxLength={18} />
-        </Form.Item>
-
-        <Form.Item
           name="document_type"
           label="Jenis Dokumen"
           rules={[{ required: true, message: "Pilih jenis dokumen" }]}
@@ -215,16 +204,10 @@ const RevisionList = ({ references }) => {
 
   const columns = [
     {
-      title: "NIP",
-      dataIndex: "nip",
-      key: "nip",
-      width: 150,
-    },
-    {
       title: "Dokumen",
       dataIndex: "document_type",
       key: "document_type",
-      width: 120,
+      width: 150,
       render: (val) => getDocTypeName(val),
     },
     {

@@ -63,14 +63,23 @@ export const getReferences = async (req, res) => {
 /**
  * Create document revision request
  * POST /api/pengadaan/document-revisions
+ * NIP otomatis dari req.user.employee_number
  */
 export const createDocumentRevision = async (req, res) => {
   try {
-    const { customId } = req.user;
-    const { nip, document_type, tmt, revision_type, reason } = req.body;
+    const { customId, employee_number: nip } = req.user;
+    const { document_type, tmt, revision_type, reason } = req.body;
+
+    // Validasi NIP dari user
+    if (!nip) {
+      return res.status(400).json({
+        code: 400,
+        message: "NIP tidak ditemukan. Pastikan Anda sudah login dengan benar.",
+      });
+    }
 
     // Validasi required fields
-    if (!nip || !document_type || !tmt || !revision_type || !reason) {
+    if (!document_type || !tmt || !revision_type || !reason) {
       return res.status(400).json({
         code: 400,
         message: "Semua field wajib diisi",
@@ -243,6 +252,7 @@ export const cancelDocumentRevision = async (req, res) => {
  * GET /api/pengadaan/admin/document-revisions
  * Query params:
  * - limit: -1 untuk mengambil semua data (untuk export)
+ * - nama: filter by user name
  */
 export const getAllDocumentRevisions = async (req, res) => {
   try {
@@ -252,6 +262,7 @@ export const getAllDocumentRevisions = async (req, res) => {
       revision_type,
       tmt,
       search,
+      nama,
       page = 1,
       limit = 10,
     } = req.query;
@@ -287,6 +298,13 @@ export const getAllDocumentRevisions = async (req, res) => {
           .where("nip", "ilike", `%${search}%`)
           .orWhere("reason", "ilike", `%${search}%`);
       });
+    }
+
+    // Filter by user name (join dengan tabel users)
+    if (nama) {
+      query = query.whereExists(
+        DocumentRevisions.relatedQuery("user").where("username", "ilike", `%${nama}%`)
+      );
     }
 
     // Jika limit = -1, ambil semua data tanpa pagination (untuk export)

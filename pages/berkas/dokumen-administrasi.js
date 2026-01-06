@@ -1,6 +1,7 @@
 import Administrasi from "@/components/Berkas/Administrasi";
 import AdministrasiPerbaikan from "@/components/Berkas/AdministrasiPerbaikan";
 import BerkasJabatanPelaksanaBaru from "@/components/Berkas/BerkasJabatanPelaksanaBaru";
+import DocumentRevisionRequest from "@/components/Berkas/DocumentRevisionRequest";
 import Layout from "@/components/Layout";
 import PageContainer from "@/components/PageContainer";
 import { Stack } from "@mantine/core";
@@ -32,6 +33,7 @@ const DokumenAdministrasi = () => {
           <Administrasi />
           <AdministrasiPerbaikan />
           <BerkasJabatanPelaksanaBaru />
+          <DocumentRevisionRequest />
         </Stack>
       </PageContainer>
     </>

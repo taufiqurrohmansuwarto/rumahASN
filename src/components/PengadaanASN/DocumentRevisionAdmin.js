@@ -3,6 +3,7 @@ import {
   getDocumentRevisionReferences,
   updateDocumentRevisionStatus,
 } from "@/services/document-revisions.services";
+import { useRouter } from "next/router";
 import {
   ActionIcon,
   Box,
@@ -19,6 +20,7 @@ import {
   IconEdit,
   IconEye,
   IconLoader,
+  IconUser,
   IconX,
 } from "@tabler/icons-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -36,10 +38,10 @@ import {
   Tag,
   message,
 } from "antd";
-import { useState } from "react";
 import dayjs from "dayjs";
-import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
+import { useState } from "react";
+import * as XLSX from "xlsx";
 
 const { TextArea } = Input;
 
@@ -108,11 +110,15 @@ const DetailModal = ({ revision, open, onClose, references }) => {
   if (!revision) return null;
 
   const getDocTypeName = (code) => {
-    return references?.document_types?.find((d) => d.code === code)?.fullName || code;
+    return (
+      references?.document_types?.find((d) => d.code === code)?.fullName || code
+    );
   };
 
   const getRevisionTypeName = (code) => {
-    return references?.revision_types?.find((r) => r.value === code)?.label || code;
+    return (
+      references?.revision_types?.find((r) => r.value === code)?.label || code
+    );
   };
 
   const getTmtLabel = (value) => {
@@ -190,7 +196,8 @@ const UpdateStatusModal = ({ revision, open, onClose, onSuccess }) => {
         onClose();
       },
       onError: (error) => {
-        const msg = error?.response?.data?.message || "Gagal memperbarui status";
+        const msg =
+          error?.response?.data?.message || "Gagal memperbarui status";
         message.error(msg);
       },
     }
@@ -259,11 +266,13 @@ const UpdateStatusModal = ({ revision, open, onClose, onSuccess }) => {
 };
 
 function DocumentRevisionAdmin() {
+  const router = useRouter();
   const [filters, setFilters] = useState({
     status: "all",
     document_type: "",
     revision_type: "",
     search: "",
+    nama: "",
     page: 1,
     limit: 10,
   });
@@ -286,15 +295,21 @@ function DocumentRevisionAdmin() {
   );
 
   const getDocTypeName = (code) => {
-    return references?.document_types?.find((d) => d.code === code)?.name || code;
+    return (
+      references?.document_types?.find((d) => d.code === code)?.name || code
+    );
   };
 
   const getDocTypeFullName = (code) => {
-    return references?.document_types?.find((d) => d.code === code)?.fullName || code;
+    return (
+      references?.document_types?.find((d) => d.code === code)?.fullName || code
+    );
   };
 
   const getRevisionTypeName = (code) => {
-    return references?.revision_types?.find((r) => r.value === code)?.label || code;
+    return (
+      references?.revision_types?.find((r) => r.value === code)?.label || code
+    );
   };
 
   const getTmtLabel = (value) => {
@@ -322,7 +337,10 @@ function DocumentRevisionAdmin() {
       const result = await getAllDocumentRevisions(exportFilters);
 
       if (!result?.data?.length) {
-        message.warning({ content: "Tidak ada data untuk diexport", key: "export" });
+        message.warning({
+          content: "Tidak ada data untuk diexport",
+          key: "export",
+        });
         return;
       }
 
@@ -350,19 +368,19 @@ function DocumentRevisionAdmin() {
 
       // Set column widths
       const colWidths = [
-        { wch: 5 },   // No
-        { wch: 20 },  // NIP
-        { wch: 25 },  // Nama Pengaju
-        { wch: 30 },  // Email Pengaju
-        { wch: 35 },  // Jenis Dokumen
-        { wch: 15 },  // TMT
-        { wch: 20 },  // Jenis Perbaikan
-        { wch: 50 },  // Detail Perbaikan
-        { wch: 12 },  // Status
-        { wch: 18 },  // Tanggal Pengajuan
-        { wch: 40 },  // Catatan Admin
-        { wch: 20 },  // Diproses Oleh
-        { wch: 18 },  // Tanggal Diproses
+        { wch: 5 }, // No
+        { wch: 20 }, // NIP
+        { wch: 25 }, // Nama Pengaju
+        { wch: 30 }, // Email Pengaju
+        { wch: 35 }, // Jenis Dokumen
+        { wch: 15 }, // TMT
+        { wch: 20 }, // Jenis Perbaikan
+        { wch: 50 }, // Detail Perbaikan
+        { wch: 12 }, // Status
+        { wch: 18 }, // Tanggal Pengajuan
+        { wch: 40 }, // Catatan Admin
+        { wch: 20 }, // Diproses Oleh
+        { wch: 18 }, // Tanggal Diproses
       ];
       worksheet["!cols"] = colWidths;
 
@@ -379,10 +397,15 @@ function DocumentRevisionAdmin() {
       const blob = new Blob([excelBuffer], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       });
-      const fileName = `Pengajuan_Perbaikan_Dokumen_${dayjs().format("YYYYMMDD_HHmmss")}.xlsx`;
+      const fileName = `Pengajuan_Perbaikan_Dokumen_${dayjs().format(
+        "YYYYMMDD_HHmmss"
+      )}.xlsx`;
       saveAs(blob, fileName);
 
-      message.success({ content: `Berhasil mengunduh ${result.data.length} data`, key: "export" });
+      message.success({
+        content: `Berhasil mengunduh ${result.data.length} data`,
+        key: "export",
+      });
     } catch (error) {
       console.error("Export error:", error);
       message.error({ content: "Gagal mengunduh data", key: "export" });
@@ -466,6 +489,16 @@ function DocumentRevisionAdmin() {
               <IconEdit size={14} />
             </ActionIcon>
           </Tooltip>
+          <Tooltip label="Lihat Pegawai">
+            <ActionIcon
+              variant="subtle"
+              color="purple"
+              size="sm"
+              onClick={() => router.push(`/rekon/pegawai/${record.nip}/detail`)}
+            >
+              <IconUser size={14} />
+            </ActionIcon>
+          </Tooltip>
         </Space>
       ),
     },
@@ -501,7 +534,9 @@ function DocumentRevisionAdmin() {
             <Select
               placeholder="Status"
               value={filters.status}
-              onChange={(val) => setFilters((prev) => ({ ...prev, status: val, page: 1 }))}
+              onChange={(val) =>
+                setFilters((prev) => ({ ...prev, status: val, page: 1 }))
+              }
               style={{ width: 140 }}
               size="small"
             >
@@ -516,7 +551,11 @@ function DocumentRevisionAdmin() {
               placeholder="Jenis Dokumen"
               value={filters.document_type || undefined}
               onChange={(val) =>
-                setFilters((prev) => ({ ...prev, document_type: val || "", page: 1 }))
+                setFilters((prev) => ({
+                  ...prev,
+                  document_type: val || "",
+                  page: 1,
+                }))
               }
               style={{ width: 140 }}
               size="small"
@@ -533,7 +572,11 @@ function DocumentRevisionAdmin() {
               placeholder="Jenis Perbaikan"
               value={filters.revision_type || undefined}
               onChange={(val) =>
-                setFilters((prev) => ({ ...prev, revision_type: val || "", page: 1 }))
+                setFilters((prev) => ({
+                  ...prev,
+                  revision_type: val || "",
+                  page: 1,
+                }))
               }
               style={{ width: 160 }}
               size="small"
@@ -553,7 +596,19 @@ function DocumentRevisionAdmin() {
                 setFilters((prev) => ({ ...prev, search: e.target.value }))
               }
               onSearch={() => refetch()}
-              style={{ width: 180 }}
+              style={{ width: 150 }}
+              size="small"
+              allowClear
+            />
+
+            <Input.Search
+              placeholder="Cari Nama..."
+              value={filters.nama}
+              onChange={(e) =>
+                setFilters((prev) => ({ ...prev, nama: e.target.value }))
+              }
+              onSearch={() => refetch()}
+              style={{ width: 150 }}
               size="small"
               allowClear
             />

@@ -1,7 +1,9 @@
 import LayananSIASNLayout from "@/components/LayananSIASNAdmin/LayananSIASNLayout";
 import LayananPengadaan from "@/components/LayananSIASNAdmin/LayananPengadaan";
+import DocumentRevisionAdmin from "@/components/PengadaanASN/DocumentRevisionAdmin";
 import PageContainer from "@/components/PageContainer";
 import { Breadcrumb } from "antd";
+import { Stack } from "@mantine/core";
 import { Grid } from "antd";
 import Head from "next/head";
 import Link from "next/link";
@@ -38,7 +40,10 @@ function PengadaanLayananSIASN() {
           ),
         }}
       >
-        <LayananPengadaan />
+        <Stack>
+          <DocumentRevisionAdmin />
+          <LayananPengadaan />
+        </Stack>
       </PageContainer>
     </>
   );
