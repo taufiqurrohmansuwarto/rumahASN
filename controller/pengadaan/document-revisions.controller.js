@@ -25,7 +25,11 @@ const REVISION_TYPES = [
 const DOKUMEN_ADMINISTRASI = [
   { code: "SK", name: "SK", fullName: "Surat Keputusan" },
   { code: "PERTEK", name: "PERTEK", fullName: "Pertimbangan Teknis" },
-  { code: "SPMT", name: "SPMT", fullName: "Surat Pernyataan Melaksanakan Tugas" },
+  {
+    code: "SPMT",
+    name: "SPMT",
+    fullName: "Surat Pernyataan Melaksanakan Tugas",
+  },
   { code: "PK", name: "PK", fullName: "Perjanjian Kinerja" },
 ];
 
@@ -44,6 +48,7 @@ const LIST_TMT = [
   { value: "01072025", label: "1 Jul 2025" },
   { value: "01082025", label: "1 Ags 2025" },
   { value: "01102025", label: "1 Okt 2025" },
+  { value: "01112025", label: "1 Nov 2025" },
   { value: "01012026", label: "1 Jan 2026" },
 ];
 
@@ -92,11 +97,15 @@ export const createDocumentRevision = async (req, res) => {
     }
 
     // Validasi document_type
-    const validDocType = DOKUMEN_ADMINISTRASI.find((d) => d.code === document_type);
+    const validDocType = DOKUMEN_ADMINISTRASI.find(
+      (d) => d.code === document_type
+    );
     if (!validDocType) {
       return res.status(400).json({
         code: 400,
-        message: `Jenis dokumen tidak valid. Pilihan: ${DOKUMEN_ADMINISTRASI.map((d) => d.code).join(", ")}`,
+        message: `Jenis dokumen tidak valid. Pilihan: ${DOKUMEN_ADMINISTRASI.map(
+          (d) => d.code
+        ).join(", ")}`,
       });
     }
 
@@ -110,7 +119,9 @@ export const createDocumentRevision = async (req, res) => {
     }
 
     // Validasi revision_type
-    const validRevisionType = REVISION_TYPES.find((r) => r.value === revision_type);
+    const validRevisionType = REVISION_TYPES.find(
+      (r) => r.value === revision_type
+    );
     if (!validRevisionType) {
       return res.status(400).json({
         code: 400,
@@ -129,7 +140,8 @@ export const createDocumentRevision = async (req, res) => {
     if (existingRevision) {
       return res.status(409).json({
         code: 409,
-        message: "Sudah ada pengajuan perbaikan yang sedang diproses untuk dokumen ini",
+        message:
+          "Sudah ada pengajuan perbaikan yang sedang diproses untuk dokumen ini",
         existing: existingRevision,
       });
     }
@@ -466,7 +478,11 @@ export const getAllDocumentRevisions = async (req, res) => {
     // Filter by user name (join dengan tabel users)
     if (nama) {
       query = query.whereExists(
-        DocumentRevisions.relatedQuery("user").where("username", "ilike", `%${nama}%`)
+        DocumentRevisions.relatedQuery("user").where(
+          "username",
+          "ilike",
+          `%${nama}%`
+        )
       );
     }
 
@@ -569,13 +585,15 @@ export const updateDocumentRevisionStatus = async (req, res) => {
     }
 
     // Update revision
-    const updatedRevision = await DocumentRevisions.query()
-      .patchAndFetchById(id, {
+    const updatedRevision = await DocumentRevisions.query().patchAndFetchById(
+      id,
+      {
         status,
         admin_notes: admin_notes || revision.admin_notes,
         processed_by: customId,
         processed_at: new Date(),
-      });
+      }
+    );
 
     res.json({
       code: 200,

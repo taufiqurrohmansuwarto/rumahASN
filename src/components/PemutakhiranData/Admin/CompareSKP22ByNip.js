@@ -395,7 +395,7 @@ function CompareSKP22ByNip({ nip }) {
       render: (_, row) => {
         const tahun = row?.tahun;
         const tahunTransfer =
-          tahun === 2024 || tahun === 2023 || tahun === 2022;
+          tahun === 2024 || tahun === 2023 || tahun === 2022 || tahun === 2025;
 
         if (tahunTransfer) {
           return (

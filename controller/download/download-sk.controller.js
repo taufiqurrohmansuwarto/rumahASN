@@ -29,6 +29,7 @@ const LIST_TMT = [
   { value: "01072025", label: "1 Jul 2025" },
   { value: "01082025", label: "1 Ags 2025" },
   { value: "01102025", label: "1 Okt 2025" },
+  { value: "01112025", label: "1 Nov 2025" },
   { value: "01012026", label: "1 Jan 2026" },
 ];
 
