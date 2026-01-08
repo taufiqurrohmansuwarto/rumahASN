@@ -276,7 +276,7 @@ const UpdateStatusModal = ({ revision, open, onClose, onSuccess }) => {
           <TextArea
             rows={4}
             placeholder="Tambahkan catatan untuk user..."
-            maxLength={500}
+            maxLength={1000}
             showCount
           />
         </Form.Item>
@@ -385,7 +385,7 @@ function DocumentRevisionAdmin() {
         "Detail Perbaikan": item.reason,
         Status: getStatusLabel(item.status),
         "Tanggal Pengajuan": dayjs(item.created_at).format("DD/MM/YYYY HH:mm"),
-        "Lampiran": item.attachment_url
+        Lampiran: item.attachment_url
           ? item.attachment_type === "file"
             ? item.attachment_name || "File"
             : "Link"
@@ -530,7 +530,11 @@ function DocumentRevisionAdmin() {
             </Tooltip>
           );
         }
-        return <Text size="xs" c="dimmed">-</Text>;
+        return (
+          <Text size="xs" c="dimmed">
+            -
+          </Text>
+        );
       },
     },
     {
