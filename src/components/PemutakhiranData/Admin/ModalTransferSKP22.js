@@ -1,21 +1,23 @@
 import React, { useEffect } from "react";
-import { Modal, Form, Select, Spin, message } from "antd";
+import { Modal, Form, Select, Spin, message, Input } from "antd";
 import FormCariPNSKinerja from "../FormCariPNSKinerja";
 import { serializeKinerja } from "@/utils/transfer-siasn.utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { postRwSkp22ByNip, uploadDokRiwayat } from "@/services/siasn-services";
 import { getAtasan } from "@/services/master.services";
+import { rwSkpMasterByNip } from "@/services/master.services";
+import FormAtasanPenilaiKinerja from "../FormAtasanPenilaiKinerja";
 
 function ModalTransferSKP22({ open, onCancel, data, loadingFile, nip, file }) {
   const queryClient = useQueryClient();
 
-  const { data: dataAtasan, isLoading: isLoadingAtasan } = useQuery(
-    ["data-atasan", nip],
-    () => getAtasan(nip),
-    {
-      refetchOnWindowFocus: false,
-    }
-  );
+  // const { data: dataAtasan, isLoading: isLoadingAtasan } = useQuery(
+  //   ["data-atasan", nip],
+  //   () => getAtasan(nip),
+  //   {
+  //     refetchOnWindowFocus: false,
+  //   }
+  // );
 
   const { mutateAsync: transfer, isLoading: isLoadingTransfer } = useMutation(
     (data) => postRwSkp22ByNip(data),
@@ -64,6 +66,10 @@ function ModalTransferSKP22({ open, onCancel, data, loadingFile, nip, file }) {
         ...serializeKinerja(data),
       };
       form.setFieldsValue(currentData);
+      form.setFieldValue(
+        "pns_penilai",
+        data?.pegawai?.nip_baru ?? undefined
+      );
     }
   }, [data, form]);
 
@@ -109,15 +115,26 @@ function ModalTransferSKP22({ open, onCancel, data, loadingFile, nip, file }) {
               <Select.Option value="2022">TAHUN PENILAIAN 2022</Select.Option>
             </Select>
           </Form.Item>
-          <a href={data?.file_skp} target="_blank" rel="noreferrer">
-            Lihat Penilai
-          </a>
-          {dataAtasan && <span> ({dataAtasan?.nip_master})</span>}
-          <FormCariPNSKinerja
-            help="ketik NIP Tanpa Spasi dan tunggu..."
-            label="Atasan Penilai"
-            name="pns_penilai"
-          />
+
+          
+          {data?.pegawai?.nip_baru ? (
+            <FormAtasanPenilaiKinerja
+              name="pns_penilai"
+              nip={data?.pegawai?.nip_baru}
+            />
+          ) : (
+            <>
+              <a href={data?.file_skp} target="_blank" rel="noreferrer">
+                Lihat Penilai
+              </a>
+              {data?.pegawai?.nip_baru && <span> ({data?.pegawai?.nip_baru})</span>}
+                <FormCariPNSKinerja
+                  help="ketik NIP Tanpa Spasi dan tunggu..."
+                  label="Atasan Penilai"
+                  name="pns_penilai"
+                />
+            </>
+          )}
         </Form>
       </Modal>
     </>
