@@ -300,6 +300,7 @@ function DocumentRevisionAdmin() {
     status: "all",
     document_type: "",
     revision_type: "",
+    tmt: "",
     search: "",
     nama: "",
     page: 1,
@@ -638,6 +639,23 @@ function DocumentRevisionAdmin() {
               {references?.document_types?.map((doc) => (
                 <Select.Option key={doc.code} value={doc.code}>
                   {doc.name}
+                </Select.Option>
+              ))}
+            </Select>
+
+            <Select
+              placeholder="TMT"
+              value={filters.tmt || undefined}
+              onChange={(val) =>
+                setFilters((prev) => ({ ...prev, tmt: val || "", page: 1 }))
+              }
+              style={{ width: 140 }}
+              size="small"
+              allowClear
+            >
+              {references?.tmt_list?.map((tmt) => (
+                <Select.Option key={tmt.value} value={tmt.value}>
+                  {tmt.label}
                 </Select.Option>
               ))}
             </Select>
