@@ -1,6 +1,8 @@
 import PageContainer from "@/components/PageContainer";
 import RekonDashboardDetail from "@/components/Rekon/RekonDashboardDetail";
 import RekonLayout from "@/components/Rekon/RekonLayout";
+import LaporanProgress from "@/components/Rekon/LaporanProgress";
+import { Stack } from "@mantine/core";
 import { Breadcrumb } from "antd";
 import Head from "next/head";
 
@@ -25,7 +27,10 @@ const RekonDashboard = () => {
           );
         }}
       >
-        <RekonDashboardDetail />
+        <Stack>
+          <LaporanProgress />
+          <RekonDashboardDetail />
+        </Stack>
       </PageContainer>
     </>
   );

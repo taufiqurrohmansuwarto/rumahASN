@@ -37,6 +37,14 @@ const masterApi = axios.create({
   baseURL: "/helpdesk/api/master",
 });
 
+export const getLaporanProgressMasterServices = (query) => {
+  const params = queryString.stringify(query, {
+    skipEmptyString: true,
+    skipNull: true,
+  });
+  return masterApi.get(`/laporan-progress?${params}`).then((res) => res.data);
+};
+
 export const searchUpdateJabatan = (query) => {
   const params = queryString.stringify(query, {
     skipEmptyString: true,
