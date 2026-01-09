@@ -38,7 +38,7 @@ const LaporanProgress = () => {
     refetchOnWindowFocus: false,
     staleTime: 1000 * 60 * 15,
     cacheTime: 1000 * 60 * 30,
-    enabled: !!opd_id,
+    enabled: router.isReady,
   });
 
   // Refresh data function
@@ -160,56 +160,57 @@ const LaporanProgress = () => {
     {
       title: "No",
       key: "no",
-      width: 50,
-      render: (_, __, index) => index + 1,
+      width: 35,
+      align: "center",
+      render: (_, __, index) => (
+        <Text size="xs" c="dimmed">
+          {index + 1}
+        </Text>
+      ),
     },
     {
       title: "Item",
       dataIndex: "item",
       key: "item",
-    },
-    {
-      title: "Realisasi",
-      key: "realisasi",
-      width: 100,
-      align: "center",
-      render: (_, record) => `${record.realisasi}/${record.total}`,
+      render: (val) => <Text size="xs">{val}</Text>,
     },
     {
       title: "Progress",
       key: "progress",
-      width: 150,
+      width: 180,
       render: (_, record) => (
-        <Progress
-          percent={Number(record.percentage?.toFixed(1))}
-          size="small"
-          strokeColor={getColor(record.percentage)}
-          status={record.percentage >= 100 ? "success" : "active"}
-          showInfo={false}
-        />
+        <Group spacing={4} noWrap>
+          <Progress
+            percent={Number(record.percentage?.toFixed(0))}
+            size="small"
+            strokeColor={getColor(record.percentage)}
+            status={record.percentage >= 100 ? "success" : "active"}
+            showInfo={false}
+            style={{ flex: 1, minWidth: 80 }}
+          />
+          <Tag
+            color={getColor(record.percentage)}
+            style={{ margin: 0, fontSize: 10, padding: "0 4px" }}
+          >
+            {record.realisasi}/{record.total}
+          </Tag>
+        </Group>
       ),
     },
     {
-      title: "%",
-      dataIndex: "percentage",
-      key: "percentage",
-      width: 80,
-      align: "center",
-      render: (val) => <Tag color={getColor(val)}>{val?.toFixed(1)}%</Tag>,
-    },
-    {
-      title: "Aksi",
+      title: "",
       key: "aksi",
-      width: 60,
+      width: 40,
       align: "center",
       render: (_, record) => (
-        <Tooltip title="Unduh Detail">
+        <Tooltip title={`Unduh ${record.item}`}>
           <Button
-            type="text"
+            type="link"
             size="small"
-            icon={<IconDownload size={14} />}
+            icon={<IconDownload size={12} />}
             onClick={() => handleDownloadDetail(record)}
             loading={downloadingKode === record.kode}
+            style={{ padding: 0, height: "auto" }}
           />
         </Tooltip>
       ),
@@ -221,43 +222,43 @@ const LaporanProgress = () => {
         {
           key: "1",
           label: (
-            <Group position="apart" style={{ width: "100%" }}>
-              <Group spacing="xs">
-                <IconChartBar size={16} />
-                <Text size="sm" fw={500}>
-                  Progress Data Kepegawaian
-                </Text>
-              </Group>
-              <Group spacing="xs">
-                <Text size="xs" c="dimmed">
-                  Rata-rata:
-                </Text>
-                <Tag color={getColor(average)}>{average.toFixed(1)}%</Tag>
-              </Group>
+            <Group spacing={6}>
+              <IconChartBar size={14} />
+              <Text size="xs" fw={500}>
+                Progress Kelengkapan Data
+              </Text>
+              <Tag
+                color={getColor(average)}
+                style={{ margin: 0, fontSize: 10, padding: "0 4px" }}
+              >
+                {average.toFixed(0)}%
+              </Tag>
             </Group>
           ),
           extra: (
             <Space
-              size="small"
+              size={4}
               onClick={(e) => e.stopPropagation()}
-              style={{ marginRight: 8 }}
+              style={{ marginRight: 4 }}
             >
-              <Tooltip title="Refresh Data">
+              <Tooltip title="Refresh">
                 <Button
                   type="text"
                   size="small"
-                  icon={<IconRefresh size={16} />}
+                  icon={<IconRefresh size={14} />}
                   onClick={handleRefresh}
                   loading={isFetchingLaporan}
+                  style={{ padding: 2, height: "auto" }}
                 />
               </Tooltip>
-              <Tooltip title="Unduh Excel">
+              <Tooltip title="Unduh Semua">
                 <Button
                   type="text"
                   size="small"
-                  icon={<IconDownload size={16} />}
+                  icon={<IconDownload size={14} />}
                   onClick={handleDownloadExcel}
                   disabled={!laporanData?.length}
+                  style={{ padding: 2, height: "auto" }}
                 />
               </Tooltip>
             </Space>
@@ -271,6 +272,8 @@ const LaporanProgress = () => {
               pagination={false}
               loading={isFetchingLaporan}
               bordered
+              style={{ fontSize: 12 }}
+              rowClassName={() => "compact-row"}
             />
           ),
         },
@@ -278,7 +281,7 @@ const LaporanProgress = () => {
     : [];
 
   return (
-    <Stack spacing="sm">
+    <Stack spacing={4}>
       {isLoadingLaporan && (
         <Progress percent={100} status="active" showInfo={false} size="small" />
       )}
@@ -286,17 +289,38 @@ const LaporanProgress = () => {
       {!isLoadingLaporan && laporanData && (
         <Collapse
           items={collapseItems}
+          size="small"
           expandIcon={({ isActive }) => (
             <IconChevronDown
-              size={16}
+              size={12}
               style={{
                 transform: isActive ? "rotate(180deg)" : "rotate(0deg)",
                 transition: "transform 0.2s",
               }}
             />
           )}
+          style={{
+            background: "transparent",
+            border: "1px solid #f0f0f0",
+            borderRadius: 6,
+          }}
         />
       )}
+
+      <style jsx global>{`
+        .compact-row td {
+          padding: 4px 8px !important;
+        }
+        .ant-collapse-small > .ant-collapse-item > .ant-collapse-header {
+          padding: 6px 12px !important;
+        }
+        .ant-collapse-small
+          > .ant-collapse-item
+          > .ant-collapse-content
+          > .ant-collapse-content-box {
+          padding: 8px !important;
+        }
+      `}</style>
     </Stack>
   );
 };
