@@ -45,6 +45,16 @@ export const getLaporanProgressMasterServices = (query) => {
   return masterApi.get(`/laporan-progress?${params}`).then((res) => res.data);
 };
 
+export const getLaporanProgressMasterDetailServices = (query) => {
+  const params = queryString.stringify(query, {
+    skipEmptyString: true,
+    skipNull: true,
+  });
+  return masterApi
+    .get(`/laporan-progress/detail?${params}`)
+    .then((res) => res.data);
+};
+
 export const searchUpdateJabatan = (query) => {
   const params = queryString.stringify(query, {
     skipEmptyString: true,

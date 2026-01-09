@@ -14,9 +14,10 @@ import {
   Table,
   Tag,
   Tooltip,
+  message,
 } from "antd";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/router";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
@@ -25,6 +26,7 @@ const LaporanProgress = () => {
   const router = useRouter();
   const { opd_id } = router.query;
   const queryClient = useQueryClient();
+  const [downloadingKode, setDownloadingKode] = useState(null);
 
   const {
     data: laporanData,
@@ -88,8 +90,55 @@ const LaporanProgress = () => {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     });
 
-    const fileName = `Progress_${opd_id}_${new Date().toISOString().split("T")[0]}.xlsx`;
+    const fileName = `Progress_${opd_id}_${
+      new Date().toISOString().split("T")[0]
+    }.xlsx`;
     saveAs(blob, fileName);
+  };
+
+  // Download detail per row
+  const handleDownloadDetail = async (record) => {
+    try {
+      setDownloadingKode(record.kode);
+      const data = await getLaporanProgressMasterServices({
+        opd_id,
+        kode: record.kode,
+      });
+
+      if (!data?.length) {
+        message.warning("Data tidak ditemukan");
+        setDownloadingKode(null);
+        return;
+      }
+
+      const excelData = data.map((item, index) => ({
+        No: index + 1,
+        NIP: item.nip_baru,
+        Status: item.status,
+      }));
+
+      const worksheet = XLSX.utils.json_to_sheet(excelData);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Detail");
+
+      worksheet["!cols"] = [{ wch: 5 }, { wch: 25 }, { wch: 15 }];
+
+      const excelBuffer = XLSX.write(workbook, {
+        bookType: "xlsx",
+        type: "array",
+      });
+      const blob = new Blob([excelBuffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+
+      const fileName = `${record.item}_${opd_id}.xlsx`;
+      saveAs(blob, fileName);
+      message.success(`Berhasil mengunduh ${record.item}`);
+    } catch (error) {
+      message.error("Gagal mengunduh data");
+    } finally {
+      setDownloadingKode(null);
+    }
   };
 
   const average = useMemo(() => {
@@ -147,6 +196,23 @@ const LaporanProgress = () => {
       width: 80,
       align: "center",
       render: (val) => <Tag color={getColor(val)}>{val?.toFixed(1)}%</Tag>,
+    },
+    {
+      title: "Aksi",
+      key: "aksi",
+      width: 60,
+      align: "center",
+      render: (_, record) => (
+        <Tooltip title="Unduh Detail">
+          <Button
+            type="text"
+            size="small"
+            icon={<IconDownload size={14} />}
+            onClick={() => handleDownloadDetail(record)}
+            loading={downloadingKode === record.kode}
+          />
+        </Tooltip>
+      ),
     },
   ];
 
