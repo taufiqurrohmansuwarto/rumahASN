@@ -14,6 +14,7 @@ import { useRouter } from "next/router";
 import ReportEmployeeMaster from "../Admin/ReportEmployeeMaster";
 import EmployeesTableFilterAdmin from "../Filter/EmployeesTableFilterAdmin";
 import React, { useState } from "react";
+import LaporanProgress from "../Rekon/LaporanProgress";
 
 function EmployeesTableAdmin() {
   const router = useRouter();
@@ -207,6 +208,7 @@ function EmployeesTableAdmin() {
 
         {/* Filter */}
         <EmployeesTableFilterAdmin />
+        <LaporanProgress />
 
         {/* Table */}
         <Table

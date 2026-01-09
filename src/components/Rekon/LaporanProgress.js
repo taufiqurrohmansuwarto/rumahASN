@@ -1,34 +1,103 @@
 import { getLaporanProgressMasterServices } from "@/services/master.services";
-import { getUnorSimaster } from "@/services/rekon.services";
 import { Group, Text, Stack } from "@mantine/core";
-import { IconChartBar, IconChevronDown } from "@tabler/icons-react";
-import { Card, Collapse, Progress, Table, Tag, TreeSelect } from "antd";
-import { useQuery } from "@tanstack/react-query";
-import { useState, useMemo } from "react";
+import {
+  IconChartBar,
+  IconChevronDown,
+  IconDownload,
+  IconRefresh,
+} from "@tabler/icons-react";
+import {
+  Button,
+  Collapse,
+  Progress,
+  Space,
+  Table,
+  Tag,
+  Tooltip,
+} from "antd";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMemo } from "react";
+import { useRouter } from "next/router";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 
 const LaporanProgress = () => {
-  const [selectedOpd, setSelectedOpd] = useState(null);
+  const router = useRouter();
+  const { opd_id } = router.query;
+  const queryClient = useQueryClient();
 
-  const { data: unorData, isLoading: isLoadingUnor } = useQuery({
-    queryKey: ["rekon-unor-simaster"],
-    queryFn: () => getUnorSimaster(),
-    refetchOnWindowFocus: false,
-    staleTime: 1000 * 60 * 30,
-    cacheTime: 1000 * 60 * 60,
-  });
-
-  const { data: laporanData, isLoading: isLoadingLaporan } = useQuery({
-    queryKey: ["laporan-progress-master", selectedOpd],
-    queryFn: () => getLaporanProgressMasterServices({ opd_id: selectedOpd }),
+  const {
+    data: laporanData,
+    isLoading: isLoadingLaporan,
+    isFetching: isFetchingLaporan,
+  } = useQuery({
+    queryKey: ["laporan-progress-master", opd_id],
+    queryFn: () => getLaporanProgressMasterServices({ opd_id }),
     refetchOnWindowFocus: false,
     staleTime: 1000 * 60 * 15,
     cacheTime: 1000 * 60 * 30,
-    enabled: !!selectedOpd,
+    enabled: !!opd_id,
   });
+
+  // Refresh data function
+  const handleRefresh = () => {
+    queryClient.invalidateQueries({
+      queryKey: ["laporan-progress-master", opd_id],
+    });
+  };
+
+  // Download Excel function
+  const handleDownloadExcel = () => {
+    if (!laporanData?.length) return;
+
+    const excelData = laporanData.map((item, index) => ({
+      No: index + 1,
+      Item: item.item,
+      Realisasi: item.realisasi,
+      Total: item.total,
+      "Progress (%)": Number(item.percentage?.toFixed(2)),
+    }));
+
+    // Add summary row
+    excelData.push({
+      No: "",
+      Item: "Rata-rata",
+      Realisasi: "",
+      Total: "",
+      "Progress (%)": Number(average.toFixed(2)),
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(excelData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Progress");
+
+    // Set column widths
+    worksheet["!cols"] = [
+      { wch: 5 },
+      { wch: 40 },
+      { wch: 12 },
+      { wch: 10 },
+      { wch: 15 },
+    ];
+
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+    });
+    const blob = new Blob([excelBuffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+
+    const fileName = `Progress_${opd_id}_${new Date().toISOString().split("T")[0]}.xlsx`;
+    saveAs(blob, fileName);
+  };
 
   const average = useMemo(() => {
     if (!laporanData?.length) return 0;
-    return laporanData.reduce((acc, d) => acc + (d.percentage || 0), 0) / laporanData.length;
+    return (
+      laporanData.reduce((acc, d) => acc + (d.percentage || 0), 0) /
+      laporanData.length
+    );
   }, [laporanData]);
 
   const getColor = (pct) => {
@@ -101,6 +170,32 @@ const LaporanProgress = () => {
               </Group>
             </Group>
           ),
+          extra: (
+            <Space
+              size="small"
+              onClick={(e) => e.stopPropagation()}
+              style={{ marginRight: 8 }}
+            >
+              <Tooltip title="Refresh Data">
+                <Button
+                  type="text"
+                  size="small"
+                  icon={<IconRefresh size={16} />}
+                  onClick={handleRefresh}
+                  loading={isFetchingLaporan}
+                />
+              </Tooltip>
+              <Tooltip title="Unduh Excel">
+                <Button
+                  type="text"
+                  size="small"
+                  icon={<IconDownload size={16} />}
+                  onClick={handleDownloadExcel}
+                  disabled={!laporanData?.length}
+                />
+              </Tooltip>
+            </Space>
+          ),
           children: (
             <Table
               dataSource={laporanData}
@@ -108,7 +203,7 @@ const LaporanProgress = () => {
               rowKey="item"
               size="small"
               pagination={false}
-              loading={isLoadingLaporan}
+              loading={isFetchingLaporan}
               bordered
             />
           ),
@@ -118,29 +213,13 @@ const LaporanProgress = () => {
 
   return (
     <Stack spacing="sm">
-      <Card size="small">
-        <Stack spacing="xs">
-          <Text fw={600} size="sm">
-            Laporan Progress Data Kepegawaian
-          </Text>
-          <TreeSelect
-            style={{ width: "100%" }}
-            showSearch
-            allowClear
-            placeholder="Pilih Unit Organisasi..."
-            value={selectedOpd}
-            treeNodeFilterProp="title"
-            onChange={setSelectedOpd}
-            treeData={unorData}
-            loading={isLoadingUnor}
-          />
-        </Stack>
-      </Card>
+      {isLoadingLaporan && (
+        <Progress percent={100} status="active" showInfo={false} size="small" />
+      )}
 
-      {selectedOpd && laporanData && (
+      {!isLoadingLaporan && laporanData && (
         <Collapse
           items={collapseItems}
-          defaultActiveKey={["1"]}
           expandIcon={({ isActive }) => (
             <IconChevronDown
               size={16}

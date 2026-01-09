@@ -1,5 +1,6 @@
 import useScrollRestoration from "@/hooks/useScrollRestoration";
 import { getAllEmployeesPaging } from "@/services/master.services";
+import LaporanProgress from "../Rekon/LaporanProgress";
 import { Badge as MantineBadge, Group, Stack, Text } from "@mantine/core";
 import {
   IconBriefcase,
@@ -213,6 +214,7 @@ function EmployeesTable() {
 
         {/* Filter */}
         <EmployeesTableFilter />
+        <LaporanProgress />
 
         {/* Table */}
         <Table

@@ -28,7 +28,6 @@ const RekonDashboard = () => {
         }}
       >
         <Stack>
-          <LaporanProgress />
           <RekonDashboardDetail />
         </Stack>
       </PageContainer>
