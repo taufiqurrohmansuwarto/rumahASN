@@ -1,19 +1,14 @@
-const SiasnToken = require("@/models/siasn-instansi/siasn-token.model");
-const PRAKOM_ID = process.env.PRAKOM_ID || "master|56543";
+const { createRedisInstance } = require("@/utils/redis");
 
 module.exports = async (req, res, next) => {
   try {
-    const token = await SiasnToken.query()
-      .where("user_id", PRAKOM_ID)
-      .orderBy("created_at", "desc")
-      .first();
-
+    const redis = await createRedisInstance();
+    const token = await redis.get("bknsiasn:access_token");
     if (!token) {
-      res.status(401).json({ code: 401, message: "Unauthorized" });
-    } else {
-      req.token = token.token.access_token;
-      next();
+      res.status(401).json({ message: "Unauthorized" });
     }
+    req.token = token;
+    next();
   } catch (error) {
     console.log(error);
     res
