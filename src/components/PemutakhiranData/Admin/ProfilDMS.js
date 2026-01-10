@@ -1,8 +1,9 @@
 import { useRouter } from "next/router";
 import { useQuery } from "@tanstack/react-query";
 import { getDMSProfile } from "@/services/siasn-services";
-import { Text, Group, Progress, Skeleton, Alert, Box } from "@mantine/core";
-import { IconInfoCircle } from "@tabler/icons-react";
+import { Badge, Skeleton } from "@mantine/core";
+import { IconArchive } from "@tabler/icons-react";
+import { Tooltip } from "antd";
 
 const ProfilDMS = () => {
   const router = useRouter();
@@ -12,31 +13,14 @@ const ProfilDMS = () => {
   );
 
   if (isLoading) {
-    return (
-      <Box
-        style={{
-          maxWidth: 220,
-          border: "1px solid #e9ecef",
-          borderRadius: 6,
-          padding: 12,
-        }}
-      >
-        <Skeleton height={12} width={80} mb={4} />
-        <Skeleton height={6} mb={2} />
-      </Box>
-    );
+    return <Skeleton height={22} width={80} radius="xl" />;
   }
 
-  if (!data?.data?.data) {
-    return (
-      <Alert icon={<IconInfoCircle size={16} />} title="Info" color="blue">
-        Data tidak ditemukan
-      </Alert>
-    );
+  if (!data || data.skor_arsip_digital == null) {
+    return null;
   }
 
-  const profile = data.data.data;
-  const score = profile.skor_arsip_digital;
+  const score = data.skor_arsip_digital;
 
   // Menentukan warna berdasarkan skor
   const getScoreColor = (score) => {
@@ -49,24 +33,17 @@ const ProfilDMS = () => {
   const scoreColor = getScoreColor(score);
 
   return (
-    <Box
-      style={{
-        maxWidth: 220,
-        border: "1px solid #e9ecef",
-        borderRadius: 6,
-        padding: 12,
-      }}
-    >
-      <Group spacing={8} mb={4} noWrap>
-        <Text size="xs" color="dimmed">
-          Skor Arsip Digital:
-        </Text>
-        <Text size="lg" weight={700} color={scoreColor}>
-          {score}
-        </Text>
-      </Group>
-      <Progress value={score} color={scoreColor} size="sm" radius="xl" />
-    </Box>
+    <Tooltip title={`Skor Arsip Digital: ${score}`}>
+      <Badge
+        color={scoreColor}
+        variant="light"
+        leftSection={
+          <IconArchive size={12} style={{ display: "flex", alignItems: "center" }} />
+        }
+      >
+        DMS: {score}
+      </Badge>
+    </Tooltip>
   );
 };
 

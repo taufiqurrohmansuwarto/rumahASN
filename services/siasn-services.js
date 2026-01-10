@@ -1104,7 +1104,7 @@ export const lockAllOperatorGajiPW = async (data = { is_locked: true }) => {
 };
 
 export const getDMSProfile = async (nip) => {
-  return api.get(`/admin/${nip}/profil-dms`).then((res) => res.data);
+  return api.get(`/admin/${nip}/dms/scoring`).then((res) => res.data);
 };
 
 export const uploadDokumenSiasnBaru = async (data) => {

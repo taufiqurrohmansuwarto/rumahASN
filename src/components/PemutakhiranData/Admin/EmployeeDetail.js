@@ -60,6 +60,7 @@ import TrackingPencantumanGelarByNip from "./Usulan/TrackingPencantumanGelarByNi
 import TrackingPenyesuaianMasaKerjaByNip from "./Usulan/TrackingPenyesuaianMasaKerjaByNip";
 import TrackingPerbaikanNamaByNip from "./Usulan/TrackingPerbaikanNamaByNip";
 import TrackingUsulanLainnyaByNip from "./Usulan/TrackingUsulanLainnyaByNip";
+import ProfilDMS from "./ProfilDMS";
 
 // import { patchAnomali2023 } from "@/services/anomali.services";
 
@@ -827,11 +828,14 @@ function EmployeeDetail({ nip }) {
 
   return (
     <Paper p="sm" radius="md" withBorder>
-      <Group spacing="xs" mb="sm">
-        <IconUser size={16} color="blue" />
-        <Text fw={600} size="md">
-          Informasi Pegawai
-        </Text>
+      <Group position="apart" mb="sm">
+        <Group spacing="xs">
+          <IconUser size={16} color="blue" />
+          <Text fw={600} size="md">
+            Informasi Pegawai
+          </Text>
+        </Group>
+        <ProfilDMS />
       </Group>
 
       <Stack spacing="sm">
