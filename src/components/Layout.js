@@ -484,10 +484,12 @@ function Layout({ children, active, collapsed = true }) {
   }, []);
 
   // Lock body scroll saat drawer terbuka di mobile
+  // tutup=true berarti collapsed=false (drawer terbuka)
+  // tutup=false berarti collapsed=true (drawer tertutup)
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    const drawerOpen = !tutup && isMobile;
+    const drawerOpen = tutup && isMobile;
 
     if (drawerOpen) {
       lockBodyScroll();
