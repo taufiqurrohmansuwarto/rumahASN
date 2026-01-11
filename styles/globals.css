@@ -27,6 +27,18 @@
 
 /* Fix ProLayout drawer mask not covering full screen on mobile */
 @media (max-width: 768px) {
+  /* When body is locked (drawer open) */
+  body[style*="position: fixed"] .ant-drawer,
+  body[style*="position: fixed"] .ant-drawer-mask {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+  }
+
   .ant-drawer {
     position: fixed !important;
     top: 0 !important;
@@ -45,9 +57,6 @@
     bottom: 0 !important;
     width: 100% !important;
     height: 100% !important;
-    min-height: 100vh !important;
-    min-height: 100dvh !important; /* Dynamic viewport height for mobile */
-    min-height: -webkit-fill-available !important;
     background: rgba(0, 0, 0, 0.45) !important;
     z-index: 999 !important;
   }
@@ -57,17 +66,11 @@
     top: 0 !important;
     bottom: 0 !important;
     height: 100% !important;
-    min-height: 100vh !important;
-    min-height: 100dvh !important;
-    min-height: -webkit-fill-available !important;
     z-index: 1000 !important;
   }
 
   .ant-drawer-content {
     height: 100% !important;
-    min-height: 100vh !important;
-    min-height: 100dvh !important;
-    min-height: -webkit-fill-available !important;
   }
 
   .ant-pro-layout .ant-drawer,
@@ -84,21 +87,6 @@
     right: 0 !important;
     width: 100% !important;
     height: 100% !important;
-    min-height: 100vh !important;
-    min-height: 100dvh !important;
-    min-height: -webkit-fill-available !important;
     background: rgba(0, 0, 0, 0.45) !important;
-  }
-}
-
-/* Additional fix for iOS Safari */
-@supports (-webkit-touch-callout: none) {
-  .ant-drawer-mask {
-    min-height: -webkit-fill-available !important;
-  }
-
-  .ant-drawer-content-wrapper,
-  .ant-drawer-content {
-    min-height: -webkit-fill-available !important;
   }
 }

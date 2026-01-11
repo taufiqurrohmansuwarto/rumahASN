@@ -24,7 +24,7 @@ import { signOut, useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { userRoutes } from "../routes";
 import FloatAIMenu from "./AITools/FloatAIMenu";
 import { NotificationBellIcon } from "./KnowledgeManagements/notifications";
@@ -445,14 +445,69 @@ function Layout({ children, active, collapsed = true }) {
   const [tutup, setTutup] = useState(collapsed);
 
   const breakPoint = Grid.useBreakpoint();
+  const isMobile = breakPoint.xs;
 
-  const handlePertanyan = () => {
+  // Ref untuk menyimpan scroll position dan status lock
+  const scrollYRef = useRef(0);
+  const isLockedRef = useRef(false);
+
+  // Function untuk lock body scroll
+  const lockBodyScroll = useCallback(() => {
+    if (isLockedRef.current) return;
+
+    scrollYRef.current = window.scrollY;
+    isLockedRef.current = true;
+
+    document.body.style.position = "fixed";
+    document.body.style.top = `-${scrollYRef.current}px`;
+    document.body.style.left = "0";
+    document.body.style.right = "0";
+    document.body.style.overflow = "hidden";
+    document.body.style.width = "100%";
+  }, []);
+
+  // Function untuk unlock body scroll
+  const unlockBodyScroll = useCallback(() => {
+    if (!isLockedRef.current) return;
+
+    const scrollY = scrollYRef.current;
+    isLockedRef.current = false;
+
+    document.body.style.position = "";
+    document.body.style.top = "";
+    document.body.style.left = "";
+    document.body.style.right = "";
+    document.body.style.overflow = "";
+    document.body.style.width = "";
+
+    window.scrollTo(0, scrollY);
+  }, []);
+
+  // Lock body scroll saat drawer terbuka di mobile
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const drawerOpen = !tutup && isMobile;
+
+    if (drawerOpen) {
+      lockBodyScroll();
+    } else {
+      unlockBodyScroll();
+    }
+
+    // Cleanup saat unmount - pastikan body unlock
+    return () => {
+      unlockBodyScroll();
+    };
+  }, [tutup, isMobile, lockBodyScroll, unlockBodyScroll]);
+
+  const handlePertanyan = useCallback(() => {
     router.push(`/tickets/create`);
-  };
+  }, [router]);
 
-  const onCollapsed = () => {
+  const onCollapsed = useCallback(() => {
     setTutup(!tutup);
-  };
+  }, [tutup]);
 
   return (
     <div>
