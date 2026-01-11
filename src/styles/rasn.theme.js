@@ -334,6 +334,58 @@ export const useGlobalStyle = createStyles(({ prefixCls, css, token }) => ({
       }
     }
 
+    // Fix ProLayout drawer mask not covering full screen on mobile
+    .${prefixCls}-pro-sider-collapsed-button {
+      z-index: 101;
+    }
+
+    .${prefixCls}-layout-sider-has-trigger {
+      .${prefixCls}-drawer-mask {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        background: rgba(0, 0, 0, 0.45) !important;
+        z-index: 99 !important;
+      }
+    }
+
+    // ProLayout mobile drawer fix
+    .${prefixCls}-pro-layout {
+      .${prefixCls}-drawer {
+        .${prefixCls}-drawer-mask {
+          position: fixed !important;
+          top: 0 !important;
+          left: 0 !important;
+          width: 100vw !important;
+          height: 100vh !important;
+          background: rgba(0, 0, 0, 0.45) !important;
+        }
+
+        .${prefixCls}-drawer-content-wrapper {
+          z-index: 100;
+        }
+      }
+    }
+
+    // General fix for all drawers in mobile
+    @media (max-width: 768px) {
+      .${prefixCls}-drawer-mask {
+        position: fixed !important;
+        inset: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        background: rgba(0, 0, 0, 0.45) !important;
+      }
+
+      .${prefixCls}-drawer-content-wrapper {
+        position: fixed !important;
+      }
+    }
+
     // Reddit-style Form Labels & Validation
     .${prefixCls}-form {
       .${prefixCls}-form-item-label > label {

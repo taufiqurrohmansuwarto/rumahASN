@@ -24,3 +24,81 @@
 .ant-pro-layout .ant-pro-sider-menu {
   font-family: "Plus Jakarta Sans", "Roboto", Arial, sans-serif;
 }
+
+/* Fix ProLayout drawer mask not covering full screen on mobile */
+@media (max-width: 768px) {
+  .ant-drawer {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  .ant-drawer-mask {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 100vh !important;
+    min-height: 100dvh !important; /* Dynamic viewport height for mobile */
+    min-height: -webkit-fill-available !important;
+    background: rgba(0, 0, 0, 0.45) !important;
+    z-index: 999 !important;
+  }
+
+  .ant-drawer-content-wrapper {
+    position: fixed !important;
+    top: 0 !important;
+    bottom: 0 !important;
+    height: 100% !important;
+    min-height: 100vh !important;
+    min-height: 100dvh !important;
+    min-height: -webkit-fill-available !important;
+    z-index: 1000 !important;
+  }
+
+  .ant-drawer-content {
+    height: 100% !important;
+    min-height: 100vh !important;
+    min-height: 100dvh !important;
+    min-height: -webkit-fill-available !important;
+  }
+
+  .ant-pro-layout .ant-drawer,
+  .ant-pro-layout .ant-drawer-mask,
+  .ant-pro-layout .ant-drawer-content-wrapper,
+  .ant-pro-layout .ant-drawer-content {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    bottom: 0 !important;
+  }
+
+  .ant-pro-layout .ant-drawer-mask {
+    right: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 100vh !important;
+    min-height: 100dvh !important;
+    min-height: -webkit-fill-available !important;
+    background: rgba(0, 0, 0, 0.45) !important;
+  }
+}
+
+/* Additional fix for iOS Safari */
+@supports (-webkit-touch-callout: none) {
+  .ant-drawer-mask {
+    min-height: -webkit-fill-available !important;
+  }
+
+  .ant-drawer-content-wrapper,
+  .ant-drawer-content {
+    min-height: -webkit-fill-available !important;
+  }
+}

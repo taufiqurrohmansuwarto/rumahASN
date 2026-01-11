@@ -16,6 +16,7 @@ import {
   Text,
   Tooltip,
 } from "@mantine/core";
+import { useMediaQuery } from "@mantine/hooks";
 import {
   IconCheck,
   IconClock,
@@ -70,6 +71,7 @@ const StatusBadge = ({ status }) => {
 const RevisionFormModal = ({ open, onClose, references, onSuccess }) => {
   const [form] = Form.useForm();
   const queryClient = useQueryClient();
+  const isMobile = useMediaQuery("(max-width: 576px)");
 
   const { mutate: submitRevision, isLoading } = useMutation(
     (data) => createDocumentRevision(data),
@@ -98,7 +100,8 @@ const RevisionFormModal = ({ open, onClose, references, onSuccess }) => {
       open={open}
       onCancel={onClose}
       footer={null}
-      width={500}
+      width={isMobile ? "95%" : 500}
+      styles={{ body: { padding: isMobile ? 12 : 24 } }}
     >
       <Form form={form} layout="vertical" onFinish={handleSubmit}>
         <Form.Item
@@ -159,13 +162,20 @@ const RevisionFormModal = ({ open, onClose, references, onSuccess }) => {
           />
         </Form.Item>
 
-        <Form.Item style={{ marginBottom: 0, textAlign: "right" }}>
-          <Button onClick={onClose} style={{ marginRight: 8 }}>
-            Batal
-          </Button>
-          <Button type="primary" htmlType="submit" loading={isLoading}>
-            Ajukan Perbaikan
-          </Button>
+        <Form.Item style={{ marginBottom: 0 }}>
+          <Group justify="flex-end" gap="xs" wrap="wrap">
+            <Button onClick={onClose} style={{ flex: isMobile ? 1 : "none" }}>
+              Batal
+            </Button>
+            <Button
+              type="primary"
+              htmlType="submit"
+              loading={isLoading}
+              style={{ flex: isMobile ? 1 : "none" }}
+            >
+              Ajukan Perbaikan
+            </Button>
+          </Group>
         </Form.Item>
       </Form>
     </Modal>
@@ -178,6 +188,7 @@ const AttachmentModal = ({ revision, open, onClose }) => {
   const [linkUrl, setLinkUrl] = useState("");
   const [file, setFile] = useState(null);
   const queryClient = useQueryClient();
+  const isMobile = useMediaQuery("(max-width: 576px)");
 
   const { mutate: uploadFile, isLoading: isUploading } = useMutation(
     ({ id, file }) => uploadAttachmentFile(id, file),
@@ -263,7 +274,8 @@ const AttachmentModal = ({ revision, open, onClose }) => {
       open={open}
       onCancel={handleClose}
       footer={null}
-      width={450}
+      width={isMobile ? "95%" : 450}
+      styles={{ body: { padding: isMobile ? 12 : 24 } }}
     >
       {hasAttachment ? (
         <Stack spacing="md">
@@ -364,13 +376,19 @@ const AttachmentModal = ({ revision, open, onClose }) => {
             />
           )}
 
-          <Group justify="flex-end" spacing="xs">
-            <Button onClick={handleClose}>Batal</Button>
+          <Group justify="flex-end" gap="xs" wrap="wrap">
+            <Button
+              onClick={handleClose}
+              style={{ flex: isMobile ? 1 : "none" }}
+            >
+              Batal
+            </Button>
             <Button
               type="primary"
               onClick={handleSubmit}
               loading={isLoading}
               icon={<IconUpload size={14} />}
+              style={{ flex: isMobile ? 1 : "none" }}
             >
               {attachmentType === "file" ? "Unggah" : "Simpan Link"}
             </Button>
@@ -388,6 +406,7 @@ const RevisionList = ({ references }) => {
     data: null,
   });
   const queryClient = useQueryClient();
+  const isMobile = useMediaQuery("(max-width: 576px)");
 
   const { data, isLoading } = useQuery(
     ["my-document-revisions", status],
@@ -426,7 +445,8 @@ const RevisionList = ({ references }) => {
     return references?.tmt_list?.find((t) => t.value === value)?.label || value;
   };
 
-  const columns = [
+  // Kolom untuk desktop
+  const desktopColumns = [
     {
       title: "Dokumen",
       dataIndex: "document_type",
@@ -558,39 +578,127 @@ const RevisionList = ({ references }) => {
     },
   ];
 
+  // Kolom untuk mobile (lebih ringkas)
+  const mobileColumns = [
+    {
+      title: "Info",
+      key: "info",
+      render: (_, record) => (
+        <Stack gap={4}>
+          <Text size="xs" fw={500} lineClamp={1}>
+            {getDocTypeName(record.document_type)}
+          </Text>
+          <Group gap={4} wrap="nowrap">
+            <Text size="xs" c="dimmed">
+              {getTmtLabel(record.tmt)}
+            </Text>
+            <Text size="xs" c="dimmed">•</Text>
+            <Text size="xs" c="dimmed">
+              {dayjs(record.created_at).format("DD/MM/YY")}
+            </Text>
+          </Group>
+          <Text size="xs" c="dimmed" lineClamp={1}>
+            {getRevisionTypeName(record.revision_type)}
+          </Text>
+        </Stack>
+      ),
+    },
+    {
+      title: "Status",
+      dataIndex: "status",
+      key: "status",
+      width: 90,
+      render: (val) => <StatusBadge status={val} />,
+    },
+    {
+      title: "Aksi",
+      key: "action",
+      width: 70,
+      align: "center",
+      render: (_, record) => (
+        <Space size={4}>
+          {record.attachment_url ? (
+            <ActionIcon
+              variant="subtle"
+              color="blue"
+              size="sm"
+              onClick={() => window.open(record.attachment_url, "_blank")}
+            >
+              {record.attachment_type === "file" ? (
+                <IconFile size={14} />
+              ) : (
+                <IconExternalLink size={14} />
+              )}
+            </ActionIcon>
+          ) : record.status === "pending" ? (
+            <ActionIcon
+              variant="subtle"
+              color="gray"
+              size="sm"
+              onClick={() => setAttachmentModal({ open: true, data: record })}
+            >
+              <IconPaperclip size={14} />
+            </ActionIcon>
+          ) : null}
+          {record.status === "pending" && (
+            <Popconfirm
+              title="Batalkan pengajuan?"
+              description="Pengajuan yang dibatalkan tidak dapat dikembalikan"
+              onConfirm={() => cancelRevision(record.id)}
+              okText="Ya"
+              cancelText="Tidak"
+            >
+              <ActionIcon
+                variant="subtle"
+                color="red"
+                size="sm"
+                loading={isCanceling}
+              >
+                <IconTrash size={14} />
+              </ActionIcon>
+            </Popconfirm>
+          )}
+        </Space>
+      ),
+    },
+  ];
+
+  const columns = isMobile ? mobileColumns : desktopColumns;
+
   return (
     <Stack spacing="xs">
-      <Group spacing="xs">
-        <Select
-          value={status}
-          onChange={setStatus}
-          style={{ width: 150 }}
-          size="small"
-        >
-          <Select.Option value="all">Semua Status</Select.Option>
-          <Select.Option value="pending">Menunggu</Select.Option>
-          <Select.Option value="in_progress">Diproses</Select.Option>
-          <Select.Option value="completed">Selesai</Select.Option>
-          <Select.Option value="rejected">Ditolak</Select.Option>
-        </Select>
-      </Group>
-
-      <Table
-        dataSource={data?.data || []}
-        columns={columns}
-        rowKey="id"
+      <Select
+        value={status}
+        onChange={setStatus}
+        style={{ width: isMobile ? "100%" : 150 }}
         size="small"
-        loading={isLoading}
-        pagination={false}
-        locale={{
-          emptyText: (
-            <Empty
-              image={Empty.PRESENTED_IMAGE_SIMPLE}
-              description="Belum ada pengajuan perbaikan"
-            />
-          ),
-        }}
-      />
+      >
+        <Select.Option value="all">Semua Status</Select.Option>
+        <Select.Option value="pending">Menunggu</Select.Option>
+        <Select.Option value="in_progress">Diproses</Select.Option>
+        <Select.Option value="completed">Selesai</Select.Option>
+        <Select.Option value="rejected">Ditolak</Select.Option>
+      </Select>
+
+      <Box style={{ overflowX: "auto" }}>
+        <Table
+          dataSource={data?.data || []}
+          columns={columns}
+          rowKey="id"
+          size="small"
+          loading={isLoading}
+          pagination={false}
+          scroll={isMobile ? undefined : { x: 900 }}
+          locale={{
+            emptyText: (
+              <Empty
+                image={Empty.PRESENTED_IMAGE_SIMPLE}
+                description="Belum ada pengajuan perbaikan"
+              />
+            ),
+          }}
+        />
+      </Box>
 
       {/* Modal Attachment */}
       <AttachmentModal
@@ -604,6 +712,7 @@ const RevisionList = ({ references }) => {
 
 function DocumentRevisionRequest() {
   const [modalOpen, setModalOpen] = useState(false);
+  const isMobile = useMediaQuery("(max-width: 576px)");
 
   const { data: references, isLoading: loadingRefs } = useQuery(
     ["document-revision-references"],
@@ -615,25 +724,33 @@ function DocumentRevisionRequest() {
     <Stack spacing="xs">
       {/* Header */}
       <Paper p="xs" radius="sm" withBorder>
-        <Group justify="space-between" align="center">
-          <Box>
-            <Text fw={600} size="sm">
-              Pengajuan Perbaikan Dokumen
-            </Text>
-            <Text size="xs" c="dimmed">
-              Ajukan perbaikan untuk SK, PERTEK, SPMT, atau PK
-            </Text>
-          </Box>
-          <Button
-            type="primary"
-            icon={<IconPlus size={14} />}
-            onClick={() => setModalOpen(true)}
-            size="small"
-            loading={loadingRefs}
+        <Stack gap={isMobile ? "xs" : 0}>
+          <Group
+            justify="space-between"
+            align={isMobile ? "flex-start" : "center"}
+            wrap="wrap"
+            gap="xs"
           >
-            Ajukan Perbaikan
-          </Button>
-        </Group>
+            <Box style={{ flex: 1, minWidth: 0 }}>
+              <Text fw={600} size="sm">
+                Pengajuan Perbaikan Dokumen
+              </Text>
+              <Text size="xs" c="dimmed">
+                Ajukan perbaikan untuk SK, PERTEK, SPMT, atau PK
+              </Text>
+            </Box>
+            <Button
+              type="primary"
+              icon={<IconPlus size={14} />}
+              onClick={() => setModalOpen(true)}
+              size="small"
+              loading={loadingRefs}
+              style={{ width: isMobile ? "100%" : "auto" }}
+            >
+              Ajukan Perbaikan
+            </Button>
+          </Group>
+        </Stack>
       </Paper>
 
       {/* List */}

@@ -10,7 +10,10 @@ const ProfilDMS = () => {
   const { nip } = router.query;
   const { data, isLoading, isFetching, refetch } = useQuery(
     ["dms-profile", nip],
-    () => getDMSProfile(nip)
+    () => getDMSProfile(nip),
+    {
+      refetchOnWindowFocus: false,
+    }
   );
 
   if (isLoading) {
@@ -40,7 +43,10 @@ const ProfilDMS = () => {
           color={scoreColor}
           variant="light"
           leftSection={
-            <IconArchive size={12} style={{ display: "flex", alignItems: "center" }} />
+            <IconArchive
+              size={12}
+              style={{ display: "flex", alignItems: "center" }}
+            />
           }
         >
           DMS: {score}
