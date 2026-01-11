@@ -92,6 +92,10 @@ export const getKinerjaPeriodikPersonal = () => {
   return api.get("/pns/kinerja-periodik").then((res) => res.data);
 };
 
+export const getDMSScoringPersonal = () => {
+  return api.get("/pns/dms/scoring").then((res) => res.data);
+};
+
 // riwayat sertifikasi personal
 export const getRwSertifikasiPersonal = () => {
   return api.get("/pns/rw-sertifikasi").then((res) => res.data);

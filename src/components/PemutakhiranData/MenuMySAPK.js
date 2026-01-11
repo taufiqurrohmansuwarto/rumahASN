@@ -31,6 +31,7 @@ import {
 import { useRouter } from "next/router";
 import GantiEmail from "../LayananSIASN/GantiEmail";
 import PengaturanGelar from "../LayananSIASN/PengaturanGelar";
+import ProfilDMSPersonal from "./ProfilDMSPersonal";
 
 const { Title, Text } = Typography;
 
@@ -450,18 +451,25 @@ export function MenuMySAPK({
 
               {/* Profile Info */}
               <Flex vertical style={{ flex: 1, minWidth: 0 }}>
-                <Text
-                  strong
-                  style={{
-                    fontSize: titleFontSize,
-                    color: "#1A1A1B",
-                    marginBottom: "6px",
-                    wordBreak: "break-word",
-                    lineHeight: isMobile ? "1.3" : "1.4",
-                  }}
+                <Flex
+                  align="center"
+                  gap={8}
+                  wrap="wrap"
+                  style={{ marginBottom: "6px" }}
                 >
-                  {dataUtama?.nama}
-                </Text>
+                  <Text
+                    strong
+                    style={{
+                      fontSize: titleFontSize,
+                      color: "#1A1A1B",
+                      wordBreak: "break-word",
+                      lineHeight: isMobile ? "1.3" : "1.4",
+                    }}
+                  >
+                    {dataUtama?.nama}
+                  </Text>
+                  <ProfilDMSPersonal />
+                </Flex>
                 <Text
                   style={{
                     color: "#787C7E",

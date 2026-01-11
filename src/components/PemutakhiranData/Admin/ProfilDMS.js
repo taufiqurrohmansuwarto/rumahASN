@@ -1,15 +1,16 @@
 import { useRouter } from "next/router";
 import { useQuery } from "@tanstack/react-query";
 import { getDMSProfile } from "@/services/siasn-services";
-import { Badge, Skeleton } from "@mantine/core";
-import { IconArchive } from "@tabler/icons-react";
+import { ActionIcon, Badge, Group, Skeleton } from "@mantine/core";
+import { IconArchive, IconRefresh } from "@tabler/icons-react";
 import { Tooltip } from "antd";
 
 const ProfilDMS = () => {
   const router = useRouter();
   const { nip } = router.query;
-  const { data, isLoading } = useQuery(["dms-profile", nip], () =>
-    getDMSProfile(nip)
+  const { data, isLoading, isFetching, refetch } = useQuery(
+    ["dms-profile", nip],
+    () => getDMSProfile(nip)
   );
 
   if (isLoading) {
@@ -33,17 +34,30 @@ const ProfilDMS = () => {
   const scoreColor = getScoreColor(score);
 
   return (
-    <Tooltip title={`Skor Arsip Digital: ${score}`}>
-      <Badge
-        color={scoreColor}
-        variant="light"
-        leftSection={
-          <IconArchive size={12} style={{ display: "flex", alignItems: "center" }} />
-        }
-      >
-        DMS: {score}
-      </Badge>
-    </Tooltip>
+    <Group gap={4}>
+      <Tooltip title={`Skor Arsip Digital: ${score}`}>
+        <Badge
+          color={scoreColor}
+          variant="light"
+          leftSection={
+            <IconArchive size={12} style={{ display: "flex", alignItems: "center" }} />
+          }
+        >
+          DMS: {score}
+        </Badge>
+      </Tooltip>
+      <Tooltip title="Refresh DMS">
+        <ActionIcon
+          size="xs"
+          variant="subtle"
+          color="gray"
+          onClick={refetch}
+          loading={isFetching}
+        >
+          <IconRefresh size={12} />
+        </ActionIcon>
+      </Tooltip>
+    </Group>
   );
 };
 

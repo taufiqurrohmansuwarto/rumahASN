@@ -42,7 +42,9 @@ module.exports.proxyKeluargaPasangan = async (fetcher, nip) => {
 };
 
 module.exports.proxyDataUtamaASN = async (fetcher, nip) => {
-  return fetcher.get(`/siasn-ws/proxy/asn/${nip}/data-utama`);
+  return fetcher
+    .get(`/siasn-ws/proxy/asn/${nip}/data-utama`)
+    .then((res) => res?.data?.data || null);
 };
 
 module.exports.proxyGelar = async (fetcher, nip) => {

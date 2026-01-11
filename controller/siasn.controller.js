@@ -3,6 +3,7 @@ const apiGateway = process.env.APIGATEWAY_URL;
 const fs = require("fs");
 const path = require("path");
 const Pegawai = require("@/models/siasn-employees.model");
+const siasn = require("@/utils/config/siasn");
 
 const dayjs = require("dayjs");
 require("dayjs/locale/id");
@@ -50,6 +51,7 @@ const {
   cariPnsKinerja,
   getDataUtamaASNProxy,
   getFileAsn,
+  proxyDataUtamaASN,
 } = require("@/utils/siasn-proxy.utils");
 const { getRwPangkat } = require("@/utils/master.utils");
 const { createLogSIASN } = require("@/utils/logs");
@@ -113,13 +115,16 @@ const siasnEmployeesDetail = async (req, res) => {
   try {
     const user = req.user;
     const siasnRequest = req.siasnRequest;
+    const fetcher = req.fetcher;
 
     const nip = user?.employee_number;
 
     let result = null;
 
     try {
-      result = await dataUtama(siasnRequest, nip);
+      result = await siasn
+        .withFetchers(siasnRequest, fetcher)
+        .call("getDataUtama", nip);
     } catch (error) {
       console.log(
         "dataUtama error, trying dataUtamaParuhWaktu:",
@@ -134,7 +139,7 @@ const siasnEmployeesDetail = async (req, res) => {
 
     res.json(result);
   } catch (error) {
-    res.status(500).json({ code: 500, message: "Internal Server Error" });
+    handleError(res, error);
   }
 };
 
