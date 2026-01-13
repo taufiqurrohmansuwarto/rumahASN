@@ -184,12 +184,13 @@ const download = async (req, res) => {
 };
 
 /**
- * Update lampiran metadata
+ * Update lampiran metadata and optionally replace file
  */
 const update = async (req, res) => {
   try {
     const { id } = req?.query;
     const { customId: userId } = req?.user;
+    const { mc } = req;
     const { file_name, unit_kerja, usulan_id } = req?.body;
 
     const lampiran = await Lampiran.query().findById(id);
@@ -210,7 +211,41 @@ const update = async (req, res) => {
       diperbarui_oleh: userId,
     };
 
-    if (file_name !== undefined) updateData.file_name = file_name;
+    // Check if there's a new file to upload
+    if (req.file) {
+      const file = req.file;
+      const fileExtension = file.originalname.split(".").pop();
+      const uniqueId = nanoid(8);
+      const filename = `perencanaan/lampiran/${lampiran.usulan_id || "general"}/${uniqueId}-${file.originalname}`;
+
+      // Upload new file to Minio (correct parameter order: mc, buffer, filename, size, mimetype, metadata)
+      await uploadFilePublic(mc, file.buffer, filename, file.size, file.mimetype, {
+        "uploaded-by": userId,
+        "original-name": file.originalname,
+        "upload-date": new Date().toISOString(),
+      });
+      const fileUrl = generatePublicUrl(filename);
+
+      // Delete old file from Minio
+      const oldUrlInfo = parseMinioUrl(lampiran.file_url);
+      if (oldUrlInfo) {
+        try {
+          await deleteFilePublic(mc, oldUrlInfo.filename);
+        } catch (error) {
+          console.error("Error deleting old file from Minio:", error);
+        }
+      }
+
+      // Update file info
+      updateData.file_name = file_name || file.originalname;
+      updateData.file_url = fileUrl;
+      updateData.file_type = file.mimetype;
+      updateData.file_size = file.size;
+    } else {
+      // Only update metadata
+      if (file_name !== undefined) updateData.file_name = file_name;
+    }
+
     if (unit_kerja !== undefined) updateData.unit_kerja = unit_kerja;
     if (usulan_id !== undefined) updateData.usulan_id = usulan_id;
 

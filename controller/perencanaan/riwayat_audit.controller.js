@@ -1,6 +1,41 @@
 const RiwayatAudit = require("@/models/perencanaan/perencanaan.riwayat_audit.model");
 const { handleError } = require("@/utils/helper/controller-helper");
 
+// Helper function to get jabatan name by id and jenis
+const getJabatanName = async (knex, jabatanId, jenisJabatan) => {
+  if (!jabatanId) return null;
+
+  if (jenisJabatan === "fungsional") {
+    const result = await knex("simaster_jft")
+      .select(
+        knex.raw(
+          "CONCAT(name, ' ', jenjang_jab, ' - ', gol_ruang) as nama_jabatan"
+        )
+      )
+      .where("id", jabatanId)
+      .first();
+    return result?.nama_jabatan || jabatanId;
+  } else if (jenisJabatan === "pelaksana") {
+    const result = await knex("simaster_jfu")
+      .select("name as nama_jabatan")
+      .where("id", jabatanId)
+      .first();
+    return result?.nama_jabatan || jabatanId;
+  }
+  return jabatanId;
+};
+
+// Helper function to get unit kerja hierarchy
+const getUnitKerjaHierarchy = async (knex, unitKerjaId) => {
+  if (!unitKerjaId) return null;
+
+  const result = await knex.raw(
+    "SELECT get_hierarchy_simaster(?) as hierarchy",
+    [unitKerjaId]
+  );
+  return result.rows?.[0]?.hierarchy || unitKerjaId;
+};
+
 /**
  * Get all riwayat audit
  */
@@ -18,6 +53,8 @@ const getAll = async (req, res) => {
       startDate,
       endDate,
     } = req?.query;
+
+    const knex = RiwayatAudit.knex();
 
     let query = RiwayatAudit.query().withGraphFetched(
       "[formasi, usulan, dibuatOleh(simpleSelect), diperbaruiOleh(simpleSelect)]"
@@ -57,9 +94,31 @@ const getAll = async (req, res) => {
     const order = sortOrder === "ascend" ? "asc" : "desc";
     query = query.orderBy(sortField, order);
 
+    // Helper to transform audit data
+    const transformAudit = async (auditList) => {
+      return Promise.all(
+        auditList.map(async (item) => {
+          // Get nama_jabatan from data_baru or data_lama
+          const jabatanId = item.data_baru?.jabatan_id || item.data_lama?.jabatan_id;
+          const jenisJabatan = item.data_baru?.jenis_jabatan || item.data_lama?.jenis_jabatan;
+          const unitKerja = item.data_baru?.unit_kerja || item.data_lama?.unit_kerja;
+
+          const namaJabatan = await getJabatanName(knex, jabatanId, jenisJabatan);
+          const unitKerjaText = await getUnitKerjaHierarchy(knex, unitKerja);
+
+          return {
+            ...item,
+            nama_jabatan: namaJabatan,
+            unit_kerja_text: unitKerjaText,
+          };
+        })
+      );
+    };
+
     // Pagination
     if (parseInt(limit) === -1) {
       const result = await query;
+      const transformedData = await transformAudit(result);
       const rekapByAksi = result.reduce((acc, item) => {
         acc[item.aksi] = (acc[item.aksi] || 0) + 1;
         return acc;
@@ -70,12 +129,14 @@ const getAll = async (req, res) => {
         aksi: rekapByAksi,
       };
 
-      return res.json({ data: result, rekap });
+      return res.json({ data: transformedData, rekap });
     }
 
     const result = await query.page(parseInt(page) - 1, parseInt(limit));
+    const transformedData = await transformAudit(result.results);
+
     res.json({
-      data: result.results,
+      data: transformedData,
       meta: {
         total: result.total,
         page: parseInt(page),

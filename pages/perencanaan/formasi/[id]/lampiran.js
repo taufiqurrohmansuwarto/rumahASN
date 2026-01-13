@@ -1,12 +1,16 @@
 import PageContainer from "@/components/PageContainer";
+import FormasiDetail from "@/components/PerencanaanFormasi/FormasiDetail";
+import PerencanaanFormasiLayout from "@/components/PerencanaanFormasi/PerencanaanFormasiLayout";
 import useScrollRestoration from "@/hooks/useScrollRestoration";
 import { Breadcrumb, FloatButton } from "antd";
 import Head from "next/head";
 import Link from "next/link";
-import PerencanaanFormasiLayout from "@/components/PerencanaanFormasi/PerencanaanFormasiLayout";
+import { useRouter } from "next/router";
 
 const LampiranFormasi = () => {
   useScrollRestoration();
+  const router = useRouter();
+  const { id } = router.query;
 
   return (
     <>
@@ -14,16 +18,18 @@ const LampiranFormasi = () => {
         <title>Rumah ASN - Lampiran Formasi</title>
       </Head>
       <PageContainer
-        title="Lampiran Formasi"
-        subTitle="Daftar lampiran formasi perencanaan"
+        title="Detail Formasi"
+        subTitle="Kelola usulan dan lampiran formasi"
         breadcrumbRender={() => (
           <Breadcrumb>
             <Breadcrumb.Item>
-              <Link href="/perencanaan/formasi/[id]">Lampiran Formasi</Link>
+              <Link href="/perencanaan/formasi">Formasi</Link>
             </Breadcrumb.Item>
+            <Breadcrumb.Item>Lampiran</Breadcrumb.Item>
           </Breadcrumb>
         )}
       >
+        <FormasiDetail formasiId={id} activeTab="lampiran" />
         <FloatButton.BackTop />
       </PageContainer>
     </>

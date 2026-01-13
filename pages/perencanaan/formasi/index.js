@@ -1,9 +1,10 @@
 import PageContainer from "@/components/PageContainer";
+import FormasiList from "@/components/PerencanaanFormasi/FormasiList";
+import PerencanaanFormasiLayout from "@/components/PerencanaanFormasi/PerencanaanFormasiLayout";
 import useScrollRestoration from "@/hooks/useScrollRestoration";
 import { Breadcrumb, FloatButton } from "antd";
 import Head from "next/head";
 import Link from "next/link";
-import PerencanaanFormasiLayout from "@/components/PerencanaanFormasi/PerencanaanFormasiLayout";
 
 const Formasi = () => {
   useScrollRestoration();
@@ -11,11 +12,11 @@ const Formasi = () => {
   return (
     <>
       <Head>
-        <title>Rumah ASN - Formasi</title>
+        <title>Rumah ASN - Perencanaan Formasi</title>
       </Head>
       <PageContainer
-        title="Formasi"
-        subTitle="Daftar formasi perencanaan"
+        title="Perencanaan"
+        subTitle="Kelola formasi dan usulan jabatan"
         breadcrumbRender={() => (
           <Breadcrumb>
             <Breadcrumb.Item>
@@ -24,6 +25,7 @@ const Formasi = () => {
           </Breadcrumb>
         )}
       >
+        <FormasiList />
         <FloatButton.BackTop />
       </PageContainer>
     </>

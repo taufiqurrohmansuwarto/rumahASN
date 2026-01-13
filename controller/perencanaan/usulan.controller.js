@@ -1,7 +1,63 @@
 const Usulan = require("@/models/perencanaan/perencanaan.usulan.model");
 const Formasi = require("@/models/perencanaan/perencanaan.formasi.model");
 const RiwayatAudit = require("@/models/perencanaan/perencanaan.riwayat_audit.model");
+
 const { handleError } = require("@/utils/helper/controller-helper");
+
+// Helper function to get jabatan name by id and jenis
+const getJabatanName = async (knex, jabatanId, jenisJabatan) => {
+  if (!jabatanId) return null;
+
+  if (jenisJabatan === "fungsional") {
+    const result = await knex("simaster_jft")
+      .select(
+        knex.raw(
+          "CONCAT(name, ' ', jenjang_jab, ' - ', gol_ruang) as nama_jabatan"
+        )
+      )
+      .where("id", jabatanId)
+      .first();
+    return result?.nama_jabatan || jabatanId;
+  } else if (jenisJabatan === "pelaksana") {
+    const result = await knex("simaster_jfu")
+      .select("name as nama_jabatan")
+      .where("id", jabatanId)
+      .first();
+    return result?.nama_jabatan || jabatanId;
+  }
+  return jabatanId;
+};
+
+// Helper function to get unit kerja hierarchy
+const getUnitKerjaHierarchy = async (knex, unitKerjaId) => {
+  if (!unitKerjaId) return null;
+
+  const result = await knex.raw(
+    "SELECT get_hierarchy_simaster(?) as hierarchy",
+    [unitKerjaId]
+  );
+  return result.rows?.[0]?.hierarchy || unitKerjaId;
+};
+
+// Helper function to get pendidikan details by IDs
+const getPendidikanDetails = async (knex, pendidikanIds) => {
+  if (
+    !pendidikanIds ||
+    !Array.isArray(pendidikanIds) ||
+    pendidikanIds.length === 0
+  ) {
+    return [];
+  }
+
+  const result = await knex.raw(
+    `SELECT rsp.id as value, stk.nama as tk_pend, rsp.nama as label 
+     FROM ref_siasn.pendidikan rsp 
+     LEFT JOIN siasn_tk_pend stk ON stk.id::text = rsp.tk_pendidikan_id::text 
+     WHERE rsp.id IN (${pendidikanIds.map(() => "?").join(",")})`,
+    pendidikanIds
+  );
+  return result.rows || [];
+};
 
 /**
  * Get all usulan
@@ -19,6 +75,8 @@ const getAll = async (req, res) => {
       sortField = "dibuat_pada",
       sortOrder = "desc",
     } = req?.query;
+
+    const knex = Usulan.knex();
 
     let query = Usulan.query().withGraphFetched(
       "[formasi, lampiran, dibuatOleh(simpleSelect), diperbaruiOleh(simpleSelect), diverifikasiOleh(simpleSelect)]"
@@ -39,9 +97,9 @@ const getAll = async (req, res) => {
       query = query.where("jenis_jabatan", jenis_jabatan);
     }
 
-    // Filter by unit_kerja
+    // Filter by unit_kerja (prefix match like '123%')
     if (unit_kerja) {
-      query = query.where("unit_kerja", "ilike", `%${unit_kerja}%`);
+      query = query.where("unit_kerja", "ilike", `${unit_kerja}%`);
     }
 
     // Search
@@ -58,9 +116,43 @@ const getAll = async (req, res) => {
     const order = sortOrder === "ascend" ? "asc" : "desc";
     query = query.orderBy(sortField, order);
 
+    // Helper to transform usulan data
+    const transformUsulan = async (usulanList) => {
+      return Promise.all(
+        usulanList.map(async (item) => {
+          // Get jabatan name
+          const namaJabatan = await getJabatanName(
+            knex,
+            item.jabatan_id,
+            item.jenis_jabatan
+          );
+
+          // Get unit kerja hierarchy
+          const unitKerjaHierarchy = await getUnitKerjaHierarchy(
+            knex,
+            item.unit_kerja
+          );
+
+          // Get pendidikan details
+          const pendidikanDetails = await getPendidikanDetails(
+            knex,
+            item.kualifikasi_pendidikan
+          );
+
+          return {
+            ...item,
+            nama_jabatan: namaJabatan,
+            unit_kerja_text: unitKerjaHierarchy,
+            kualifikasi_pendidikan_detail: pendidikanDetails,
+          };
+        })
+      );
+    };
+
     // Pagination
     if (parseInt(limit) === -1) {
       const result = await query;
+      const transformedData = await transformUsulan(result);
       const rekap = {
         total: result.length,
         disetujui: result.filter((x) => x.status === "disetujui").length,
@@ -69,17 +161,42 @@ const getAll = async (req, res) => {
         perbaikan: result.filter((x) => x.status === "perbaikan").length,
       };
 
-      return res.json({ data: result, rekap });
+      return res.json({ data: transformedData, rekap });
     }
 
     const result = await query.page(parseInt(page) - 1, parseInt(limit));
+    const transformedData = await transformUsulan(result.results);
+
+    // Get rekap stats
+    const rekapQuery = await Usulan.query()
+      .where((builder) => {
+        if (formasi_id) builder.where("formasi_id", formasi_id);
+        if (status) builder.where("status", status);
+        if (jenis_jabatan) builder.where("jenis_jabatan", jenis_jabatan);
+        if (unit_kerja) builder.where("unit_kerja", "ilike", `${unit_kerja}%`);
+      })
+      .select(
+        knex.raw("COUNT(*) FILTER (WHERE status = 'disetujui') as disetujui"),
+        knex.raw("COUNT(*) FILTER (WHERE status = 'ditolak') as ditolak"),
+        knex.raw("COUNT(*) FILTER (WHERE status = 'menunggu') as menunggu"),
+        knex.raw("COUNT(*) FILTER (WHERE status = 'perbaikan') as perbaikan")
+      )
+      .first();
+
     res.json({
-      data: result.results,
+      data: transformedData,
       meta: {
         total: result.total,
         page: parseInt(page),
         limit: parseInt(limit),
         totalPages: Math.ceil(result.total / parseInt(limit)),
+      },
+      rekap: {
+        total: result.total,
+        disetujui: parseInt(rekapQuery?.disetujui || 0),
+        ditolak: parseInt(rekapQuery?.ditolak || 0),
+        menunggu: parseInt(rekapQuery?.menunggu || 0),
+        perbaikan: parseInt(rekapQuery?.perbaikan || 0),
       },
     });
   } catch (error) {
@@ -93,6 +210,7 @@ const getAll = async (req, res) => {
 const getById = async (req, res) => {
   try {
     const { id } = req?.query;
+    const knex = Usulan.knex();
 
     const result = await Usulan.query()
       .findById(id)
@@ -104,7 +222,31 @@ const getById = async (req, res) => {
       return res.status(404).json({ message: "Usulan tidak ditemukan" });
     }
 
-    res.json(result);
+    // Get jabatan name
+    const namaJabatan = await getJabatanName(
+      knex,
+      result.jabatan_id,
+      result.jenis_jabatan
+    );
+
+    // Get unit kerja hierarchy
+    const unitKerjaHierarchy = await getUnitKerjaHierarchy(
+      knex,
+      result.unit_kerja
+    );
+
+    // Get pendidikan details
+    const pendidikanDetails = await getPendidikanDetails(
+      knex,
+      result.kualifikasi_pendidikan
+    );
+
+    res.json({
+      ...result,
+      nama_jabatan: namaJabatan,
+      unit_kerja_text: unitKerjaHierarchy,
+      kualifikasi_pendidikan_detail: pendidikanDetails,
+    });
   } catch (error) {
     handleError(res, error);
   }
@@ -116,7 +258,15 @@ const getById = async (req, res) => {
 const create = async (req, res) => {
   try {
     const { customId: userId } = req?.user;
-    const { formasi_id, jenis_jabatan, jabatan_id, kualifikasi_pendidikan, alokasi, unit_kerja, lampiran_id } = req?.body;
+    const {
+      formasi_id,
+      jenis_jabatan,
+      jabatan_id,
+      kualifikasi_pendidikan,
+      alokasi,
+      unit_kerja,
+      lampiran_id,
+    } = req?.body;
 
     // Validate formasi exists
     const formasi = await Formasi.query().findById(formasi_id);
@@ -161,8 +311,15 @@ const update = async (req, res) => {
     const { id } = req?.query;
     const { customId: userId } = req?.user;
     const isAdmin = req?.user?.current_role === "admin";
-    const { jenis_jabatan, jabatan_id, kualifikasi_pendidikan, alokasi, unit_kerja, lampiran_id, alasan_perbaikan } =
-      req?.body;
+    const {
+      jenis_jabatan,
+      jabatan_id,
+      kualifikasi_pendidikan,
+      alokasi,
+      unit_kerja,
+      lampiran_id,
+      alasan_perbaikan,
+    } = req?.body;
 
     const usulan = await Usulan.query().findById(id);
 
@@ -172,7 +329,9 @@ const update = async (req, res) => {
 
     // Non-admin hanya boleh update jika status belum disetujui
     if (!isAdmin && usulan.status === "disetujui") {
-      return res.status(403).json({ message: "Usulan sudah disetujui, tidak bisa diubah" });
+      return res
+        .status(403)
+        .json({ message: "Usulan sudah disetujui, tidak bisa diubah" });
     }
 
     // Store old data for audit
@@ -184,11 +343,13 @@ const update = async (req, res) => {
 
     if (jenis_jabatan !== undefined) updateData.jenis_jabatan = jenis_jabatan;
     if (jabatan_id !== undefined) updateData.jabatan_id = jabatan_id;
-    if (kualifikasi_pendidikan !== undefined) updateData.kualifikasi_pendidikan = kualifikasi_pendidikan;
+    if (kualifikasi_pendidikan !== undefined)
+      updateData.kualifikasi_pendidikan = kualifikasi_pendidikan;
     if (alokasi !== undefined) updateData.alokasi = alokasi;
     if (unit_kerja !== undefined) updateData.unit_kerja = unit_kerja;
     if (lampiran_id !== undefined) updateData.lampiran_id = lampiran_id;
-    if (alasan_perbaikan !== undefined) updateData.alasan_perbaikan = alasan_perbaikan;
+    if (alasan_perbaikan !== undefined)
+      updateData.alasan_perbaikan = alasan_perbaikan;
 
     // If status is perbaikan, update status to menunggu
     if (usulan.status === "perbaikan" && alasan_perbaikan) {
@@ -227,7 +388,7 @@ const updateStatus = async (req, res) => {
     if (req?.user?.current_role !== "admin") {
       return res.status(403).json({ message: "Forbidden" });
     }
-    const { status, alasan_perbaikan } = req?.body;
+    const { status, alasan_perbaikan, catatan } = req?.body;
 
     const usulan = await Usulan.query().findById(id);
 
@@ -252,6 +413,11 @@ const updateStatus = async (req, res) => {
       updateData.alasan_perbaikan = alasan_perbaikan;
     }
 
+    // Update catatan if provided
+    if (catatan !== undefined) {
+      updateData.catatan = catatan;
+    }
+
     await Usulan.query().findById(id).patch(updateData);
 
     // Get updated data
@@ -268,7 +434,10 @@ const updateStatus = async (req, res) => {
       ip_address: req?.ip || req?.connection?.remoteAddress,
     });
 
-    res.json({ code: 200, message: `Status usulan berhasil diperbarui menjadi ${status}` });
+    res.json({
+      code: 200,
+      message: `Status usulan berhasil diperbarui menjadi ${status}`,
+    });
   } catch (error) {
     handleError(res, error);
   }
@@ -289,9 +458,11 @@ const remove = async (req, res) => {
       return res.status(404).json({ message: "Usulan tidak ditemukan" });
     }
 
-    // Non-admin hanya boleh hapus jika status belum disetujui
-    if (!isAdmin && usulan.status === "disetujui") {
-      return res.status(403).json({ message: "Usulan sudah disetujui, tidak bisa dihapus" });
+    // Non-admin hanya boleh hapus jika status === "menunggu"
+    if (!isAdmin && usulan.status !== "menunggu") {
+      return res.status(403).json({
+        message: `Usulan dengan status "${usulan.status}" tidak bisa dihapus. Hanya usulan dengan status "menunggu" yang bisa dihapus.`,
+      });
     }
 
     // Store data for audit
@@ -323,4 +494,3 @@ module.exports = {
   updateStatus,
   remove,
 };
-

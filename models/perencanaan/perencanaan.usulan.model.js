@@ -15,6 +15,11 @@ class Usulan extends Model {
     return "usulan_id";
   }
 
+  // Define JSON columns for proper serialization
+  static get jsonAttributes() {
+    return ["kualifikasi_pendidikan"];
+  }
+
   $beforeInsert() {
     this.usulan_id = `usul-${nanoid()}`;
     this.dibuat_pada = new Date().toISOString();

@@ -184,7 +184,12 @@ export const uploadLampiran = async (formData) => {
  * @param {Object} data - { file_name, unit_kerja, usulan_id }
  */
 export const updateLampiran = async (id, data) => {
-  return api.patch(`/lampiran/${id}`, data).then((res) => res?.data);
+  // Check if data is FormData (for file upload)
+  const isFormData = data instanceof FormData;
+  const config = isFormData
+    ? { headers: { "Content-Type": "multipart/form-data" } }
+    : {};
+  return api.patch(`/lampiran/${id}`, data, config).then((res) => res?.data);
 };
 
 /**
@@ -276,3 +281,30 @@ export const exportRiwayatAudit = async (params = {}) => {
   return api.get(`/riwayat-audit?${query}`, { responseType: "blob" });
 };
 
+// ==========================================
+// REFERENSI
+// ==========================================
+
+/**
+ * Get jabatan fungsional (JFT)
+ * @returns {Promise<Array>} - Array of { id, nama, value, label }
+ */
+export const getJabatanFungsional = async () => {
+  return api.get("/referensi?type=jft").then((res) => res?.data);
+};
+
+/**
+ * Get jabatan pelaksana (JFU)
+ * @returns {Promise<Array>} - Array of { id, nama, value, label }
+ */
+export const getJabatanPelaksana = async () => {
+  return api.get("/referensi?type=jfu").then((res) => res?.data);
+};
+
+/**
+ * Get pendidikan
+ * @returns {Promise<Array>} - Array of { id, nama, value, label }
+ */
+export const getPendidikan = async () => {
+  return api.get("/referensi?type=pendidikan").then((res) => res?.data);
+};

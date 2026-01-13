@@ -19,7 +19,11 @@ const upload = multer({
 
 const router = createRouter();
 
-router.use(auth).use(adminFasilitator).get(getAllLampiran).post(upload.single("file"), uploadLampiran);
+router
+  .use(auth)
+  .use(adminFasilitator)
+  .get(getAllLampiran)
+  .post(upload.single("file"), uploadLampiran);
 
 export default router.handler({});
 

@@ -1,9 +1,10 @@
 import PageContainer from "@/components/PageContainer";
+import AuditLogList from "@/components/PerencanaanFormasi/AuditLogList";
+import PerencanaanFormasiLayout from "@/components/PerencanaanFormasi/PerencanaanFormasiLayout";
 import useScrollRestoration from "@/hooks/useScrollRestoration";
 import { Breadcrumb, FloatButton } from "antd";
 import Head from "next/head";
 import Link from "next/link";
-import PerencanaanFormasiLayout from "@/components/PerencanaanFormasi/PerencanaanFormasiLayout";
 
 const AuditLogFormasi = () => {
   useScrollRestoration();
@@ -11,19 +12,21 @@ const AuditLogFormasi = () => {
   return (
     <>
       <Head>
-        <title>Rumah ASN - Audit Log Formasi</title>
+        <title>Rumah ASN - Audit Log Perencanaan</title>
       </Head>
       <PageContainer
-        title="Audit Log Formasi"
-        subTitle="Daftar audit log formasi perencanaan"
+        title="Audit Log"
+        subTitle="Riwayat perubahan data perencanaan formasi"
         breadcrumbRender={() => (
           <Breadcrumb>
             <Breadcrumb.Item>
-              <Link href="/perencanaan/audit-log">Audit Log Formasi</Link>
+              <Link href="/perencanaan/formasi">Formasi</Link>
             </Breadcrumb.Item>
+            <Breadcrumb.Item>Audit Log</Breadcrumb.Item>
           </Breadcrumb>
         )}
       >
+        <AuditLogList />
         <FloatButton.BackTop />
       </PageContainer>
     </>
