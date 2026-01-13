@@ -78,9 +78,16 @@ const getAll = async (req, res) => {
 
     const knex = Usulan.knex();
 
+    const { customId: userId, current_role } = req?.user;
+
     let query = Usulan.query().withGraphFetched(
       "[formasi, lampiran, dibuatOleh(simpleSelect), diperbaruiOleh(simpleSelect), diverifikasiOleh(simpleSelect)]"
     );
+
+    // Non-admin hanya bisa melihat usulan miliknya sendiri
+    if (current_role !== "admin") {
+      query = query.where("dibuat_oleh", userId);
+    }
 
     // Filter by status
     if (status) {
@@ -168,7 +175,14 @@ const getAll = async (req, res) => {
     const transformedData = await transformUsulan(result.results);
 
     // Get rekap stats
-    const rekapQuery = await Usulan.query()
+    let rekapQueryBuilder = Usulan.query();
+
+    // Non-admin hanya melihat statistik usulan miliknya sendiri
+    if (current_role !== "admin") {
+      rekapQueryBuilder = rekapQueryBuilder.where("dibuat_oleh", userId);
+    }
+
+    const rekapQuery = await rekapQueryBuilder
       .where((builder) => {
         if (formasi_id) builder.where("formasi_id", formasi_id);
         if (status) builder.where("status", status);
@@ -211,12 +225,20 @@ const getById = async (req, res) => {
   try {
     const { id } = req?.query;
     const knex = Usulan.knex();
+    const { customId: userId, current_role } = req?.user;
 
-    const result = await Usulan.query()
+    let query = Usulan.query()
       .findById(id)
       .withGraphFetched(
         "[formasi, lampiran, dibuatOleh(simpleSelect), diperbaruiOleh(simpleSelect), diverifikasiOleh(simpleSelect)]"
       );
+
+    // Non-admin hanya bisa melihat usulan miliknya sendiri
+    if (current_role !== "admin") {
+      query = query.where("dibuat_oleh", userId);
+    }
+
+    const result = await query;
 
     if (!result) {
       return res.status(404).json({ message: "Usulan tidak ditemukan" });
@@ -266,12 +288,19 @@ const create = async (req, res) => {
       alokasi,
       unit_kerja,
       lampiran_id,
+      catatan,
+      alasan_perbaikan,
     } = req?.body;
 
-    // Validate formasi exists
+    // Validate formasi exists and is active
     const formasi = await Formasi.query().findById(formasi_id);
     if (!formasi) {
       return res.status(404).json({ message: "Formasi tidak ditemukan" });
+    }
+    if (formasi.status !== "aktif") {
+      return res.status(400).json({
+        message: "Formasi tidak aktif, tidak dapat membuat usulan",
+      });
     }
 
     const result = await Usulan.query().insert({
@@ -283,6 +312,8 @@ const create = async (req, res) => {
       unit_kerja,
       status: "menunggu",
       lampiran_id: lampiran_id || null,
+      catatan: catatan || null,
+      alasan_perbaikan: alasan_perbaikan || null,
       dibuat_oleh: userId,
       diperbarui_oleh: userId,
     });
@@ -318,6 +349,7 @@ const update = async (req, res) => {
       alokasi,
       unit_kerja,
       lampiran_id,
+      catatan,
       alasan_perbaikan,
     } = req?.body;
 
@@ -325,6 +357,14 @@ const update = async (req, res) => {
 
     if (!usulan) {
       return res.status(404).json({ message: "Usulan tidak ditemukan" });
+    }
+
+    // Check if formasi is active
+    const formasi = await Formasi.query().findById(usulan.formasi_id);
+    if (formasi && formasi.status !== "aktif") {
+      return res.status(400).json({
+        message: "Formasi tidak aktif, tidak dapat mengubah usulan",
+      });
     }
 
     // Non-admin hanya boleh update jika status belum disetujui
@@ -348,6 +388,7 @@ const update = async (req, res) => {
     if (alokasi !== undefined) updateData.alokasi = alokasi;
     if (unit_kerja !== undefined) updateData.unit_kerja = unit_kerja;
     if (lampiran_id !== undefined) updateData.lampiran_id = lampiran_id;
+    if (catatan !== undefined) updateData.catatan = catatan;
     if (alasan_perbaikan !== undefined)
       updateData.alasan_perbaikan = alasan_perbaikan;
 
@@ -458,10 +499,20 @@ const remove = async (req, res) => {
       return res.status(404).json({ message: "Usulan tidak ditemukan" });
     }
 
+    const owner = usulan.dibuat_oleh === userId;
+
+    // Check if formasi is active
+    const formasi = await Formasi.query().findById(usulan.formasi_id);
+    if (formasi && formasi.status !== "aktif") {
+      return res.status(400).json({
+        message: "Formasi tidak aktif, tidak dapat menghapus usulan",
+      });
+    }
+
     // Non-admin hanya boleh hapus jika status === "menunggu"
-    if (!isAdmin && usulan.status !== "menunggu") {
+    if (!isAdmin && usulan.status !== "menunggu" && !owner) {
       return res.status(403).json({
-        message: `Usulan dengan status "${usulan.status}" tidak bisa dihapus. Hanya usulan dengan status "menunggu" yang bisa dihapus.`,
+        message: `Usulan dengan status "${usulan.status}" tidak bisa dihapus. Hanya usulan dengan status "menunggu" atau owner yang bisa dihapus.`,
       });
     }
 

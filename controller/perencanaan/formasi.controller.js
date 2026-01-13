@@ -6,9 +6,19 @@ const { handleError } = require("@/utils/helper/controller-helper");
  */
 const getAll = async (req, res) => {
   try {
-    const { page = 1, limit = 20, search, status, tahun, sortField = "dibuat_pada", sortOrder = "desc" } = req?.query;
+    const {
+      page = 1,
+      limit = 20,
+      search,
+      status,
+      tahun,
+      sortField = "dibuat_pada",
+      sortOrder = "desc",
+    } = req?.query;
 
-    let query = Formasi.query().withGraphFetched("[dibuatOleh(simpleSelect), diperbaruiOleh(simpleSelect), usulan]");
+    let query = Formasi.query().withGraphFetched(
+      "[dibuatOleh(simpleSelect), diperbaruiOleh(simpleSelect), usulan]"
+    );
 
     // Filter by status
     if (status) {
@@ -69,7 +79,9 @@ const getById = async (req, res) => {
 
     const result = await Formasi.query()
       .findById(id)
-      .withGraphFetched("[dibuatOleh(simpleSelect), diperbaruiOleh(simpleSelect), usulan]");
+      .withGraphFetched(
+        "[dibuatOleh(simpleSelect), diperbaruiOleh(simpleSelect), usulan]"
+      );
 
     if (!result) {
       return res.status(404).json({ message: "Formasi tidak ditemukan" });
@@ -86,11 +98,12 @@ const getById = async (req, res) => {
  */
 const create = async (req, res) => {
   try {
-    if (req?.user?.current_role !== "admin") {
+    const { customId: userId, current_role } = req?.user;
+    const { deskripsi, tahun, status } = req?.body;
+
+    if (current_role !== "admin") {
       return res.status(403).json({ message: "Forbidden" });
     }
-    const { customId: userId } = req?.user;
-    const { deskripsi, tahun, status } = req?.body;
 
     const result = await Formasi.query().insert({
       deskripsi,
@@ -111,12 +124,13 @@ const create = async (req, res) => {
  */
 const update = async (req, res) => {
   try {
-    if (req?.user?.current_role !== "admin") {
+    const { id } = req?.query;
+    const { customId: userId, current_role } = req?.user;
+    const { deskripsi, tahun, status } = req?.body;
+
+    if (current_role !== "admin") {
       return res.status(403).json({ message: "Forbidden" });
     }
-    const { id } = req?.query;
-    const { customId: userId } = req?.user;
-    const { deskripsi, tahun, status } = req?.body;
 
     const formasi = await Formasi.query().findById(id);
 
@@ -145,10 +159,12 @@ const update = async (req, res) => {
  */
 const remove = async (req, res) => {
   try {
-    if (req?.user?.current_role !== "admin") {
+    const { id } = req?.query;
+    const { current_role } = req?.user;
+
+    if (current_role !== "admin") {
       return res.status(403).json({ message: "Forbidden" });
     }
-    const { id } = req?.query;
 
     const formasi = await Formasi.query().findById(id);
 
@@ -157,10 +173,12 @@ const remove = async (req, res) => {
     }
 
     // Check if formasi has usulan
-    const usulanCount = await Formasi.relatedQuery("usulan").for(id).resultSize();
+    const usulanCount = await Formasi.relatedQuery("usulan")
+      .for(id)
+      .resultSize();
     if (usulanCount > 0) {
-      return res.status(400).json({ 
-        message: "Formasi tidak dapat dihapus karena masih memiliki usulan" 
+      return res.status(400).json({
+        message: "Formasi tidak dapat dihapus karena masih memiliki usulan",
       });
     }
 
@@ -179,4 +197,3 @@ module.exports = {
   update,
   remove,
 };
-

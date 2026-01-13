@@ -13,7 +13,6 @@ import {
   Paper,
   Stack,
   Text,
-  Tooltip,
 } from "@mantine/core";
 import { useDebouncedValue } from "@mantine/hooks";
 import {
@@ -37,6 +36,7 @@ import {
   Popconfirm,
   Table,
   Tag,
+  Tooltip,
   Upload,
 } from "antd";
 import dayjs from "dayjs";
@@ -49,6 +49,14 @@ const formatFileSize = (bytes) => {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+};
+
+// Strip file extension from name
+const stripExtension = (filename) => {
+  if (!filename) return "-";
+  const lastDotIndex = filename.lastIndexOf(".");
+  if (lastDotIndex === -1) return filename;
+  return filename.substring(0, lastDotIndex);
 };
 
 // Get file type tag
@@ -95,7 +103,14 @@ const UploadModal = ({ open, onClose, formasiId }) => {
     }
     const formData = new FormData();
     formData.append("file", file);
+    // Jika ada nama dokumen custom, gunakan itu + extension dari file asli
+    if (values.nama_dokumen) {
+      const ext = file.name.split(".").pop();
+      formData.append("file_name", `${values.nama_dokumen}.${ext}`);
+    }
     if (values.unit_kerja) formData.append("unit_kerja", values.unit_kerja);
+    // Kirim formasi_id untuk validasi di backend
+    if (formasiId) formData.append("formasi_id", formasiId);
     upload(formData);
   };
 
@@ -193,10 +208,19 @@ const UploadModal = ({ open, onClose, formasiId }) => {
 };
 
 // Modal Edit Lampiran (with file re-upload support)
-const EditModal = ({ open, onClose, data, onReupload }) => {
+const EditModal = ({ open, onClose, data }) => {
   const [form] = Form.useForm();
   const [file, setFile] = useState(null);
+  const [currentExt, setCurrentExt] = useState("");
   const queryClient = useQueryClient();
+
+  // Set current extension when data changes
+  useEffect(() => {
+    if (data?.file_name) {
+      const ext = data.file_name.split(".").pop();
+      setCurrentExt(ext);
+    }
+  }, [data]);
 
   const { mutate: update, isLoading } = useMutation(
     (formData) => updateLampiran(data?.lampiran_id, formData),
@@ -215,16 +239,19 @@ const EditModal = ({ open, onClose, data, onReupload }) => {
   );
 
   const handleSubmit = (values) => {
-    // If there's a new file, use FormData
+    // Determine extension: from new file or current file
+    const ext = file ? file.name.split(".").pop() : currentExt;
+    const fullFileName = values.file_name ? `${values.file_name}.${ext}` : null;
+
+    // Always use FormData because the route uses multer middleware
+    const formData = new FormData();
     if (file) {
-      const formData = new FormData();
       formData.append("file", file);
-      if (values.file_name) formData.append("file_name", values.file_name);
-      update(formData);
-    } else {
-      // Just update metadata
-      update(values);
     }
+    if (fullFileName) {
+      formData.append("file_name", fullFileName);
+    }
+    update(formData);
   };
 
   const handleClose = () => {
@@ -291,18 +318,22 @@ const EditModal = ({ open, onClose, data, onReupload }) => {
         form={form}
         layout="vertical"
         onFinish={handleSubmit}
-        initialValues={{ file_name: data.file_name }}
+        initialValues={{ file_name: stripExtension(data.file_name) }}
       >
         <Form.Item
           name="file_name"
           label={
             <Group gap={4}>
               <IconFile size={14} />
-              <span>Nama File</span>
+              <span>Nama File (tanpa extension)</span>
             </Group>
           }
         >
-          <Input placeholder="Nama file" prefix={<IconFile size={14} color="#868e96" />} />
+          <Input
+            placeholder="Nama file"
+            prefix={<IconFile size={14} color="#868e96" />}
+            suffix={<Text size="xs" c="dimmed">.{currentExt || file?.name?.split(".").pop()}</Text>}
+          />
         </Form.Item>
 
         <Form.Item
@@ -335,13 +366,14 @@ const EditModal = ({ open, onClose, data, onReupload }) => {
                 return Upload.LIST_IGNORE;
               }
               setFile(f);
-              // Auto-fill file name from uploaded file
-              form.setFieldValue("file_name", f.name);
+              // Update extension from new file
+              setCurrentExt(f.name.split(".").pop());
               return false;
             }}
             onRemove={() => {
               setFile(null);
-              form.setFieldValue("file_name", data.file_name);
+              // Restore original extension
+              setCurrentExt(data.file_name.split(".").pop());
             }}
             fileList={file ? [file] : []}
           >
@@ -449,7 +481,6 @@ function LampiranList({ formasiId, formasi }) {
       title: "No",
       key: "no",
       width: 50,
-      align: "center",
       render: (_, __, index) => (filters.page - 1) * filters.limit + index + 1,
     },
     {
@@ -458,10 +489,12 @@ function LampiranList({ formasiId, formasi }) {
       key: "file_name",
       ellipsis: true,
       render: (val) => (
-        <Group gap={6}>
-          <IconFile size={14} color="#868e96" />
-          <Text size="sm">{val}</Text>
-        </Group>
+        <Tooltip title={val}>
+          <Group gap={6}>
+            <IconFile size={14} color="#868e96" />
+            <Text size="sm">{stripExtension(val)}</Text>
+          </Group>
+        </Tooltip>
       ),
     },
     {
@@ -479,7 +512,7 @@ function LampiranList({ formasiId, formasi }) {
       align: "center",
       render: (val) =>
         val ? (
-          <Tooltip label="Buka URL">
+          <Tooltip title="Buka URL">
             <ActionIcon
               variant="subtle"
               color="blue"
@@ -521,7 +554,7 @@ function LampiranList({ formasiId, formasi }) {
       align: "center",
       render: (_, record) => (
         <Group gap={4} justify="center">
-          <Tooltip label="Edit">
+          <Tooltip title="Edit">
             <ActionIcon
               variant="subtle"
               color="blue"
@@ -531,7 +564,7 @@ function LampiranList({ formasiId, formasi }) {
               <IconEdit size={14} />
             </ActionIcon>
           </Tooltip>
-          <Tooltip label="Download">
+          <Tooltip title="Download">
             <ActionIcon
               variant="subtle"
               color="green"
@@ -548,7 +581,7 @@ function LampiranList({ formasiId, formasi }) {
             okText="Ya"
             cancelText="Tidak"
           >
-            <Tooltip label="Hapus">
+            <Tooltip title="Hapus">
               <ActionIcon variant="subtle" color="red" size="sm" loading={isDeleting}>
                 <IconTrash size={14} />
               </ActionIcon>
@@ -634,7 +667,7 @@ function LampiranList({ formasiId, formasi }) {
             allowClear
           />
           <div style={{ flex: 1 }} />
-          <Tooltip label="Refresh">
+          <Tooltip title="Refresh">
             <Button icon={<IconRefresh size={14} />} onClick={() => refetch()} size="small" />
           </Tooltip>
           <Button
@@ -645,14 +678,23 @@ function LampiranList({ formasiId, formasi }) {
           >
             Unduh
           </Button>
-          <Button
-            type="primary"
-            icon={<IconPlus size={14} />}
-            onClick={() => setUploadModal(true)}
-            size="small"
+          <Tooltip
+            title={
+              formasi?.status !== "aktif"
+                ? "Formasi tidak aktif"
+                : "Tambah lampiran baru"
+            }
           >
-            Tambah Lampiran
-          </Button>
+            <Button
+              type="primary"
+              icon={<IconPlus size={14} />}
+              onClick={() => setUploadModal(true)}
+              size="small"
+              disabled={formasi?.status !== "aktif"}
+            >
+              Tambah Lampiran
+            </Button>
+          </Tooltip>
         </Group>
       </Paper>
 

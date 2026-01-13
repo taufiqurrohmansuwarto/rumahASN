@@ -55,10 +55,15 @@ const getAll = async (req, res) => {
     } = req?.query;
 
     const knex = RiwayatAudit.knex();
+    const { customId: userId, current_role } = req?.user;
 
     let query = RiwayatAudit.query().withGraphFetched(
       "[formasi, usulan, dibuatOleh(simpleSelect), diperbaruiOleh(simpleSelect)]"
     );
+
+    if (current_role !== "admin") {
+      query = query.where("dibuat_oleh", userId);
+    }
 
     // Filter by formasi_id
     if (formasi_id) {
@@ -99,11 +104,18 @@ const getAll = async (req, res) => {
       return Promise.all(
         auditList.map(async (item) => {
           // Get nama_jabatan from data_baru or data_lama
-          const jabatanId = item.data_baru?.jabatan_id || item.data_lama?.jabatan_id;
-          const jenisJabatan = item.data_baru?.jenis_jabatan || item.data_lama?.jenis_jabatan;
-          const unitKerja = item.data_baru?.unit_kerja || item.data_lama?.unit_kerja;
+          const jabatanId =
+            item.data_baru?.jabatan_id || item.data_lama?.jabatan_id;
+          const jenisJabatan =
+            item.data_baru?.jenis_jabatan || item.data_lama?.jenis_jabatan;
+          const unitKerja =
+            item.data_baru?.unit_kerja || item.data_lama?.unit_kerja;
 
-          const namaJabatan = await getJabatanName(knex, jabatanId, jenisJabatan);
+          const namaJabatan = await getJabatanName(
+            knex,
+            jabatanId,
+            jenisJabatan
+          );
           const unitKerjaText = await getUnitKerjaHierarchy(knex, unitKerja);
 
           return {
@@ -158,7 +170,9 @@ const getById = async (req, res) => {
 
     const result = await RiwayatAudit.query()
       .findById(id)
-      .withGraphFetched("[formasi, usulan, dibuatOleh(simpleSelect), diperbaruiOleh(simpleSelect)]");
+      .withGraphFetched(
+        "[formasi, usulan, dibuatOleh(simpleSelect), diperbaruiOleh(simpleSelect)]"
+      );
 
     if (!result) {
       return res.status(404).json({ message: "Riwayat audit tidak ditemukan" });
@@ -179,7 +193,9 @@ const getByUsulanId = async (req, res) => {
 
     const result = await RiwayatAudit.query()
       .where("usulan_id", usulan_id)
-      .withGraphFetched("[formasi, usulan, dibuatOleh(simpleSelect), diperbaruiOleh(simpleSelect)]")
+      .withGraphFetched(
+        "[formasi, usulan, dibuatOleh(simpleSelect), diperbaruiOleh(simpleSelect)]"
+      )
       .orderBy("dibuat_pada", "desc");
 
     res.json(result);
@@ -194,10 +210,18 @@ const getByUsulanId = async (req, res) => {
 const getByFormasiId = async (req, res) => {
   try {
     const { formasi_id } = req?.query;
+    const { customId: userId, current_role } = req?.user;
 
     const result = await RiwayatAudit.query()
       .where("formasi_id", formasi_id)
-      .withGraphFetched("[formasi, usulan, dibuatOleh(simpleSelect), diperbaruiOleh(simpleSelect)]")
+      .where((builder) => {
+        if (current_role !== "admin") {
+          builder.where("dibuat_oleh", userId);
+        }
+      })
+      .withGraphFetched(
+        "[formasi, usulan, dibuatOleh(simpleSelect), diperbaruiOleh(simpleSelect)]"
+      )
       .orderBy("dibuat_pada", "desc");
 
     res.json(result);
@@ -212,4 +236,3 @@ module.exports = {
   getByUsulanId,
   getByFormasiId,
 };
-

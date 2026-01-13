@@ -19,10 +19,10 @@ import {
   Paper,
   Stack,
   Text,
-  Tooltip,
 } from "@mantine/core";
 import { useDebouncedValue } from "@mantine/hooks";
 import {
+  IconAlertCircle,
   IconBriefcase,
   IconBuilding,
   IconCheck,
@@ -31,6 +31,7 @@ import {
   IconEdit,
   IconFileText,
   IconHash,
+  IconMessage,
   IconPaperclip,
   IconPlus,
   IconRefresh,
@@ -41,6 +42,7 @@ import {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
+  Collapse,
   Form,
   Input,
   InputNumber,
@@ -50,6 +52,7 @@ import {
   Select,
   Table,
   Tag,
+  Tooltip,
   TreeSelect,
 } from "antd";
 import dayjs from "dayjs";
@@ -785,7 +788,6 @@ function UsulanList({ formasiId, formasi }) {
       title: "No",
       key: "no",
       width: 50,
-      align: "center",
       render: (_, __, index) => (filters.page - 1) * filters.limit + index + 1,
     },
     {
@@ -812,18 +814,20 @@ function UsulanList({ formasiId, formasi }) {
       title: "Kualifikasi Pendidikan",
       dataIndex: "kualifikasi_pendidikan_detail",
       key: "kualifikasi_pendidikan_detail",
-      width: 200,
+      width: 250,
       render: (val) =>
         val?.length > 0 ? (
           <Stack gap={2}>
             {val.slice(0, 2).map((item, i) => (
-              <Tooltip key={i} label={item.label}>
-                <Text size="xs" c="dimmed" lineClamp={1}>
-                  <Tag color="blue" style={{ marginRight: 4 }}>
+              <Tooltip key={i} title={item.label}>
+                <Group gap={4} wrap="nowrap">
+                  <Tag color="blue" style={{ flexShrink: 0 }}>
                     {item.tk_pend}
                   </Tag>
-                  {item.label}
-                </Text>
+                  <Text size="xs" c="dimmed" lineClamp={1}>
+                    {item.label}
+                  </Text>
+                </Group>
               </Tooltip>
             ))}
             {val.length > 2 && (
@@ -842,11 +846,12 @@ function UsulanList({ formasiId, formasi }) {
       title: "Unit Kerja",
       dataIndex: "unit_kerja_text",
       key: "unit_kerja_text",
-      width: 180,
-      ellipsis: true,
+      width: 250,
       render: (val, record) => (
-        <Tooltip label={val || record.unit_kerja}>
-          <Text size="xs">{val || record.unit_kerja}</Text>
+        <Tooltip title={val || record.unit_kerja}>
+          <Text size="xs" lineClamp={2} style={{ whiteSpace: "normal" }}>
+            {val || record.unit_kerja}
+          </Text>
         </Tooltip>
       ),
     },
@@ -883,7 +888,7 @@ function UsulanList({ formasiId, formasi }) {
         return (
           <Group gap={4} justify="center">
             {isAdmin && (
-              <Tooltip label="Verifikasi">
+              <Tooltip title="Verifikasi">
                 <ActionIcon
                   variant="subtle"
                   color="blue"
@@ -896,7 +901,7 @@ function UsulanList({ formasiId, formasi }) {
                 </ActionIcon>
               </Tooltip>
             )}
-            <Tooltip label="Edit">
+            <Tooltip title="Edit">
               <ActionIcon
                 variant="subtle"
                 color="green"
@@ -915,7 +920,7 @@ function UsulanList({ formasiId, formasi }) {
               disabled={!canDelete}
             >
               <Tooltip
-                label={
+                title={
                   canDelete
                     ? "Hapus"
                     : "Tidak bisa hapus (status bukan menunggu)"
@@ -1096,7 +1101,7 @@ function UsulanList({ formasiId, formasi }) {
             dropdownStyle={{ maxHeight: 400, overflow: "auto" }}
           />
           <div style={{ flex: 1 }} />
-          <Tooltip label="Refresh">
+          <Tooltip title="Refresh">
             <Button
               icon={<IconRefresh size={14} />}
               onClick={() => refetch()}
@@ -1111,14 +1116,23 @@ function UsulanList({ formasiId, formasi }) {
           >
             Unduh
           </Button>
-          <Button
-            type="primary"
-            icon={<IconPlus size={14} />}
-            onClick={() => setModal({ open: true, data: null })}
-            size="small"
+          <Tooltip
+            title={
+              formasi?.status !== "aktif"
+                ? "Formasi tidak aktif"
+                : "Buat usulan baru"
+            }
           >
-            Buat Usulan
-          </Button>
+            <Button
+              type="primary"
+              icon={<IconPlus size={14} />}
+              onClick={() => setModal({ open: true, data: null })}
+              size="small"
+              disabled={formasi?.status !== "aktif"}
+            >
+              Buat Usulan
+            </Button>
+          </Tooltip>
         </Group>
       </Paper>
 
@@ -1139,7 +1153,71 @@ function UsulanList({ formasiId, formasi }) {
               `${range[0]}-${range[1]} dari ${total}`,
             onChange: (p, l) => updateFilters({ page: p, limit: l }),
           }}
-          scroll={{ x: 1000 }}
+          scroll={{ x: 1200 }}
+          expandable={{
+            expandedRowRender: (record) => {
+              // Only show expanded content if status is not "menunggu" and has catatan or alasan_perbaikan
+              const hasCatatan = record.catatan;
+              const hasAlasanPerbaikan = record.alasan_perbaikan;
+
+              if (!hasCatatan && !hasAlasanPerbaikan) return null;
+
+              const items = [];
+
+              if (hasAlasanPerbaikan) {
+                items.push({
+                  key: "alasan_perbaikan",
+                  label: (
+                    <Group gap={6}>
+                      <IconAlertCircle size={14} color="#fa5252" />
+                      <Text size="xs" fw={500} c="red">
+                        Alasan Perbaikan
+                      </Text>
+                    </Group>
+                  ),
+                  children: (
+                    <Text size="xs" style={{ whiteSpace: "pre-wrap" }}>
+                      {record.alasan_perbaikan}
+                    </Text>
+                  ),
+                });
+              }
+
+              if (hasCatatan) {
+                items.push({
+                  key: "catatan",
+                  label: (
+                    <Group gap={6}>
+                      <IconMessage size={14} color="#228be6" />
+                      <Text size="xs" fw={500} c="blue">
+                        Catatan Verifikasi
+                      </Text>
+                    </Group>
+                  ),
+                  children: (
+                    <Text size="xs" style={{ whiteSpace: "pre-wrap" }}>
+                      {record.catatan}
+                    </Text>
+                  ),
+                });
+              }
+
+              return (
+                <Box pl="md">
+                  <Collapse
+                    items={items}
+                    defaultActiveKey={["alasan_perbaikan", "catatan"]}
+                    size="small"
+                    bordered={false}
+                    style={{ background: "transparent" }}
+                  />
+                </Box>
+              );
+            },
+            rowExpandable: (record) =>
+              record.status !== "menunggu" &&
+              (record.catatan || record.alasan_perbaikan),
+          }}
         />
       </Paper>
 

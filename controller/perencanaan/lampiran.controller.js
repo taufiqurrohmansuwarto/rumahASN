@@ -1,5 +1,7 @@
 const Lampiran = require("@/models/perencanaan/perencanaan.lampiran.model");
 const Usulan = require("@/models/perencanaan/perencanaan.usulan.model");
+const Formasi = require("@/models/perencanaan/perencanaan.formasi.model");
+const RiwayatAudit = require("@/models/perencanaan/perencanaan.riwayat_audit.model");
 const {
   uploadFilePublic,
   generatePublicUrl,
@@ -15,12 +17,25 @@ const { nanoid } = require("nanoid");
  */
 const getAll = async (req, res) => {
   try {
-    const { page = 1, limit = 20, search, usulan_id, unit_kerja, sortField = "dibuat_pada", sortOrder = "desc" } =
-      req?.query;
+    const {
+      page = 1,
+      limit = 20,
+      search,
+      usulan_id,
+      unit_kerja,
+      sortField = "dibuat_pada",
+      sortOrder = "desc",
+    } = req?.query;
+
+    const { customId: userId, current_role } = req?.user;
 
     let query = Lampiran.query().withGraphFetched(
       "[usulan, dibuatOleh(simpleSelect), diperbaruiOleh(simpleSelect)]"
     );
+
+    if (current_role !== "admin") {
+      query = query.where("dibuat_oleh", userId);
+    }
 
     // Filter by usulan_id
     if (usulan_id) {
@@ -78,10 +93,20 @@ const getAll = async (req, res) => {
 const getById = async (req, res) => {
   try {
     const { id } = req?.query;
+    const { customId: userId, current_role } = req?.user;
 
-    const result = await Lampiran.query()
+    let query = Lampiran.query()
       .findById(id)
-      .withGraphFetched("[usulan, dibuatOleh(simpleSelect), diperbaruiOleh(simpleSelect)]");
+      .withGraphFetched(
+        "[usulan, dibuatOleh(simpleSelect), diperbaruiOleh(simpleSelect)]"
+      );
+
+    // Non-admin hanya bisa melihat lampiran miliknya sendiri
+    if (current_role !== "admin") {
+      query = query.where("dibuat_oleh", userId);
+    }
+
+    const result = await query;
 
     if (!result) {
       return res.status(404).json({ message: "Lampiran tidak ditemukan" });
@@ -101,10 +126,23 @@ const upload = async (req, res) => {
     const { mc } = req;
     const { file } = req;
     const { customId: userId } = req?.user;
-    const { usulan_id, unit_kerja } = req?.body;
+    const { usulan_id, unit_kerja, file_name, formasi_id } = req?.body || {};
 
     if (!file) {
       return res.status(400).json({ message: "File tidak ditemukan" });
+    }
+
+    // Validate formasi exists and is active
+    if (formasi_id) {
+      const formasi = await Formasi.query().findById(formasi_id);
+      if (!formasi) {
+        return res.status(404).json({ message: "Formasi tidak ditemukan" });
+      }
+      if (formasi.status !== "aktif") {
+        return res.status(400).json({
+          message: "Formasi tidak aktif, tidak dapat menambah lampiran",
+        });
+      }
     }
 
     // Validate usulan exists
@@ -115,32 +153,56 @@ const upload = async (req, res) => {
       }
     }
 
-    // Generate unique filename
-    const ext = file.originalname.split(".").pop();
+    // Use custom file_name if provided, otherwise use original filename
+    const finalFileName = file_name || file.originalname;
+
+    // Generate unique filename for storage
     const uniqueId = nanoid(8);
-    const filename = `perencanaan/lampiran/${usulan_id || "general"}/${uniqueId}-${file.originalname}`;
+    const filename = `perencanaan/lampiran/${
+      formasi_id || usulan_id || "general"
+    }/${uniqueId}-${finalFileName}`;
 
     // Upload to Minio
-    await uploadFilePublic(mc, file.buffer, filename, file.size, file.mimetype, {
-      "uploaded-by": userId,
-      "usulan-id": usulan_id || "",
-      "original-name": file.originalname,
-      "upload-date": new Date().toISOString(),
-    });
+    await uploadFilePublic(
+      mc,
+      file.buffer,
+      filename,
+      file.size,
+      file.mimetype,
+      {
+        "uploaded-by": userId,
+        "formasi-id": formasi_id || "",
+        "usulan-id": usulan_id || "",
+        "original-name": file.originalname,
+        "custom-name": finalFileName,
+        "upload-date": new Date().toISOString(),
+      }
+    );
 
     // Generate public URL
     const fileUrl = generatePublicUrl(filename);
 
     // Save to database
     const result = await Lampiran.query().insert({
+      formasi_id: formasi_id || null,
       usulan_id: usulan_id || null,
-      file_name: file.originalname,
+      file_name: finalFileName,
       file_size: file.size,
       file_url: fileUrl,
       file_type: file.mimetype,
       unit_kerja: unit_kerja || null,
       dibuat_oleh: userId,
       diperbarui_oleh: userId,
+    });
+
+    // Create audit log
+    await RiwayatAudit.query().insert({
+      formasi_id: formasi_id || null,
+      lampiran_id: result.lampiran_id,
+      aksi: "UPLOAD_LAMPIRAN",
+      data_baru: result,
+      dibuat_oleh: userId,
+      ip_address: req?.ip || req?.connection?.remoteAddress,
     });
 
     res.json({ code: 200, message: "File berhasil diupload", data: result });
@@ -170,12 +232,22 @@ const download = async (req, res) => {
     }
 
     // Download file from Minio
-    const fileBuffer = await downloadFileAsBuffer(mc, urlInfo.bucket, urlInfo.filename);
+    const fileBuffer = await downloadFileAsBuffer(
+      mc,
+      urlInfo.bucket,
+      urlInfo.filename
+    );
 
     // Set response headers
-    res.setHeader("Content-Type", lampiran.file_type || "application/octet-stream");
+    res.setHeader(
+      "Content-Type",
+      lampiran.file_type || "application/octet-stream"
+    );
     res.setHeader("Content-Length", fileBuffer.length);
-    res.setHeader("Content-Disposition", `attachment; filename="${lampiran.file_name}"`);
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="${lampiran.file_name}"`
+    );
 
     res.end(fileBuffer);
   } catch (error) {
@@ -191,12 +263,22 @@ const update = async (req, res) => {
     const { id } = req?.query;
     const { customId: userId } = req?.user;
     const { mc } = req;
-    const { file_name, unit_kerja, usulan_id } = req?.body;
+    const { file_name, unit_kerja, usulan_id } = req?.body || {};
 
     const lampiran = await Lampiran.query().findById(id);
 
     if (!lampiran) {
       return res.status(404).json({ message: "Lampiran tidak ditemukan" });
+    }
+
+    // Check if formasi is active
+    if (lampiran.formasi_id) {
+      const formasi = await Formasi.query().findById(lampiran.formasi_id);
+      if (formasi && formasi.status !== "aktif") {
+        return res.status(400).json({
+          message: "Formasi tidak aktif, tidak dapat mengubah lampiran",
+        });
+      }
     }
 
     // Validate usulan exists if usulan_id is provided
@@ -207,6 +289,9 @@ const update = async (req, res) => {
       }
     }
 
+    // Store old data for audit
+    const dataLama = { ...lampiran };
+
     const updateData = {
       diperbarui_oleh: userId,
     };
@@ -214,16 +299,27 @@ const update = async (req, res) => {
     // Check if there's a new file to upload
     if (req.file) {
       const file = req.file;
-      const fileExtension = file.originalname.split(".").pop();
       const uniqueId = nanoid(8);
-      const filename = `perencanaan/lampiran/${lampiran.usulan_id || "general"}/${uniqueId}-${file.originalname}`;
+      // Use custom file_name if provided, otherwise use original filename
+      const finalFileName = file_name || file.originalname;
+      const filename = `perencanaan/lampiran/${
+        lampiran.formasi_id || lampiran.usulan_id || "general"
+      }/${uniqueId}-${finalFileName}`;
 
       // Upload new file to Minio (correct parameter order: mc, buffer, filename, size, mimetype, metadata)
-      await uploadFilePublic(mc, file.buffer, filename, file.size, file.mimetype, {
-        "uploaded-by": userId,
-        "original-name": file.originalname,
-        "upload-date": new Date().toISOString(),
-      });
+      await uploadFilePublic(
+        mc,
+        file.buffer,
+        filename,
+        file.size,
+        file.mimetype,
+        {
+          "uploaded-by": userId,
+          "original-name": file.originalname,
+          "custom-name": finalFileName,
+          "upload-date": new Date().toISOString(),
+        }
+      );
       const fileUrl = generatePublicUrl(filename);
 
       // Delete old file from Minio
@@ -237,7 +333,7 @@ const update = async (req, res) => {
       }
 
       // Update file info
-      updateData.file_name = file_name || file.originalname;
+      updateData.file_name = finalFileName;
       updateData.file_url = fileUrl;
       updateData.file_type = file.mimetype;
       updateData.file_size = file.size;
@@ -250,6 +346,20 @@ const update = async (req, res) => {
     if (usulan_id !== undefined) updateData.usulan_id = usulan_id;
 
     await Lampiran.query().findById(id).patch(updateData);
+
+    // Get updated data
+    const dataBaru = await Lampiran.query().findById(id);
+
+    // Create audit log
+    await RiwayatAudit.query().insert({
+      formasi_id: lampiran.formasi_id || null,
+      lampiran_id: id,
+      aksi: "UPDATE_LAMPIRAN",
+      data_lama: dataLama,
+      data_baru: dataBaru,
+      dibuat_oleh: userId,
+      ip_address: req?.ip || req?.connection?.remoteAddress,
+    });
 
     res.json({ code: 200, message: "Lampiran berhasil diperbarui" });
   } catch (error) {
@@ -264,12 +374,26 @@ const remove = async (req, res) => {
   try {
     const { id } = req?.query;
     const { mc } = req;
+    const { customId: userId } = req?.user;
 
     const lampiran = await Lampiran.query().findById(id);
 
     if (!lampiran) {
       return res.status(404).json({ message: "Lampiran tidak ditemukan" });
     }
+
+    // Check if formasi is active
+    if (lampiran.formasi_id) {
+      const formasi = await Formasi.query().findById(lampiran.formasi_id);
+      if (formasi && formasi.status !== "aktif") {
+        return res.status(400).json({
+          message: "Formasi tidak aktif, tidak dapat menghapus lampiran",
+        });
+      }
+    }
+
+    // Store data for audit
+    const dataLama = { ...lampiran };
 
     // Parse file path from URL
     const urlInfo = parseMinioUrl(lampiran.file_url);
@@ -286,6 +410,16 @@ const remove = async (req, res) => {
     // Delete from database
     await Lampiran.query().deleteById(id);
 
+    // Create audit log
+    await RiwayatAudit.query().insert({
+      formasi_id: lampiran.formasi_id || null,
+      lampiran_id: id,
+      aksi: "DELETE_LAMPIRAN",
+      data_lama: dataLama,
+      dibuat_oleh: userId,
+      ip_address: req?.ip || req?.connection?.remoteAddress,
+    });
+
     res.json({ code: 200, message: "Lampiran berhasil dihapus" });
   } catch (error) {
     handleError(res, error);
@@ -300,4 +434,3 @@ module.exports = {
   update,
   remove,
 };
-
