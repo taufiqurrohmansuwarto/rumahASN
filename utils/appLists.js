@@ -208,6 +208,24 @@ export const appLists = [
     icon: "https://siasn.bkd.jatimprov.go.id:9000/public/icon-bestie.png",
     userType: ["admin"],
   },
+  {
+    rightIcon: <IconTransfer />,
+    title: "Perencanaan Formasi",
+    desc: "Perencanaan Formasi",
+    color: "#FBBC05",
+    url: "/perencanaan/formasi",
+    icon: "https://siasn.bkd.jatimprov.go.id:9000/public/icon-bestie.png",
+    userType: ["admin", "fasilitator"],
+  },
+  {
+    rightIcon: <IconTransfer />,
+    title: "Coaching",
+    desc: "Coaching & Mentoring",
+    color: "#FBBC05",
+    url: "/coaching-clinic/all",
+    icon: "https://siasn.bkd.jatimprov.go.id:9000/public/icon-bestie.png",
+    userType: ["fasilitator"],
+  },
 ];
 
 export const getUserType = (user) => {
