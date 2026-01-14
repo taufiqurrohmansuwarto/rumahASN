@@ -37,6 +37,7 @@ import {
   IconRefresh,
   IconSchool,
   IconTrash,
+  IconUser,
   IconX,
 } from "@tabler/icons-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -981,6 +982,12 @@ function UsulanList({ formasiId, formasi }) {
         "Dibuat Pada": item.dibuat_pada
           ? dayjs(item.dibuat_pada).format("DD/MM/YYYY HH:mm")
           : "-",
+        "Diverifikasi Oleh": item.diverifikasiOleh?.username || "-",
+        "Tanggal Verifikasi": item.diverifikasi_pada
+          ? dayjs(item.diverifikasi_pada).format("DD/MM/YYYY HH:mm")
+          : "-",
+        "Catatan Verifikasi": item.catatan || "-",
+        "Alasan Perbaikan": item.alasan_perbaikan || "-",
       }));
 
       // Create workbook
@@ -1156,13 +1163,53 @@ function UsulanList({ formasiId, formasi }) {
           scroll={{ x: 1200 }}
           expandable={{
             expandedRowRender: (record) => {
-              // Only show expanded content if status is not "menunggu" and has catatan or alasan_perbaikan
+              // Only show expanded content if status is not "menunggu" and has content to show
               const hasCatatan = record.catatan;
               const hasAlasanPerbaikan = record.alasan_perbaikan;
+              const hasVerifier = record.diverifikasiOleh || record.diverifikasi_pada;
 
-              if (!hasCatatan && !hasAlasanPerbaikan) return null;
+              if (!hasCatatan && !hasAlasanPerbaikan && !hasVerifier) return null;
 
               const items = [];
+
+              // Add verifier info first
+              if (hasVerifier) {
+                items.push({
+                  key: "verifikasi",
+                  label: (
+                    <Group gap={6}>
+                      <IconUser size={14} color="#40c057" />
+                      <Text size="xs" fw={500} c="green">
+                        Informasi Verifikasi
+                      </Text>
+                    </Group>
+                  ),
+                  children: (
+                    <Stack gap={4}>
+                      {record.diverifikasiOleh && (
+                        <Group gap={4}>
+                          <Text size="xs" c="dimmed">
+                            Diverifikasi oleh:
+                          </Text>
+                          <Text size="xs" fw={500}>
+                            {record.diverifikasiOleh.username || record.diverifikasiOleh.custom_id || "-"}
+                          </Text>
+                        </Group>
+                      )}
+                      {record.diverifikasi_pada && (
+                        <Group gap={4}>
+                          <Text size="xs" c="dimmed">
+                            Tanggal verifikasi:
+                          </Text>
+                          <Text size="xs" fw={500}>
+                            {dayjs(record.diverifikasi_pada).format("DD/MM/YYYY HH:mm")}
+                          </Text>
+                        </Group>
+                      )}
+                    </Stack>
+                  ),
+                });
+              }
 
               if (hasAlasanPerbaikan) {
                 items.push({
@@ -1206,7 +1253,7 @@ function UsulanList({ formasiId, formasi }) {
                 <Box pl="md">
                   <Collapse
                     items={items}
-                    defaultActiveKey={["alasan_perbaikan", "catatan"]}
+                    defaultActiveKey={["verifikasi", "alasan_perbaikan", "catatan"]}
                     size="small"
                     bordered={false}
                     style={{ background: "transparent" }}
@@ -1216,7 +1263,7 @@ function UsulanList({ formasiId, formasi }) {
             },
             rowExpandable: (record) =>
               record.status !== "menunggu" &&
-              (record.catatan || record.alasan_perbaikan),
+              (record.catatan || record.alasan_perbaikan || record.diverifikasiOleh || record.diverifikasi_pada),
           }}
         />
       </Paper>

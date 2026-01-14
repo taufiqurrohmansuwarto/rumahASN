@@ -182,9 +182,8 @@ const upload = async (req, res) => {
     // Generate public URL
     const fileUrl = generatePublicUrl(filename);
 
-    // Save to database
+    // Save to database (formasi_id tidak disimpan di tabel lampiran, hanya untuk validasi)
     const result = await Lampiran.query().insert({
-      formasi_id: formasi_id || null,
       usulan_id: usulan_id || null,
       file_name: finalFileName,
       file_size: file.size,
@@ -195,12 +194,12 @@ const upload = async (req, res) => {
       diperbarui_oleh: userId,
     });
 
-    // Create audit log
+    // Create audit log (lampiran_id stored in data_baru since riwayat_audit doesn't have lampiran_id column)
     await RiwayatAudit.query().insert({
       formasi_id: formasi_id || null,
-      lampiran_id: result.lampiran_id,
+      usulan_id: usulan_id || null,
       aksi: "UPLOAD_LAMPIRAN",
-      data_baru: result,
+      data_baru: { ...result, lampiran_id: result.lampiran_id },
       dibuat_oleh: userId,
       ip_address: req?.ip || req?.connection?.remoteAddress,
     });
@@ -271,13 +270,16 @@ const update = async (req, res) => {
       return res.status(404).json({ message: "Lampiran tidak ditemukan" });
     }
 
-    // Check if formasi is active
-    if (lampiran.formasi_id) {
-      const formasi = await Formasi.query().findById(lampiran.formasi_id);
-      if (formasi && formasi.status !== "aktif") {
-        return res.status(400).json({
-          message: "Formasi tidak aktif, tidak dapat mengubah lampiran",
-        });
+    // Check if formasi is active (melalui usulan jika ada)
+    if (lampiran.usulan_id) {
+      const usulan = await Usulan.query().findById(lampiran.usulan_id);
+      if (usulan?.formasi_id) {
+        const formasi = await Formasi.query().findById(usulan.formasi_id);
+        if (formasi && formasi.status !== "aktif") {
+          return res.status(400).json({
+            message: "Formasi tidak aktif, tidak dapat mengubah lampiran",
+          });
+        }
       }
     }
 
@@ -303,7 +305,7 @@ const update = async (req, res) => {
       // Use custom file_name if provided, otherwise use original filename
       const finalFileName = file_name || file.originalname;
       const filename = `perencanaan/lampiran/${
-        lampiran.formasi_id || lampiran.usulan_id || "general"
+        lampiran.usulan_id || "general"
       }/${uniqueId}-${finalFileName}`;
 
       // Upload new file to Minio (correct parameter order: mc, buffer, filename, size, mimetype, metadata)
@@ -350,13 +352,12 @@ const update = async (req, res) => {
     // Get updated data
     const dataBaru = await Lampiran.query().findById(id);
 
-    // Create audit log
+    // Create audit log (lampiran_id stored in data fields since riwayat_audit doesn't have lampiran_id column)
     await RiwayatAudit.query().insert({
-      formasi_id: lampiran.formasi_id || null,
-      lampiran_id: id,
+      usulan_id: dataBaru.usulan_id || lampiran.usulan_id || null,
       aksi: "UPDATE_LAMPIRAN",
-      data_lama: dataLama,
-      data_baru: dataBaru,
+      data_lama: { ...dataLama, lampiran_id: id },
+      data_baru: { ...dataBaru, lampiran_id: id },
       dibuat_oleh: userId,
       ip_address: req?.ip || req?.connection?.remoteAddress,
     });
@@ -382,13 +383,16 @@ const remove = async (req, res) => {
       return res.status(404).json({ message: "Lampiran tidak ditemukan" });
     }
 
-    // Check if formasi is active
-    if (lampiran.formasi_id) {
-      const formasi = await Formasi.query().findById(lampiran.formasi_id);
-      if (formasi && formasi.status !== "aktif") {
-        return res.status(400).json({
-          message: "Formasi tidak aktif, tidak dapat menghapus lampiran",
-        });
+    // Check if formasi is active (melalui usulan jika ada)
+    if (lampiran.usulan_id) {
+      const usulan = await Usulan.query().findById(lampiran.usulan_id);
+      if (usulan?.formasi_id) {
+        const formasi = await Formasi.query().findById(usulan.formasi_id);
+        if (formasi && formasi.status !== "aktif") {
+          return res.status(400).json({
+            message: "Formasi tidak aktif, tidak dapat menghapus lampiran",
+          });
+        }
       }
     }
 
@@ -410,12 +414,11 @@ const remove = async (req, res) => {
     // Delete from database
     await Lampiran.query().deleteById(id);
 
-    // Create audit log
+    // Create audit log (lampiran_id stored in data_lama since riwayat_audit doesn't have lampiran_id column)
     await RiwayatAudit.query().insert({
-      formasi_id: lampiran.formasi_id || null,
-      lampiran_id: id,
+      usulan_id: lampiran.usulan_id || null,
       aksi: "DELETE_LAMPIRAN",
-      data_lama: dataLama,
+      data_lama: { ...dataLama, lampiran_id: id },
       dibuat_oleh: userId,
       ip_address: req?.ip || req?.connection?.remoteAddress,
     });
