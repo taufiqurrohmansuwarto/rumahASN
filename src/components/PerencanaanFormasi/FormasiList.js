@@ -462,14 +462,16 @@ function FormasiList() {
                 size="small"
               />
             </Tooltip>
-            <Button
-              type="primary"
-              icon={<IconPlus size={14} />}
-              onClick={() => setModal({ open: true, data: null })}
-              size="small"
-            >
-              Buat Formasi
-            </Button>
+            {isAdmin && (
+              <Button
+                type="primary"
+                icon={<IconPlus size={14} />}
+                onClick={() => setModal({ open: true, data: null })}
+                size="small"
+              >
+                Buat Formasi
+              </Button>
+            )}
           </Group>
         </Group>
       </Paper>
