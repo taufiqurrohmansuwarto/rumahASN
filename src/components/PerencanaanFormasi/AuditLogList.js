@@ -36,17 +36,41 @@ const { RangePicker } = DatePicker;
 // Aksi Badge
 const AksiBadge = ({ aksi }) => {
   const config = {
-    CREATE: { color: "green", label: "Create" },
-    UPDATE: { color: "blue", label: "Edit" },
-    DELETE: { color: "red", label: "Delete" },
+    // Usulan actions
+    CREATE: { color: "green", label: "Create Usulan" },
+    UPDATE: { color: "blue", label: "Edit Usulan" },
+    DELETE: { color: "red", label: "Delete Usulan" },
     VERIFY_DISETUJUI: { color: "green", label: "Disetujui" },
     VERIFY_DITOLAK: { color: "red", label: "Ditolak" },
     VERIFY_PERBAIKAN: { color: "orange", label: "Perbaikan" },
     VERIFY_MENUNGGU: { color: "default", label: "Menunggu" },
+    // Lampiran actions
+    UPLOAD_LAMPIRAN: { color: "cyan", label: "Upload Lampiran" },
+    UPDATE_LAMPIRAN: { color: "geekblue", label: "Edit Lampiran" },
+    DELETE_LAMPIRAN: { color: "magenta", label: "Hapus Lampiran" },
+    // Formasi actions
+    CREATE_FORMASI: { color: "lime", label: "Create Formasi" },
+    UPDATE_FORMASI: { color: "purple", label: "Edit Formasi" },
+    DELETE_FORMASI: { color: "volcano", label: "Hapus Formasi" },
   };
   const { color, label } = config[aksi] || { color: "default", label: aksi };
   return <Tag color={color}>{label}</Tag>;
 };
+
+// Filter options for aksi with grouping
+const AKSI_OPTIONS = [
+  { label: "--- Usulan ---", value: "group-usulan", disabled: true },
+  { label: "Create Usulan", value: "CREATE" },
+  { label: "Edit Usulan", value: "UPDATE" },
+  { label: "Hapus Usulan", value: "DELETE" },
+  { label: "Verifikasi Disetujui", value: "VERIFY_DISETUJUI" },
+  { label: "Verifikasi Ditolak", value: "VERIFY_DITOLAK" },
+  { label: "Verifikasi Perbaikan", value: "VERIFY_PERBAIKAN" },
+  { label: "--- Lampiran ---", value: "group-lampiran", disabled: true },
+  { label: "Upload Lampiran", value: "UPLOAD_LAMPIRAN" },
+  { label: "Edit Lampiran", value: "UPDATE_LAMPIRAN" },
+  { label: "Hapus Lampiran", value: "DELETE_LAMPIRAN" },
+];
 
 // Parse perubahan dari data_lama dan data_baru
 const parsePerubahan = (dataLama, dataBaru) => {
@@ -396,20 +420,16 @@ function AuditLogList() {
             allowClear
           />
           <Select
-            placeholder="Aksi"
+            placeholder="Filter Aksi"
             value={aksi || undefined}
             onChange={(val) => updateFilters({ aksi: val || "", page: 1 })}
-            style={{ width: 130 }}
+            style={{ width: 180 }}
             size="small"
             allowClear
-          >
-            <Select.Option value="CREATE">Create</Select.Option>
-            <Select.Option value="UPDATE">Edit</Select.Option>
-            <Select.Option value="DELETE">Delete</Select.Option>
-            <Select.Option value="VERIFY_DISETUJUI">Disetujui</Select.Option>
-            <Select.Option value="VERIFY_DITOLAK">Ditolak</Select.Option>
-            <Select.Option value="VERIFY_PERBAIKAN">Perbaikan</Select.Option>
-          </Select>
+            options={AKSI_OPTIONS}
+            showSearch
+            optionFilterProp="label"
+          />
           <RangePicker
             size="small"
             onChange={handleDateChange}

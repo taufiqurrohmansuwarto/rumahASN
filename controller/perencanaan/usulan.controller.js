@@ -78,16 +78,23 @@ const getAll = async (req, res) => {
 
     const knex = Usulan.knex();
 
-    const { customId: userId, current_role } = req?.user;
+    const { customId: userId, current_role, organization_id } = req?.user;
+
+    // Determine opd_id based on role
+    // Admin can see all (opd_id = 1), non-admin uses their organization_id
+    const opdId = current_role === "admin" ? "1" : organization_id;
 
     let query = Usulan.query().withGraphFetched(
       "[formasi, lampiran, dibuatOleh(simpleSelect), diperbaruiOleh(simpleSelect), diverifikasiOleh(simpleSelect)]"
     );
 
-    // Non-admin hanya bisa melihat usulan miliknya sendiri
-    if (current_role !== "admin") {
-      query = query.where("dibuat_oleh", userId);
+    // Hierarchical access control based on organization
+    // User can see usulan where unit_kerja starts with their opdId
+    // E.g., user with opdId 123 can see unit_kerja 123, 12345, 123456, etc.
+    if (opdId && opdId !== "1") {
+      query = query.where("unit_kerja", "ilike", `${opdId}%`);
     }
+    // Admin (opdId = 1) can see all, no filter needed
 
     // Filter by status
     if (status) {
@@ -109,13 +116,36 @@ const getAll = async (req, res) => {
       query = query.where("unit_kerja", "ilike", `${unit_kerja}%`);
     }
 
-    // Search
+    // Filter by jabatan_id (exact match)
+    if (req?.query?.jabatan_id) {
+      query = query.where("jabatan_id", req.query.jabatan_id);
+    }
+
+    // Search - search across usulan_id, jabatan_id, unit_kerja, and also nama_jabatan from simaster tables
     if (search) {
       query = query.where((builder) => {
         builder
           .where("usulan_id", "ilike", `%${search}%`)
           .orWhere("jabatan_id", "ilike", `%${search}%`)
-          .orWhere("unit_kerja", "ilike", `%${search}%`);
+          .orWhere("unit_kerja", "ilike", `%${search}%`)
+          // Search nama jabatan from simaster_jft (fungsional)
+          .orWhereExists(function () {
+            this.select(knex.raw("1"))
+              .from("simaster_jft")
+              .whereRaw(
+                `simaster_jft.id = "perencanaan"."usulan".jabatan_id AND "perencanaan"."usulan".jenis_jabatan = 'fungsional' AND CONCAT(simaster_jft.name, ' ', simaster_jft.jenjang_jab, ' - ', simaster_jft.gol_ruang) ILIKE ?`,
+                [`%${search}%`]
+              );
+          })
+          // Search nama jabatan from simaster_jfu (pelaksana)
+          .orWhereExists(function () {
+            this.select(knex.raw("1"))
+              .from("simaster_jfu")
+              .whereRaw(
+                `simaster_jfu.id = "perencanaan"."usulan".jabatan_id AND "perencanaan"."usulan".jenis_jabatan = 'pelaksana' AND simaster_jfu.name ILIKE ?`,
+                [`%${search}%`]
+              );
+          });
       });
     }
 
@@ -160,12 +190,34 @@ const getAll = async (req, res) => {
     if (parseInt(limit) === -1) {
       const result = await query;
       const transformedData = await transformUsulan(result);
+
+      // Calculate allocation stats from the result
+      const totalAlokasi = result.reduce((acc, x) => acc + (x.alokasi || 0), 0);
+      const alokasiDisetujui = result
+        .filter((x) => x.status === "disetujui")
+        .reduce((acc, x) => acc + (x.alokasi || 0), 0);
+      const alokasiDitolak = result
+        .filter((x) => x.status === "ditolak")
+        .reduce((acc, x) => acc + (x.alokasi || 0), 0);
+      const alokasiMenunggu = result
+        .filter((x) => x.status === "menunggu")
+        .reduce((acc, x) => acc + (x.alokasi || 0), 0);
+      const alokasiPerbaikan = result
+        .filter((x) => x.status === "perbaikan")
+        .reduce((acc, x) => acc + (x.alokasi || 0), 0);
+
       const rekap = {
         total: result.length,
         disetujui: result.filter((x) => x.status === "disetujui").length,
         ditolak: result.filter((x) => x.status === "ditolak").length,
         menunggu: result.filter((x) => x.status === "menunggu").length,
         perbaikan: result.filter((x) => x.status === "perbaikan").length,
+        // Allocation stats
+        total_alokasi: totalAlokasi,
+        alokasi_disetujui: alokasiDisetujui,
+        alokasi_ditolak: alokasiDitolak,
+        alokasi_menunggu: alokasiMenunggu,
+        alokasi_perbaikan: alokasiPerbaikan,
       };
 
       return res.json({ data: transformedData, rekap });
@@ -174,26 +226,45 @@ const getAll = async (req, res) => {
     const result = await query.page(parseInt(page) - 1, parseInt(limit));
     const transformedData = await transformUsulan(result.results);
 
-    // Get rekap stats
+    // Get rekap stats (counts and allocation sums by status)
     let rekapQueryBuilder = Usulan.query();
 
-    // Non-admin hanya melihat statistik usulan miliknya sendiri
-    if (current_role !== "admin") {
-      rekapQueryBuilder = rekapQueryBuilder.where("dibuat_oleh", userId);
+    // Hierarchical access control for statistics
+    // Non-admin only sees stats for usulan in their organization hierarchy
+    if (opdId && opdId !== "1") {
+      rekapQueryBuilder = rekapQueryBuilder.where(
+        "unit_kerja",
+        "ilike",
+        `${opdId}%`
+      );
     }
 
     const rekapQuery = await rekapQueryBuilder
       .where((builder) => {
         if (formasi_id) builder.where("formasi_id", formasi_id);
-        if (status) builder.where("status", status);
         if (jenis_jabatan) builder.where("jenis_jabatan", jenis_jabatan);
         if (unit_kerja) builder.where("unit_kerja", "ilike", `${unit_kerja}%`);
       })
       .select(
+        // Count by status
         knex.raw("COUNT(*) FILTER (WHERE status = 'disetujui') as disetujui"),
         knex.raw("COUNT(*) FILTER (WHERE status = 'ditolak') as ditolak"),
         knex.raw("COUNT(*) FILTER (WHERE status = 'menunggu') as menunggu"),
-        knex.raw("COUNT(*) FILTER (WHERE status = 'perbaikan') as perbaikan")
+        knex.raw("COUNT(*) FILTER (WHERE status = 'perbaikan') as perbaikan"),
+        // Allocation sums by status
+        knex.raw("COALESCE(SUM(alokasi), 0) as total_alokasi"),
+        knex.raw(
+          "COALESCE(SUM(alokasi) FILTER (WHERE status = 'disetujui'), 0) as alokasi_disetujui"
+        ),
+        knex.raw(
+          "COALESCE(SUM(alokasi) FILTER (WHERE status = 'ditolak'), 0) as alokasi_ditolak"
+        ),
+        knex.raw(
+          "COALESCE(SUM(alokasi) FILTER (WHERE status = 'menunggu'), 0) as alokasi_menunggu"
+        ),
+        knex.raw(
+          "COALESCE(SUM(alokasi) FILTER (WHERE status = 'perbaikan'), 0) as alokasi_perbaikan"
+        )
       )
       .first();
 
@@ -211,6 +282,12 @@ const getAll = async (req, res) => {
         ditolak: parseInt(rekapQuery?.ditolak || 0),
         menunggu: parseInt(rekapQuery?.menunggu || 0),
         perbaikan: parseInt(rekapQuery?.perbaikan || 0),
+        // Allocation stats
+        total_alokasi: parseInt(rekapQuery?.total_alokasi || 0),
+        alokasi_disetujui: parseInt(rekapQuery?.alokasi_disetujui || 0),
+        alokasi_ditolak: parseInt(rekapQuery?.alokasi_ditolak || 0),
+        alokasi_menunggu: parseInt(rekapQuery?.alokasi_menunggu || 0),
+        alokasi_perbaikan: parseInt(rekapQuery?.alokasi_perbaikan || 0),
       },
     });
   } catch (error) {
@@ -225,7 +302,10 @@ const getById = async (req, res) => {
   try {
     const { id } = req?.query;
     const knex = Usulan.knex();
-    const { customId: userId, current_role } = req?.user;
+    const { current_role, organization_id } = req?.user;
+
+    // Determine opd_id based on role
+    const opdId = current_role === "admin" ? "1" : organization_id;
 
     let query = Usulan.query()
       .findById(id)
@@ -233,9 +313,9 @@ const getById = async (req, res) => {
         "[formasi, lampiran, dibuatOleh(simpleSelect), diperbaruiOleh(simpleSelect), diverifikasiOleh(simpleSelect)]"
       );
 
-    // Non-admin hanya bisa melihat usulan miliknya sendiri
-    if (current_role !== "admin") {
-      query = query.where("dibuat_oleh", userId);
+    // Hierarchical access control - user can see usulan in their organization hierarchy
+    if (opdId && opdId !== "1") {
+      query = query.where("unit_kerja", "ilike", `${opdId}%`);
     }
 
     const result = await query;
@@ -357,6 +437,13 @@ const update = async (req, res) => {
 
     if (!usulan) {
       return res.status(404).json({ message: "Usulan tidak ditemukan" });
+    }
+
+    // Non-admin hanya boleh update usulan miliknya sendiri
+    if (!isAdmin && usulan.dibuat_oleh !== userId) {
+      return res.status(403).json({
+        message: "Anda tidak memiliki akses untuk mengubah usulan ini",
+      });
     }
 
     // Check if formasi is active
@@ -499,7 +586,14 @@ const remove = async (req, res) => {
       return res.status(404).json({ message: "Usulan tidak ditemukan" });
     }
 
-    const owner = usulan.dibuat_oleh === userId;
+    const isOwner = usulan.dibuat_oleh === userId;
+
+    // Non-admin hanya boleh hapus usulan miliknya sendiri
+    if (!isAdmin && !isOwner) {
+      return res.status(403).json({
+        message: "Anda tidak memiliki akses untuk menghapus usulan ini",
+      });
+    }
 
     // Check if formasi is active
     const formasi = await Formasi.query().findById(usulan.formasi_id);
@@ -509,10 +603,10 @@ const remove = async (req, res) => {
       });
     }
 
-    // Non-admin hanya boleh hapus jika status === "menunggu"
-    if (!isAdmin && usulan.status !== "menunggu" && !owner) {
+    // Non-admin owner hanya boleh hapus jika status === "menunggu"
+    if (!isAdmin && isOwner && usulan.status !== "menunggu") {
       return res.status(403).json({
-        message: `Usulan dengan status "${usulan.status}" tidak bisa dihapus. Hanya usulan dengan status "menunggu" atau owner yang bisa dihapus.`,
+        message: `Usulan dengan status "${usulan.status}" tidak bisa dihapus. Hanya usulan dengan status "menunggu" yang bisa dihapus.`,
       });
     }
 

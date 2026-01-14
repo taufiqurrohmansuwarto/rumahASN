@@ -2,8 +2,8 @@ const { loadEnv } = require("./utils/load-env");
 loadEnv();
 
 const redisConfig = {
-  host: process.env.REDIS_HOST || "localhost",
-  port: process.env.REDIS_PORT || 6379,
+  host: process.env.REDIS_URL || process.env.REDIS_HOST || "127.0.0.1",
+  port: parseInt(process.env.REDIS_PORT || "6380", 10),
   password: process.env.REDIS_PASSWORD || "",
   username: process.env.REDIS_USERNAME || "",
   // Enhanced Redis configuration for better performance and stability

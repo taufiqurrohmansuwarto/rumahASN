@@ -75,23 +75,48 @@ const getAll = async (req, res) => {
       query = query.where("usulan_id", usulan_id);
     }
 
-    // Filter by aksi
+    // Filter by aksi - support multiple aksi with comma-separated values
     if (aksi) {
-      query = query.where("aksi", aksi);
+      const aksiList = aksi.split(",").map((a) => a.trim());
+      if (aksiList.length === 1) {
+        query = query.where("aksi", aksiList[0]);
+      } else {
+        query = query.whereIn("aksi", aksiList);
+      }
     }
 
-    // Filter by date range
+    // Filter by date range - include the entire end date (until 23:59:59)
     if (startDate && endDate) {
-      query = query.whereBetween("dibuat_pada", [startDate, endDate]);
+      const startDateTime = `${startDate} 00:00:00`;
+      const endDateTime = `${endDate} 23:59:59`;
+      query = query.whereBetween("dibuat_pada", [startDateTime, endDateTime]);
+    } else if (startDate) {
+      query = query.where("dibuat_pada", ">=", `${startDate} 00:00:00`);
+    } else if (endDate) {
+      query = query.where("dibuat_pada", "<=", `${endDate} 23:59:59`);
     }
 
-    // Search
+    // Filter by operator (dibuat_oleh) - search by custom_id
+    if (req?.query?.operator) {
+      query = query.where("dibuat_oleh", req.query.operator);
+    }
+
+    // Search - search by operator name using subquery
     if (search) {
       query = query.where((builder) => {
         builder
           .where("riwayat_audit_id", "ilike", `%${search}%`)
           .orWhere("aksi", "ilike", `%${search}%`)
-          .orWhere("ip_address", "ilike", `%${search}%`);
+          .orWhere("ip_address", "ilike", `%${search}%`)
+          // Search by operator username
+          .orWhereExists(function () {
+            this.select(knex.raw("1"))
+              .from("users")
+              .whereRaw(
+                `users.custom_id = "perencanaan"."riwayat_audit".dibuat_oleh AND users.username ILIKE ?`,
+                [`%${search}%`]
+              );
+          });
       });
     }
 

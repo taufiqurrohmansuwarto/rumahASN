@@ -20,7 +20,6 @@ import {
   Stack,
   Text,
 } from "@mantine/core";
-import { useDebouncedValue } from "@mantine/hooks";
 import {
   IconAlertCircle,
   IconBriefcase,
@@ -696,13 +695,10 @@ function UsulanList({ formasiId, formasi }) {
     limit: urlLimit = 10,
     status: urlStatus = "",
     jenis: urlJenis = "",
-    search: urlSearch = "",
+    jabatan: urlJabatan = "",
     "unit-kerja": urlUnitKerja = "",
   } = router.query;
 
-  // Local state for search input (for debounce)
-  const [searchInput, setSearchInput] = useState(urlSearch);
-  const [debouncedSearch] = useDebouncedValue(searchInput, 400);
 
   // Fetch Unit Kerja (OPD) Tree for filter
   const { data: opdTree, isLoading: loadingOpd } = useQuery({
@@ -711,17 +707,50 @@ function UsulanList({ formasiId, formasi }) {
     staleTime: 1000 * 60 * 10,
   });
 
-  // Sync debounced search to URL
-  useEffect(() => {
-    if (debouncedSearch !== urlSearch) {
-      updateFilters({ search: debouncedSearch, page: 1 });
-    }
-  }, [debouncedSearch]);
+  // Fetch Jabatan Fungsional for filter
+  const { data: jabatanFungsional, isLoading: loadingJFT } = useQuery({
+    queryKey: ["ref-jabatan-fungsional"],
+    queryFn: getJabatanFungsional,
+    enabled: !urlJenis || urlJenis === "fungsional",
+    staleTime: 1000 * 60 * 10,
+  });
 
-  // Sync URL search to local state on mount
-  useEffect(() => {
-    setSearchInput(urlSearch);
-  }, [urlSearch]);
+  // Fetch Jabatan Pelaksana for filter
+  const { data: jabatanPelaksana, isLoading: loadingJFU } = useQuery({
+    queryKey: ["ref-jabatan-pelaksana"],
+    queryFn: getJabatanPelaksana,
+    enabled: !urlJenis || urlJenis === "pelaksana",
+    staleTime: 1000 * 60 * 10,
+  });
+
+  // Combine jabatan data based on jenis filter
+  const getJabatanTreeData = () => {
+    if (urlJenis === "fungsional") return jabatanFungsional || [];
+    if (urlJenis === "pelaksana") return jabatanPelaksana || [];
+    // If no jenis filter, combine both with grouping
+    const combined = [];
+    if (jabatanFungsional?.length) {
+      combined.push({
+        value: "group-fungsional",
+        title: "Jabatan Fungsional",
+        selectable: false,
+        children: jabatanFungsional,
+      });
+    }
+    if (jabatanPelaksana?.length) {
+      combined.push({
+        value: "group-pelaksana",
+        title: "Jabatan Pelaksana",
+        selectable: false,
+        children: jabatanPelaksana,
+      });
+    }
+    return combined;
+  };
+
+  const jabatanTreeData = getJabatanTreeData();
+  const isLoadingJabatan = loadingJFT || loadingJFU;
+
 
   // Update URL params
   const updateFilters = useCallback(
@@ -744,7 +773,7 @@ function UsulanList({ formasiId, formasi }) {
     formasi_id: formasiId,
     status: urlStatus,
     jenis_jabatan: urlJenis,
-    search: urlSearch,
+    jabatan_id: urlJabatan,
     unit_kerja: urlUnitKerja,
   };
 
@@ -777,12 +806,13 @@ function UsulanList({ formasiId, formasi }) {
     }
   );
 
-  // Stats
+  // Stats - use allocation statistics from backend rekap
   const total = data?.meta?.total || data?.rekap?.total || 0;
-  const disetujui = data?.rekap?.disetujui || 0;
-  const menunggu = data?.rekap?.menunggu || 0;
-  const totalAlokasi =
-    data?.data?.reduce((acc, item) => acc + (item.alokasi || 0), 0) || 0;
+  const totalAlokasi = data?.rekap?.total_alokasi || 0;
+  const alokasiDisetujui = data?.rekap?.alokasi_disetujui || 0;
+  const alokasiDitolak = data?.rekap?.alokasi_ditolak || 0;
+  const alokasiMenunggu = data?.rekap?.alokasi_menunggu || 0;
+  const alokasiPerbaikan = data?.rekap?.alokasi_perbaikan || 0;
 
   const columns = [
     {
@@ -1019,9 +1049,9 @@ function UsulanList({ formasiId, formasi }) {
 
   return (
     <Stack gap="xs">
-      {/* Header: Stats */}
+      {/* Header: Stats - Allocation by Status */}
       <Paper p="xs" radius="sm" withBorder>
-        <Group gap="lg">
+        <Group gap="md" wrap="wrap">
           <Group gap={4}>
             <Text size="xs" c="dimmed">
               Usulan:
@@ -1030,9 +1060,12 @@ function UsulanList({ formasiId, formasi }) {
               {total}
             </Text>
           </Group>
+          <Text size="xs" c="dimmed">
+            |
+          </Text>
           <Group gap={4}>
             <Text size="xs" c="dimmed">
-              Alokasi:
+              Total Alokasi:
             </Text>
             <Text size="sm" fw={600} c="blue">
               {totalAlokasi}
@@ -1043,7 +1076,7 @@ function UsulanList({ formasiId, formasi }) {
               Disetujui:
             </Text>
             <Text size="sm" fw={600} c="green">
-              {disetujui}
+              {alokasiDisetujui}
             </Text>
           </Group>
           <Group gap={4}>
@@ -1051,7 +1084,23 @@ function UsulanList({ formasiId, formasi }) {
               Menunggu:
             </Text>
             <Text size="sm" fw={600} c="orange">
-              {menunggu}
+              {alokasiMenunggu}
+            </Text>
+          </Group>
+          <Group gap={4}>
+            <Text size="xs" c="dimmed">
+              Perbaikan:
+            </Text>
+            <Text size="sm" fw={600} c="blue.5">
+              {alokasiPerbaikan}
+            </Text>
+          </Group>
+          <Group gap={4}>
+            <Text size="xs" c="dimmed">
+              Ditolak:
+            </Text>
+            <Text size="sm" fw={600} c="red">
+              {alokasiDitolak}
             </Text>
           </Group>
         </Group>
@@ -1060,18 +1109,13 @@ function UsulanList({ formasiId, formasi }) {
       {/* Filter Row (Full Width) */}
       <Paper p="xs" radius="sm" withBorder>
         <Group gap="xs" wrap="wrap">
-          <Input
-            placeholder="Cari jabatan..."
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            style={{ width: 180 }}
-            size="small"
-            allowClear
-          />
           <Select
             placeholder="Jenis Jabatan"
             value={urlJenis || undefined}
-            onChange={(val) => updateFilters({ jenis: val || "", page: 1 })}
+            onChange={(val) => {
+              // Reset jabatan filter when jenis changes
+              updateFilters({ jenis: val || "", jabatan: "", page: 1 });
+            }}
             style={{ width: 130 }}
             size="small"
             allowClear
@@ -1079,6 +1123,20 @@ function UsulanList({ formasiId, formasi }) {
             <Select.Option value="pelaksana">Pelaksana</Select.Option>
             <Select.Option value="fungsional">Fungsional</Select.Option>
           </Select>
+          <TreeSelect
+            placeholder={isLoadingJabatan ? "Memuat jabatan..." : "Filter Jabatan"}
+            value={urlJabatan || undefined}
+            onChange={(val) => updateFilters({ jabatan: val || "", page: 1 })}
+            treeData={jabatanTreeData}
+            showSearch
+            treeNodeFilterProp="label"
+            allowClear
+            disabled={isLoadingJabatan}
+            style={{ width: 280 }}
+            size="small"
+            dropdownStyle={{ maxHeight: 400, overflow: "auto" }}
+            notFoundContent={isLoadingJabatan ? "Memuat..." : "Tidak ditemukan"}
+          />
           <Select
             placeholder="Status"
             value={urlStatus || undefined}
