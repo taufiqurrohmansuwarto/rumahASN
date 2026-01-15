@@ -9,13 +9,13 @@ import {
   getUsulan,
   updateUsulan,
 } from "@/services/perencanaan-formasi.services";
-import { saveAs } from "file-saver";
-import * as XLSX from "xlsx";
 import {
   ActionIcon,
+  Badge,
   Box,
   Group,
   Paper,
+  ScrollArea,
   Stack,
   Text,
 } from "@mantine/core";
@@ -23,9 +23,13 @@ import {
   IconAlertCircle,
   IconBriefcase,
   IconBuilding,
+  IconCircleMinus,
+  IconCirclePlus,
   IconDownload,
   IconEdit,
+  IconEye,
   IconFileText,
+  IconGitCompare,
   IconHash,
   IconMessage,
   IconPaperclip,
@@ -40,7 +44,6 @@ import {
   Button,
   Collapse,
   Form,
-  Input,
   InputNumber,
   message,
   Modal,
@@ -52,20 +55,11 @@ import {
   TreeSelect,
 } from "antd";
 import dayjs from "dayjs";
+import { saveAs } from "file-saver";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useState } from "react";
-
-
-// Convert flat jabatan list to tree format for TreeSelect
-const convertToTreeData = (data) => {
-  if (!data || !Array.isArray(data)) return [];
-  return data.map((item) => ({
-    value: item.value,
-    title: item.label,
-    key: item.value,
-  }));
-};
+import * as XLSX from "xlsx";
 
 // Modal Create/Edit Usulan
 const UsulanModal = ({ open, onClose, data, formasiId, formasiUsulanId }) => {
@@ -183,7 +177,7 @@ const UsulanModal = ({ open, onClose, data, formasiId, formasiUsulanId }) => {
 
     // Priority 3: Contains input as complete word/phrase
     const wordBoundaryRegex = new RegExp(
-      `\\b${input.replace(/[.*+?^${}()[|\\]/g, '\\$&')}\\b`,
+      `\\b${input.replace(/[.*+?^${}()[|\\]/g, "\\$&")}\\b`,
       "i"
     );
     const wordMatchA = wordBoundaryRegex.test(labelA);
@@ -426,11 +420,177 @@ const UsulanModal = ({ open, onClose, data, formasiId, formasiUsulanId }) => {
   );
 };
 
-function UsulanList({ formasiId, formasiUsulanId, submissionStatus }) {
+// Modal Perbandingan Data Usulan
+const ComparisonModal = ({ open, onClose, snapshotData, currentData, comparisonStats }) => {
+  if (!snapshotData || !comparisonStats) return null;
+
+  const { added, removed, unchanged } = comparisonStats;
+
+  // Render compact item row - single line
+  const renderItem = (item, status) => {
+    const statusConfig = {
+      added: { color: "green", bg: "#e6ffed", label: "Baru", icon: IconCirclePlus },
+      removed: { color: "red", bg: "#ffebe9", label: "Dihapus", icon: IconCircleMinus },
+      unchanged: { color: "gray", bg: "#f8f9fa", label: "Tetap", icon: null },
+    };
+    const config = statusConfig[status];
+    const Icon = config.icon;
+
+    // Get pendidikan details - show tk_pend short, full label in tooltip
+    const pendidikanDetails = item.kualifikasi_pendidikan_detail || [];
+    const pendidikanShort = pendidikanDetails.length > 0
+      ? pendidikanDetails.map(p => p.tk_pend).join(", ")
+      : "-";
+    const pendidikanFull = pendidikanDetails.length > 0
+      ? pendidikanDetails.map(p => p.label).join("\n")
+      : "-";
+
+    const unitKerja = item.unit_kerja_text || item.unit_kerja || "-";
+    // Truncate unit kerja if too long
+    const unitKerjaShort = unitKerja.length > 40 ? unitKerja.substring(0, 40) + "..." : unitKerja;
+
+    return (
+      <tr key={item.usulan_id} style={{ backgroundColor: config.bg }}>
+        <td style={{ padding: "6px 8px", whiteSpace: "nowrap" }}>
+          <Badge size="xs" color={item.jenis_jabatan === "fungsional" ? "blue" : "green"}>
+            {item.jenis_jabatan === "fungsional" ? "JFT" : "JFU"}
+          </Badge>
+        </td>
+        <td style={{ padding: "6px 8px" }}>
+          <Text size="xs" fw={500} lineClamp={1}>
+            {item.nama_jabatan || item.jabatan_id}
+          </Text>
+        </td>
+        <td style={{ padding: "6px 8px" }}>
+          <Tooltip title={unitKerja}>
+            <Text size="xs" c="dimmed" lineClamp={1}>
+              {unitKerjaShort}
+            </Text>
+          </Tooltip>
+        </td>
+        <td style={{ padding: "6px 8px", textAlign: "center" }}>
+          <Text size="xs" fw={600}>{item.alokasi}</Text>
+        </td>
+        <td style={{ padding: "6px 8px" }}>
+          <Tooltip title={pendidikanFull} overlayStyle={{ whiteSpace: "pre-line", maxWidth: 400 }}>
+            <Text size="xs" c="dimmed" style={{ cursor: pendidikanDetails.length > 0 ? "help" : "default" }}>
+              {pendidikanShort}
+            </Text>
+          </Tooltip>
+        </td>
+        <td style={{ padding: "6px 8px", textAlign: "center" }}>
+          <Badge size="xs" color={config.color} variant="light" leftSection={Icon && <Icon size={10} />}>
+            {config.label}
+          </Badge>
+        </td>
+      </tr>
+    );
+  };
+
+  const tableStyle = {
+    width: "100%",
+    borderCollapse: "collapse",
+    fontSize: "12px",
+  };
+
+  const thStyle = {
+    padding: "8px",
+    textAlign: "left",
+    borderBottom: "1px solid #dee2e6",
+    fontWeight: 600,
+    fontSize: "11px",
+    color: "#868e96",
+    backgroundColor: "#f8f9fa",
+  };
+
+  return (
+    <Modal
+      title={
+        <Group gap="xs">
+          <IconGitCompare size={18} />
+          <span>Detail Perbandingan Data Usulan</span>
+        </Group>
+      }
+      open={open}
+      onCancel={onClose}
+      footer={null}
+      width={950}
+    >
+      <Stack gap="sm">
+        {/* Summary */}
+        <Paper p="xs" radius="sm" withBorder bg="blue.0">
+          <Group gap="lg" wrap="wrap">
+            <Group gap="xs">
+              <Text size="xs" c="dimmed">Data Asli:</Text>
+              <Text size="xs" fw={600}>{snapshotData.length} usulan</Text>
+              <Text size="xs" c="dimmed">|</Text>
+              <Text size="xs" fw={600}>
+                {snapshotData.reduce((acc, item) => acc + (item.alokasi || 0), 0)} alokasi
+              </Text>
+            </Group>
+            <Group gap="xs">
+              <Text size="xs" c="dimmed">Saat Ini:</Text>
+              <Text size="xs" fw={600}>{currentData?.length || 0} usulan</Text>
+              <Text size="xs" c="dimmed">|</Text>
+              <Text size="xs" fw={600}>
+                {(currentData || []).reduce((acc, item) => acc + (item.alokasi || 0), 0)} alokasi
+              </Text>
+            </Group>
+            {(added.length > 0 || removed.length > 0) && (
+              <Group gap="xs">
+                {added.length > 0 && (
+                  <Badge size="xs" color="green" variant="light">+{added.length} baru</Badge>
+                )}
+                {removed.length > 0 && (
+                  <Badge size="xs" color="red" variant="light">-{removed.length} dihapus</Badge>
+                )}
+              </Group>
+            )}
+          </Group>
+        </Paper>
+
+        <ScrollArea h={400} offsetScrollbars>
+          <table style={tableStyle}>
+            <thead>
+              <tr>
+                <th style={{ ...thStyle, width: 60 }}>Jenis</th>
+                <th style={{ ...thStyle, width: 200 }}>Nama Jabatan</th>
+                <th style={{ ...thStyle, width: 250 }}>Unit Kerja</th>
+                <th style={{ ...thStyle, width: 60, textAlign: "center" }}>Alokasi</th>
+                <th style={{ ...thStyle, width: 120 }}>Pendidikan</th>
+                <th style={{ ...thStyle, width: 80, textAlign: "center" }}>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {/* Removed Items */}
+              {removed.length > 0 && removed.map((item) => renderItem(item, "removed"))}
+              {/* Added Items */}
+              {added.length > 0 && added.map((item) => renderItem(item, "added"))}
+              {/* Unchanged Items */}
+              {unchanged.length > 0 && unchanged.map((item) => renderItem(item, "unchanged"))}
+            </tbody>
+          </table>
+
+          {/* No changes message */}
+          {added.length === 0 && removed.length === 0 && unchanged.length > 0 && (
+            <Paper p="xs" radius="sm" withBorder bg="gray.0" mt="sm">
+              <Text size="xs" c="dimmed" ta="center">
+                Tidak ada perubahan. Data saat ini sama dengan data saat pengajuan dikirim.
+              </Text>
+            </Paper>
+          )}
+        </ScrollArea>
+      </Stack>
+    </Modal>
+  );
+};
+
+function UsulanList({ formasiId, formasiUsulanId, submissionStatus, submissionData }) {
   const router = useRouter();
   const { data: session } = useSession();
   const isAdmin = session?.user?.current_role === "admin";
   const queryClient = useQueryClient();
+  const [deletingId, setDeletingId] = useState(null);
 
   // Get filters from URL (using kebab-case for cleaner URLs)
   const {
@@ -441,7 +601,6 @@ function UsulanList({ formasiId, formasiUsulanId, submissionStatus }) {
     jabatan: urlJabatan = "",
     "unit-kerja": urlUnitKerja = "",
   } = router.query;
-
 
   // Fetch Unit Kerja (OPD) Tree for filter
   const { data: opdTree, isLoading: loadingOpd } = useQuery({
@@ -494,7 +653,6 @@ function UsulanList({ formasiId, formasiUsulanId, submissionStatus }) {
   const jabatanTreeData = getJabatanTreeData();
   const isLoadingJabatan = loadingJFT || loadingJFU;
 
-
   // Update URL params
   const updateFilters = useCallback(
     (newFilters) => {
@@ -521,6 +679,7 @@ function UsulanList({ formasiId, formasiUsulanId, submissionStatus }) {
   };
 
   const [modal, setModal] = useState({ open: false, data: null });
+  const [comparisonModal, setComparisonModal] = useState(false);
 
   // Fetch usulan
   const { data, isLoading, refetch } = useQuery(
@@ -530,9 +689,12 @@ function UsulanList({ formasiId, formasiUsulanId, submissionStatus }) {
   );
 
   // Delete mutation
-  const { mutate: hapusUsulan, isLoading: isDeleting } = useMutation(
+  const { mutate: hapusUsulan } = useMutation(
     (id) => deleteUsulan(id),
     {
+      onMutate: (id) => {
+        setDeletingId(id);
+      },
       onSuccess: () => {
         message.success("Usulan berhasil dihapus");
         queryClient.invalidateQueries(["perencanaan-usulan"]);
@@ -541,6 +703,9 @@ function UsulanList({ formasiId, formasiUsulanId, submissionStatus }) {
         message.error(
           error?.response?.data?.message || "Gagal menghapus usulan"
         );
+      },
+      onSettled: () => {
+        setDeletingId(null);
       },
     }
   );
@@ -554,7 +719,23 @@ function UsulanList({ formasiId, formasiUsulanId, submissionStatus }) {
   // Determine if editable based on submission status
   // Non-admin can only edit when status is draft or perbaikan
   // When status is disetujui, ditolak, or menunggu, non-admin cannot edit
-  const isEditable = isAdmin || (submissionStatus === "draft" || submissionStatus === "perbaikan");
+  const isEditable =
+    isAdmin || submissionStatus === "draft" || submissionStatus === "perbaikan";
+
+  // Comparison logic - compare data_usulan (snapshot) with current data
+  const dataUsulanSnapshot = submissionData?.data_usulan || [];
+  const hasSnapshot = submissionData?.is_confirmed && dataUsulanSnapshot.length > 0;
+  const currentUsulanIds = new Set((data?.data || []).map((item) => item.usulan_id));
+  const snapshotUsulanIds = new Set(dataUsulanSnapshot.map((item) => item.usulan_id));
+
+  // Calculate comparison stats
+  const comparisonStats = hasSnapshot
+    ? {
+        added: (data?.data || []).filter((item) => !snapshotUsulanIds.has(item.usulan_id)),
+        removed: dataUsulanSnapshot.filter((item) => !currentUsulanIds.has(item.usulan_id)),
+        unchanged: (data?.data || []).filter((item) => snapshotUsulanIds.has(item.usulan_id)),
+      }
+    : null;
 
   const columns = [
     {
@@ -577,11 +758,21 @@ function UsulanList({ formasiId, formasiUsulanId, submissionStatus }) {
       dataIndex: "nama_jabatan",
       key: "nama_jabatan",
       ellipsis: true,
-      render: (val, record) => (
-        <Text size="sm" fw={500}>
-          {val || record.jabatan_id}
-        </Text>
-      ),
+      render: (val, record) => {
+        const isNewItem = hasSnapshot && !snapshotUsulanIds.has(record.usulan_id);
+        return (
+          <Group gap="xs" wrap="nowrap">
+            <Text size="sm" fw={500} style={{ flex: 1 }}>
+              {val || record.jabatan_id}
+            </Text>
+            {isNewItem && (
+              <Badge size="xs" color="green" variant="light">
+                Baru
+              </Badge>
+            )}
+          </Group>
+        );
+      },
     },
     {
       title: "Kualifikasi Pendidikan",
@@ -675,7 +866,7 @@ function UsulanList({ formasiId, formasiUsulanId, submissionStatus }) {
                   color="red"
                   size="sm"
                   disabled={!canDelete}
-                  loading={isDeleting}
+                  loading={deletingId === record.usulan_id}
                 >
                   <IconTrash size={14} />
                 </ActionIcon>
@@ -766,28 +957,90 @@ function UsulanList({ formasiId, formasiUsulanId, submissionStatus }) {
       <Paper p="xs" radius="sm" withBorder>
         <Group gap="lg" wrap="wrap">
           <Group gap={4}>
-            <Text size="xs" c="dimmed">Jumlah Usulan:</Text>
-            <Text size="sm" fw={600}>{total}</Text>
+            <Text size="xs" c="dimmed">
+              Jumlah Usulan:
+            </Text>
+            <Text size="sm" fw={600}>
+              {total}
+            </Text>
             {totalDisetujui > 0 && (
-              <Tag color="green" size="small">{totalDisetujui} terverifikasi</Tag>
+              <Tag color="green" size="small">
+                {totalDisetujui} terverifikasi
+              </Tag>
             )}
           </Group>
-          <Text size="xs" c="dimmed">|</Text>
+          <Text size="xs" c="dimmed">
+            |
+          </Text>
           <Group gap={4}>
-            <Text size="xs" c="dimmed">Total Alokasi (Terverifikasi):</Text>
-            <Text size="sm" fw={600} c="green">{totalAlokasi}</Text>
+            <Text size="xs" c="dimmed">
+              Total Alokasi (Terverifikasi):
+            </Text>
+            <Text size="sm" fw={600} c="green">
+              {totalAlokasi}
+            </Text>
             {totalAlokasiSemua !== totalAlokasi && (
-              <Text size="xs" c="dimmed">/ {totalAlokasiSemua} total</Text>
+              <Text size="xs" c="dimmed">
+                / {totalAlokasiSemua} total
+              </Text>
             )}
           </Group>
           {!isEditable && (
             <>
-              <Text size="xs" c="dimmed">|</Text>
+              <Text size="xs" c="dimmed">
+                |
+              </Text>
               <Tag color="orange">Pengajuan Terkunci - Tidak dapat diubah</Tag>
             </>
           )}
         </Group>
       </Paper>
+
+      {/* Comparison Summary - Show when is_confirmed and has snapshot */}
+      {hasSnapshot && (
+        <Paper p="xs" radius="sm" withBorder bg="gray.0">
+          <Group gap="md" wrap="wrap" justify="space-between">
+            <Group gap="md" wrap="wrap">
+              <Group gap="xs">
+                <IconGitCompare size={14} color="#868e96" />
+                <Text size="xs" c="dimmed">Data saat dikirim:</Text>
+                <Text size="xs" fw={600}>{dataUsulanSnapshot.length} usulan</Text>
+                <Text size="xs" c="dimmed">|</Text>
+                <Text size="xs" fw={600}>
+                  {dataUsulanSnapshot.reduce((acc, item) => acc + (item.alokasi || 0), 0)} alokasi
+                </Text>
+              </Group>
+              {(comparisonStats.added.length > 0 || comparisonStats.removed.length > 0) ? (
+                <Group gap="xs">
+                  <Text size="xs" c="dimmed">Perubahan:</Text>
+                  {comparisonStats.added.length > 0 && (
+                    <Badge size="xs" color="green" variant="light" leftSection={<IconCirclePlus size={10} />}>
+                      +{comparisonStats.added.length} baru
+                    </Badge>
+                  )}
+                  {comparisonStats.removed.length > 0 && (
+                    <Badge size="xs" color="red" variant="light" leftSection={<IconCircleMinus size={10} />}>
+                      -{comparisonStats.removed.length} dihapus
+                    </Badge>
+                  )}
+                </Group>
+              ) : (
+                <Badge size="xs" color="gray" variant="light">Tidak ada perubahan</Badge>
+              )}
+            </Group>
+            <Tooltip title="Lihat detail perbandingan">
+              <Button
+                size="small"
+                type="text"
+                icon={<IconEye size={14} />}
+                onClick={() => setComparisonModal(true)}
+              >
+                Detail
+              </Button>
+            </Tooltip>
+          </Group>
+        </Paper>
+      )}
 
       {/* Filter Row (Full Width) */}
       <Paper p="xs" radius="sm" withBorder>
@@ -807,7 +1060,9 @@ function UsulanList({ formasiId, formasiUsulanId, submissionStatus }) {
             <Select.Option value="fungsional">Fungsional</Select.Option>
           </Select>
           <TreeSelect
-            placeholder={isLoadingJabatan ? "Memuat jabatan..." : "Filter Jabatan"}
+            placeholder={
+              isLoadingJabatan ? "Memuat jabatan..." : "Filter Jabatan"
+            }
             value={urlJabatan || undefined}
             onChange={(val) => updateFilters({ jabatan: val || "", page: 1 })}
             treeData={jabatanTreeData}
@@ -852,11 +1107,7 @@ function UsulanList({ formasiId, formasiUsulanId, submissionStatus }) {
             Unduh
           </Button>
           <Tooltip
-            title={
-              !isEditable
-                ? "Tidak dapat menambah data"
-                : "Tambah Jabatan"
-            }
+            title={!isEditable ? "Tidak dapat menambah data" : "Tambah Jabatan"}
           >
             <Button
               type="primary"
@@ -894,9 +1145,11 @@ function UsulanList({ formasiId, formasiUsulanId, submissionStatus }) {
               // Only show expanded content if status is not "menunggu" and has content to show
               const hasCatatan = record.catatan;
               const hasAlasanPerbaikan = record.alasan_perbaikan;
-              const hasVerifier = record.diverifikasiOleh || record.diverifikasi_pada;
+              const hasVerifier =
+                record.diverifikasiOleh || record.diverifikasi_pada;
 
-              if (!hasCatatan && !hasAlasanPerbaikan && !hasVerifier) return null;
+              if (!hasCatatan && !hasAlasanPerbaikan && !hasVerifier)
+                return null;
 
               const items = [];
 
@@ -920,7 +1173,9 @@ function UsulanList({ formasiId, formasiUsulanId, submissionStatus }) {
                             Diverifikasi oleh:
                           </Text>
                           <Text size="xs" fw={500}>
-                            {record.diverifikasiOleh.username || record.diverifikasiOleh.custom_id || "-"}
+                            {record.diverifikasiOleh.username ||
+                              record.diverifikasiOleh.custom_id ||
+                              "-"}
                           </Text>
                         </Group>
                       )}
@@ -930,7 +1185,9 @@ function UsulanList({ formasiId, formasiUsulanId, submissionStatus }) {
                             Tanggal verifikasi:
                           </Text>
                           <Text size="xs" fw={500}>
-                            {dayjs(record.diverifikasi_pada).format("DD/MM/YYYY HH:mm")}
+                            {dayjs(record.diverifikasi_pada).format(
+                              "DD/MM/YYYY HH:mm"
+                            )}
                           </Text>
                         </Group>
                       )}
@@ -981,7 +1238,11 @@ function UsulanList({ formasiId, formasiUsulanId, submissionStatus }) {
                 <Box pl="md">
                   <Collapse
                     items={items}
-                    defaultActiveKey={["verifikasi", "alasan_perbaikan", "catatan"]}
+                    defaultActiveKey={[
+                      "verifikasi",
+                      "alasan_perbaikan",
+                      "catatan",
+                    ]}
                     size="small"
                     bordered={false}
                     style={{ background: "transparent" }}
@@ -991,7 +1252,10 @@ function UsulanList({ formasiId, formasiUsulanId, submissionStatus }) {
             },
             rowExpandable: (record) =>
               record.status !== "menunggu" &&
-              (record.catatan || record.alasan_perbaikan || record.diverifikasiOleh || record.diverifikasi_pada),
+              (record.catatan ||
+                record.alasan_perbaikan ||
+                record.diverifikasiOleh ||
+                record.diverifikasi_pada),
           }}
         />
       </Paper>
@@ -1003,6 +1267,13 @@ function UsulanList({ formasiId, formasiUsulanId, submissionStatus }) {
         data={modal.data}
         formasiId={formasiId} // For lampiran context
         formasiUsulanId={formasiUsulanId} // For create logic
+      />
+      <ComparisonModal
+        open={comparisonModal}
+        onClose={() => setComparisonModal(false)}
+        snapshotData={dataUsulanSnapshot}
+        currentData={data?.data || []}
+        comparisonStats={comparisonStats}
       />
     </Stack>
   );

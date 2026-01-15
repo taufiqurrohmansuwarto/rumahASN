@@ -15,6 +15,11 @@ class FormasiUsulan extends Model {
     return "formasi_usulan_id";
   }
 
+  // Define JSON columns for proper serialization
+  static get jsonAttributes() {
+    return ["data_usulan"];
+  }
+
   $beforeInsert() {
     this.formasi_usulan_id = `fu-${nanoid()}`;
     this.dibuat_pada = new Date().toISOString();

@@ -1,5 +1,6 @@
 const FormasiUsulan = require("@/models/perencanaan/perencanaan.formasi_usulan.model");
 const Formasi = require("@/models/perencanaan/perencanaan.formasi.model");
+const Usulan = require("@/models/perencanaan/perencanaan.usulan.model");
 const RiwayatAudit = require("@/models/perencanaan/perencanaan.riwayat_audit.model");
 const {
   uploadFilePublic,
@@ -10,6 +11,61 @@ const {
 } = require("@/utils/helper/minio-helper");
 const { handleError } = require("@/utils/helper/controller-helper");
 const { nanoid } = require("nanoid");
+
+// Helper function to get jabatan name by id and jenis
+const getJabatanName = async (knex, jabatanId, jenisJabatan) => {
+  if (!jabatanId) return null;
+
+  if (jenisJabatan === "fungsional") {
+    const result = await knex("simaster_jft")
+      .select(
+        knex.raw(
+          "CONCAT(name, ' ', jenjang_jab, ' - ', gol_ruang) as nama_jabatan"
+        )
+      )
+      .where("id", jabatanId)
+      .first();
+    return result?.nama_jabatan || jabatanId;
+  } else if (jenisJabatan === "pelaksana") {
+    const result = await knex("simaster_jfu")
+      .select("name as nama_jabatan")
+      .where("id", jabatanId)
+      .first();
+    return result?.nama_jabatan || jabatanId;
+  }
+  return jabatanId;
+};
+
+// Helper function to get unit kerja hierarchy
+const getUnitKerjaHierarchy = async (knex, unitKerjaId) => {
+  if (!unitKerjaId) return null;
+
+  const result = await knex.raw(
+    "SELECT get_hierarchy_simaster(?) as hierarchy",
+    [unitKerjaId]
+  );
+  return result.rows?.[0]?.hierarchy || unitKerjaId;
+};
+
+// Helper function to get pendidikan details by IDs
+const getPendidikanDetails = async (knex, pendidikanIds) => {
+  if (
+    !pendidikanIds ||
+    !Array.isArray(pendidikanIds) ||
+    pendidikanIds.length === 0
+  ) {
+    return [];
+  }
+
+  const result = await knex.raw(
+    `SELECT rsp.id as value, stk.nama as tk_pend, rsp.nama as label
+     FROM ref_siasn.pendidikan rsp
+     LEFT JOIN siasn_tk_pend stk ON stk.id::text = rsp.tk_pendidikan_id::text
+     WHERE rsp.id IN (${pendidikanIds.map(() => "?").join(",")})`,
+    pendidikanIds
+  );
+  return result.rows || [];
+};
 
 /**
  * Get all formasi usulan
@@ -70,7 +126,9 @@ const getAll = async (req, res) => {
       return items.map((item) => {
         const usulanList = item.usulan || [];
         const jumlahUsulan = usulanList.length;
-        const jumlahDisetujui = usulanList.filter((u) => u.status === "disetujui").length;
+        const jumlahDisetujui = usulanList.filter(
+          (u) => u.status === "disetujui"
+        ).length;
         // Total alokasi hanya dari usulan yang sudah disetujui/diverifikasi
         const totalAlokasi = usulanList
           .filter((u) => u.status === "disetujui")
@@ -119,7 +177,7 @@ const getAll = async (req, res) => {
       )
       .first();
 
-    res.json({
+    const data = {
       data: transformedData,
       meta: {
         total: result.total,
@@ -134,7 +192,9 @@ const getAll = async (req, res) => {
         ditolak: parseInt(rekap?.ditolak || 0),
         perbaikan: parseInt(rekap?.perbaikan || 0),
       },
-    });
+    };
+
+    res.json(data);
   } catch (error) {
     handleError(res, error);
   }
@@ -167,7 +227,9 @@ const getById = async (req, res) => {
     // Add stats
     const usulanList = result.usulan || [];
     const jumlahUsulan = usulanList.length;
-    const jumlahDisetujui = usulanList.filter((u) => u.status === "disetujui").length;
+    const jumlahDisetujui = usulanList.filter(
+      (u) => u.status === "disetujui"
+    ).length;
     // Total alokasi hanya dari usulan yang sudah disetujui/diverifikasi
     const totalAlokasi = usulanList
       .filter((u) => u.status === "disetujui")
@@ -264,27 +326,81 @@ const update = async (req, res) => {
       if (status) updateData.status = status;
       if (catatan !== undefined) updateData.catatan = catatan;
 
-      if (status === "disetujui" || status === "ditolak" || status === "perbaikan") {
+      if (
+        status === "disetujui" ||
+        status === "ditolak" ||
+        status === "perbaikan"
+      ) {
         updateData.corrector_id = userId;
         updateData.corrected_at = new Date().toISOString();
       }
-    } 
+    }
     // User Logic: Confirm Submission
     else {
       if (formasiUsulan.user_id !== userId) {
         return res.status(403).json({ message: "Forbidden" });
       }
-      
+
       // User can only update if status is draft or perbaikan
-      if (formasiUsulan.status !== 'draft' && formasiUsulan.status !== 'perbaikan') {
-         return res.status(400).json({ message: "Pengajuan tidak dapat diubah karena status bukan Draft atau Perbaikan." });
+      if (
+        formasiUsulan.status !== "draft" &&
+        formasiUsulan.status !== "perbaikan"
+      ) {
+        return res.status(400).json({
+          message:
+            "Pengajuan tidak dapat diubah karena status bukan Draft atau Perbaikan.",
+        });
       }
 
       if (is_confirmed !== undefined) {
-         updateData.is_confirmed = is_confirmed;
-         if (is_confirmed) {
-             updateData.status = 'menunggu'; // Set to waiting verification
-         }
+        updateData.is_confirmed = is_confirmed;
+        if (is_confirmed) {
+          updateData.status = "menunggu"; // Set to waiting verification
+
+          // Simpan snapshot data usulan saat kirim untuk perbandingan setelah verifikasi
+          const knex = Usulan.knex();
+          const usulanList = await Usulan.query()
+            .where("formasi_usulan_id", id)
+            .select(
+              "usulan_id",
+              "jenis_jabatan",
+              "jabatan_id",
+              "kualifikasi_pendidikan",
+              "alokasi",
+              "unit_kerja",
+              "lampiran_id",
+              "status",
+              "dibuat_pada"
+            );
+
+          // Enrich data with nama_jabatan, unit_kerja_text, kualifikasi_pendidikan_detail
+          const enrichedUsulanList = await Promise.all(
+            usulanList.map(async (item) => {
+              const namaJabatan = await getJabatanName(
+                knex,
+                item.jabatan_id,
+                item.jenis_jabatan
+              );
+              const unitKerjaText = await getUnitKerjaHierarchy(
+                knex,
+                item.unit_kerja
+              );
+              const pendidikanDetail = await getPendidikanDetails(
+                knex,
+                item.kualifikasi_pendidikan
+              );
+
+              return {
+                ...item,
+                nama_jabatan: namaJabatan,
+                unit_kerja_text: unitKerjaText,
+                kualifikasi_pendidikan_detail: pendidikanDetail,
+              };
+            })
+          );
+
+          updateData.data_usulan = enrichedUsulanList;
+        }
       }
     }
 
@@ -294,7 +410,9 @@ const update = async (req, res) => {
     await RiwayatAudit.query().insert({
       formasi_id: formasiUsulan.formasi_id,
       // usulan_id is null here as this is formasi_usulan level
-      aksi: isAdmin ? `VERIFY_SUBMISSION_${status?.toUpperCase()}` : "UPDATE_SUBMISSION",
+      aksi: isAdmin
+        ? `VERIFY_SUBMISSION_${status?.toUpperCase()}`
+        : "UPDATE_SUBMISSION",
       data_lama: formasiUsulan,
       data_baru: { ...formasiUsulan, ...updateData },
       dibuat_oleh: userId,
@@ -327,7 +445,7 @@ const uploadDokumen = async (req, res) => {
 
     // Check permission
     if (formasiUsulan.user_id !== userId) {
-       return res.status(403).json({ message: "Forbidden" });
+      return res.status(403).json({ message: "Forbidden" });
     }
 
     const uniqueId = nanoid(8);
@@ -350,20 +468,25 @@ const uploadDokumen = async (req, res) => {
 
     // Delete old file if exists
     if (formasiUsulan.dokumen_url) {
-        const oldUrlInfo = parseMinioUrl(formasiUsulan.dokumen_url);
-        if (oldUrlInfo) {
-             try { await deleteFilePublic(mc, oldUrlInfo.filename); } catch (e) {}
-        }
+      const oldUrlInfo = parseMinioUrl(formasiUsulan.dokumen_url);
+      if (oldUrlInfo) {
+        try {
+          await deleteFilePublic(mc, oldUrlInfo.filename);
+        } catch (e) {}
+      }
     }
 
     await FormasiUsulan.query().findById(id).patch({
-        dokumen_url: fileUrl,
-        dokumen_name: file.originalname,
-        diperbarui_oleh: userId
+      dokumen_url: fileUrl,
+      dokumen_name: file.originalname,
+      diperbarui_oleh: userId,
     });
 
-    res.json({ code: 200, message: "Dokumen berhasil diunggah", data: { url: fileUrl } });
-
+    res.json({
+      code: 200,
+      message: "Dokumen berhasil diunggah",
+      data: { url: fileUrl },
+    });
   } catch (error) {
     handleError(res, error);
   }
@@ -373,53 +496,65 @@ const uploadDokumen = async (req, res) => {
  * Download Dokumen
  */
 const downloadDokumen = async (req, res) => {
-    try {
-        const { id } = req?.query;
-        const { mc } = req;
+  try {
+    const { id } = req?.query;
+    const { mc } = req;
 
-        const formasiUsulan = await FormasiUsulan.query().findById(id);
-        if (!formasiUsulan || !formasiUsulan.dokumen_url) {
-            return res.status(404).json({ message: "Dokumen tidak ditemukan" });
-        }
-
-        const urlInfo = parseMinioUrl(formasiUsulan.dokumen_url);
-        const fileBuffer = await downloadFileAsBuffer(mc, urlInfo.bucket, urlInfo.filename);
-
-        res.setHeader("Content-Disposition", `attachment; filename="${formasiUsulan.dokumen_name}"`);
-        res.end(fileBuffer);
-    } catch (error) {
-        handleError(res, error);
+    const formasiUsulan = await FormasiUsulan.query().findById(id);
+    if (!formasiUsulan || !formasiUsulan.dokumen_url) {
+      return res.status(404).json({ message: "Dokumen tidak ditemukan" });
     }
-}
+
+    const urlInfo = parseMinioUrl(formasiUsulan.dokumen_url);
+    if (!urlInfo) {
+      return res.status(400).json({ message: "Format URL dokumen tidak valid" });
+    }
+
+    const fileBuffer = await downloadFileAsBuffer(
+      mc,
+      urlInfo.bucket,
+      urlInfo.filename
+    );
+
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="${formasiUsulan.dokumen_name}"`
+    );
+    res.end(fileBuffer);
+  } catch (error) {
+    handleError(res, error);
+  }
+};
 
 /**
  * Delete Submission
  */
 const remove = async (req, res) => {
-    try {
-        const { id } = req?.query;
-        const { customId: userId, current_role } = req?.user;
-        const isAdmin = current_role === "admin";
+  try {
+    const { id } = req?.query;
+    const { customId: userId, current_role } = req?.user;
+    const isAdmin = current_role === "admin";
 
-        const formasiUsulan = await FormasiUsulan.query().findById(id);
-        if (!formasiUsulan) return res.status(404).json({ message: "Not Found" });
+    const formasiUsulan = await FormasiUsulan.query().findById(id);
+    if (!formasiUsulan) return res.status(404).json({ message: "Not Found" });
 
-        if (!isAdmin && formasiUsulan.user_id !== userId) {
-            return res.status(403).json({ message: "Forbidden" });
-        }
-
-        // Only allow delete if draft
-        if (!isAdmin && formasiUsulan.status !== 'draft') {
-            return res.status(400).json({ message: "Hanya draft yang dapat dihapus" });
-        }
-
-        await FormasiUsulan.query().deleteById(id);
-        res.json({ code: 200, message: "Pengajuan berhasil dihapus" });
-
-    } catch (error) {
-        handleError(res, error);
+    if (!isAdmin && formasiUsulan.user_id !== userId) {
+      return res.status(403).json({ message: "Forbidden" });
     }
-}
+
+    // Only allow delete if draft
+    if (!isAdmin && formasiUsulan.status !== "draft") {
+      return res
+        .status(400)
+        .json({ message: "Hanya draft yang dapat dihapus" });
+    }
+
+    await FormasiUsulan.query().deleteById(id);
+    res.json({ code: 200, message: "Pengajuan berhasil dihapus" });
+  } catch (error) {
+    handleError(res, error);
+  }
+};
 
 module.exports = {
   getAll,

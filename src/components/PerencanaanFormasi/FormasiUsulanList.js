@@ -71,6 +71,7 @@ function FormasiUsulanList({ formasiId, formasi }) {
   const isAdmin = session?.user?.current_role === "admin";
   const userId = session?.user?.id; // custom_id from session
   const queryClient = useQueryClient();
+  const [deletingId, setDeletingId] = useState(null);
 
   // Filters
   const {
@@ -142,15 +143,21 @@ function FormasiUsulanList({ formasiId, formasi }) {
   );
 
   // Delete mutation
-  const { mutate: remove, isLoading: isDeleting } = useMutation(
+  const { mutate: remove } = useMutation(
     (id) => deleteFormasiUsulan(id),
     {
+      onMutate: (id) => {
+        setDeletingId(id);
+      },
       onSuccess: () => {
         message.success("Pengajuan berhasil dihapus");
         queryClient.invalidateQueries(["perencanaan-formasi-usulan"]);
       },
       onError: (err) => {
         message.error(err?.response?.data?.message || "Gagal menghapus pengajuan");
+      },
+      onSettled: () => {
+        setDeletingId(null);
       },
     }
   );
@@ -375,7 +382,7 @@ function FormasiUsulanList({ formasiId, formasi }) {
                 cancelText="Batal"
               >
                 <Tooltip title="Hapus">
-                  <ActionIcon variant="subtle" color="red" loading={isDeleting}>
+                  <ActionIcon variant="subtle" color="red" loading={deletingId === record.formasi_usulan_id}>
                     <IconTrash size={16} />
                   </ActionIcon>
                 </Tooltip>

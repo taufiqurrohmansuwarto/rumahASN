@@ -72,6 +72,8 @@ function FormasiList() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [modal, setModal] = useState({ open: false, data: null });
+  const [deletingId, setDeletingId] = useState(null);
+  const [deletingPengajuanId, setDeletingPengajuanId] = useState(null);
   const { data: session } = useSession();
   const isAdmin = session?.user?.current_role === "admin";
 
@@ -132,9 +134,12 @@ function FormasiList() {
   );
 
   // Delete formasi mutation (admin only)
-  const { mutate: hapusFormasi, isLoading: isDeleting } = useMutation(
+  const { mutate: hapusFormasi } = useMutation(
     (id) => deleteFormasi(id),
     {
+      onMutate: (id) => {
+        setDeletingId(id);
+      },
       onSuccess: () => {
         message.success("Formasi berhasil dihapus");
         queryClient.invalidateQueries(["perencanaan-formasi"]);
@@ -144,13 +149,19 @@ function FormasiList() {
           error?.response?.data?.message || "Gagal menghapus formasi"
         );
       },
+      onSettled: () => {
+        setDeletingId(null);
+      },
     }
   );
 
   // Delete pengajuan mutation (user's own)
-  const { mutate: hapusPengajuan, isLoading: isDeletingPengajuan } = useMutation(
+  const { mutate: hapusPengajuan } = useMutation(
     (id) => deleteFormasiUsulan(id),
     {
+      onMutate: (id) => {
+        setDeletingPengajuanId(id);
+      },
       onSuccess: () => {
         message.success("Pengajuan berhasil dihapus");
         queryClient.invalidateQueries(["perencanaan-formasi"]);
@@ -159,6 +170,9 @@ function FormasiList() {
         message.error(
           error?.response?.data?.message || "Gagal menghapus pengajuan"
         );
+      },
+      onSettled: () => {
+        setDeletingPengajuanId(null);
       },
     }
   );
@@ -332,7 +346,7 @@ function FormasiList() {
                   variant="subtle"
                   color="red"
                   size="sm"
-                  loading={isDeleting}
+                  loading={deletingId === record.formasi_id}
                 >
                   <IconTrash size={14} />
                 </ActionIcon>
@@ -352,7 +366,7 @@ function FormasiList() {
                   variant="subtle"
                   color="red"
                   size="sm"
-                  loading={isDeletingPengajuan}
+                  loading={deletingPengajuanId === pengajuan.formasi_usulan_id}
                 >
                   <IconTrash size={14} />
                 </ActionIcon>
