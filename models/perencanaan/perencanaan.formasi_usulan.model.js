@@ -6,22 +6,17 @@ Model.knex(knex);
 
 const nanoid = customAlphabet("1234567890abcdefghijklmnopqrstuvwxyz", 8);
 
-class Usulan extends Model {
+class FormasiUsulan extends Model {
   static get tableName() {
-    return "perencanaan.usulan";
+    return "perencanaan.formasi_usulan";
   }
 
   static get idColumn() {
-    return "usulan_id";
-  }
-
-  // Define JSON columns for proper serialization
-  static get jsonAttributes() {
-    return ["kualifikasi_pendidikan"];
+    return "formasi_usulan_id";
   }
 
   $beforeInsert() {
-    this.usulan_id = `usul-${nanoid()}`;
+    this.formasi_usulan_id = `fu-${nanoid()}`;
     this.dibuat_pada = new Date().toISOString();
     this.diperbarui_pada = new Date().toISOString();
   }
@@ -32,31 +27,47 @@ class Usulan extends Model {
 
   static get relationMappings() {
     const User = require("../users.model");
-    const FormasiUsulan = require("./perencanaan.formasi_usulan.model");
-    const Lampiran = require("./perencanaan.lampiran.model");
+    const Formasi = require("./perencanaan.formasi.model");
+    const Usulan = require("./perencanaan.usulan.model");
 
     return {
-      formasiUsulan: {
+      formasi: {
         relation: Model.BelongsToOneRelation,
-        modelClass: FormasiUsulan,
+        modelClass: Formasi,
         join: {
-          from: "perencanaan.usulan.formasi_usulan_id",
-          to: "perencanaan.formasi_usulan.formasi_usulan_id",
+          from: "perencanaan.formasi_usulan.formasi_id",
+          to: "perencanaan.formasi.formasi_id",
         },
       },
-      lampiran: {
-        relation: Model.BelongsToOneRelation,
-        modelClass: Lampiran,
+      usulan: {
+        relation: Model.HasManyRelation,
+        modelClass: Usulan,
         join: {
-          from: "perencanaan.usulan.lampiran_id",
-          to: "perencanaan.lampiran.lampiran_id",
+          from: "perencanaan.formasi_usulan.formasi_usulan_id",
+          to: "perencanaan.usulan.formasi_usulan_id",
+        },
+      },
+      pembuat: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: User,
+        join: {
+          from: "perencanaan.formasi_usulan.user_id",
+          to: "users.custom_id",
+        },
+      },
+      korektor: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: User,
+        join: {
+          from: "perencanaan.formasi_usulan.corrector_id",
+          to: "users.custom_id",
         },
       },
       dibuatOleh: {
         relation: Model.BelongsToOneRelation,
         modelClass: User,
         join: {
-          from: "perencanaan.usulan.dibuat_oleh",
+          from: "perencanaan.formasi_usulan.dibuat_oleh",
           to: "users.custom_id",
         },
       },
@@ -64,15 +75,7 @@ class Usulan extends Model {
         relation: Model.BelongsToOneRelation,
         modelClass: User,
         join: {
-          from: "perencanaan.usulan.diperbarui_oleh",
-          to: "users.custom_id",
-        },
-      },
-      diverifikasiOleh: {
-        relation: Model.BelongsToOneRelation,
-        modelClass: User,
-        join: {
-          from: "perencanaan.usulan.diverifikasi_oleh",
+          from: "perencanaan.formasi_usulan.diperbarui_oleh",
           to: "users.custom_id",
         },
       },
@@ -80,4 +83,4 @@ class Usulan extends Model {
   }
 }
 
-module.exports = Usulan;
+module.exports = FormasiUsulan;

@@ -86,7 +86,7 @@ const convertToTreeData = (data) => {
 };
 
 // Modal Create/Edit Usulan
-const UsulanModal = ({ open, onClose, data, formasiId }) => {
+const UsulanModal = ({ open, onClose, data, formasiId, formasiUsulanId }) => {
   const [form] = Form.useForm();
   const queryClient = useQueryClient();
   const isEdit = !!data;
@@ -138,7 +138,7 @@ const UsulanModal = ({ open, onClose, data, formasiId }) => {
     staleTime: 1000 * 60 * 10,
   });
 
-  // Fetch Lampiran untuk formasi ini
+  // Fetch Lampiran untuk formasi ini (using formasiId for backward compatibility or parent context)
   const { data: lampiranData, isLoading: loadingLampiran } = useQuery({
     queryKey: ["perencanaan-lampiran", { formasi_id: formasiId, limit: -1 }],
     queryFn: () => getLampiran({ formasi_id: formasiId, limit: -1 }),
@@ -201,7 +201,7 @@ const UsulanModal = ({ open, onClose, data, formasiId }) => {
 
     // Priority 3: Contains input as complete word/phrase
     const wordBoundaryRegex = new RegExp(
-      `\\b${input.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`,
+      `\\b${input.replace(/[.*+?^${}()[|\\]/g, '\\$&')}\\b`,
       "i"
     );
     const wordMatchA = wordBoundaryRegex.test(labelA);
@@ -217,7 +217,7 @@ const UsulanModal = ({ open, onClose, data, formasiId }) => {
     (values) =>
       isEdit
         ? updateUsulan(data.usulan_id, values)
-        : createUsulan({ ...values, formasi_id: formasiId }),
+        : createUsulan({ ...values, formasi_usulan_id: formasiUsulanId }), // Use formasiUsulanId
     {
       onSuccess: () => {
         message.success(
@@ -683,7 +683,7 @@ const VerifikasiModal = ({ open, onClose, data }) => {
   );
 };
 
-function UsulanList({ formasiId, formasi }) {
+function UsulanList({ formasiId, formasiUsulanId, submissionStatus }) {
   const router = useRouter();
   const { data: session } = useSession();
   const isAdmin = session?.user?.current_role === "admin";
@@ -770,7 +770,7 @@ function UsulanList({ formasiId, formasi }) {
   const filters = {
     page: Number(urlPage),
     limit: Number(urlLimit),
-    formasi_id: formasiId,
+    formasi_usulan_id: formasiUsulanId,
     status: urlStatus,
     jenis_jabatan: urlJenis,
     jabatan_id: urlJabatan,
@@ -787,7 +787,7 @@ function UsulanList({ formasiId, formasi }) {
   const { data, isLoading, refetch } = useQuery(
     ["perencanaan-usulan", filters],
     () => getUsulan(filters),
-    { keepPreviousData: true, enabled: !!formasiId }
+    { keepPreviousData: true, enabled: !!formasiUsulanId }
   );
 
   // Delete mutation
@@ -806,13 +806,12 @@ function UsulanList({ formasiId, formasi }) {
     }
   );
 
-  // Stats - use allocation statistics from backend rekap
+  // Stats - simplified
   const total = data?.meta?.total || data?.rekap?.total || 0;
   const totalAlokasi = data?.rekap?.total_alokasi || 0;
-  const alokasiDisetujui = data?.rekap?.alokasi_disetujui || 0;
-  const alokasiDitolak = data?.rekap?.alokasi_ditolak || 0;
-  const alokasiMenunggu = data?.rekap?.alokasi_menunggu || 0;
-  const alokasiPerbaikan = data?.rekap?.alokasi_perbaikan || 0;
+
+  // Determine if editable based on submission status
+  const isEditable = isAdmin || submissionStatus === "draft" || submissionStatus === "perbaikan";
 
   const columns = [
     {
@@ -890,49 +889,26 @@ function UsulanList({ formasiId, formasi }) {
       title: "Alokasi",
       dataIndex: "alokasi",
       key: "alokasi",
-      width: 70,
+      width: 80,
       align: "center",
       render: (val) => (
-        <Text size="sm" fw={600}>
+        <Text size="sm" fw={600} c="blue">
           {val}
         </Text>
       ),
     },
     {
-      title: "Status",
-      dataIndex: "status",
-      key: "status",
-      width: 100,
-      render: (val) => <StatusBadge status={val} />,
-    },
-    {
       title: "Aksi",
       key: "action",
-      width: 120,
+      width: 80,
       align: "center",
       render: (_, record) => {
-        // Non-admin hanya bisa hapus jika status === "menunggu"
-        const canDelete = isAdmin || record.status === "menunggu";
-        // Non-admin hanya bisa edit jika status !== "disetujui"
-        const canEdit = isAdmin || record.status !== "disetujui";
+        const canEdit = isEditable;
+        const canDelete = isEditable;
 
         return (
           <Group gap={4} justify="center">
-            {isAdmin && (
-              <Tooltip title="Verifikasi">
-                <ActionIcon
-                  variant="subtle"
-                  color="blue"
-                  size="sm"
-                  onClick={() =>
-                    setVerifikasiModal({ open: true, data: record })
-                  }
-                >
-                  <IconCheck size={14} />
-                </ActionIcon>
-              </Tooltip>
-            )}
-            <Tooltip title="Edit">
+            <Tooltip title={canEdit ? "Edit" : "Tidak dapat diedit"}>
               <ActionIcon
                 variant="subtle"
                 color="green"
@@ -950,13 +926,7 @@ function UsulanList({ formasiId, formasi }) {
               cancelText="Tidak"
               disabled={!canDelete}
             >
-              <Tooltip
-                title={
-                  canDelete
-                    ? "Hapus"
-                    : "Tidak bisa hapus (status bukan menunggu)"
-                }
-              >
+              <Tooltip title="Hapus">
                 <ActionIcon
                   variant="subtle"
                   color="red"
@@ -1016,8 +986,8 @@ function UsulanList({ formasiId, formasi }) {
         "Tanggal Verifikasi": item.diverifikasi_pada
           ? dayjs(item.diverifikasi_pada).format("DD/MM/YYYY HH:mm")
           : "-",
-        "Catatan Verifikasi": item.catatan || "-",
-        "Alasan Perbaikan": item.alasan_perbaikan || "-",
+        "Catatan Verifikasi": item.catatan || "",
+        "Alasan Perbaikan": item.alasan_perbaikan || "",
       }));
 
       // Create workbook
@@ -1049,60 +1019,24 @@ function UsulanList({ formasiId, formasi }) {
 
   return (
     <Stack gap="xs">
-      {/* Header: Stats - Allocation by Status */}
+      {/* Header: Stats */}
       <Paper p="xs" radius="sm" withBorder>
-        <Group gap="md" wrap="wrap">
+        <Group gap="lg" wrap="wrap">
           <Group gap={4}>
-            <Text size="xs" c="dimmed">
-              Usulan:
-            </Text>
-            <Text size="sm" fw={600}>
-              {total}
-            </Text>
+            <Text size="xs" c="dimmed">Jumlah Usulan:</Text>
+            <Text size="sm" fw={600}>{total}</Text>
           </Group>
-          <Text size="xs" c="dimmed">
-            |
-          </Text>
+          <Text size="xs" c="dimmed">|</Text>
           <Group gap={4}>
-            <Text size="xs" c="dimmed">
-              Total Alokasi:
-            </Text>
-            <Text size="sm" fw={600} c="blue">
-              {totalAlokasi}
-            </Text>
+            <Text size="xs" c="dimmed">Total Alokasi:</Text>
+            <Text size="sm" fw={600} c="blue">{totalAlokasi}</Text>
           </Group>
-          <Group gap={4}>
-            <Text size="xs" c="dimmed">
-              Disetujui:
-            </Text>
-            <Text size="sm" fw={600} c="green">
-              {alokasiDisetujui}
-            </Text>
-          </Group>
-          <Group gap={4}>
-            <Text size="xs" c="dimmed">
-              Menunggu:
-            </Text>
-            <Text size="sm" fw={600} c="orange">
-              {alokasiMenunggu}
-            </Text>
-          </Group>
-          <Group gap={4}>
-            <Text size="xs" c="dimmed">
-              Perbaikan:
-            </Text>
-            <Text size="sm" fw={600} c="blue.5">
-              {alokasiPerbaikan}
-            </Text>
-          </Group>
-          <Group gap={4}>
-            <Text size="xs" c="dimmed">
-              Ditolak:
-            </Text>
-            <Text size="sm" fw={600} c="red">
-              {alokasiDitolak}
-            </Text>
-          </Group>
+          {!isEditable && (
+            <>
+              <Text size="xs" c="dimmed">|</Text>
+              <Tag color="orange">Pengajuan Terkunci - Tidak dapat diubah</Tag>
+            </>
+          )}
         </Group>
       </Paper>
 
@@ -1132,24 +1066,11 @@ function UsulanList({ formasiId, formasi }) {
             treeNodeFilterProp="label"
             allowClear
             disabled={isLoadingJabatan}
-            style={{ width: 280 }}
+            style={{ width: 250 }}
             size="small"
             dropdownStyle={{ maxHeight: 400, overflow: "auto" }}
             notFoundContent={isLoadingJabatan ? "Memuat..." : "Tidak ditemukan"}
           />
-          <Select
-            placeholder="Status"
-            value={urlStatus || undefined}
-            onChange={(val) => updateFilters({ status: val || "", page: 1 })}
-            style={{ width: 120 }}
-            size="small"
-            allowClear
-          >
-            <Select.Option value="menunggu">Menunggu</Select.Option>
-            <Select.Option value="disetujui">Disetujui</Select.Option>
-            <Select.Option value="ditolak">Ditolak</Select.Option>
-            <Select.Option value="perbaikan">Perbaikan</Select.Option>
-          </Select>
           <TreeSelect
             placeholder="Unit Kerja"
             value={urlUnitKerja || undefined}
@@ -1161,7 +1082,7 @@ function UsulanList({ formasiId, formasi }) {
             treeNodeFilterProp="label"
             allowClear
             loading={loadingOpd}
-            style={{ width: 250 }}
+            style={{ width: 220 }}
             size="small"
             dropdownStyle={{ maxHeight: 400, overflow: "auto" }}
           />
@@ -1183,9 +1104,9 @@ function UsulanList({ formasiId, formasi }) {
           </Button>
           <Tooltip
             title={
-              formasi?.status !== "aktif"
-                ? "Formasi tidak aktif"
-                : "Buat usulan baru"
+              !isEditable
+                ? "Tidak dapat menambah data"
+                : "Tambah Jabatan"
             }
           >
             <Button
@@ -1193,9 +1114,9 @@ function UsulanList({ formasiId, formasi }) {
               icon={<IconPlus size={14} />}
               onClick={() => setModal({ open: true, data: null })}
               size="small"
-              disabled={formasi?.status !== "aktif"}
+              disabled={!isEditable}
             >
-              Buat Usulan
+              Tambah
             </Button>
           </Tooltip>
         </Group>
@@ -1331,7 +1252,8 @@ function UsulanList({ formasiId, formasi }) {
         open={modal.open}
         onClose={() => setModal({ open: false, data: null })}
         data={modal.data}
-        formasiId={formasiId}
+        formasiId={formasiId} // For lampiran context
+        formasiUsulanId={formasiUsulanId} // For create logic
       />
       <VerifikasiModal
         open={verifikasiModal.open}

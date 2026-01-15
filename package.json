@@ -89,6 +89,7 @@
     "papaparse": "^5.5.2",
     "pdf-lib": "^1.17.1",
     "pdf-parse": "^2.1.7",
+    "pdfjs": "^2.5.4",
     "pdfjs-dist": "^5.4.149",
     "pdfreader": "^3.0.7",
     "pg": "^8.8.0",

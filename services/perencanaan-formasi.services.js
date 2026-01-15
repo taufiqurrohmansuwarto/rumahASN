@@ -70,12 +70,99 @@ export const exportFormasi = async (params = {}) => {
 };
 
 // ==========================================
+// FORMASI USULAN (SUBMISSION)
+// ==========================================
+
+/**
+ * Get all formasi usulan
+ * @param {Object} params - { page, limit, search, status, formasi_id, sortField, sortOrder }
+ */
+export const getFormasiUsulan = async (params = {}) => {
+  const query = queryString.stringify(params, {
+    skipEmptyString: true,
+    skipNull: true,
+  });
+  return api.get(`/formasi-usulan?${query}`).then((res) => res?.data);
+};
+
+/**
+ * Get formasi usulan by ID
+ * @param {String} id - Formasi Usulan ID
+ */
+export const getFormasiUsulanById = async (id) => {
+  return api.get(`/formasi-usulan/${id}`).then((res) => res?.data);
+};
+
+/**
+ * Create new formasi usulan (Draft)
+ * @param {Object} data - { formasi_id }
+ */
+export const createFormasiUsulan = async (data) => {
+  return api.post("/formasi-usulan", data).then((res) => res?.data);
+};
+
+/**
+ * Update formasi usulan
+ * @param {String} id - Formasi Usulan ID
+ * @param {Object} data - { status, catatan, is_confirmed }
+ */
+export const updateFormasiUsulan = async (id, data) => {
+  return api.patch(`/formasi-usulan/${id}`, data).then((res) => res?.data);
+};
+
+/**
+ * Delete formasi usulan
+ * @param {String} id - Formasi Usulan ID
+ */
+export const deleteFormasiUsulan = async (id) => {
+  return api.delete(`/formasi-usulan/${id}`).then((res) => res?.data);
+};
+
+/**
+ * Upload dokumen formasi usulan
+ * @param {String} id - Formasi Usulan ID
+ * @param {FormData} formData - file
+ */
+export const uploadDokumenFormasiUsulan = async (id, formData) => {
+  return api
+    .post(`/formasi-usulan/${id}/upload`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    })
+    .then((res) => res?.data);
+};
+
+/**
+ * Download dokumen formasi usulan
+ * @param {String} id - Formasi Usulan ID
+ */
+export const downloadDokumenFormasiUsulan = async (id) => {
+  return api.get(`/formasi-usulan/${id}/download`, {
+    responseType: "blob",
+  });
+};
+
+/**
+ * Export formasi usulan to Excel
+ * @param {Object} params - { formasi_id, status, search }
+ */
+export const exportFormasiUsulan = async (params = {}) => {
+  const query = queryString.stringify(
+    { ...params, limit: -1 },
+    {
+      skipEmptyString: true,
+      skipNull: true,
+    }
+  );
+  return api.get(`/formasi-usulan?${query}`, { responseType: "blob" });
+};
+
+// ==========================================
 // USULAN
 // ==========================================
 
 /**
  * Get all usulan
- * @param {Object} params - { page, limit, search, status, formasi_id, jenis_jabatan, unit_kerja, sortField, sortOrder }
+ * @param {Object} params - { page, limit, search, status, formasi_usulan_id, jenis_jabatan, unit_kerja, sortField, sortOrder }
  */
 export const getUsulan = async (params = {}) => {
   const query = queryString.stringify(params, {
@@ -95,7 +182,7 @@ export const getUsulanById = async (id) => {
 
 /**
  * Create new usulan
- * @param {Object} data - { formasi_id, jenis_jabatan, jabatan_id, kualifikasi_pendidikan, alokasi, unit_kerja, lampiran_id }
+ * @param {Object} data - { formasi_usulan_id, jenis_jabatan, jabatan_id, kualifikasi_pendidikan, alokasi, unit_kerja, lampiran_id }
  */
 export const createUsulan = async (data) => {
   return api.post("/usulan", data).then((res) => res?.data);

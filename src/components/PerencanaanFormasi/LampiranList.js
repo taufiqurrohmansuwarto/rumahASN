@@ -393,12 +393,15 @@ const EditModal = ({ open, onClose, data }) => {
   );
 };
 
-function LampiranList({ formasiId, formasi }) {
+function LampiranList({ formasiId, formasiUsulanId, formasi, submissionStatus }) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [uploadModal, setUploadModal] = useState(false);
   const [editModal, setEditModal] = useState({ open: false, data: null });
   const [downloading, setDownloading] = useState(null);
+
+  // Determine if editable based on submission status
+  const isEditable = !submissionStatus || submissionStatus === "draft" || submissionStatus === "perbaikan";
 
   // Get filters from URL
   const { lPage = 1, lLimit = 10, lSearch = "" } = router.query;
@@ -554,16 +557,18 @@ function LampiranList({ formasiId, formasi }) {
       align: "center",
       render: (_, record) => (
         <Group gap={4} justify="center">
-          <Tooltip title="Edit">
-            <ActionIcon
-              variant="subtle"
-              color="blue"
-              size="sm"
-              onClick={() => setEditModal({ open: true, data: record })}
-            >
-              <IconEdit size={14} />
-            </ActionIcon>
-          </Tooltip>
+          {isEditable && (
+            <Tooltip title="Edit">
+              <ActionIcon
+                variant="subtle"
+                color="blue"
+                size="sm"
+                onClick={() => setEditModal({ open: true, data: record })}
+              >
+                <IconEdit size={14} />
+              </ActionIcon>
+            </Tooltip>
+          )}
           <Tooltip title="Download">
             <ActionIcon
               variant="subtle"
@@ -575,18 +580,20 @@ function LampiranList({ formasiId, formasi }) {
               <IconDownload size={14} />
             </ActionIcon>
           </Tooltip>
-          <Popconfirm
-            title="Hapus lampiran?"
-            onConfirm={() => hapusLampiran(record.lampiran_id)}
-            okText="Ya"
-            cancelText="Tidak"
-          >
-            <Tooltip title="Hapus">
-              <ActionIcon variant="subtle" color="red" size="sm" loading={isDeleting}>
-                <IconTrash size={14} />
-              </ActionIcon>
-            </Tooltip>
-          </Popconfirm>
+          {isEditable && (
+            <Popconfirm
+              title="Hapus lampiran?"
+              onConfirm={() => hapusLampiran(record.lampiran_id)}
+              okText="Ya"
+              cancelText="Tidak"
+            >
+              <Tooltip title="Hapus">
+                <ActionIcon variant="subtle" color="red" size="sm" loading={isDeleting}>
+                  <IconTrash size={14} />
+                </ActionIcon>
+              </Tooltip>
+            </Popconfirm>
+          )}
         </Group>
       ),
     },
@@ -678,23 +685,25 @@ function LampiranList({ formasiId, formasi }) {
           >
             Unduh
           </Button>
-          <Tooltip
-            title={
-              formasi?.status !== "aktif"
-                ? "Formasi tidak aktif"
-                : "Tambah lampiran baru"
-            }
-          >
-            <Button
-              type="primary"
-              icon={<IconPlus size={14} />}
-              onClick={() => setUploadModal(true)}
-              size="small"
-              disabled={formasi?.status !== "aktif"}
+          {isEditable && (
+            <Tooltip
+              title={
+                formasi?.status !== "aktif"
+                  ? "Formasi tidak aktif"
+                  : "Tambah lampiran baru"
+              }
             >
-              Tambah Lampiran
-            </Button>
-          </Tooltip>
+              <Button
+                type="primary"
+                icon={<IconPlus size={14} />}
+                onClick={() => setUploadModal(true)}
+                size="small"
+                disabled={formasi?.status !== "aktif"}
+              >
+                Tambah Lampiran
+              </Button>
+            </Tooltip>
+          )}
         </Group>
       </Paper>
 

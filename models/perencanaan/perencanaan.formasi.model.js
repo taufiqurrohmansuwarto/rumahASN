@@ -27,7 +27,7 @@ class Formasi extends Model {
 
   static get relationMappings() {
     const User = require("../users.model");
-    const Usulan = require("./perencanaan.usulan.model");
+    const FormasiUsulan = require("./perencanaan.formasi_usulan.model");
 
     return {
       dibuatOleh: {
@@ -46,12 +46,12 @@ class Formasi extends Model {
           to: "users.custom_id",
         },
       },
-      usulan: {
+      formasiUsulan: {
         relation: Model.HasManyRelation,
-        modelClass: Usulan,
+        modelClass: FormasiUsulan,
         join: {
           from: "perencanaan.formasi.formasi_id",
-          to: "perencanaan.usulan.formasi_id",
+          to: "perencanaan.formasi_usulan.formasi_id",
         },
       },
     };

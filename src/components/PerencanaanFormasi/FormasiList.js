@@ -1,12 +1,9 @@
 import {
-  createFormasi,
   deleteFormasi,
   getFormasi,
-  updateFormasi,
 } from "@/services/perencanaan-formasi.services";
 import {
   ActionIcon,
-  Box,
   Group,
   Paper,
   Stack,
@@ -15,27 +12,20 @@ import {
 } from "@mantine/core";
 import { useDebouncedValue } from "@mantine/hooks";
 import {
-  IconCalendar,
   IconEdit,
   IconEye,
-  IconFileText,
   IconPlus,
   IconRefresh,
-  IconToggleLeft,
   IconTrash,
 } from "@tabler/icons-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
-  Card,
-  Form,
   Input,
   InputNumber,
   message,
-  Modal,
   Popconfirm,
   Select,
-  Statistic,
   Table,
   Tag,
 } from "antd";
@@ -43,8 +33,7 @@ import dayjs from "dayjs";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useState } from "react";
-
-const { TextArea } = Input;
+import FormasiModal from "./FormasiModal";
 
 // Status Badge
 const StatusBadge = ({ status }) => {
@@ -56,140 +45,12 @@ const StatusBadge = ({ status }) => {
   return <Tag color={color}>{label}</Tag>;
 };
 
-// Modal Form Formasi
-const FormasiModal = ({ open, onClose, data, onSuccess }) => {
-  const [form] = Form.useForm();
-  const queryClient = useQueryClient();
-  const isEdit = !!data;
-
-  const { mutate: submit, isLoading } = useMutation(
-    (values) =>
-      isEdit ? updateFormasi(data.formasi_id, values) : createFormasi(values),
-    {
-      onSuccess: () => {
-        message.success(
-          isEdit ? "Formasi berhasil diperbarui" : "Formasi berhasil dibuat"
-        );
-        queryClient.invalidateQueries(["perencanaan-formasi"]);
-        form.resetFields();
-        onSuccess?.();
-        onClose();
-      },
-      onError: (error) => {
-        message.error(
-          error?.response?.data?.message || "Gagal menyimpan formasi"
-        );
-      },
-    }
-  );
-
-  const handleSubmit = (values) => {
-    submit(values);
-  };
-
-  return (
-    <Modal
-      title={
-        <Group gap="xs">
-          {isEdit ? <IconEdit size={18} /> : <IconPlus size={18} />}
-          <span>{isEdit ? "Edit Formasi" : "Formasi Baru"}</span>
-        </Group>
-      }
-      open={open}
-      onCancel={onClose}
-      width={500}
-      destroyOnClose
-      footer={
-        <div style={{ textAlign: "right" }}>
-          <Button onClick={onClose} style={{ marginRight: 8 }}>
-            Batal
-          </Button>
-          <Button
-            type="primary"
-            loading={isLoading}
-            onClick={() => form.submit()}
-          >
-            {isEdit ? "Simpan" : "Buat"}
-          </Button>
-        </div>
-      }
-    >
-      <Form
-        form={form}
-        layout="vertical"
-        onFinish={handleSubmit}
-        initialValues={
-          isEdit
-            ? {
-                deskripsi: data.deskripsi,
-                tahun: data.tahun,
-                status: data.status,
-              }
-            : { tahun: new Date().getFullYear(), status: "aktif" }
-        }
-      >
-        <Form.Item
-          name="deskripsi"
-          label={
-            <Group gap={4}>
-              <IconFileText size={14} />
-              <span>Judul / Deskripsi</span>
-            </Group>
-          }
-          rules={[{ required: true, message: "Judul wajib diisi" }]}
-        >
-          <TextArea
-            rows={3}
-            placeholder="Contoh: KPPI 2026, CPNS 2026"
-            maxLength={500}
-            showCount
-          />
-        </Form.Item>
-
-        <Form.Item
-          name="tahun"
-          label={
-            <Group gap={4}>
-              <IconCalendar size={14} />
-              <span>Tahun</span>
-            </Group>
-          }
-          rules={[{ required: true, message: "Tahun wajib diisi" }]}
-        >
-          <InputNumber
-            min={2020}
-            max={2100}
-            style={{ width: "100%" }}
-            placeholder="2026"
-          />
-        </Form.Item>
-
-        <Form.Item
-          name="status"
-          label={
-            <Group gap={4}>
-              <IconToggleLeft size={14} />
-              <span>Status</span>
-            </Group>
-          }
-        >
-          <Select>
-            <Select.Option value="aktif">Aktif</Select.Option>
-            <Select.Option value="nonaktif">Nonaktif</Select.Option>
-          </Select>
-        </Form.Item>
-      </Form>
-    </Modal>
-  );
-};
-
 function FormasiList() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [modal, setModal] = useState({ open: false, data: null });
   const { data: session } = useSession();
   const isAdmin = session?.user?.current_role === "admin";
-  const userId = session?.user?.customId;
 
   // Get filters from URL
   const {
@@ -263,21 +124,19 @@ function FormasiList() {
     }
   );
 
-  // Stats - Gunakan rekap dari backend jika ada, jika tidak hitung dari data
+  // Stats
   const total = data?.rekap?.total || data?.meta?.total || 0;
   const aktif =
     data?.rekap?.aktif ||
     data?.data?.filter((item) => item.status === "aktif").length ||
     0;
 
-  // Total usulan - hitung dari semua formasi di halaman saat ini
-  // Usulan sudah di-fetch dengan withGraphFetched di controller
+  // Total usulan (calculated from current page data, approximation)
   const totalUsulan =
     data?.data?.reduce((acc, item) => {
-      if (Array.isArray(item.usulan)) {
-        return acc + item.usulan.length;
-      }
-      return acc;
+      // Logic backend might not return usulan count directly here anymore
+      // unless we asked for it. Assuming 0 if not present.
+      return acc + (item.usulan_count || 0); 
     }, 0) || 0;
 
   const columns = [
@@ -329,14 +188,6 @@ function FormasiList() {
       ),
     },
     {
-      title: "Usulan",
-      dataIndex: "usulan",
-      key: "usulan",
-      width: 70,
-      align: "center",
-      render: (val) => <Tag>{val?.length || 0}</Tag>,
-    },
-    {
       title: "Aksi",
       key: "action",
       width: 130,
@@ -349,7 +200,7 @@ function FormasiList() {
               color="blue"
               size="sm"
               onClick={() =>
-                router.push(`/perencanaan/formasi/${record.formasi_id}/usulan`)
+                router.push(`/perencanaan/formasi/${record.formasi_id}`)
               }
             >
               <IconEye size={14} />
@@ -413,14 +264,6 @@ function FormasiList() {
               </Text>
               <Text size="sm" fw={600} c="green">
                 {aktif}
-              </Text>
-            </Group>
-            <Group gap={4}>
-              <Text size="xs" c="dimmed">
-                Usulan:
-              </Text>
-              <Text size="sm" fw={600} c="blue">
-                {totalUsulan}
               </Text>
             </Group>
           </Group>
