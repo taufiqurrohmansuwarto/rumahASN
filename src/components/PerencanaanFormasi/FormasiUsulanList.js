@@ -2,12 +2,16 @@ import {
   createFormasiUsulan,
   deleteFormasiUsulan,
   getFormasiUsulan,
+  getUsulan,
 } from "@/services/perencanaan-formasi.services";
+import { saveAs } from "file-saver";
+import * as XLSX from "xlsx";
 import { ActionIcon, Group, Paper, Stack, Text } from "@mantine/core";
 import { useDebouncedValue } from "@mantine/hooks";
 import {
   IconCheck,
   IconClock,
+  IconDownload,
   IconEdit,
   IconEye,
   IconFileCheck,
@@ -18,9 +22,11 @@ import {
 } from "@tabler/icons-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  Avatar,
   Button,
   Input,
   message,
+  Modal,
   Popconfirm,
   Select,
   Table,
@@ -31,6 +37,8 @@ import dayjs from "dayjs";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useState } from "react";
+
+const { confirm } = Modal;
 
 // Status Badge
 const StatusBadge = ({ status, isConfirmed }) => {
@@ -61,7 +69,7 @@ function FormasiUsulanList({ formasiId, formasi }) {
   const router = useRouter();
   const { data: session } = useSession();
   const isAdmin = session?.user?.current_role === "admin";
-  const userId = session?.user?.customId;
+  const userId = session?.user?.id; // custom_id from session
   const queryClient = useQueryClient();
 
   // Filters
@@ -147,6 +155,33 @@ function FormasiUsulanList({ formasiId, formasi }) {
     }
   );
 
+  // Confirmation modal before creating
+  const handleCreateNew = () => {
+    confirm({
+      title: "Buat Pengajuan Baru?",
+      content: (
+        <Stack gap="xs">
+          <Text size="sm">
+            Anda akan membuat pengajuan usulan formasi baru untuk periode:
+          </Text>
+          <Paper p="xs" radius="sm" bg="blue.0" withBorder>
+            <Text size="sm" fw={600} c="blue.7">
+              {formasi?.deskripsi || "Formasi"} - Tahun {formasi?.tahun || "-"}
+            </Text>
+          </Paper>
+          <Text size="xs" c="dimmed">
+            Setelah dibuat, Anda dapat menambahkan daftar jabatan yang diusulkan
+            dan mengunggah dokumen pendukung.
+          </Text>
+        </Stack>
+      ),
+      okText: "Ya, Buat Pengajuan",
+      cancelText: "Batal",
+      onOk: () => create(),
+      centered: true,
+    });
+  };
+
   // Stats from data
   const stats = {
     total: data?.meta?.total || 0,
@@ -155,6 +190,82 @@ function FormasiUsulanList({ formasiId, formasi }) {
     disetujui: data?.rekap?.disetujui || 0,
     ditolak: data?.rekap?.ditolak || 0,
     perbaikan: data?.rekap?.perbaikan || 0,
+  };
+
+  // Download all usulan for admin
+  const [downloading, setDownloading] = useState(false);
+
+  const handleDownloadAll = async () => {
+    try {
+      setDownloading(true);
+      message.loading({ content: "Mengunduh semua data usulan...", key: "download-all" });
+
+      // Fetch all usulan for this formasi (across all submissions)
+      const allUsulan = await getUsulan({
+        formasi_id: formasiId,
+        limit: -1,
+      });
+
+      if (!allUsulan?.data?.length) {
+        message.warning({ content: "Tidak ada data usulan untuk diunduh", key: "download-all" });
+        return;
+      }
+
+      // Transform data for Excel with specified columns
+      const excelData = allUsulan.data.map((item, index) => {
+        const formasiUsulan = item.formasiUsulan || {};
+        const pembuat = formasiUsulan.pembuat || {};
+        const formasi = formasiUsulan.formasi || {};
+        
+        return {
+          "No": index + 1,
+          "Nama Pengusul": pembuat?.username || "-",
+          "Perangkat Daerah": pembuat?.perangkat_daerah_detail || "-",
+          "Formasi": formasi?.deskripsi || formasi?.nama || "-",
+          "Jenis Jabatan": item.jenis_jabatan || "-",
+          "Nama Jabatan": item.nama_jabatan || item.jabatan_id || "-",
+          "Kualifikasi Pendidikan": item.kualifikasi_pendidikan_detail
+            ?.map((p) => `${p.tk_pend} - ${p.label}`)
+            .join("; ") || "-",
+          "Unit Kerja": item.unit_kerja_text || item.unit_kerja || "-",
+          "Alokasi": item.alokasi || 0,
+          "Status Usulan Formasi": formasiUsulan.status || "-",
+          "Tanggal Usulan Dibuat": item.dibuat_pada
+            ? dayjs(item.dibuat_pada).format("DD/MM/YYYY HH:mm")
+            : "-",
+          "Tanggal Verifikasi": formasiUsulan.diverifikasi_pada
+            ? dayjs(formasiUsulan.diverifikasi_pada).format("DD/MM/YYYY HH:mm")
+            : "-",
+          "Nama Verifikator": formasiUsulan.korektor?.username || "-",
+        };
+      });
+
+      // Create workbook
+      const ws = XLSX.utils.json_to_sheet(excelData);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Semua Usulan");
+
+      // Auto-width columns
+      const colWidths = Object.keys(excelData[0] || {}).map((key) => ({
+        wch: Math.max(key.length + 5, 15),
+      }));
+      ws["!cols"] = colWidths;
+
+      // Generate buffer and save
+      const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+      const blob = new Blob([excelBuffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+
+      const fileName = `Semua_Usulan_${formasi?.deskripsi || "Formasi"}_${dayjs().format("YYYYMMDD_HHmmss")}.xlsx`;
+      saveAs(blob, fileName);
+      message.success({ content: "Data berhasil diunduh", key: "download-all" });
+    } catch (error) {
+      console.error(error);
+      message.error({ content: "Gagal mengunduh data", key: "download-all" });
+    } finally {
+      setDownloading(false);
+    }
   };
 
   // Columns
@@ -169,10 +280,19 @@ function FormasiUsulanList({ formasiId, formasi }) {
       dataIndex: "pembuat",
       key: "pembuat",
       render: (val) => (
-        <Stack gap={0}>
-          <Text size="sm" fw={500}>{val?.username || "-"}</Text>
-          <Text size="xs" c="dimmed">{val?.perangkat_daerah_detail || val?.custom_id || "-"}</Text>
-        </Stack>
+        <Group gap="xs" wrap="nowrap">
+          <Avatar src={val?.image} size="sm" radius="xl">
+            {val?.username?.[0]?.toUpperCase() || "?"}
+          </Avatar>
+          <Stack gap={0}>
+            <Text size="sm" fw={500}>{val?.username || "-"}</Text>
+            <Tooltip title={val?.perangkat_daerah_detail || "-"}>
+              <Text size="xs" c="dimmed" lineClamp={1} style={{ maxWidth: 200 }}>
+                {val?.perangkat_daerah_detail || val?.custom_id || "-"}
+              </Text>
+            </Tooltip>
+          </Stack>
+        </Group>
       ),
     },
     {
@@ -336,12 +456,25 @@ function FormasiUsulanList({ formasiId, formasi }) {
           </Group>
 
           <Group gap="xs">
+            {/* Admin: Download all usulan */}
+            {isAdmin && (
+              <Tooltip title="Unduh semua data usulan beserta jabatan">
+                <Button
+                  icon={<IconDownload size={14} />}
+                  onClick={handleDownloadAll}
+                  loading={downloading}
+                  size="small"
+                >
+                  Unduh Semua
+                </Button>
+              </Tooltip>
+            )}
             {/* Non-admin can create if formasi is active */}
             {!isAdmin && formasi?.status === "aktif" && (
               <Button
                 type="primary"
                 icon={<IconPlus size={14} />}
-                onClick={() => create()}
+                onClick={handleCreateNew}
                 loading={isCreating}
                 size="small"
               >

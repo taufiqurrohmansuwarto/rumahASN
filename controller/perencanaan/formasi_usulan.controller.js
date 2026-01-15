@@ -70,14 +70,21 @@ const getAll = async (req, res) => {
       return items.map((item) => {
         const usulanList = item.usulan || [];
         const jumlahUsulan = usulanList.length;
-        const totalAlokasi = usulanList.reduce(
+        const jumlahDisetujui = usulanList.filter((u) => u.status === "disetujui").length;
+        // Total alokasi hanya dari usulan yang sudah disetujui/diverifikasi
+        const totalAlokasi = usulanList
+          .filter((u) => u.status === "disetujui")
+          .reduce((acc, u) => acc + (u.alokasi || 0), 0);
+        const totalAlokasiSemua = usulanList.reduce(
           (acc, u) => acc + (u.alokasi || 0),
           0
         );
         return {
           ...item,
           jumlah_usulan: jumlahUsulan,
+          jumlah_disetujui: jumlahDisetujui,
           total_alokasi: totalAlokasi,
+          total_alokasi_semua: totalAlokasiSemua,
           usulan: undefined, // Remove usulan array from response to keep it clean
         };
       });
@@ -160,7 +167,12 @@ const getById = async (req, res) => {
     // Add stats
     const usulanList = result.usulan || [];
     const jumlahUsulan = usulanList.length;
-    const totalAlokasi = usulanList.reduce(
+    const jumlahDisetujui = usulanList.filter((u) => u.status === "disetujui").length;
+    // Total alokasi hanya dari usulan yang sudah disetujui/diverifikasi
+    const totalAlokasi = usulanList
+      .filter((u) => u.status === "disetujui")
+      .reduce((acc, u) => acc + (u.alokasi || 0), 0);
+    const totalAlokasiSemua = usulanList.reduce(
       (acc, u) => acc + (u.alokasi || 0),
       0
     );
@@ -168,7 +180,9 @@ const getById = async (req, res) => {
     res.json({
       ...result,
       jumlah_usulan: jumlahUsulan,
+      jumlah_disetujui: jumlahDisetujui,
       total_alokasi: totalAlokasi,
+      total_alokasi_semua: totalAlokasiSemua,
     });
   } catch (error) {
     handleError(res, error);

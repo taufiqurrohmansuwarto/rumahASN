@@ -8,7 +8,6 @@ import {
   getPendidikan,
   getUsulan,
   updateUsulan,
-  updateUsulanStatus,
 } from "@/services/perencanaan-formasi.services";
 import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
@@ -24,8 +23,6 @@ import {
   IconAlertCircle,
   IconBriefcase,
   IconBuilding,
-  IconCheck,
-  IconClock,
   IconDownload,
   IconEdit,
   IconFileText,
@@ -37,7 +34,6 @@ import {
   IconSchool,
   IconTrash,
   IconUser,
-  IconX,
 } from "@tabler/icons-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -60,20 +56,6 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useState } from "react";
 
-const { TextArea } = Input;
-
-// Status Config
-const STATUS_CONFIG = {
-  menunggu: { color: "orange", icon: IconClock, label: "Menunggu" },
-  disetujui: { color: "green", icon: IconCheck, label: "Disetujui" },
-  ditolak: { color: "red", icon: IconX, label: "Ditolak" },
-  perbaikan: { color: "blue", icon: IconEdit, label: "Perbaikan" },
-};
-
-const StatusBadge = ({ status }) => {
-  const config = STATUS_CONFIG[status] || STATUS_CONFIG.menunggu;
-  return <Tag color={config.color}>{config.label}</Tag>;
-};
 
 // Convert flat jabatan list to tree format for TreeSelect
 const convertToTreeData = (data) => {
@@ -444,245 +426,6 @@ const UsulanModal = ({ open, onClose, data, formasiId, formasiUsulanId }) => {
   );
 };
 
-// Modal Verifikasi (Admin)
-const VerifikasiModal = ({ open, onClose, data }) => {
-  const [form] = Form.useForm();
-  const queryClient = useQueryClient();
-
-  const { mutate: submit, isLoading } = useMutation(
-    (values) => updateUsulanStatus(data?.usulan_id, values),
-    {
-      onSuccess: () => {
-        message.success("Status usulan berhasil diperbarui");
-        queryClient.invalidateQueries(["perencanaan-usulan"]);
-        form.resetFields();
-        onClose();
-      },
-      onError: (error) => {
-        message.error(
-          error?.response?.data?.message || "Gagal memperbarui status"
-        );
-      },
-    }
-  );
-
-  if (!data) return null;
-
-  const pendidikanDetail = data.kualifikasi_pendidikan_detail || [];
-  const lampiranUrl = data.lampiran?.file_path || data.lampiran?.url;
-
-  return (
-    <Modal
-      title={
-        <Group gap="xs">
-          <IconCheck size={18} />
-          <span>Persetujuan Usulan</span>
-        </Group>
-      }
-      open={open}
-      onCancel={onClose}
-      width={600}
-      destroyOnClose
-      footer={
-        <div style={{ textAlign: "right" }}>
-          <Button onClick={onClose} style={{ marginRight: 8 }}>
-            Batal
-          </Button>
-          <Button
-            type="primary"
-            loading={isLoading}
-            onClick={() => form.submit()}
-          >
-            OK
-          </Button>
-        </div>
-      }
-    >
-      <Paper p="sm" radius="sm" withBorder mb="md" bg="gray.0">
-        <Stack gap={8}>
-          <Group gap="xs" align="flex-start">
-            <Text size="xs" c="dimmed" w={120}>
-              Jenis Jabatan:
-            </Text>
-            <Tag color={data.jenis_jabatan === "fungsional" ? "blue" : "green"}>
-              {data.jenis_jabatan}
-            </Tag>
-          </Group>
-          <Group gap="xs" align="flex-start">
-            <Text size="xs" c="dimmed" w={120}>
-              Nama Jabatan:
-            </Text>
-            <Text size="sm" fw={500} style={{ flex: 1 }}>
-              {data.nama_jabatan || data.jabatan_id}
-            </Text>
-          </Group>
-          <Group gap="xs" align="flex-start">
-            <Text size="xs" c="dimmed" w={120}>
-              Unit Kerja:
-            </Text>
-            <Text size="sm" fw={500} style={{ flex: 1 }}>
-              {data.unit_kerja_text || data.unit_kerja}
-            </Text>
-          </Group>
-          <Group gap="xs" align="flex-start">
-            <Text size="xs" c="dimmed" w={120}>
-              Alokasi:
-            </Text>
-            <Text size="sm" fw={600} c="blue">
-              {data.alokasi} orang
-            </Text>
-          </Group>
-          <Group gap="xs" align="flex-start">
-            <Text size="xs" c="dimmed" w={120}>
-              Kualifikasi:
-            </Text>
-            <Stack gap={2} style={{ flex: 1 }}>
-              {pendidikanDetail.length > 0 ? (
-                pendidikanDetail.map((item, i) => (
-                  <Text key={i} size="xs">
-                    <Tag color="blue" style={{ marginRight: 4 }}>
-                      {item.tk_pend}
-                    </Tag>
-                    {item.label}
-                  </Text>
-                ))
-              ) : (
-                <Text size="xs" c="dimmed">
-                  Tidak ada kualifikasi
-                </Text>
-              )}
-            </Stack>
-          </Group>
-          {data.lampiran && (
-            <Group gap="xs" align="flex-start">
-              <Text size="xs" c="dimmed" w={120}>
-                Lampiran:
-              </Text>
-              <a
-                href={lampiranUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ flex: 1 }}
-              >
-                <Group gap={4}>
-                  <IconPaperclip size={14} />
-                  <Text size="xs" c="blue">
-                    {data.lampiran.file_name || "Lihat Lampiran"}
-                  </Text>
-                </Group>
-              </a>
-            </Group>
-          )}
-          {data.dibuatOleh && (
-            <Group gap="xs" align="flex-start">
-              <Text size="xs" c="dimmed" w={120}>
-                Dibuat oleh:
-              </Text>
-              <Text size="xs">
-                {data.dibuatOleh.username || data.dibuatOleh.custom_id} -{" "}
-                {dayjs(data.dibuat_pada).format("DD/MM/YYYY HH:mm")}
-              </Text>
-            </Group>
-          )}
-          {data.status === "perbaikan" && data.alasan_perbaikan && (
-            <Group gap="xs" align="flex-start">
-              <Text size="xs" c="dimmed" w={120}>
-                Alasan Perbaikan:
-              </Text>
-              <Text size="xs" c="red" style={{ flex: 1 }}>
-                {data.alasan_perbaikan}
-              </Text>
-            </Group>
-          )}
-          {data.catatan && (
-            <Group gap="xs" align="flex-start">
-              <Text size="xs" c="dimmed" w={120}>
-                Catatan:
-              </Text>
-              <Text size="xs" style={{ flex: 1 }}>
-                {data.catatan}
-              </Text>
-            </Group>
-          )}
-        </Stack>
-      </Paper>
-
-      <Form
-        form={form}
-        layout="vertical"
-        onFinish={submit}
-        initialValues={{ status: data.status, catatan: data.catatan || "" }}
-      >
-        <Form.Item
-          name="status"
-          label={
-            <Group gap={4}>
-              <IconCheck size={14} />
-              <span>Status</span>
-            </Group>
-          }
-          rules={[{ required: true, message: "Pilih status" }]}
-        >
-          <Select>
-            <Select.Option value="menunggu">Menunggu</Select.Option>
-            <Select.Option value="disetujui">Disetujui</Select.Option>
-            <Select.Option value="ditolak">Ditolak</Select.Option>
-            <Select.Option value="perbaikan">Perlu Perbaikan</Select.Option>
-          </Select>
-        </Form.Item>
-
-        <Form.Item
-          name="catatan"
-          label={
-            <Group gap={4}>
-              <IconFileText size={14} />
-              <span>Catatan Verifikasi</span>
-            </Group>
-          }
-        >
-          <TextArea
-            rows={3}
-            placeholder="Tambahkan catatan verifikasi (opsional)..."
-            maxLength={1000}
-            showCount
-          />
-        </Form.Item>
-
-        <Form.Item
-          noStyle
-          shouldUpdate={(prevValues, currentValues) =>
-            prevValues.status !== currentValues.status
-          }
-        >
-          {({ getFieldValue }) =>
-            getFieldValue("status") === "perbaikan" && (
-              <Form.Item
-                name="alasan_perbaikan"
-                label={
-                  <Group gap={4}>
-                    <IconFileText size={14} />
-                    <span>Alasan Perbaikan</span>
-                  </Group>
-                }
-                rules={[
-                  { required: true, message: "Alasan perbaikan wajib diisi" },
-                ]}
-              >
-                <TextArea
-                  rows={3}
-                  placeholder="Jelaskan alasan perbaikan..."
-                  maxLength={500}
-                  showCount
-                />
-              </Form.Item>
-            )
-          }
-        </Form.Item>
-      </Form>
-    </Modal>
-  );
-};
-
 function UsulanList({ formasiId, formasiUsulanId, submissionStatus }) {
   const router = useRouter();
   const { data: session } = useSession();
@@ -778,10 +521,6 @@ function UsulanList({ formasiId, formasiUsulanId, submissionStatus }) {
   };
 
   const [modal, setModal] = useState({ open: false, data: null });
-  const [verifikasiModal, setVerifikasiModal] = useState({
-    open: false,
-    data: null,
-  });
 
   // Fetch usulan
   const { data, isLoading, refetch } = useQuery(
@@ -808,10 +547,14 @@ function UsulanList({ formasiId, formasiUsulanId, submissionStatus }) {
 
   // Stats - simplified
   const total = data?.meta?.total || data?.rekap?.total || 0;
-  const totalAlokasi = data?.rekap?.total_alokasi || 0;
+  const totalAlokasi = data?.rekap?.total_alokasi || 0; // Only verified
+  const totalAlokasiSemua = data?.rekap?.total_alokasi_semua || totalAlokasi;
+  const totalDisetujui = data?.rekap?.total_disetujui || 0;
 
   // Determine if editable based on submission status
-  const isEditable = isAdmin || submissionStatus === "draft" || submissionStatus === "perbaikan";
+  // Non-admin can only edit when status is draft or perbaikan
+  // When status is disetujui, ditolak, or menunggu, non-admin cannot edit
+  const isEditable = isAdmin || (submissionStatus === "draft" || submissionStatus === "perbaikan");
 
   const columns = [
     {
@@ -1025,11 +768,17 @@ function UsulanList({ formasiId, formasiUsulanId, submissionStatus }) {
           <Group gap={4}>
             <Text size="xs" c="dimmed">Jumlah Usulan:</Text>
             <Text size="sm" fw={600}>{total}</Text>
+            {totalDisetujui > 0 && (
+              <Tag color="green" size="small">{totalDisetujui} terverifikasi</Tag>
+            )}
           </Group>
           <Text size="xs" c="dimmed">|</Text>
           <Group gap={4}>
-            <Text size="xs" c="dimmed">Total Alokasi:</Text>
-            <Text size="sm" fw={600} c="blue">{totalAlokasi}</Text>
+            <Text size="xs" c="dimmed">Total Alokasi (Terverifikasi):</Text>
+            <Text size="sm" fw={600} c="green">{totalAlokasi}</Text>
+            {totalAlokasiSemua !== totalAlokasi && (
+              <Text size="xs" c="dimmed">/ {totalAlokasiSemua} total</Text>
+            )}
           </Group>
           {!isEditable && (
             <>
@@ -1254,11 +1003,6 @@ function UsulanList({ formasiId, formasiUsulanId, submissionStatus }) {
         data={modal.data}
         formasiId={formasiId} // For lampiran context
         formasiUsulanId={formasiUsulanId} // For create logic
-      />
-      <VerifikasiModal
-        open={verifikasiModal.open}
-        onClose={() => setVerifikasiModal({ open: false, data: null })}
-        data={verifikasiModal.data}
       />
     </Stack>
   );

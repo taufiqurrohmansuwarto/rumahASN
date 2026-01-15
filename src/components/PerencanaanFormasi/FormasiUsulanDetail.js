@@ -25,7 +25,6 @@ import {
   Input,
   message,
   Modal,
-  Popconfirm,
   Select,
   Tabs,
   Tag,
@@ -103,7 +102,6 @@ const VerifikasiModal = ({ open, onClose, data }) => {
           rules={[{ required: true, message: "Pilih status" }]}
         >
           <Select>
-            <Select.Option value="menunggu">Menunggu</Select.Option>
             <Select.Option value="disetujui">Disetujui</Select.Option>
             <Select.Option value="ditolak">Ditolak</Select.Option>
             <Select.Option value="perbaikan">Perlu Perbaikan</Select.Option>
@@ -177,16 +175,138 @@ const UploadModal = ({ open, onClose, data }) => {
     )
 }
 
+// Kirim Usulan Modal with File Upload
+const KirimUsulanModal = ({ open, onClose, data, onSuccess }) => {
+  const [file, setFile] = useState(null);
+  const queryClient = useQueryClient();
+
+  const { mutate: submit, isLoading } = useMutation(
+    async () => {
+      // Upload file first if provided
+      if (file) {
+        const formData = new FormData();
+        formData.append("file", file);
+        await uploadDokumenFormasiUsulan(data.formasi_usulan_id, formData);
+      }
+      // Then confirm submission
+      return updateFormasiUsulan(data.formasi_usulan_id, { is_confirmed: true });
+    },
+    {
+      onSuccess: () => {
+        message.success("Pengajuan berhasil dikirim!");
+        queryClient.invalidateQueries(["perencanaan-formasi-usulan-detail"]);
+        onClose();
+        setFile(null);
+        if (onSuccess) onSuccess();
+      },
+      onError: (err) => {
+        message.error(err?.response?.data?.message || "Gagal mengirim pengajuan");
+      },
+    }
+  );
+
+  const handleSubmit = () => {
+    // Require file if no existing document
+    if (!data.dokumen_url && !file) {
+      return message.warning("Harap unggah dokumen pendukung terlebih dahulu");
+    }
+    submit();
+  };
+
+  return (
+    <Modal
+      title={
+        <Group gap="xs">
+          <IconSend size={18} />
+          <span>Kirim Pengajuan Usulan</span>
+        </Group>
+      }
+      open={open}
+      onCancel={onClose}
+      width={500}
+      footer={
+        <Group justify="flex-end">
+          <Button onClick={onClose}>Batal</Button>
+          <Button type="primary" loading={isLoading} onClick={handleSubmit}>
+            Kirim Pengajuan
+          </Button>
+        </Group>
+      }
+    >
+      <Stack gap="md">
+        <Alert
+          variant="light"
+          color="blue"
+          title="Konfirmasi Pengiriman"
+          icon={<IconInfoCircle size={16} />}
+        >
+          Pastikan semua data usulan jabatan sudah benar. Setelah dikirim, data
+          tidak dapat diubah sampai admin memberikan keputusan.
+        </Alert>
+
+        <Paper p="sm" radius="sm" withBorder bg="gray.0">
+          <Stack gap={4}>
+            <Group gap="xs">
+              <Text size="xs" c="dimmed" w={120}>Nama Formasi:</Text>
+              <Text size="sm" fw={500}>{data.formasi?.deskripsi || "-"}</Text>
+            </Group>
+            <Group gap="xs">
+              <Text size="xs" c="dimmed" w={120}>Jumlah Usulan:</Text>
+              <Text size="sm" fw={500}>{data.jumlah_usulan || 0} jabatan</Text>
+            </Group>
+            <Group gap="xs">
+              <Text size="xs" c="dimmed" w={120}>Total Alokasi:</Text>
+              <Text size="sm" fw={500}>{data.total_alokasi_semua || 0} formasi</Text>
+            </Group>
+          </Stack>
+        </Paper>
+
+        <Divider />
+
+        <Text size="sm" fw={500}>
+          Unggah Dokumen Pendukung {data.dokumen_url ? "(Opsional - Ganti)" : "(Wajib)"}
+        </Text>
+        <Text size="xs" c="dimmed">
+          Unggah Surat Pengantar / SPTJM sebagai bukti pengajuan resmi.
+        </Text>
+
+        {data.dokumen_url && (
+          <Alert variant="light" color="green" title="Dokumen sudah ada" icon={<IconFileText size={16} />}>
+            {data.dokumen_name || "dokumen.pdf"}
+          </Alert>
+        )}
+
+        <Upload.Dragger
+          maxCount={1}
+          accept=".pdf"
+          beforeUpload={(f) => {
+            setFile(f);
+            return false;
+          }}
+          onRemove={() => setFile(null)}
+        >
+          <p className="ant-upload-drag-icon">
+            <IconUpload size={32} color="#868e96" />
+          </p>
+          <p className="ant-upload-text">Klik atau drag file PDF ke sini</p>
+          <p className="ant-upload-hint">Format: PDF, Max 5MB</p>
+        </Upload.Dragger>
+      </Stack>
+    </Modal>
+  );
+};
+
 function FormasiUsulanDetail({ data, activeTab = "usulan", children }) {
   const router = useRouter();
   const { id, fuId } = router.query;
   const { data: session } = useSession();
   const isAdmin = session?.user?.current_role === "admin";
-  const isOwner = session?.user?.customId === data.user_id;
+  const isOwner = session?.user?.id === data.user_id; // Fixed: use id instead of customId
   const queryClient = useQueryClient();
 
   const [verifyModal, setVerifyModal] = useState(false);
   const [uploadModal, setUploadModal] = useState(false);
+  const [kirimModal, setKirimModal] = useState(false);
   const [downloadingPdf, setDownloadingPdf] = useState(false);
 
   // Perangkat daerah info
@@ -230,7 +350,7 @@ function FormasiUsulanDetail({ data, activeTab = "usulan", children }) {
       }
 
       // Calculate total
-      const totalAlokasi = usulanList.reduce(
+      const totalAlokasiSemua = usulanList.reduce(
         (acc, item) => acc + (item.alokasi || 0),
         0
       );
@@ -246,153 +366,173 @@ function FormasiUsulanDetail({ data, activeTab = "usulan", children }) {
       let yPosition = height - margin;
 
       // Helper function to add new page if needed
-      const checkNewPage = () => {
-        if (yPosition < 80) {
+      const checkNewPage = (minSpace = 80) => {
+        if (yPosition < minSpace) {
           page = pdfDoc.addPage([595, 842]);
           yPosition = height - margin;
         }
       };
 
-      // Title
-      page.drawText("DAFTAR USULAN FORMASI", {
-        x: margin,
-        y: yPosition,
-        size: 14,
-        font: boldFont,
-        color: rgb(0, 0, 0),
+      // Helper to draw centered text
+      const drawCenteredText = (text, y, fontSize, fontType, color = rgb(0, 0, 0)) => {
+        const textWidth = fontType.widthOfTextAtSize(text, fontSize);
+        const x = (width - textWidth) / 2;
+        page.drawText(text, { x, y, size: fontSize, font: fontType, color });
+      };
+
+      // Helper to wrap text into lines
+      const wrapText = (text, maxWidth, fontSize, fontType) => {
+        if (!text) return ["-"];
+        const words = text.split(" ");
+        const lines = [];
+        let currentLine = "";
+
+        for (const word of words) {
+          const testLine = currentLine ? `${currentLine} ${word}` : word;
+          const testWidth = fontType.widthOfTextAtSize(testLine, fontSize);
+          if (testWidth > maxWidth && currentLine) {
+            lines.push(currentLine);
+            currentLine = word;
+          } else {
+            currentLine = testLine;
+          }
+        }
+        if (currentLine) lines.push(currentLine);
+        return lines.length ? lines : ["-"];
+      };
+
+      // === KOP / HEADER (Centered) ===
+      const namaFormasi = data.formasi?.deskripsi || "Formasi";
+      const opdName = perangkatDaerah !== "-" ? perangkatDaerah : "PERANGKAT DAERAH";
+      const tanggalUsulan = dayjs(data.dibuat_pada).format("DD MMMM YYYY");
+
+      // Title Line 1: USULAN KEBUTUHAN [NAMA FORMASI]
+      drawCenteredText(`USULAN KEBUTUHAN ${namaFormasi.toUpperCase()}`, yPosition, 14, boldFont);
+      yPosition -= 18;
+
+      // Title Line 2: DI LINGKUNGAN [OPD]
+      drawCenteredText(`DI LINGKUNGAN ${opdName.toUpperCase()}`, yPosition, 12, boldFont);
+      yPosition -= 18;
+
+      // Title Line 3: [TANGGAL PENGUSULAN]
+      drawCenteredText(tanggalUsulan, yPosition, 10, font, rgb(0.3, 0.3, 0.3));
+      yPosition -= 30;
+
+      // Divider line
+      page.drawLine({
+        start: { x: margin, y: yPosition },
+        end: { x: width - margin, y: yPosition },
+        thickness: 1,
+        color: rgb(0.7, 0.7, 0.7),
       });
       yPosition -= 20;
 
-      // Subtitle (formasi name)
-      page.drawText(data.formasi?.deskripsi || "Formasi", {
-        x: margin,
-        y: yPosition,
-        size: 12,
-        font: boldFont,
-        color: rgb(0.2, 0.4, 0.6),
-      });
-      yPosition -= 25;
-
-      // Info section
-      const infoLines = [
-        `Perangkat Daerah : ${perangkatDaerah}`,
-        `Operator         : ${namaOperator}`,
-        `Tanggal Cetak    : ${dayjs().format("DD MMMM YYYY HH:mm")}`,
-        `Jumlah Usulan    : ${usulanList.length} jabatan`,
-        `Total Alokasi    : ${totalAlokasi} formasi`,
-      ];
-
-      for (const line of infoLines) {
-        page.drawText(line, {
-          x: margin,
-          y: yPosition,
-          size: 9,
-          font: font,
-          color: rgb(0.3, 0.3, 0.3),
-        });
-        yPosition -= 14;
-      }
-      yPosition -= 10;
-
-      // Table header
-      const colWidths = [30, 150, 60, 150, 90, 40];
+      // === TABLE ===
+      const colWidths = [25, 140, 55, 140, 100, 40];
       const headers = ["No", "Nama Jabatan", "Jenis", "Unit Kerja", "Pendidikan", "Alokasi"];
       let xPos = margin;
 
       // Draw header background
       page.drawRectangle({
         x: margin,
-        y: yPosition - 12,
+        y: yPosition - 14,
         width: width - margin * 2,
-        height: 18,
+        height: 20,
         color: rgb(0.2, 0.4, 0.6),
       });
 
       // Draw header text
       for (let i = 0; i < headers.length; i++) {
         page.drawText(headers[i], {
-          x: xPos + 2,
-          y: yPosition - 8,
+          x: xPos + 3,
+          y: yPosition - 10,
           size: 8,
           font: boldFont,
           color: rgb(1, 1, 1),
         });
         xPos += colWidths[i];
       }
-      yPosition -= 20;
+      yPosition -= 24;
 
-      // Draw table rows
+      // Draw table rows with text wrapping
       for (let rowIndex = 0; rowIndex < usulanList.length; rowIndex++) {
-        checkNewPage();
         const item = usulanList[rowIndex];
-        xPos = margin;
+        
+        // Prepare wrapped text for each column
+        const cellData = [
+          [String(rowIndex + 1)],
+          wrapText(item.nama_jabatan || item.jabatan_id || "-", colWidths[1] - 6, 7, font),
+          [item.jenis_jabatan || "-"],
+          wrapText(item.unit_kerja_text || item.unit_kerja || "-", colWidths[3] - 6, 7, font),
+          wrapText(
+            item.kualifikasi_pendidikan_detail?.map((p) => `${p.tk_pend} ${p.label}`).join(", ") || "-",
+            colWidths[4] - 6,
+            7,
+            font
+          ),
+          [String(item.alokasi || 0)],
+        ];
+
+        // Calculate row height based on max lines
+        const maxLines = Math.max(...cellData.map((c) => c.length));
+        const rowHeight = Math.max(16, maxLines * 10 + 6);
+
+        // Check if we need a new page
+        checkNewPage(rowHeight + 20);
 
         // Alternate row background
         if (rowIndex % 2 === 0) {
           page.drawRectangle({
             x: margin,
-            y: yPosition - 10,
+            y: yPosition - rowHeight + 4,
             width: width - margin * 2,
-            height: 16,
-            color: rgb(0.95, 0.95, 0.95),
+            height: rowHeight,
+            color: rgb(0.96, 0.96, 0.96),
           });
         }
 
-        // Truncate helper
-        const truncate = (text, maxLen) => {
-          if (!text) return "-";
-          return text.length > maxLen ? text.substring(0, maxLen - 2) + ".." : text;
-        };
-
-        const rowData = [
-          String(rowIndex + 1),
-          truncate(item.nama_jabatan || item.jabatan_id, 30),
-          truncate(item.jenis_jabatan, 12),
-          truncate(item.unit_kerja_text || item.unit_kerja, 30),
-          truncate(
-            item.kualifikasi_pendidikan_detail
-              ?.map((p) => p.tk_pend)
-              .join(", "),
-            18
-          ),
-          String(item.alokasi || 0),
-        ];
-
-        for (let i = 0; i < rowData.length; i++) {
-          page.drawText(rowData[i], {
-            x: xPos + 2,
-            y: yPosition - 6,
-            size: 7,
-            font: font,
-            color: rgb(0.1, 0.1, 0.1),
-          });
-          xPos += colWidths[i];
+        // Draw cell contents
+        xPos = margin;
+        for (let colIndex = 0; colIndex < cellData.length; colIndex++) {
+          const lines = cellData[colIndex];
+          let lineY = yPosition - 8;
+          for (const line of lines) {
+            page.drawText(line, {
+              x: xPos + 3,
+              y: lineY,
+              size: 7,
+              font: font,
+              color: rgb(0.1, 0.1, 0.1),
+            });
+            lineY -= 10;
+          }
+          xPos += colWidths[colIndex];
         }
-        yPosition -= 16;
+        yPosition -= rowHeight;
       }
 
       // Total row
-      checkNewPage();
+      checkNewPage(30);
       yPosition -= 5;
       page.drawRectangle({
         x: margin,
-        y: yPosition - 10,
+        y: yPosition - 14,
         width: width - margin * 2,
-        height: 18,
+        height: 20,
         color: rgb(0.85, 0.9, 0.95),
       });
 
       page.drawText("TOTAL ALOKASI", {
-        x: margin + colWidths[0] + colWidths[1] + colWidths[2] + colWidths[3] + 2,
-        y: yPosition - 6,
+        x: margin + colWidths[0] + colWidths[1] + colWidths[2] + colWidths[3] + 3,
+        y: yPosition - 10,
         size: 8,
         font: boldFont,
         color: rgb(0, 0, 0),
       });
 
-      page.drawText(String(totalAlokasi), {
-        x: margin + colWidths[0] + colWidths[1] + colWidths[2] + colWidths[3] + colWidths[4] + 2,
-        y: yPosition - 6,
+      page.drawText(String(totalAlokasiSemua), {
+        x: margin + colWidths[0] + colWidths[1] + colWidths[2] + colWidths[3] + colWidths[4] + 3,
+        y: yPosition - 10,
         size: 8,
         font: boldFont,
         color: rgb(0, 0, 0),
@@ -404,7 +544,7 @@ function FormasiUsulanDetail({ data, activeTab = "usulan", children }) {
 
       saveAs(
         blob,
-        `Usulan_${data.formasi?.deskripsi || "Formasi"}_${perangkatDaerah}_${dayjs().format("YYYYMMDD")}.pdf`
+        `Usulan_${namaFormasi}_${opdName}_${dayjs().format("YYYYMMDD")}.pdf`
       );
       message.success({ content: "PDF berhasil dibuat", key: "pdf" });
     } catch (error) {
@@ -415,33 +555,7 @@ function FormasiUsulanDetail({ data, activeTab = "usulan", children }) {
     }
   };
 
-  // Submit (Confirm) Mutation for User
-  const { mutate: confirmSubmission, isLoading: isConfirming } = useMutation(
-    () => updateFormasiUsulan(data.formasi_usulan_id, { is_confirmed: true }),
-    {
-      onSuccess: () => {
-        message.success("Pengajuan berhasil dikirim!");
-        queryClient.invalidateQueries(["perencanaan-formasi-usulan-detail"]);
-      },
-      onError: () => message.error("Gagal mengirim pengajuan"),
-    }
-  );
-
-  // Cancel/Un-confirm Mutation for User
-  const { mutate: cancelSubmission, isLoading: isCancelling } = useMutation(
-    () =>
-      updateFormasiUsulan(data.formasi_usulan_id, {
-        is_confirmed: false,
-        status: "draft",
-      }),
-    {
-      onSuccess: () => {
-        message.success("Pengajuan ditarik kembali ke draft");
-        queryClient.invalidateQueries(["perencanaan-formasi-usulan-detail"]);
-      },
-      onError: () => message.error("Gagal menarik pengajuan"),
-    }
-  );
+  // Note: Submit functionality moved to KirimUsulanModal component
 
   const handleTabChange = (key) => {
     router.push(`/perencanaan/formasi/${id}/${fuId}/${key}`);
@@ -497,12 +611,18 @@ function FormasiUsulanDetail({ data, activeTab = "usulan", children }) {
                   Jumlah Usulan:
                 </Text>
                 <Tag color="blue">{data.jumlah_usulan || 0} jabatan</Tag>
+                {(data.jumlah_disetujui || 0) > 0 && (
+                  <Tag color="green">{data.jumlah_disetujui} terverifikasi</Tag>
+                )}
               </Group>
               <Group gap={6}>
                 <Text size="xs" c="dimmed">
-                  Total Alokasi:
+                  Total Alokasi (Terverifikasi):
                 </Text>
                 <Tag color="green">{data.total_alokasi || 0} formasi</Tag>
+                {data.total_alokasi_semua !== undefined && data.total_alokasi_semua !== data.total_alokasi && (
+                  <Text size="xs" c="dimmed">/ {data.total_alokasi_semua} total</Text>
+                )}
               </Group>
             </Group>
           </Stack>
@@ -535,44 +655,25 @@ function FormasiUsulanDetail({ data, activeTab = "usulan", children }) {
                 </Button>
               )}
 
-              {/* Owner: Submit */}
+              {/* Owner: Submit with Modal */}
               {isOwner && data.status === "draft" && (
-                <Popconfirm
-                  title="Kirim Pengajuan?"
-                  description="Pastikan semua usulan dan dokumen sudah benar. Data tidak dapat diubah setelah dikirim."
-                  onConfirm={confirmSubmission}
+                <Tooltip
+                  title={
+                    (data.jumlah_usulan || 0) === 0
+                      ? "Tambahkan usulan jabatan terlebih dahulu"
+                      : "Kirim pengajuan untuk diverifikasi"
+                  }
                 >
-                  <Tooltip
-                    title={
-                      !data.dokumen_url
-                        ? "Upload dokumen pendukung terlebih dahulu"
-                        : "Kirim pengajuan untuk diverifikasi"
-                    }
+                  <Button
+                    type="primary"
+                    size="small"
+                    icon={<IconSend size={14} />}
+                    disabled={(data.jumlah_usulan || 0) === 0}
+                    onClick={() => setKirimModal(true)}
                   >
-                    <Button
-                      type="primary"
-                      size="small"
-                      icon={<IconSend size={14} />}
-                      loading={isConfirming}
-                      disabled={!data.dokumen_url || (data.jumlah_usulan || 0) === 0}
-                    >
-                      Kirim Pengajuan
-                    </Button>
-                  </Tooltip>
-                </Popconfirm>
-              )}
-
-              {/* Owner: Cancel submission */}
-              {isOwner && data.status === "menunggu" && (
-                <Popconfirm
-                  title="Tarik kembali pengajuan?"
-                  description="Status akan kembali menjadi Draft dan Anda dapat mengedit kembali."
-                  onConfirm={cancelSubmission}
-                >
-                  <Button danger size="small" loading={isCancelling}>
-                    Tarik Kembali
+                    Kirim Pengajuan
                   </Button>
-                </Popconfirm>
+                </Tooltip>
               )}
             </Group>
           </Stack>
@@ -671,6 +772,11 @@ function FormasiUsulanDetail({ data, activeTab = "usulan", children }) {
       <UploadModal
         open={uploadModal}
         onClose={() => setUploadModal(false)}
+        data={data}
+      />
+      <KirimUsulanModal
+        open={kirimModal}
+        onClose={() => setKirimModal(false)}
         data={data}
       />
     </Stack>

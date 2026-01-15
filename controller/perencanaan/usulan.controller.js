@@ -68,6 +68,7 @@ const getAll = async (req, res) => {
       page = 1,
       limit = 20,
       search,
+      formasi_id, // Filter by parent formasi
       formasi_usulan_id, // New Parent ID
       jenis_jabatan,
       unit_kerja,
@@ -78,8 +79,15 @@ const getAll = async (req, res) => {
     const knex = Usulan.knex();
 
     let query = Usulan.query().withGraphFetched(
-      "[lampiran, dibuatOleh(simpleSelect), diperbaruiOleh(simpleSelect)]"
+      "[lampiran, dibuatOleh(simpleSelect), diperbaruiOleh(simpleSelect), diverifikasiOleh(simpleSelect), formasiUsulan.[formasi, pembuat(simpleWithImage)]]"
     );
+
+    // Filter by formasi_id (join through formasi_usulan)
+    if (formasi_id) {
+      query = query
+        .joinRelated("formasiUsulan")
+        .where("formasiUsulan.formasi_id", formasi_id);
+    }
 
     // Filter by formasi_usulan_id (Mandatory for context usually, but optional for admin overview)
     if (formasi_usulan_id) {
@@ -142,17 +150,36 @@ const getAll = async (req, res) => {
     if (parseInt(limit) === -1) {
       const result = await query;
       const transformedData = await transformUsulan(result);
-      // Calculate allocation stats
-      const totalAlokasi = result.reduce((acc, x) => acc + (x.alokasi || 0), 0);
+      // Calculate allocation stats - only count verified (disetujui) items
+      const totalAlokasi = result
+        .filter((x) => x.status === "disetujui")
+        .reduce((acc, x) => acc + (x.alokasi || 0), 0);
+      const totalAlokasiSemua = result.reduce((acc, x) => acc + (x.alokasi || 0), 0);
       
       return res.json({ 
           data: transformedData, 
-          rekap: { total_alokasi: totalAlokasi, total: result.length } 
+          rekap: { 
+            total_alokasi: totalAlokasi, 
+            total_alokasi_semua: totalAlokasiSemua,
+            total: result.length,
+            total_disetujui: result.filter((x) => x.status === "disetujui").length,
+          } 
       });
     }
 
     const result = await query.page(parseInt(page) - 1, parseInt(limit));
     const transformedData = await transformUsulan(result.results);
+
+    // Also fetch rekap stats for paginated response
+    let rekapQuery = Usulan.query();
+    if (formasi_usulan_id) {
+      rekapQuery = rekapQuery.where("formasi_usulan_id", formasi_usulan_id);
+    }
+    const allUsulan = await rekapQuery;
+    const totalAlokasi = allUsulan
+      .filter((x) => x.status === "disetujui")
+      .reduce((acc, x) => acc + (x.alokasi || 0), 0);
+    const totalAlokasiSemua = allUsulan.reduce((acc, x) => acc + (x.alokasi || 0), 0);
 
     res.json({
       data: transformedData,
@@ -161,6 +188,12 @@ const getAll = async (req, res) => {
         page: parseInt(page),
         limit: parseInt(limit),
         totalPages: Math.ceil(result.total / parseInt(limit)),
+      },
+      rekap: {
+        total_alokasi: totalAlokasi,
+        total_alokasi_semua: totalAlokasiSemua,
+        total: allUsulan.length,
+        total_disetujui: allUsulan.filter((x) => x.status === "disetujui").length,
       },
     });
   } catch (error) {
@@ -259,6 +292,7 @@ const create = async (req, res) => {
       unit_kerja,
       lampiran_id: lampiran_id || null,
       catatan: catatan || null,
+      status: "menunggu", // Default: menunggu verifikasi admin
       dibuat_oleh: userId,
       diperbarui_oleh: userId,
     });
@@ -364,10 +398,69 @@ const remove = async (req, res) => {
   }
 };
 
+/**
+ * Update usulan status (verifikasi per jabatan) - Admin only
+ */
+const updateStatus = async (req, res) => {
+  try {
+    const { id } = req?.query;
+    const { customId: userId, current_role } = req?.user;
+    const isAdmin = current_role === "admin";
+
+    if (!isAdmin) {
+      return res.status(403).json({ message: "Hanya admin yang dapat memverifikasi usulan" });
+    }
+
+    const { status, catatan, alasan_perbaikan } = req?.body;
+
+    const usulan = await Usulan.query().findById(id);
+
+    if (!usulan) {
+      return res.status(404).json({ message: "Usulan tidak ditemukan" });
+    }
+
+    // Validate status value
+    const validStatuses = ["menunggu", "disetujui", "ditolak", "perbaikan"];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ message: "Status tidak valid" });
+    }
+
+    const updateData = {
+      status,
+      diperbarui_oleh: userId,
+      diverifikasi_oleh: userId,
+      diverifikasi_pada: new Date().toISOString(),
+    };
+
+    if (catatan !== undefined) updateData.catatan = catatan;
+    if (status === "perbaikan" && alasan_perbaikan) {
+      updateData.alasan_perbaikan = alasan_perbaikan;
+    }
+
+    await Usulan.query().findById(id).patch(updateData);
+
+    // Create audit log - get formasi_id from the usulan's formasiUsulan
+    const formasiUsulan = await FormasiUsulan.query().findById(usulan.formasi_usulan_id);
+    await RiwayatAudit.query().insert({
+      usulan_id: id,
+      formasi_id: formasiUsulan?.formasi_id || null,
+      aksi: `verifikasi_${status}`,
+      data_baru: { status, catatan },
+      data_lama: { status: usulan.status },
+      dibuat_oleh: userId,
+    });
+
+    res.json({ code: 200, message: "Status usulan berhasil diperbarui" });
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
 module.exports = {
   getAll,
   getById,
   create,
   update,
   remove,
+  updateStatus,
 };

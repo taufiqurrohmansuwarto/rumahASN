@@ -1,5 +1,6 @@
 import {
   deleteFormasi,
+  deleteFormasiUsulan,
   getFormasi,
 } from "@/services/perencanaan-formasi.services";
 import {
@@ -12,14 +13,18 @@ import {
 } from "@mantine/core";
 import { useDebouncedValue } from "@mantine/hooks";
 import {
+  IconCheck,
+  IconClock,
   IconEdit,
   IconEye,
   IconPlus,
   IconRefresh,
   IconTrash,
+  IconX,
 } from "@tabler/icons-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  Avatar,
   Button,
   Input,
   InputNumber,
@@ -34,6 +39,24 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useState } from "react";
 import FormasiModal from "./FormasiModal";
+
+// Pengajuan Status Badge
+const PengajuanStatusBadge = ({ status }) => {
+  const config = {
+    draft: { color: "default", icon: IconEdit, label: "Draft" },
+    menunggu: { color: "orange", icon: IconClock, label: "Menunggu" },
+    disetujui: { color: "green", icon: IconCheck, label: "Disetujui" },
+    ditolak: { color: "red", icon: IconX, label: "Ditolak" },
+    perbaikan: { color: "blue", icon: IconEdit, label: "Perbaikan" },
+  };
+  const { color, icon: Icon, label } = config[status] || config.draft;
+  return (
+    <Tag color={color} style={{ display: "flex", alignItems: "center", gap: 4 }}>
+      <Icon size={12} />
+      {label}
+    </Tag>
+  );
+};
 
 // Status Badge
 const StatusBadge = ({ status }) => {
@@ -108,7 +131,7 @@ function FormasiList() {
     { keepPreviousData: true }
   );
 
-  // Delete mutation
+  // Delete formasi mutation (admin only)
   const { mutate: hapusFormasi, isLoading: isDeleting } = useMutation(
     (id) => deleteFormasi(id),
     {
@@ -119,6 +142,22 @@ function FormasiList() {
       onError: (error) => {
         message.error(
           error?.response?.data?.message || "Gagal menghapus formasi"
+        );
+      },
+    }
+  );
+
+  // Delete pengajuan mutation (user's own)
+  const { mutate: hapusPengajuan, isLoading: isDeletingPengajuan } = useMutation(
+    (id) => deleteFormasiUsulan(id),
+    {
+      onSuccess: () => {
+        message.success("Pengajuan berhasil dihapus");
+        queryClient.invalidateQueries(["perencanaan-formasi"]);
+      },
+      onError: (error) => {
+        message.error(
+          error?.response?.data?.message || "Gagal menghapus pengajuan"
         );
       },
     }
@@ -139,7 +178,8 @@ function FormasiList() {
       return acc + (item.usulan_count || 0); 
     }, 0) || 0;
 
-  const columns = [
+  // Base columns for all users
+  const baseColumns = [
     {
       title: "Judul",
       dataIndex: "deskripsi",
@@ -165,6 +205,10 @@ function FormasiList() {
       width: 90,
       render: (val) => <StatusBadge status={val} />,
     },
+  ];
+
+  // Admin columns
+  const adminColumns = [
     {
       title: "Dibuat oleh",
       dataIndex: "dibuatOleh",
@@ -187,12 +231,69 @@ function FormasiList() {
         </Text>
       ),
     },
+  ];
+
+  // Non-admin columns (show user's own pengajuan)
+  const userColumns = [
     {
-      title: "Aksi",
-      key: "action",
-      width: 130,
-      align: "center",
-      render: (_, record) => (
+      title: "Pengajuan Saya",
+      key: "pengajuan_saya",
+      width: 200,
+      render: (_, record) => {
+        const pengajuan = record.pengajuan_saya;
+        if (!pengajuan) {
+          return <Text size="xs" c="dimmed">Belum ada pengajuan</Text>;
+        }
+        return (
+          <Stack gap={2}>
+            <PengajuanStatusBadge status={pengajuan.status} />
+            <Text size="xs" c="dimmed">
+              Update: {dayjs(pengajuan.diperbarui_pada).format("DD/MM/YY HH:mm")}
+            </Text>
+          </Stack>
+        );
+      },
+    },
+    {
+      title: "Operator / Perangkat Daerah",
+      key: "operator",
+      width: 220,
+      render: (_, record) => {
+        const pengajuan = record.pengajuan_saya;
+        if (!pengajuan?.pembuat) {
+          return <Text size="xs" c="dimmed">-</Text>;
+        }
+        const pembuat = pengajuan.pembuat;
+        return (
+          <Group gap="xs" wrap="nowrap">
+            <Avatar src={pembuat.image} size="sm" radius="xl">
+              {pembuat.username?.[0]?.toUpperCase() || "?"}
+            </Avatar>
+            <Stack gap={0}>
+              <Text size="sm" fw={500}>{pembuat.username || "-"}</Text>
+              <Tooltip title={pembuat.perangkat_daerah_detail || "-"}>
+                <Text size="xs" c="dimmed" lineClamp={1} style={{ maxWidth: 150 }}>
+                  {pembuat.perangkat_daerah_detail || "-"}
+                </Text>
+              </Tooltip>
+            </Stack>
+          </Group>
+        );
+      },
+    },
+  ];
+
+  // Action column
+  const actionColumn = {
+    title: "Aksi",
+    key: "action",
+    width: isAdmin ? 130 : 100,
+    align: "center",
+    render: (_, record) => {
+      const pengajuan = record.pengajuan_saya;
+      const canDeletePengajuan = !isAdmin && pengajuan && pengajuan.status === "draft";
+
+      return (
         <Group gap={4} justify="center">
           <Tooltip label="Detail">
             <ActionIcon
@@ -226,7 +327,7 @@ function FormasiList() {
               okText="Ya, Hapus"
               cancelText="Batal"
             >
-              <Tooltip label="Hapus">
+              <Tooltip label="Hapus Formasi">
                 <ActionIcon
                   variant="subtle"
                   color="red"
@@ -238,10 +339,35 @@ function FormasiList() {
               </Tooltip>
             </Popconfirm>
           )}
+          {canDeletePengajuan && (
+            <Popconfirm
+              title="Hapus pengajuan?"
+              description="Semua data usulan di dalamnya akan hilang."
+              onConfirm={() => hapusPengajuan(pengajuan.formasi_usulan_id)}
+              okText="Ya, Hapus"
+              cancelText="Batal"
+            >
+              <Tooltip label="Hapus Pengajuan Saya">
+                <ActionIcon
+                  variant="subtle"
+                  color="red"
+                  size="sm"
+                  loading={isDeletingPengajuan}
+                >
+                  <IconTrash size={14} />
+                </ActionIcon>
+              </Tooltip>
+            </Popconfirm>
+          )}
         </Group>
-      ),
+      );
     },
-  ];
+  };
+
+  // Combine columns based on role
+  const columns = isAdmin
+    ? [...baseColumns, ...adminColumns, actionColumn]
+    : [...baseColumns, ...userColumns, actionColumn];
 
   return (
     <Stack gap="xs">

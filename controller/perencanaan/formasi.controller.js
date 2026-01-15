@@ -16,6 +16,9 @@ const getAll = async (req, res) => {
       sortOrder = "desc",
     } = req?.query;
 
+    const { customId: userId, current_role } = req?.user;
+    const isAdmin = current_role === "admin";
+
     // Use formasiUsulan relation instead of usulan
     let query = Formasi.query().withGraphFetched(
       "[dibuatOleh(simpleSelect), diperbaruiOleh(simpleSelect)]"
@@ -44,26 +47,46 @@ const getAll = async (req, res) => {
     const order = sortOrder === "ascend" ? "asc" : "desc";
     query = query.orderBy(sortField, order);
 
+    // Helper to add user's pengajuan info
+    const addUserPengajuanInfo = async (formasiList) => {
+      if (isAdmin) return formasiList;
+      
+      const FormasiUsulan = require("@/models/perencanaan/perencanaan.formasi_usulan.model");
+      
+      return Promise.all(
+        formasiList.map(async (formasi) => {
+          const userPengajuan = await FormasiUsulan.query()
+            .where("formasi_id", formasi.formasi_id)
+            .where("user_id", userId)
+            .withGraphFetched("[pembuat(simpleWithImage)]")
+            .first();
+          
+          return {
+            ...formasi,
+            pengajuan_saya: userPengajuan || null,
+          };
+        })
+      );
+    };
+
     // Pagination
     if (parseInt(limit) === -1) {
       const result = await query;
+      const transformedData = await addUserPengajuanInfo(result);
       const rekap = {
         total: result.length,
         aktif: result.filter((x) => x.status === "aktif").length,
         nonaktif: result.filter((x) => x.status === "nonaktif").length,
       };
 
-      return res.json({ data: result, rekap });
+      return res.json({ data: transformedData, rekap });
     }
 
     const result = await query.page(parseInt(page) - 1, parseInt(limit));
-    
-    // Fetch summary counts manually or via subquery if needed, 
-    // but for now let's just return formasi data to fix the error.
-    // If frontend needs total usulan, we can add it later.
+    const transformedData = await addUserPengajuanInfo(result.results);
     
     res.json({
-      data: result.results,
+      data: transformedData,
       meta: {
         total: result.total,
         page: parseInt(page),
