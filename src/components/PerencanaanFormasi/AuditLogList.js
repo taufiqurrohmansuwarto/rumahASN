@@ -7,7 +7,7 @@ import {
   Text,
   Tooltip,
 } from "@mantine/core";
-import { useDebouncedValue } from "@mantine/hooks";
+import { useDebouncedValue, useMediaQuery } from "@mantine/hooks";
 import {
   IconDownload,
   IconEye,
@@ -158,6 +158,10 @@ const DetailModal = ({ open, onClose, data }) => {
 function AuditLogList() {
   const router = useRouter();
   const [detailModal, setDetailModal] = useState({ open: false, data: null });
+
+  // Responsive breakpoints
+  const isMobile = useMediaQuery("(max-width: 768px)");
+  const isTablet = useMediaQuery("(max-width: 992px)");
 
   // Get filters from URL
   const {
@@ -410,47 +414,53 @@ function AuditLogList() {
 
       {/* Filter Row */}
       <Paper p="xs" radius="sm" withBorder>
-        <Group gap="xs" wrap="wrap">
-          <Input
-            placeholder="Cari operator..."
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            style={{ width: 160 }}
-            size="small"
-            allowClear
-          />
-          <Select
-            placeholder="Filter Aksi"
-            value={aksi || undefined}
-            onChange={(val) => updateFilters({ aksi: val || "", page: 1 })}
-            style={{ width: 180 }}
-            size="small"
-            allowClear
-            options={AKSI_OPTIONS}
-            showSearch
-            optionFilterProp="label"
-          />
-          <RangePicker
-            size="small"
-            onChange={handleDateChange}
-            format="DD/MM/YYYY"
-            placeholder={["Dari", "Sampai"]}
-            style={{ width: 220 }}
-            value={startDate && endDate ? [dayjs(startDate), dayjs(endDate)] : null}
-          />
-          <div style={{ flex: 1 }} />
-          <Tooltip label="Refresh">
-            <Button icon={<IconRefresh size={14} />} onClick={() => refetch()} size="small" />
-          </Tooltip>
-          <Button
-            icon={<IconDownload size={14} />}
-            size="small"
-            loading={downloading}
-            onClick={handleDownloadExcel}
-          >
-            Unduh
-          </Button>
-        </Group>
+        <Stack gap="xs">
+          {/* Filters */}
+          <Group gap="xs" wrap="wrap">
+            <Input
+              placeholder="Cari operator..."
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              style={{ width: isMobile ? "100%" : 160, flex: isMobile ? 1 : undefined }}
+              size="small"
+              allowClear
+            />
+            <Select
+              placeholder="Filter Aksi"
+              value={aksi || undefined}
+              onChange={(val) => updateFilters({ aksi: val || "", page: 1 })}
+              style={{ width: isMobile ? "calc(50% - 4px)" : 180 }}
+              size="small"
+              allowClear
+              options={AKSI_OPTIONS}
+              showSearch
+              optionFilterProp="label"
+            />
+            <RangePicker
+              size="small"
+              onChange={handleDateChange}
+              format="DD/MM/YYYY"
+              placeholder={["Dari", "Sampai"]}
+              style={{ width: isMobile ? "calc(50% - 4px)" : 220 }}
+              value={startDate && endDate ? [dayjs(startDate), dayjs(endDate)] : null}
+            />
+          </Group>
+
+          {/* Action Buttons */}
+          <Group gap="xs" justify={isMobile ? "space-between" : "flex-end"}>
+            <Tooltip label="Refresh">
+              <Button icon={<IconRefresh size={14} />} onClick={() => refetch()} size="small" />
+            </Tooltip>
+            <Button
+              icon={<IconDownload size={14} />}
+              size="small"
+              loading={downloading}
+              onClick={handleDownloadExcel}
+            >
+              {isMobile ? null : "Unduh"}
+            </Button>
+          </Group>
+        </Stack>
       </Paper>
 
       {/* Table */}
@@ -469,7 +479,7 @@ function AuditLogList() {
             showTotal: (total, range) => `${range[0]}-${range[1]} dari ${total}`,
             onChange: (p, l) => updateFilters({ page: p, limit: l }),
           }}
-          scroll={{ x: 1200 }}
+          scroll={{ x: isMobile ? 900 : 1200 }}
         />
       </Paper>
 

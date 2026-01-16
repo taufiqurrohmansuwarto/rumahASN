@@ -19,6 +19,7 @@ import {
   Stack,
   Text,
 } from "@mantine/core";
+import { useMediaQuery } from "@mantine/hooks";
 import {
   IconAlertCircle,
   IconBriefcase,
@@ -68,6 +69,7 @@ const UsulanModal = ({ open, onClose, data, formasiId, formasiUsulanId }) => {
   const [form] = Form.useForm();
   const queryClient = useQueryClient();
   const isEdit = !!data;
+  const isMobile = useMediaQuery("(max-width: 768px)");
 
   // State untuk filter tingkat pendidikan (cascading dropdown)
   const [selectedTingkat, setSelectedTingkat] = useState(null);
@@ -244,8 +246,9 @@ const UsulanModal = ({ open, onClose, data, formasiId, formasiUsulanId }) => {
       }
       open={open}
       onCancel={onClose}
-      width={700}
+      width={isMobile ? "95%" : 700}
       destroyOnClose
+      centered={isMobile}
       footer={
         <div style={{ textAlign: "right" }}>
           <Button onClick={onClose} style={{ marginRight: 8 }}>
@@ -845,6 +848,10 @@ function UsulanList({
   const isAdmin = session?.user?.current_role === "admin";
   const queryClient = useQueryClient();
   const [deletingId, setDeletingId] = useState(null);
+
+  // Responsive breakpoints
+  const isMobile = useMediaQuery("(max-width: 768px)");
+  const isTablet = useMediaQuery("(max-width: 992px)");
 
   // Get filters from URL (using kebab-case for cleaner URLs)
   const {
@@ -1585,82 +1592,88 @@ function UsulanList({
 
       {/* Filter Row (Full Width) */}
       <Paper p="xs" radius="sm" withBorder>
-        <Group gap="xs" wrap="wrap">
-          <Select
-            placeholder="Jenis Jabatan"
-            value={urlJenis || undefined}
-            onChange={(val) => {
-              // Reset jabatan filter when jenis changes
-              updateFilters({ jenis: val || "", jabatan: "", page: 1 });
-            }}
-            style={{ width: 130 }}
-            size="small"
-            allowClear
-          >
-            <Select.Option value="pelaksana">Pelaksana</Select.Option>
-            <Select.Option value="fungsional">Fungsional</Select.Option>
-          </Select>
-          <TreeSelect
-            placeholder={
-              isLoadingJabatan ? "Memuat jabatan..." : "Filter Jabatan"
-            }
-            value={urlJabatan || undefined}
-            onChange={(val) => updateFilters({ jabatan: val || "", page: 1 })}
-            treeData={jabatanTreeData}
-            showSearch
-            treeNodeFilterProp="label"
-            allowClear
-            disabled={isLoadingJabatan}
-            style={{ width: 250 }}
-            size="small"
-            dropdownStyle={{ maxHeight: 400, overflow: "auto" }}
-            notFoundContent={isLoadingJabatan ? "Memuat..." : "Tidak ditemukan"}
-          />
-          <TreeSelect
-            placeholder="Unit Kerja"
-            value={urlUnitKerja || undefined}
-            onChange={(val) =>
-              updateFilters({ "unit-kerja": val || "", page: 1 })
-            }
-            treeData={opdTree}
-            showSearch
-            treeNodeFilterProp="label"
-            allowClear
-            loading={loadingOpd}
-            style={{ width: 220 }}
-            size="small"
-            dropdownStyle={{ maxHeight: 400, overflow: "auto" }}
-          />
-          <div style={{ flex: 1 }} />
-          <Tooltip title="Refresh">
-            <Button
-              icon={<IconRefresh size={14} />}
-              onClick={() => refetch()}
+        <Stack gap="xs">
+          {/* Filters */}
+          <Group gap="xs" wrap="wrap">
+            <Select
+              placeholder="Jenis Jabatan"
+              value={urlJenis || undefined}
+              onChange={(val) => {
+                // Reset jabatan filter when jenis changes
+                updateFilters({ jenis: val || "", jabatan: "", page: 1 });
+              }}
+              style={{ width: isMobile ? "calc(50% - 4px)" : 130 }}
               size="small"
-            />
-          </Tooltip>
-          <Button
-            icon={<IconDownload size={14} />}
-            size="small"
-            loading={downloading}
-            onClick={handleDownloadExcel}
-          >
-            Unduh
-          </Button>
-          <Tooltip
-            title={!isEditable ? "Tidak dapat menambah data" : "Tambah Jabatan"}
-          >
-            <Button
-              type="primary"
-              icon={<IconPlus size={14} />}
-              onClick={() => setModal({ open: true, data: null })}
-              size="small"
-              disabled={!isEditable}
+              allowClear
             >
-              Tambah
+              <Select.Option value="pelaksana">Pelaksana</Select.Option>
+              <Select.Option value="fungsional">Fungsional</Select.Option>
+            </Select>
+            <TreeSelect
+              placeholder={
+                isLoadingJabatan ? "Memuat jabatan..." : "Filter Jabatan"
+              }
+              value={urlJabatan || undefined}
+              onChange={(val) => updateFilters({ jabatan: val || "", page: 1 })}
+              treeData={jabatanTreeData}
+              showSearch
+              treeNodeFilterProp="label"
+              allowClear
+              disabled={isLoadingJabatan}
+              style={{ width: isMobile ? "calc(50% - 4px)" : 250 }}
+              size="small"
+              dropdownStyle={{ maxHeight: 400, overflow: "auto" }}
+              notFoundContent={isLoadingJabatan ? "Memuat..." : "Tidak ditemukan"}
+            />
+            <TreeSelect
+              placeholder="Unit Kerja"
+              value={urlUnitKerja || undefined}
+              onChange={(val) =>
+                updateFilters({ "unit-kerja": val || "", page: 1 })
+              }
+              treeData={opdTree}
+              showSearch
+              treeNodeFilterProp="label"
+              allowClear
+              loading={loadingOpd}
+              style={{ width: isMobile ? "100%" : 220 }}
+              size="small"
+              dropdownStyle={{ maxHeight: 400, overflow: "auto" }}
+            />
+          </Group>
+
+          {/* Action Buttons */}
+          <Group gap="xs" justify={isMobile ? "space-between" : "flex-end"}>
+            <Tooltip title="Refresh">
+              <Button
+                icon={<IconRefresh size={14} />}
+                onClick={() => refetch()}
+                size="small"
+              />
+            </Tooltip>
+            <Button
+              icon={<IconDownload size={14} />}
+              size="small"
+              loading={downloading}
+              onClick={handleDownloadExcel}
+            >
+              {isMobile ? null : "Unduh"}
             </Button>
-          </Tooltip>
-        </Group>
+            <Tooltip
+              title={!isEditable ? "Tidak dapat menambah data" : "Tambah Jabatan"}
+            >
+              <Button
+                type="primary"
+                icon={<IconPlus size={14} />}
+                onClick={() => setModal({ open: true, data: null })}
+                size="small"
+                disabled={!isEditable}
+              >
+                {isMobile ? null : "Tambah"}
+              </Button>
+            </Tooltip>
+          </Group>
+        </Stack>
       </Paper>
 
       {/* Table */}
@@ -1680,7 +1693,7 @@ function UsulanList({
               `${range[0]}-${range[1]} dari ${total}`,
             onChange: (p, l) => updateFilters({ page: p, limit: l }),
           }}
-          scroll={{ x: 1200 }}
+          scroll={{ x: isMobile ? 900 : 1200 }}
           expandable={{
             expandedRowRender: (record) => {
               // Only show expanded content if status is not "menunggu" and has content to show

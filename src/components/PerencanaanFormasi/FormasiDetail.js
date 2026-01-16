@@ -1,5 +1,6 @@
 import { getFormasiById } from "@/services/perencanaan-formasi.services";
 import { Group, Paper, Stack, Text } from "@mantine/core";
+import { useMediaQuery } from "@mantine/hooks";
 import {
   IconCalendarEvent,
   IconClipboardList,
@@ -37,6 +38,7 @@ const InfoBadge = ({ icon: Icon, label, value }) => (
 
 function FormasiDetail({ formasiId, activeTab = "usulan" }) {
   const router = useRouter();
+  const isMobile = useMediaQuery("(max-width: 768px)");
 
   // Fetch formasi detail
   const { data: formasi, isLoading } = useQuery({
@@ -85,19 +87,19 @@ function FormasiDetail({ formasiId, activeTab = "usulan" }) {
 
   return (
     <Stack gap="xs">
-      {/* Header - 1 row responsive */}
+      {/* Header - responsive layout */}
       <Paper p="xs" radius="sm" withBorder>
-        <Group justify="space-between" gap="xs" wrap="wrap">
-          {/* Left: Title + Badge */}
-          <Group gap="xs" wrap="nowrap">
+        <Stack gap="xs">
+          {/* Title + Badge */}
+          <Group gap="xs" wrap="wrap">
             <Text fw={600} size="sm">
               {formasi?.deskripsi || "Detail Formasi"}
             </Text>
             <StatusBadge status={formasi?.status} />
           </Group>
 
-          {/* Right: Info badges */}
-          <Group gap="sm" wrap="wrap">
+          {/* Info badges */}
+          <Group gap={isMobile ? "xs" : "sm"} wrap="wrap">
             <InfoBadge
               icon={IconCalendarEvent}
               label="Tahun"
@@ -114,7 +116,7 @@ function FormasiDetail({ formasiId, activeTab = "usulan" }) {
               value={formasi?.dibuatOleh?.username}
             />
           </Group>
-        </Group>
+        </Stack>
       </Paper>
 
       {/* Tabs - Outside Card */}

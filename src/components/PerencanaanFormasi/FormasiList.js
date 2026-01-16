@@ -11,7 +11,7 @@ import {
   Text,
   Tooltip,
 } from "@mantine/core";
-import { useDebouncedValue } from "@mantine/hooks";
+import { useDebouncedValue, useMediaQuery } from "@mantine/hooks";
 import {
   IconCheck,
   IconClock,
@@ -76,6 +76,10 @@ function FormasiList() {
   const [deletingPengajuanId, setDeletingPengajuanId] = useState(null);
   const { data: session } = useSession();
   const isAdmin = session?.user?.current_role === "admin";
+
+  // Responsive breakpoints
+  const isMobile = useMediaQuery("(max-width: 768px)");
+  const isTablet = useMediaQuery("(max-width: 992px)");
 
   // Get filters from URL
   const {
@@ -385,11 +389,11 @@ function FormasiList() {
 
   return (
     <Stack gap="xs">
-      {/* Header + Stats + Filter (1 row) */}
+      {/* Header + Stats + Filter */}
       <Paper p="xs" radius="sm" withBorder>
-        <Group justify="space-between" align="center" wrap="wrap" gap="xs">
-          {/* Stats inline */}
-          <Group gap="md">
+        <Stack gap="xs">
+          {/* Stats Row */}
+          <Group gap="md" wrap="wrap">
             <Group gap={4}>
               <Text size="xs" c="dimmed">
                 Total:
@@ -409,12 +413,12 @@ function FormasiList() {
           </Group>
 
           {/* Filter & Actions */}
-          <Group gap="xs">
+          <Group gap="xs" wrap="wrap">
             <Input
               placeholder="Cari judul..."
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              style={{ width: 160 }}
+              style={{ width: isMobile ? "100%" : 160, flex: isMobile ? 1 : undefined }}
               size="small"
               allowClear
             />
@@ -422,7 +426,7 @@ function FormasiList() {
               placeholder="Tahun"
               value={tahun || undefined}
               onChange={(val) => updateFilters({ tahun: val || "", page: 1 })}
-              style={{ width: 90 }}
+              style={{ width: isMobile ? "calc(50% - 4px)" : 90 }}
               size="small"
               min={2020}
               max={2100}
@@ -431,32 +435,34 @@ function FormasiList() {
               placeholder="Status"
               value={status || undefined}
               onChange={(val) => updateFilters({ status: val || "", page: 1 })}
-              style={{ width: 100 }}
+              style={{ width: isMobile ? "calc(50% - 4px)" : 100 }}
               size="small"
               allowClear
             >
               <Select.Option value="aktif">Aktif</Select.Option>
               <Select.Option value="nonaktif">Nonaktif</Select.Option>
             </Select>
-            <Tooltip label="Refresh">
-              <Button
-                icon={<IconRefresh size={14} />}
-                onClick={() => refetch()}
-                size="small"
-              />
-            </Tooltip>
-            {isAdmin && (
-              <Button
-                type="primary"
-                icon={<IconPlus size={14} />}
-                onClick={() => setModal({ open: true, data: null })}
-                size="small"
-              >
-                Buat Formasi
-              </Button>
-            )}
+            <Group gap="xs" wrap="nowrap" style={{ marginLeft: isMobile ? 0 : "auto" }}>
+              <Tooltip label="Refresh">
+                <Button
+                  icon={<IconRefresh size={14} />}
+                  onClick={() => refetch()}
+                  size="small"
+                />
+              </Tooltip>
+              {isAdmin && (
+                <Button
+                  type="primary"
+                  icon={<IconPlus size={14} />}
+                  onClick={() => setModal({ open: true, data: null })}
+                  size="small"
+                >
+                  {isMobile ? null : "Buat Formasi"}
+                </Button>
+              )}
+            </Group>
           </Group>
-        </Group>
+        </Stack>
       </Paper>
 
       {/* Table */}
@@ -476,7 +482,7 @@ function FormasiList() {
               `${range[0]}-${range[1]} dari ${total}`,
             onChange: (p, l) => updateFilters({ page: p, limit: l }),
           }}
-          scroll={{ x: 800 }}
+          scroll={{ x: isMobile ? 600 : 800 }}
         />
       </Paper>
 

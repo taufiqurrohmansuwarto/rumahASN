@@ -8,7 +8,7 @@ import { getOpdFasilitator } from "@/services/master.services";
 import { saveAs } from "file-saver";
 import ExcelJS from "exceljs";
 import { ActionIcon, Group, Paper, Stack, Text } from "@mantine/core";
-import { useDebouncedValue } from "@mantine/hooks";
+import { useDebouncedValue, useMediaQuery } from "@mantine/hooks";
 import {
   IconDownload,
   IconEye,
@@ -62,6 +62,10 @@ function FormasiUsulanList({ formasiId, formasi }) {
   const userId = session?.user?.id; // custom_id from session
   const queryClient = useQueryClient();
   const [deletingId, setDeletingId] = useState(null);
+
+  // Responsive breakpoints
+  const isMobile = useMediaQuery("(max-width: 768px)");
+  const isTablet = useMediaQuery("(max-width: 992px)");
 
   // Filters
   const {
@@ -582,12 +586,12 @@ function FormasiUsulanList({ formasiId, formasi }) {
     <Stack gap="xs">
       {/* Stats Row */}
       <Paper p="xs" radius="sm" withBorder>
-        <Group gap="lg" wrap="wrap">
+        <Group gap={isMobile ? "xs" : "lg"} wrap="wrap">
           <Group gap={4}>
             <Text size="xs" c="dimmed">Total:</Text>
             <Text size="sm" fw={600}>{stats.total}</Text>
           </Group>
-          <Text size="xs" c="dimmed">|</Text>
+          {!isMobile && <Text size="xs" c="dimmed">|</Text>}
           <Group gap={4}>
             <Text size="xs" c="dimmed">Draft:</Text>
             <Text size="sm" fw={600}>{stats.draft}</Text>
@@ -613,13 +617,14 @@ function FormasiUsulanList({ formasiId, formasi }) {
 
       {/* Filter & Action Bar */}
       <Paper p="xs" radius="sm" withBorder>
-        <Group justify="space-between" wrap="wrap" gap="xs">
-          <Group gap="xs">
+        <Stack gap="xs">
+          {/* Filter Row */}
+          <Group gap="xs" wrap="wrap">
             <Input
               placeholder="Cari operator..."
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              style={{ width: 180 }}
+              style={{ width: isMobile ? "100%" : 180, flex: isMobile ? 1 : undefined }}
               size="small"
               allowClear
             />
@@ -627,7 +632,7 @@ function FormasiUsulanList({ formasiId, formasi }) {
               placeholder="Status"
               value={status || undefined}
               onChange={(val) => updateFilters({ status: val || "", page: 1 })}
-              style={{ width: 140 }}
+              style={{ width: isMobile ? "calc(50% - 4px)" : 140 }}
               size="small"
               allowClear
             >
@@ -647,11 +652,15 @@ function FormasiUsulanList({ formasiId, formasi }) {
                 treeNodeFilterProp="label"
                 allowClear
                 loading={loadingOpd}
-                style={{ width: 220 }}
+                style={{ width: isMobile ? "calc(50% - 4px)" : 220 }}
                 size="small"
                 dropdownStyle={{ maxHeight: 400, overflow: "auto" }}
               />
             )}
+          </Group>
+
+          {/* Action Buttons Row */}
+          <Group gap="xs" justify={isMobile ? "space-between" : "flex-end"}>
             <Tooltip title="Refresh">
               <Button
                 icon={<IconRefresh size={14} />}
@@ -659,9 +668,6 @@ function FormasiUsulanList({ formasiId, formasi }) {
                 size="small"
               />
             </Tooltip>
-          </Group>
-
-          <Group gap="xs">
             {/* Admin: Download all usulan */}
             {isAdmin && (
               <Tooltip title="Unduh semua data usulan beserta jabatan">
@@ -671,7 +677,7 @@ function FormasiUsulanList({ formasiId, formasi }) {
                   loading={downloading}
                   size="small"
                 >
-                  Unduh Semua
+                  {isMobile ? null : "Unduh Semua"}
                 </Button>
               </Tooltip>
             )}
@@ -684,11 +690,11 @@ function FormasiUsulanList({ formasiId, formasi }) {
                 loading={isCreating}
                 size="small"
               >
-                Buat Pengajuan Baru
+                {isMobile ? "Buat" : "Buat Pengajuan Baru"}
               </Button>
             )}
           </Group>
-        </Group>
+        </Stack>
       </Paper>
 
       {/* Table */}
@@ -707,7 +713,7 @@ function FormasiUsulanList({ formasiId, formasi }) {
             showTotal: (total, range) => `${range[0]}-${range[1]} dari ${total}`,
             showSizeChanger: true,
           }}
-          scroll={{ x: 900 }}
+          scroll={{ x: isMobile ? 700 : 900 }}
         />
       </Paper>
     </Stack>

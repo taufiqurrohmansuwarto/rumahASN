@@ -14,7 +14,7 @@ import {
   Stack,
   Text,
 } from "@mantine/core";
-import { useDebouncedValue } from "@mantine/hooks";
+import { useDebouncedValue, useMediaQuery } from "@mantine/hooks";
 import {
   IconDownload,
   IconEdit,
@@ -79,6 +79,7 @@ const UploadModal = ({ open, onClose, formasiId }) => {
   const [form] = Form.useForm();
   const [file, setFile] = useState(null);
   const queryClient = useQueryClient();
+  const isMobile = useMediaQuery("(max-width: 768px)");
 
   const { mutate: upload, isLoading } = useMutation(
     (formData) => uploadLampiran(formData),
@@ -130,8 +131,9 @@ const UploadModal = ({ open, onClose, formasiId }) => {
       }
       open={open}
       onCancel={handleClose}
-      width={500}
+      width={isMobile ? "95%" : 500}
       destroyOnClose
+      centered={isMobile}
       footer={
         <div style={{ textAlign: "right" }}>
           <Button onClick={handleClose} style={{ marginRight: 8 }}>
@@ -213,6 +215,7 @@ const EditModal = ({ open, onClose, data }) => {
   const [file, setFile] = useState(null);
   const [currentExt, setCurrentExt] = useState("");
   const queryClient = useQueryClient();
+  const isMobile = useMediaQuery("(max-width: 768px)");
 
   // Set current extension when data changes
   useEffect(() => {
@@ -272,8 +275,9 @@ const EditModal = ({ open, onClose, data }) => {
       }
       open={open}
       onCancel={handleClose}
-      width={550}
+      width={isMobile ? "95%" : 550}
       destroyOnClose
+      centered={isMobile}
       footer={
         <div style={{ textAlign: "right" }}>
           <Button onClick={handleClose} style={{ marginRight: 8 }}>
@@ -399,6 +403,9 @@ function LampiranList({ formasiId, formasiUsulanId, formasi, submissionStatus })
   const [uploadModal, setUploadModal] = useState(false);
   const [editModal, setEditModal] = useState({ open: false, data: null });
   const [downloading, setDownloading] = useState(null);
+
+  // Responsive breakpoints
+  const isMobile = useMediaQuery("(max-width: 768px)");
 
   // Determine if editable based on submission status
   const isEditable = !submissionStatus || submissionStatus === "draft" || submissionStatus === "perbaikan";
@@ -664,47 +671,50 @@ function LampiranList({ formasiId, formasiUsulanId, formasi, submissionStatus })
 
       {/* Filter Row */}
       <Paper p="xs" radius="sm" withBorder>
-        <Group gap="xs" wrap="wrap">
-          <Input
-            placeholder="Cari file..."
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            style={{ width: 200 }}
-            size="small"
-            allowClear
-          />
-          <div style={{ flex: 1 }} />
-          <Tooltip title="Refresh">
-            <Button icon={<IconRefresh size={14} />} onClick={() => refetch()} size="small" />
-          </Tooltip>
-          <Button
-            icon={<IconDownload size={14} />}
-            size="small"
-            loading={downloadingExcel}
-            onClick={handleDownloadExcel}
-          >
-            Unduh
-          </Button>
-          {isEditable && (
-            <Tooltip
-              title={
-                formasi?.status !== "aktif"
-                  ? "Formasi tidak aktif"
-                  : "Tambah lampiran baru"
-              }
-            >
-              <Button
-                type="primary"
-                icon={<IconPlus size={14} />}
-                onClick={() => setUploadModal(true)}
-                size="small"
-                disabled={formasi?.status !== "aktif"}
-              >
-                Tambah Lampiran
-              </Button>
+        <Stack gap="xs">
+          <Group gap="xs" wrap="wrap">
+            <Input
+              placeholder="Cari file..."
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              style={{ width: isMobile ? "100%" : 200, flex: isMobile ? 1 : undefined }}
+              size="small"
+              allowClear
+            />
+          </Group>
+          <Group gap="xs" justify={isMobile ? "space-between" : "flex-end"}>
+            <Tooltip title="Refresh">
+              <Button icon={<IconRefresh size={14} />} onClick={() => refetch()} size="small" />
             </Tooltip>
-          )}
-        </Group>
+            <Button
+              icon={<IconDownload size={14} />}
+              size="small"
+              loading={downloadingExcel}
+              onClick={handleDownloadExcel}
+            >
+              {isMobile ? null : "Unduh"}
+            </Button>
+            {isEditable && (
+              <Tooltip
+                title={
+                  formasi?.status !== "aktif"
+                    ? "Formasi tidak aktif"
+                    : "Tambah lampiran baru"
+                }
+              >
+                <Button
+                  type="primary"
+                  icon={<IconPlus size={14} />}
+                  onClick={() => setUploadModal(true)}
+                  size="small"
+                  disabled={formasi?.status !== "aktif"}
+                >
+                  {isMobile ? "Tambah" : "Tambah Lampiran"}
+                </Button>
+              </Tooltip>
+            )}
+          </Group>
+        </Stack>
       </Paper>
 
       {/* Table */}
@@ -723,7 +733,7 @@ function LampiranList({ formasiId, formasiUsulanId, formasi, submissionStatus })
             showTotal: (total, range) => `${range[0]}-${range[1]} dari ${total}`,
             onChange: (p, l) => updateFilters({ lPage: p, lLimit: l }),
           }}
-          scroll={{ x: 900 }}
+          scroll={{ x: isMobile ? 700 : 900 }}
         />
       </Paper>
 

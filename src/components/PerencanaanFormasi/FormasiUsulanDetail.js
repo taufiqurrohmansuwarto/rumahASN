@@ -4,6 +4,7 @@ import {
   uploadDokumenFormasiUsulan,
 } from "@/services/perencanaan-formasi.services";
 import { Alert, Group, Paper, Stack, Text, Divider } from "@mantine/core";
+import { useMediaQuery } from "@mantine/hooks";
 import {
   IconCheck,
   IconClock,
@@ -346,6 +347,10 @@ function FormasiUsulanDetail({ data, activeTab = "usulan", children }) {
   const { data: session } = useSession();
   const isAdmin = session?.user?.current_role === "admin";
   const isOwner = session?.user?.id === data.user_id; // Fixed: use id instead of customId
+
+  // Responsive breakpoints
+  const isMobile = useMediaQuery("(max-width: 768px)");
+  const isTablet = useMediaQuery("(max-width: 992px)");
 
   const [verifyModal, setVerifyModal] = useState(false);
   const [uploadModal, setUploadModal] = useState(false);
@@ -707,106 +712,113 @@ function FormasiUsulanDetail({ data, activeTab = "usulan", children }) {
 
   return (
     <Stack gap={4}>
-      {/* Header Info Card - Compact Single Row */}
+      {/* Header Info Card - Responsive Layout */}
       <Paper p="xs" radius="sm" withBorder>
-        <Group justify="space-between" align="center" wrap="wrap" gap="xs">
-          {/* Left: Title & Info */}
-          <Group gap="sm" wrap="wrap" style={{ flex: 1 }}>
+        <Stack gap="xs">
+          {/* Title Row */}
+          <Group justify="space-between" align="center" wrap="wrap" gap="xs">
             <Text size="sm" fw={600}>
               {data.formasi?.deskripsi || "Pengajuan Usulan Formasi"}
             </Text>
-            <Text size="xs" c="dimmed">|</Text>
+            <StatusBadge status={data.status} />
+          </Group>
+
+          {/* Info Row */}
+          <Group gap="xs" wrap="wrap">
             <Group gap={4}>
               <IconUser size={12} color="#868e96" />
               <Text size="xs" c="dimmed">{namaOperator}</Text>
             </Group>
-            <Text size="xs" c="dimmed">|</Text>
+            {!isMobile && <Text size="xs" c="dimmed">|</Text>}
             <Text size="xs" c="dimmed">
               {dayjs(data.dibuat_pada).format("DD MMM YYYY")}
             </Text>
-            <Text size="xs" c="dimmed">|</Text>
+            {!isMobile && <Text size="xs" c="dimmed">|</Text>}
             <Tag color="blue" style={{ margin: 0 }}>{data.jumlah_usulan || 0} jabatan</Tag>
             <Tag color="cyan" style={{ margin: 0 }}>{data.total_alokasi_semua || 0} alokasi</Tag>
-            <Text size="xs" c="dimmed">|</Text>
-            {/* Dokumen inline */}
-            {data.dokumen_url ? (
-              <Button
-                icon={<IconFileText size={12} />}
-                size="small"
-                type="link"
-                href={data.dokumen_url}
-                target="_blank"
-                style={{ padding: 0, height: 'auto' }}
-              >
-                {data.dokumen_name || "Dokumen"}
-              </Button>
-            ) : (
-              <Text size="xs" c="orange" fs="italic">Belum ada dokumen</Text>
-            )}
-            {isOwner && isEditable && (
-              <Button
-                size="small"
-                type="link"
-                icon={<IconUpload size={12} />}
-                onClick={() => setUploadModal(true)}
-                style={{ padding: 0, height: 'auto' }}
-              >
-                {data.dokumen_url ? "Ganti" : "Upload"}
-              </Button>
-            )}
           </Group>
 
-          {/* Right: Status & Actions */}
-          <Group gap="xs" wrap="nowrap">
-            <StatusBadge status={data.status} />
-
-            {/* Download PDF Button - Only when status is draft */}
-            {isDraft && (
-              <Tooltip title="Unduh daftar usulan dalam format PDF">
+          {/* Document & Actions Row */}
+          <Group justify="space-between" align="center" wrap="wrap" gap="xs">
+            {/* Document Info */}
+            <Group gap="xs" wrap="wrap">
+              {data.dokumen_url ? (
                 <Button
-                  icon={<IconDownload size={14} />}
+                  icon={<IconFileText size={12} />}
                   size="small"
-                  onClick={handleDownloadPdf}
-                  loading={downloadingPdf}
+                  type="link"
+                  href={data.dokumen_url}
+                  target="_blank"
+                  style={{ padding: 0, height: 'auto' }}
                 >
-                  Unduh PDF
+                  {isMobile ? "Dokumen" : (data.dokumen_name || "Dokumen")}
                 </Button>
-              </Tooltip>
-            )}
+              ) : (
+                <Text size="xs" c="orange" fs="italic">Belum ada dokumen</Text>
+              )}
+              {isOwner && isEditable && (
+                <Button
+                  size="small"
+                  type="link"
+                  icon={<IconUpload size={12} />}
+                  onClick={() => setUploadModal(true)}
+                  style={{ padding: 0, height: 'auto' }}
+                >
+                  {data.dokumen_url ? "Ganti" : "Upload"}
+                </Button>
+              )}
+            </Group>
 
-            {/* Admin: Verify */}
-            {isAdmin && !isDraft && (
-              <Button
-                type="primary"
-                size="small"
-                onClick={() => setVerifyModal(true)}
-              >
-                Verifikasi
-              </Button>
-            )}
+            {/* Action Buttons */}
+            <Group gap="xs" wrap="nowrap">
+              {/* Download PDF Button - Only when status is draft */}
+              {isDraft && (
+                <Tooltip title="Unduh daftar usulan dalam format PDF">
+                  <Button
+                    icon={<IconDownload size={14} />}
+                    size="small"
+                    onClick={handleDownloadPdf}
+                    loading={downloadingPdf}
+                  >
+                    {isMobile ? null : "Unduh PDF"}
+                  </Button>
+                </Tooltip>
+              )}
 
-            {/* Owner: Submit with Modal */}
-            {isOwner && isDraft && (
-              <Tooltip
-                title={
-                  (data.jumlah_usulan || 0) === 0
-                    ? "Tambahkan usulan jabatan terlebih dahulu"
-                    : "Kirim pengajuan untuk diverifikasi"
-                }
-              >
+              {/* Admin: Verify */}
+              {isAdmin && !isDraft && (
                 <Button
                   type="primary"
                   size="small"
-                  icon={<IconSend size={14} />}
-                  disabled={(data.jumlah_usulan || 0) === 0}
-                  onClick={() => setKirimModal(true)}
+                  onClick={() => setVerifyModal(true)}
                 >
-                  Kirim Pengajuan
+                  {isMobile ? "Verif" : "Verifikasi"}
                 </Button>
-              </Tooltip>
-            )}
+              )}
+
+              {/* Owner: Submit with Modal */}
+              {isOwner && isDraft && (
+                <Tooltip
+                  title={
+                    (data.jumlah_usulan || 0) === 0
+                      ? "Tambahkan usulan jabatan terlebih dahulu"
+                      : "Kirim pengajuan untuk diverifikasi"
+                  }
+                >
+                  <Button
+                    type="primary"
+                    size="small"
+                    icon={<IconSend size={14} />}
+                    disabled={(data.jumlah_usulan || 0) === 0}
+                    onClick={() => setKirimModal(true)}
+                  >
+                    {isMobile ? "Kirim" : "Kirim Pengajuan"}
+                  </Button>
+                </Tooltip>
+              )}
+            </Group>
           </Group>
-        </Group>
+        </Stack>
       </Paper>
 
       {/* Catatan & Warning Section - Only show if has content */}

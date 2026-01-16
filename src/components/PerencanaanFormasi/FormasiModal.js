@@ -2,6 +2,7 @@ import {
   createFormasi,
   updateFormasi,
 } from "@/services/perencanaan-formasi.services";
+import { useMediaQuery } from "@mantine/hooks";
 import { IconCalendar, IconEdit, IconFileText, IconPlus, IconToggleLeft } from "@tabler/icons-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button, Form, Input, InputNumber, message, Modal, Select } from "antd";
@@ -13,6 +14,7 @@ const FormasiModal = ({ open, onClose, data, onSuccess }) => {
   const [form] = Form.useForm();
   const queryClient = useQueryClient();
   const isEdit = !!data;
+  const isMobile = useMediaQuery("(max-width: 768px)");
 
   // Reset form when data changes or modal opens
   useEffect(() => {
@@ -69,8 +71,9 @@ const FormasiModal = ({ open, onClose, data, onSuccess }) => {
       }
       open={open}
       onCancel={onClose}
-      width={500}
+      width={isMobile ? "95%" : 500}
       destroyOnClose
+      centered={isMobile}
       footer={
         <div style={{ textAlign: "right" }}>
           <Button onClick={onClose} style={{ marginRight: 8 }}>
