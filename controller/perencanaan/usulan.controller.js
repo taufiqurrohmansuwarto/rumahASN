@@ -412,6 +412,10 @@ const update = async (req, res) => {
 
 /**
  * Delete usulan
+ * Rules:
+ * - Draft + is_confirmed=false: only owner (non-admin) can delete
+ * - Perbaikan + is_confirmed=true: everyone (admin and owner) can delete
+ * - Other statuses: nobody can delete
  */
 const remove = async (req, res) => {
   try {
@@ -425,16 +429,36 @@ const remove = async (req, res) => {
       return res.status(404).json({ message: "Usulan tidak ditemukan" });
     }
 
-    if (!isAdmin && usulan.dibuat_oleh !== userId) {
-      return res.status(403).json({ message: "Forbidden" });
+    const formasiUsulan = usulan.formasiUsulan;
+    const { status, is_confirmed, user_id: ownerId } = formasiUsulan;
+
+    // Determine if user can delete based on rules
+    let canDelete = false;
+    let errorMessage = "";
+
+    if (status === "perbaikan" && is_confirmed) {
+      // Perbaikan + is_confirmed: everyone (admin and owner) can delete
+      if (isAdmin || ownerId === userId) {
+        canDelete = true;
+      } else {
+        errorMessage = "Forbidden";
+      }
+    } else if (status === "draft" && !is_confirmed) {
+      // Draft + not confirmed: only owner (non-admin) can delete
+      if (!isAdmin && ownerId === userId) {
+        canDelete = true;
+      } else if (isAdmin) {
+        errorMessage = "Admin tidak dapat menghapus usulan pada status draft";
+      } else {
+        errorMessage = "Forbidden";
+      }
+    } else {
+      // Other statuses (menunggu, disetujui, ditolak): nobody can delete
+      errorMessage = `Tidak dapat menghapus usulan pada status ${status}`;
     }
 
-    // Check status if not admin
-    if (!isAdmin) {
-        const status = usulan.formasiUsulan?.status;
-        if (status !== 'draft' && status !== 'perbaikan') {
-            return res.status(400).json({ message: "Tidak dapat menghapus usulan pada status " + status });
-        }
+    if (!canDelete) {
+      return res.status(403).json({ message: errorMessage });
     }
 
     await Usulan.query().deleteById(id);
