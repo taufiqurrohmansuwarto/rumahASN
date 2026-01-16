@@ -214,7 +214,7 @@ export const appLists = [
     desc: "Perencanaan Formasi",
     color: "#FBBC05",
     url: "/perencanaan/formasi",
-    icon: "https://siasn.bkd.jatimprov.go.id:9000/public/icon-bestie.png",
+    icon: "https://siasn.bkd.jatimprov.go.id:9000/public/icon-perencanaan.png",
     userType: ["admin", "fasilitator"],
   },
   {
@@ -223,7 +223,7 @@ export const appLists = [
     desc: "Coaching & Mentoring",
     color: "#FBBC05",
     url: "/coaching-clinic/all",
-    icon: "https://siasn.bkd.jatimprov.go.id:9000/public/icon-bestie.png",
+    icon: "https://siasn.bkd.jatimprov.go.id:9000/public/icon-coaching.png",
     userType: ["fasilitator"],
   },
 ];

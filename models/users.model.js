@@ -75,6 +75,7 @@ class User extends Model {
   static get relationMappings() {
     const Role = require("./roles.model");
     const WebinarSeriesParticipants = require("@/models/webinar-series-participates.model");
+    const Unor = require("@/models/sync-unor-master.model");
     const AppRole = require("@/models/app_roles.model");
 
     return {
@@ -84,6 +85,14 @@ class User extends Model {
         join: {
           from: "users.custom_id",
           to: "webinar_series_participates.user_id",
+        },
+      },
+      unor: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: Unor,
+        join: {
+          from: "users.organization_id",
+          to: "sync_unor_master.id",
         },
       },
       app_role: {

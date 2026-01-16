@@ -4,21 +4,17 @@ import {
   getFormasiUsulan,
   getUsulan,
 } from "@/services/perencanaan-formasi.services";
+import { getOpdFasilitator } from "@/services/master.services";
 import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
 import { ActionIcon, Group, Paper, Stack, Text } from "@mantine/core";
 import { useDebouncedValue } from "@mantine/hooks";
 import {
-  IconCheck,
-  IconClock,
   IconDownload,
-  IconEdit,
   IconEye,
-  IconFileCheck,
   IconPlus,
   IconRefresh,
   IconTrash,
-  IconX,
 } from "@tabler/icons-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -32,6 +28,7 @@ import {
   Table,
   Tag,
   Tooltip,
+  TreeSelect,
 } from "antd";
 import dayjs from "dayjs";
 import { useSession } from "next-auth/react";
@@ -40,27 +37,20 @@ import { useCallback, useEffect, useState } from "react";
 
 const { confirm } = Modal;
 
-// Status Badge
+// Status Badge - Compact version
 const StatusBadge = ({ status, isConfirmed }) => {
   const config = {
-    draft: { color: "default", icon: IconEdit, label: "Draft" },
-    menunggu: { color: "orange", icon: IconClock, label: "Menunggu Verifikasi" },
-    disetujui: { color: "green", icon: IconCheck, label: "Disetujui" },
-    ditolak: { color: "red", icon: IconX, label: "Ditolak" },
-    perbaikan: { color: "blue", icon: IconEdit, label: "Perlu Perbaikan" },
+    draft: { color: "default", label: "Draft" },
+    menunggu: { color: "orange", label: "Menunggu" },
+    disetujui: { color: "green", label: "Disetujui" },
+    ditolak: { color: "red", label: "Ditolak" },
+    perbaikan: { color: "blue", label: "Perbaikan" },
   };
-  const { color, icon: Icon, label } = config[status] || {
-    color: "default",
-    icon: IconEdit,
-    label: status,
-  };
+  const { color, label } = config[status] || { color: "default", label: status };
   return (
-    <Tag color={color}>
-      <Group gap={4} wrap="nowrap">
-        <Icon size={12} />
-        <span>{label}</span>
-        {isConfirmed && status !== "draft" && <IconFileCheck size={12} />}
-      </Group>
+    <Tag color={color} style={{ margin: 0 }}>
+      {label}
+      {isConfirmed && status !== "draft" && " ✓"}
     </Tag>
   );
 };
@@ -79,6 +69,7 @@ function FormasiUsulanList({ formasiId, formasi }) {
     limit = 10,
     search = "",
     status = "",
+    "organization-id": organizationId = "",
   } = router.query;
 
   const [searchInput, setSearchInput] = useState(search);
@@ -94,6 +85,13 @@ function FormasiUsulanList({ formasiId, formasi }) {
   useEffect(() => {
     setSearchInput(search);
   }, [search]);
+
+  // Fetch Unit Kerja (OPD) - Tree data for filter
+  const { data: opdTree, isLoading: loadingOpd } = useQuery({
+    queryKey: ["unor-fasilitator"],
+    queryFn: getOpdFasilitator,
+    staleTime: 1000 * 60 * 10,
+  });
 
   const updateFilters = useCallback(
     (newFilters) => {
@@ -114,6 +112,7 @@ function FormasiUsulanList({ formasiId, formasi }) {
     formasi_id: formasiId,
     search,
     status,
+    organization_id: organizationId,
   };
 
   // Fetch data
@@ -223,11 +222,13 @@ function FormasiUsulanList({ formasiId, formasi }) {
         const formasiUsulan = item.formasiUsulan || {};
         const pembuat = formasiUsulan.pembuat || {};
         const formasi = formasiUsulan.formasi || {};
-        
+        // Prioritize unor.name, fallback to perangkat_daerah_detail
+        const perangkatDaerah = pembuat?.unor?.name || pembuat?.perangkat_daerah_detail || "-";
+
         return {
           "No": index + 1,
           "Nama Pengusul": pembuat?.username || "-",
-          "Perangkat Daerah": pembuat?.perangkat_daerah_detail || "-",
+          "Perangkat Daerah": perangkatDaerah,
           "Formasi": formasi?.deskripsi || formasi?.nama || "-",
           "Jenis Jabatan": item.jenis_jabatan || "-",
           "Nama Jabatan": item.nama_jabatan || item.jabatan_id || "-",
@@ -240,10 +241,10 @@ function FormasiUsulanList({ formasiId, formasi }) {
           "Tanggal Usulan Dibuat": item.dibuat_pada
             ? dayjs(item.dibuat_pada).format("DD/MM/YYYY HH:mm")
             : "-",
-          "Tanggal Verifikasi": formasiUsulan.diverifikasi_pada
-            ? dayjs(formasiUsulan.diverifikasi_pada).format("DD/MM/YYYY HH:mm")
-            : "-",
           "Nama Verifikator": formasiUsulan.korektor?.username || "-",
+          "Tanggal Verifikasi": formasiUsulan.corrected_at
+            ? dayjs(formasiUsulan.corrected_at).format("DD/MM/YYYY HH:mm")
+            : "-",
         };
       });
 
@@ -279,80 +280,120 @@ function FormasiUsulanList({ formasiId, formasi }) {
   const columns = [
     {
       title: "No",
-      width: 50,
+      width: 40,
+      align: "center",
       render: (_, __, i) => (filters.page - 1) * filters.limit + i + 1,
     },
     {
-      title: "Operator / Perangkat Daerah",
+      title: "Operator",
       dataIndex: "pembuat",
       key: "pembuat",
-      render: (val) => (
-        <Group gap="xs" wrap="nowrap">
-          <Avatar src={val?.image} size="sm" radius="xl">
-            {val?.username?.[0]?.toUpperCase() || "?"}
-          </Avatar>
-          <Stack gap={0}>
-            <Text size="sm" fw={500}>{val?.username || "-"}</Text>
-            <Tooltip title={val?.perangkat_daerah_detail || "-"}>
-              <Text size="xs" c="dimmed" lineClamp={1} style={{ maxWidth: 200 }}>
-                {val?.perangkat_daerah_detail || val?.custom_id || "-"}
-              </Text>
-            </Tooltip>
-          </Stack>
-        </Group>
-      ),
+      width: 250,
+      render: (val) => {
+        const perangkatDaerah = val?.unor?.name || val?.perangkat_daerah_detail || "-";
+        return (
+          <Group gap={8} wrap="nowrap" align="flex-start">
+            <Avatar src={val?.image} size={28}>
+              {val?.username?.[0]?.toUpperCase() || "?"}
+            </Avatar>
+            <div>
+              <Text size="xs" fw={500} lh={1.2}>{val?.username || "-"}</Text>
+              <Text size="xs" c="dimmed" lh={1.2}>{perangkatDaerah}</Text>
+            </div>
+          </Group>
+        );
+      },
     },
     {
-      title: "Jumlah Usulan",
+      title: "Usulan",
       key: "jumlah_usulan",
-      width: 100,
+      width: 80,
       align: "center",
-      render: (_, record) => (
-        <Tag color="blue">{record.jumlah_usulan || 0} jabatan</Tag>
-      ),
+      render: (_, record) => {
+        const current = record.jumlah_usulan || 0;
+        const snapshot = record.jumlah_usulan_snapshot;
+        const hasSnapshot = record.is_confirmed && snapshot !== undefined;
+        const changed = hasSnapshot && current !== snapshot;
+
+        return (
+          <Tooltip title={hasSnapshot ? `Dikirim: ${snapshot} → Sekarang: ${current}` : `${current} jabatan`}>
+            <Text size="xs" fw={500} c={changed ? "orange" : undefined}>
+              {current}{hasSnapshot && changed && ` (${snapshot})`}
+            </Text>
+          </Tooltip>
+        );
+      },
     },
     {
-      title: "Total Alokasi",
+      title: "Alokasi",
       key: "total_alokasi",
-      width: 100,
+      width: 80,
       align: "center",
-      render: (_, record) => (
-        <Text size="sm" fw={600} c="blue">{record.total_alokasi || 0}</Text>
-      ),
+      render: (_, record) => {
+        const current = record.total_alokasi || 0;
+        const snapshot = record.total_alokasi_snapshot;
+        const hasSnapshot = record.is_confirmed && snapshot !== undefined;
+        const changed = hasSnapshot && current !== snapshot;
+
+        return (
+          <Tooltip title={hasSnapshot ? `Dikirim: ${snapshot} → Sekarang: ${current}` : `Total: ${current}`}>
+            <Text size="xs" fw={600} c={changed ? "orange" : "blue"}>
+              {current}{hasSnapshot && changed && ` (${snapshot})`}
+            </Text>
+          </Tooltip>
+        );
+      },
     },
     {
       title: "Status",
       dataIndex: "status",
       key: "status",
-      width: 160,
+      width: 90,
+      align: "center",
       render: (val, record) => <StatusBadge status={val} isConfirmed={record.is_confirmed} />,
     },
     {
-      title: "Dokumen",
+      title: "Dok",
       key: "dokumen",
-      width: 100,
-      render: (_, record) =>
-        record.dokumen_url ? (
-          <Tag color="green">Ada</Tag>
-        ) : (
-          <Tag color="default">Belum</Tag>
-        ),
+      width: 50,
+      align: "center",
+      render: (_, record) => (
+        <Tooltip title={record.dokumen_url ? record.dokumen_name || "Ada dokumen" : "Belum ada dokumen"}>
+          <Text size="xs" c={record.dokumen_url ? "green" : "dimmed"}>
+            {record.dokumen_url ? "✓" : "-"}
+          </Text>
+        </Tooltip>
+      ),
     },
     {
-      title: "Update Terakhir",
-      dataIndex: "diperbarui_pada",
-      key: "diperbarui_pada",
-      width: 140,
-      render: (val) => (
-        <Text size="xs" c="dimmed">
-          {dayjs(val).format("DD/MM/YYYY HH:mm")}
-        </Text>
-      ),
+      title: "Verifikasi",
+      key: "verifikasi",
+      width: 180,
+      render: (_, record) => {
+        if (!record.corrected_at && !record.korektor) {
+          return <Text size="xs" c="dimmed">-</Text>;
+        }
+        return (
+          <Tooltip title={`${record.korektor?.username || "-"}\n${record.corrected_at ? dayjs(record.corrected_at).format("DD/MM/YYYY HH:mm") : "-"}`}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <Avatar src={record.korektor?.image} size={28} style={{ flexShrink: 0 }}>
+                {record.korektor?.username?.[0]?.toUpperCase() || "?"}
+              </Avatar>
+              <div style={{ minWidth: 0, flex: 1 }}>
+                <Text size="xs" fw={500} lh={1.2} lineClamp={1}>{record.korektor?.username || "-"}</Text>
+                <Text size="xs" c="dimmed" lh={1.2}>
+                  {record.corrected_at ? dayjs(record.corrected_at).format("DD/MM/YY HH:mm") : "-"}
+                </Text>
+              </div>
+            </div>
+          </Tooltip>
+        );
+      },
     },
     {
       title: "Aksi",
       key: "aksi",
-      width: 90,
+      width: 70,
       align: "center",
       render: (_, record) => {
         const isOwner = record.user_id === userId;
@@ -360,17 +401,18 @@ function FormasiUsulanList({ formasiId, formasi }) {
 
         return (
           <Group gap={4} justify="center">
-            <Tooltip title="Lihat Detail">
+            <Tooltip title="Detail">
               <ActionIcon
                 variant="subtle"
                 color="blue"
+                size="sm"
                 onClick={() =>
                   router.push(
                     `/perencanaan/formasi/${formasiId}/${record.formasi_usulan_id}/usulan`
                   )
                 }
               >
-                <IconEye size={16} />
+                <IconEye size={14} />
               </ActionIcon>
             </Tooltip>
             {canDelete && (
@@ -382,8 +424,8 @@ function FormasiUsulanList({ formasiId, formasi }) {
                 cancelText="Batal"
               >
                 <Tooltip title="Hapus">
-                  <ActionIcon variant="subtle" color="red" loading={deletingId === record.formasi_usulan_id}>
-                    <IconTrash size={16} />
+                  <ActionIcon variant="subtle" color="red" size="sm" loading={deletingId === record.formasi_usulan_id}>
+                    <IconTrash size={14} />
                   </ActionIcon>
                 </Tooltip>
               </Popconfirm>
@@ -453,6 +495,21 @@ function FormasiUsulanList({ formasiId, formasi }) {
               <Select.Option value="perbaikan">Perbaikan</Select.Option>
               <Select.Option value="ditolak">Ditolak</Select.Option>
             </Select>
+            {isAdmin && (
+              <TreeSelect
+                placeholder="Perangkat Daerah"
+                value={organizationId || undefined}
+                onChange={(val) => updateFilters({ "organization-id": val || "", page: 1 })}
+                treeData={opdTree}
+                showSearch
+                treeNodeFilterProp="label"
+                allowClear
+                loading={loadingOpd}
+                style={{ width: 220 }}
+                size="small"
+                dropdownStyle={{ maxHeight: 400, overflow: "auto" }}
+              />
+            )}
             <Tooltip title="Refresh">
               <Button
                 icon={<IconRefresh size={14} />}

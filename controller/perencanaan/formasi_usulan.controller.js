@@ -78,6 +78,7 @@ const getAll = async (req, res) => {
       search,
       status,
       formasi_id,
+      organization_id,
       sortField = "dibuat_pada",
       sortOrder = "desc",
     } = req?.query;
@@ -87,7 +88,7 @@ const getAll = async (req, res) => {
     const knex = FormasiUsulan.knex();
 
     let query = FormasiUsulan.query().withGraphFetched(
-      "[formasi, pembuat(simpleWithImage), korektor(simpleSelect), usulan]"
+      "[formasi, pembuat(simpleWithImage).[unor], korektor(simpleSelect), usulan]"
     );
 
     // Filter by formasi_id
@@ -117,6 +118,18 @@ const getAll = async (req, res) => {
       });
     }
 
+    // Filter by organization_id (perangkat daerah)
+    if (organization_id) {
+      query = query.whereExists(function () {
+        this.select(knex.raw("1"))
+          .from("users")
+          .whereRaw(
+            `users.custom_id = "perencanaan"."formasi_usulan".user_id AND users.organization_id = ?`,
+            [organization_id]
+          );
+      });
+    }
+
     // Sorting
     const order = sortOrder === "ascend" ? "asc" : "desc";
     query = query.orderBy(sortField, order);
@@ -125,25 +138,33 @@ const getAll = async (req, res) => {
     const transformData = (items) => {
       return items.map((item) => {
         const usulanList = item.usulan || [];
+        const snapshotList = item.data_usulan || [];
+
+        // Current stats
         const jumlahUsulan = usulanList.length;
-        const jumlahDisetujui = usulanList.filter(
-          (u) => u.status === "disetujui"
-        ).length;
-        // Total alokasi hanya dari usulan yang sudah disetujui/diverifikasi
-        const totalAlokasi = usulanList
-          .filter((u) => u.status === "disetujui")
-          .reduce((acc, u) => acc + (u.alokasi || 0), 0);
         const totalAlokasiSemua = usulanList.reduce(
           (acc, u) => acc + (u.alokasi || 0),
           0
         );
+
+        // Snapshot stats (data saat dikirim)
+        const jumlahUsulanSnapshot = snapshotList.length;
+        const totalAlokasiSnapshot = snapshotList.reduce(
+          (acc, u) => acc + (u.alokasi || 0),
+          0
+        );
+
         return {
           ...item,
+          // Current
           jumlah_usulan: jumlahUsulan,
-          jumlah_disetujui: jumlahDisetujui,
-          total_alokasi: totalAlokasi,
-          total_alokasi_semua: totalAlokasiSemua,
-          usulan: undefined, // Remove usulan array from response to keep it clean
+          total_alokasi: totalAlokasiSemua,
+          // Snapshot (saat dikirim)
+          jumlah_usulan_snapshot: jumlahUsulanSnapshot,
+          total_alokasi_snapshot: totalAlokasiSnapshot,
+          // Remove arrays from response
+          usulan: undefined,
+          data_usulan: undefined,
         };
       });
     };
@@ -165,6 +186,16 @@ const getAll = async (req, res) => {
     }
     if (!isAdmin) {
       rekapQuery = rekapQuery.where("user_id", userId);
+    }
+    if (organization_id) {
+      rekapQuery = rekapQuery.whereExists(function () {
+        this.select(knex.raw("1"))
+          .from("users")
+          .whereRaw(
+            `users.custom_id = "perencanaan"."formasi_usulan".user_id AND users.organization_id = ?`,
+            [organization_id]
+          );
+      });
     }
 
     const rekap = await rekapQuery
@@ -212,7 +243,7 @@ const getById = async (req, res) => {
     const result = await FormasiUsulan.query()
       .findById(id)
       .withGraphFetched(
-        "[formasi, pembuat(simpleWithImage), korektor(simpleSelect), usulan]"
+        "[formasi, pembuat(simpleWithImage).[unor], korektor(simpleSelect), usulan]"
       );
 
     if (!result) {

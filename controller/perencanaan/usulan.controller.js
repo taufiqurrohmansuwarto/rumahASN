@@ -248,12 +248,17 @@ const getById = async (req, res) => {
 
 /**
  * Create usulan
+ * Rules:
+ * - Draft + is_confirmed=false: only owner (non-admin) can create
+ * - Perbaikan + is_confirmed=true: everyone (admin and owner) can create
+ * - Other statuses: nobody can create
  */
 const create = async (req, res) => {
   try {
-    const { customId: userId } = req?.user;
+    const { customId: userId, current_role } = req?.user;
+    const isAdmin = current_role === "admin";
     const {
-      formasi_usulan_id, // CHANGED: Replaces formasi_id
+      formasi_usulan_id,
       jenis_jabatan,
       jabatan_id,
       kualifikasi_pendidikan,
@@ -264,23 +269,44 @@ const create = async (req, res) => {
     } = req?.body;
 
     if (!formasi_usulan_id) {
-        return res.status(400).json({ message: "Formasi Usulan ID wajib diisi" });
+      return res.status(400).json({ message: "Formasi Usulan ID wajib diisi" });
     }
 
-    // Validate FormasiUsulan exists and is in editable state
+    // Validate FormasiUsulan exists
     const formasiUsulan = await FormasiUsulan.query().findById(formasi_usulan_id);
     if (!formasiUsulan) {
       return res.status(404).json({ message: "Data Pengajuan tidak ditemukan" });
     }
-    
-    // Check permission (Only owner can add)
-    if (formasiUsulan.user_id !== userId) {
-        return res.status(403).json({ message: "Forbidden" });
+
+    const { status, is_confirmed, user_id: ownerId } = formasiUsulan;
+
+    // Determine if user can create based on rules
+    let canCreate = false;
+    let errorMessage = "";
+
+    if (status === "perbaikan" && is_confirmed) {
+      // Perbaikan + is_confirmed: everyone (admin and owner) can create
+      if (isAdmin || ownerId === userId) {
+        canCreate = true;
+      } else {
+        errorMessage = "Forbidden";
+      }
+    } else if (status === "draft" && !is_confirmed) {
+      // Draft + not confirmed: only owner (non-admin) can create
+      if (!isAdmin && ownerId === userId) {
+        canCreate = true;
+      } else if (isAdmin) {
+        errorMessage = "Admin tidak dapat menambah usulan pada status draft";
+      } else {
+        errorMessage = "Forbidden";
+      }
+    } else {
+      // Other statuses (menunggu, disetujui, ditolak): nobody can create
+      errorMessage = `Tidak dapat menambah usulan pada status ${status}`;
     }
 
-    // Check status
-    if (formasiUsulan.status !== 'draft' && formasiUsulan.status !== 'perbaikan') {
-        return res.status(400).json({ message: "Tidak dapat menambah usulan pada status " + formasiUsulan.status });
+    if (!canCreate) {
+      return res.status(403).json({ message: errorMessage });
     }
 
     const result = await Usulan.query().insert({
@@ -305,6 +331,10 @@ const create = async (req, res) => {
 
 /**
  * Update usulan
+ * Rules:
+ * - Draft + is_confirmed=false: only owner (non-admin) can update
+ * - Perbaikan + is_confirmed=true: everyone (admin and owner) can update
+ * - Other statuses: nobody can update
  */
 const update = async (req, res) => {
   try {
@@ -327,19 +357,36 @@ const update = async (req, res) => {
       return res.status(404).json({ message: "Usulan tidak ditemukan" });
     }
 
-    // Validate Parent Status
     const formasiUsulan = usulan.formasiUsulan;
-    
-    // Non-admin can only update if owner
-    if (!isAdmin && usulan.dibuat_oleh !== userId) {
-      return res.status(403).json({ message: "Forbidden" });
+    const { status, is_confirmed, user_id: ownerId } = formasiUsulan;
+
+    // Determine if user can update based on rules
+    let canUpdate = false;
+    let errorMessage = "";
+
+    if (status === "perbaikan" && is_confirmed) {
+      // Perbaikan + is_confirmed: everyone (admin and owner) can update
+      if (isAdmin || ownerId === userId) {
+        canUpdate = true;
+      } else {
+        errorMessage = "Forbidden";
+      }
+    } else if (status === "draft" && !is_confirmed) {
+      // Draft + not confirmed: only owner (non-admin) can update
+      if (!isAdmin && ownerId === userId) {
+        canUpdate = true;
+      } else if (isAdmin) {
+        errorMessage = "Admin tidak dapat mengubah usulan pada status draft";
+      } else {
+        errorMessage = "Forbidden";
+      }
+    } else {
+      // Other statuses (menunggu, disetujui, ditolak): nobody can update
+      errorMessage = `Tidak dapat mengubah usulan pada status ${status}`;
     }
 
-    // Check status if not admin
-    if (!isAdmin) {
-        if (formasiUsulan.status !== 'draft' && formasiUsulan.status !== 'perbaikan') {
-            return res.status(400).json({ message: "Tidak dapat mengubah usulan pada status " + formasiUsulan.status });
-        }
+    if (!canUpdate) {
+      return res.status(403).json({ message: errorMessage });
     }
 
     const updateData = {
