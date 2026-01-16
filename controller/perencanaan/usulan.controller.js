@@ -79,7 +79,7 @@ const getAll = async (req, res) => {
     const knex = Usulan.knex();
 
     let query = Usulan.query().withGraphFetched(
-      "[lampiran, dibuatOleh(simpleSelect), diperbaruiOleh(simpleSelect), diverifikasiOleh(simpleSelect), formasiUsulan.[formasi, pembuat(simpleWithImage)]]"
+      "[lampiran, dibuatOleh(simpleSelect), diperbaruiOleh(simpleSelect), diverifikasiOleh(simpleSelect), formasiUsulan.[formasi, pembuat(simpleWithImage).[unor], korektor(simpleSelect)]]"
     );
 
     // Filter by formasi_id (join through formasi_usulan)

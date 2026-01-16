@@ -6,7 +6,7 @@ import {
 } from "@/services/perencanaan-formasi.services";
 import { getOpdFasilitator } from "@/services/master.services";
 import { saveAs } from "file-saver";
-import * as XLSX from "xlsx";
+import ExcelJS from "exceljs";
 import { ActionIcon, Group, Paper, Stack, Text } from "@mantine/core";
 import { useDebouncedValue } from "@mantine/hooks";
 import {
@@ -217,51 +217,193 @@ function FormasiUsulanList({ formasiId, formasi }) {
         return;
       }
 
-      // Transform data for Excel with specified columns
-      const excelData = allUsulan.data.map((item, index) => {
-        const formasiUsulan = item.formasiUsulan || {};
-        const pembuat = formasiUsulan.pembuat || {};
-        const formasi = formasiUsulan.formasi || {};
-        // Prioritize unor.name, fallback to perangkat_daerah_detail
-        const perangkatDaerah = pembuat?.unor?.name || pembuat?.perangkat_daerah_detail || "-";
+      // Helper function to sort pendidikan by level
+      const sortPendidikan = (pendidikanList) => {
+        if (!pendidikanList || !Array.isArray(pendidikanList)) return [];
+        const levelOrder = ["S3", "S2", "S1", "D-IV", "DIV", "D-III", "DIII", "D-II", "DII", "D-I", "DI", "SMA", "SMK", "SLTA", "SMP", "SLTP", "SD"];
+        return [...pendidikanList].sort((a, b) => {
+          const levelA = levelOrder.findIndex(l => a.tk_pend?.toUpperCase()?.includes(l)) ?? 999;
+          const levelB = levelOrder.findIndex(l => b.tk_pend?.toUpperCase()?.includes(l)) ?? 999;
+          return levelA - levelB;
+        });
+      };
 
-        return {
-          "No": index + 1,
-          "Nama Pengusul": pembuat?.username || "-",
-          "Perangkat Daerah": perangkatDaerah,
-          "Formasi": formasi?.deskripsi || formasi?.nama || "-",
-          "Jenis Jabatan": item.jenis_jabatan || "-",
-          "Nama Jabatan": item.nama_jabatan || item.jabatan_id || "-",
-          "Kualifikasi Pendidikan": item.kualifikasi_pendidikan_detail
-            ?.map((p) => `${p.tk_pend} - ${p.label}`)
-            .join("; ") || "-",
-          "Unit Kerja": item.unit_kerja_text || item.unit_kerja || "-",
-          "Alokasi": item.alokasi || 0,
-          "Status Usulan Formasi": formasiUsulan.status || "-",
-          "Tanggal Usulan Dibuat": item.dibuat_pada
-            ? dayjs(item.dibuat_pada).format("DD/MM/YYYY HH:mm")
-            : "-",
-          "Nama Verifikator": formasiUsulan.korektor?.username || "-",
-          "Tanggal Verifikasi": formasiUsulan.corrected_at
-            ? dayjs(formasiUsulan.corrected_at).format("DD/MM/YYYY HH:mm")
-            : "-",
+      // Create workbook
+      const wb = new ExcelJS.Workbook();
+      wb.creator = "Rumah ASN";
+      wb.created = new Date();
+
+      const ws = wb.addWorksheet("Semua Usulan");
+
+      // Define columns (narrower widths)
+      ws.columns = [
+        { key: "no", width: 5 },
+        { key: "pengusul", width: 20 },
+        { key: "perangkat_daerah", width: 25 },
+        { key: "jenis_jabatan", width: 12 },
+        { key: "nama_jabatan", width: 30 },
+        { key: "kualifikasi", width: 25 },
+        { key: "unit_kerja", width: 35 },
+        { key: "alokasi", width: 8 },
+        { key: "status", width: 12 },
+        { key: "tgl_dibuat", width: 15 },
+        { key: "verifikator", width: 18 },
+        { key: "tgl_verifikasi", width: 15 },
+      ];
+
+      // Add title rows
+      ws.mergeCells("A1:L1");
+      const titleCell = ws.getCell("A1");
+      titleCell.value = `REKAP SEMUA USULAN KEBUTUHAN FORMASI`;
+      titleCell.font = { bold: true, size: 14 };
+      titleCell.alignment = { horizontal: "center", vertical: "middle" };
+      ws.getRow(1).height = 25;
+
+      ws.mergeCells("A2:L2");
+      const subtitleCell = ws.getCell("A2");
+      subtitleCell.value = `${formasi?.deskripsi || "Formasi"} | Dicetak: ${dayjs().format("DD/MM/YYYY HH:mm")}`;
+      subtitleCell.font = { size: 10, italic: true };
+      subtitleCell.alignment = { horizontal: "center", vertical: "middle" };
+
+      // Add empty row
+      ws.addRow([]);
+
+      // Add header row (row 4)
+      const headerRow = ws.addRow([
+        "NO", "PENGUSUL", "PERANGKAT DAERAH", "JENIS", "NAMA JABATAN",
+        "KUALIFIKASI", "UNIT KERJA", "ALOKASI", "STATUS", "TGL DIBUAT", "VERIFIKATOR", "TGL VERIFIKASI"
+      ]);
+      headerRow.height = 22;
+      headerRow.eachCell((cell) => {
+        cell.fill = {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: { argb: "FF1E88E5" },
+        };
+        cell.font = {
+          bold: true,
+          color: { argb: "FFFFFFFF" },
+          size: 9,
+        };
+        cell.alignment = {
+          horizontal: "center",
+          vertical: "middle",
+          wrapText: true,
+        };
+        cell.border = {
+          top: { style: "thin" },
+          left: { style: "thin" },
+          bottom: { style: "thin" },
+          right: { style: "thin" },
         };
       });
 
-      // Create workbook
-      const ws = XLSX.utils.json_to_sheet(excelData);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Semua Usulan");
+      // Status color mapping
+      const statusColors = {
+        draft: { bg: "FFE0E0E0", font: "FF666666" },      // Gray
+        menunggu: { bg: "FFFFF3E0", font: "FFE65100" },   // Orange
+        disetujui: { bg: "FFE8F5E9", font: "FF2E7D32" },  // Green
+        ditolak: { bg: "FFFFEBEE", font: "FFC62828" },    // Red
+        perbaikan: { bg: "FFE3F2FD", font: "FF1565C0" },  // Blue
+      };
 
-      // Auto-width columns
-      const colWidths = Object.keys(excelData[0] || {}).map((key) => ({
-        wch: Math.max(key.length + 5, 15),
-      }));
-      ws["!cols"] = colWidths;
+      // Add data rows
+      allUsulan.data.forEach((item, index) => {
+        const formasiUsulan = item.formasiUsulan || {};
+        const pembuat = formasiUsulan.pembuat || {};
+        const perangkatDaerah = pembuat?.unor?.name || pembuat?.perangkat_daerah_detail || "-";
+        const status = formasiUsulan.status || "-";
+        const jenisJabatan = item.jenis_jabatan ? item.jenis_jabatan.toUpperCase() : "-";
+
+        // Sort and format kualifikasi pendidikan (vertical with newlines)
+        const sortedPendidikan = sortPendidikan(item.kualifikasi_pendidikan_detail);
+        const kualifikasiText = sortedPendidikan.length > 0
+          ? sortedPendidikan.map((p) => `${p.tk_pend} - ${p.label}`).join("\n")
+          : "-";
+
+        const row = ws.addRow({
+          no: index + 1,
+          pengusul: pembuat?.username || "-",
+          perangkat_daerah: perangkatDaerah,
+          jenis_jabatan: jenisJabatan,
+          nama_jabatan: item.nama_jabatan || item.jabatan_id || "-",
+          kualifikasi: kualifikasiText,
+          unit_kerja: item.unit_kerja_text || item.unit_kerja || "-",
+          alokasi: item.alokasi || 0,
+          status: status.toUpperCase(),
+          tgl_dibuat: item.dibuat_pada ? dayjs(item.dibuat_pada).format("DD/MM/YYYY HH:mm") : "-",
+          verifikator: formasiUsulan.korektor?.username || "-",
+          tgl_verifikasi: formasiUsulan.corrected_at ? dayjs(formasiUsulan.corrected_at).format("DD/MM/YYYY HH:mm") : "-",
+        });
+
+        // Style data rows
+        row.eachCell((cell, colNumber) => {
+          cell.border = {
+            top: { style: "thin" },
+            left: { style: "thin" },
+            bottom: { style: "thin" },
+            right: { style: "thin" },
+          };
+          cell.alignment = {
+            vertical: "middle",
+            wrapText: colNumber >= 5 && colNumber <= 7, // Wrap for Nama Jabatan, Kualifikasi, Unit Kerja
+          };
+          cell.font = { size: 9 };
+
+          // Status column (column 9) - special coloring
+          if (colNumber === 9 && statusColors[status]) {
+            cell.fill = {
+              type: "pattern",
+              pattern: "solid",
+              fgColor: { argb: statusColors[status].bg },
+            };
+            cell.font = {
+              bold: true,
+              size: 9,
+              color: { argb: statusColors[status].font },
+            };
+            cell.alignment = {
+              horizontal: "center",
+              vertical: "middle",
+            };
+          } else if (index % 2 === 1) {
+            // Alternate row colors for other cells
+            cell.fill = {
+              type: "pattern",
+              pattern: "solid",
+              fgColor: { argb: "FFF5F5F5" },
+            };
+          }
+        });
+      });
+
+      // Add total row
+      const totalAlokasi = allUsulan.data.reduce((sum, item) => sum + (item.alokasi || 0), 0);
+      const totalRow = ws.addRow(["", "", "", "", "", "", "TOTAL", totalAlokasi, "", "", "", ""]);
+      totalRow.eachCell((cell, colNumber) => {
+        cell.border = {
+          top: { style: "thin" },
+          left: { style: "thin" },
+          bottom: { style: "thin" },
+          right: { style: "thin" },
+        };
+        cell.font = { bold: true, size: 9 };
+        if (colNumber === 7) {
+          cell.alignment = { horizontal: "right", vertical: "middle" };
+        }
+        if (colNumber === 8) {
+          cell.alignment = { horizontal: "center", vertical: "middle" };
+          cell.fill = {
+            type: "pattern",
+            pattern: "solid",
+            fgColor: { argb: "FFFFF9C4" }, // Yellow
+          };
+        }
+      });
 
       // Generate buffer and save
-      const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-      const blob = new Blob([excelBuffer], {
+      const buffer = await wb.xlsx.writeBuffer();
+      const blob = new Blob([buffer], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       });
 

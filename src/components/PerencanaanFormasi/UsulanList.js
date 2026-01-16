@@ -61,7 +61,7 @@ import { saveAs } from "file-saver";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useState } from "react";
-import * as XLSX from "xlsx";
+import ExcelJS from "exceljs";
 
 // Modal Create/Edit Usulan
 const UsulanModal = ({ open, onClose, data, formasiId, formasiUsulanId }) => {
@@ -439,7 +439,13 @@ const UsulanModal = ({ open, onClose, data, formasiId, formasiUsulanId }) => {
 };
 
 // Modal Perbandingan Data Usulan
-const ComparisonModal = ({ open, onClose, snapshotData, currentData, comparisonStats }) => {
+const ComparisonModal = ({
+  open,
+  onClose,
+  snapshotData,
+  currentData,
+  comparisonStats,
+}) => {
   if (!snapshotData || !comparisonStats) return null;
 
   const { added, removed, modified, unchanged } = comparisonStats;
@@ -447,9 +453,24 @@ const ComparisonModal = ({ open, onClose, snapshotData, currentData, comparisonS
   // Render compact item row - single line
   const renderItem = (item, status, snapshotItem = null, differences = []) => {
     const statusConfig = {
-      added: { color: "green", bg: "#e6ffed", label: "Baru", icon: IconCirclePlus },
-      removed: { color: "red", bg: "#ffebe9", label: "Dihapus", icon: IconCircleMinus },
-      modified: { color: "orange", bg: "#fff3e0", label: "Diubah", icon: IconEdit },
+      added: {
+        color: "green",
+        bg: "#e6ffed",
+        label: "Baru",
+        icon: IconCirclePlus,
+      },
+      removed: {
+        color: "red",
+        bg: "#ffebe9",
+        label: "Dihapus",
+        icon: IconCircleMinus,
+      },
+      modified: {
+        color: "orange",
+        bg: "#fff3e0",
+        label: "Diubah",
+        icon: IconEdit,
+      },
       unchanged: { color: "gray", bg: "#f8f9fa", label: "Tetap", icon: null },
     };
     const config = statusConfig[status];
@@ -457,61 +478,86 @@ const ComparisonModal = ({ open, onClose, snapshotData, currentData, comparisonS
 
     // Get pendidikan details - show tk_pend short, full label in tooltip
     const pendidikanDetails = item.kualifikasi_pendidikan_detail || [];
-    const pendidikanShort = pendidikanDetails.length > 0
-      ? pendidikanDetails.map(p => p.tk_pend).join(", ")
-      : "-";
-    const pendidikanFull = pendidikanDetails.length > 0
-      ? pendidikanDetails.map(p => p.label).join("\n")
-      : "-";
+    const pendidikanShort =
+      pendidikanDetails.length > 0
+        ? pendidikanDetails.map((p) => p.tk_pend).join(", ")
+        : "-";
+    const pendidikanFull =
+      pendidikanDetails.length > 0
+        ? pendidikanDetails.map((p) => p.label).join("\n")
+        : "-";
 
     const unitKerja = item.unit_kerja_text || item.unit_kerja || "-";
     // Truncate unit kerja if too long
-    const unitKerjaShort = unitKerja.length > 40 ? unitKerja.substring(0, 40) + "..." : unitKerja;
+    const unitKerjaShort =
+      unitKerja.length > 40 ? unitKerja.substring(0, 40) + "..." : unitKerja;
 
     // For modified items, show what changed
     const renderAlokasiWithDiff = () => {
-      const alokasidiff = differences.find(d => d.field === "alokasi");
+      const alokasidiff = differences.find((d) => d.field === "alokasi");
       if (status === "modified" && alokasidiff) {
         return (
           <Tooltip title={`Sebelumnya: ${alokasidiff.snapshot}`}>
             <Group gap={2} justify="center">
-              <Text size="xs" c="dimmed" td="line-through">{alokasidiff.snapshot}</Text>
-              <Text size="xs" fw={600} c="orange">{alokasidiff.current}</Text>
+              <Text size="xs" c="dimmed" td="line-through">
+                {alokasidiff.snapshot}
+              </Text>
+              <Text size="xs" fw={600} c="orange">
+                {alokasidiff.current}
+              </Text>
             </Group>
           </Tooltip>
         );
       }
-      return <Text size="xs" fw={600}>{item.alokasi}</Text>;
+      return (
+        <Text size="xs" fw={600}>
+          {item.alokasi}
+        </Text>
+      );
     };
 
     // Render comparison popover content for modified items
     const renderComparisonPopover = () => {
       if (status !== "modified" || !snapshotItem) return null;
 
-      const snapshotPendidikan = snapshotItem.kualifikasi_pendidikan_detail || [];
-      const snapshotPendidikanText = snapshotPendidikan.length > 0
-        ? snapshotPendidikan.map(p => p.label || p.tk_pend).join(", ")
-        : "-";
-      const currentPendidikanText = pendidikanDetails.length > 0
-        ? pendidikanDetails.map(p => p.label || p.tk_pend).join(", ")
-        : "-";
+      const snapshotPendidikan =
+        snapshotItem.kualifikasi_pendidikan_detail || [];
+      const snapshotPendidikanText =
+        snapshotPendidikan.length > 0
+          ? snapshotPendidikan.map((p) => p.label || p.tk_pend).join(", ")
+          : "-";
+      const currentPendidikanText =
+        pendidikanDetails.length > 0
+          ? pendidikanDetails.map((p) => p.label || p.tk_pend).join(", ")
+          : "-";
 
-      const snapshotUnitKerja = snapshotItem.unit_kerja_text || snapshotItem.unit_kerja || "-";
+      const snapshotUnitKerja =
+        snapshotItem.unit_kerja_text || snapshotItem.unit_kerja || "-";
 
-      const isChanged = (field) => differences.some(d => d.field === field);
+      const isChanged = (field) => differences.some((d) => d.field === field);
 
       const renderValue = (current, snapshot, field, truncate = 50) => {
         const changed = isChanged(field);
         const currentStr = String(current || "-");
         const snapshotStr = String(snapshot || "-");
-        const currentTrunc = currentStr.length > truncate ? currentStr.substring(0, truncate) + "..." : currentStr;
-        const snapshotTrunc = snapshotStr.length > truncate ? snapshotStr.substring(0, truncate) + "..." : snapshotStr;
+        const currentTrunc =
+          currentStr.length > truncate
+            ? currentStr.substring(0, truncate) + "..."
+            : currentStr;
+        const snapshotTrunc =
+          snapshotStr.length > truncate
+            ? snapshotStr.substring(0, truncate) + "..."
+            : snapshotStr;
 
         if (changed) {
           return (
             <Stack gap={2}>
-              <Text size="xs" c="dimmed" td="line-through">{snapshotTrunc}</Text>
-              <Text size="xs" fw={500} c="orange">{currentTrunc}</Text>
+              <Text size="xs" c="dimmed" td="line-through">
+                {snapshotTrunc}
+              </Text>
+              <Text size="xs" fw={500} c="orange">
+                {currentTrunc}
+              </Text>
             </Stack>
           );
         }
@@ -522,11 +568,17 @@ const ComparisonModal = ({ open, onClose, snapshotData, currentData, comparisonS
         <Box style={{ width: 350 }}>
           <Group gap="xs" mb="xs">
             <IconGitCompare size={14} />
-            <Text size="xs" fw={600}>Perbandingan Data</Text>
+            <Text size="xs" fw={600}>
+              Perbandingan Data
+            </Text>
           </Group>
           <Descriptions size="small" column={1} bordered>
             <Descriptions.Item label={<Text size="xs">Jenis</Text>}>
-              {renderValue(item.jenis_jabatan, snapshotItem.jenis_jabatan, "jenis")}
+              {renderValue(
+                item.jenis_jabatan,
+                snapshotItem.jenis_jabatan,
+                "jenis"
+              )}
             </Descriptions.Item>
             <Descriptions.Item label={<Text size="xs">Jabatan</Text>}>
               {renderValue(
@@ -543,7 +595,12 @@ const ComparisonModal = ({ open, onClose, snapshotData, currentData, comparisonS
               {renderValue(item.alokasi, snapshotItem.alokasi, "alokasi")}
             </Descriptions.Item>
             <Descriptions.Item label={<Text size="xs">Pendidikan</Text>}>
-              {renderValue(currentPendidikanText, snapshotPendidikanText, "pendidikan", 60)}
+              {renderValue(
+                currentPendidikanText,
+                snapshotPendidikanText,
+                "pendidikan",
+                60
+              )}
             </Descriptions.Item>
           </Descriptions>
           <Text size="xs" c="dimmed" mt="xs" ta="center">
@@ -563,7 +620,10 @@ const ComparisonModal = ({ open, onClose, snapshotData, currentData, comparisonS
           leftSection={Icon && <Icon size={10} />}
           style={{ cursor: status === "modified" ? "pointer" : "default" }}
         >
-          {config.label}{status === "modified" && differences.length > 0 ? ` (${differences.length})` : ""}
+          {config.label}
+          {status === "modified" && differences.length > 0
+            ? ` (${differences.length})`
+            : ""}
         </Badge>
       );
 
@@ -586,7 +646,10 @@ const ComparisonModal = ({ open, onClose, snapshotData, currentData, comparisonS
     return (
       <tr key={item.usulan_id} style={{ backgroundColor: config.bg }}>
         <td style={{ padding: "6px 8px", whiteSpace: "nowrap" }}>
-          <Badge size="xs" color={item.jenis_jabatan === "fungsional" ? "blue" : "green"}>
+          <Badge
+            size="xs"
+            color={item.jenis_jabatan === "fungsional" ? "blue" : "green"}
+          >
             {item.jenis_jabatan === "fungsional" ? "JFT" : "JFU"}
           </Badge>
         </td>
@@ -606,8 +669,17 @@ const ComparisonModal = ({ open, onClose, snapshotData, currentData, comparisonS
           {renderAlokasiWithDiff()}
         </td>
         <td style={{ padding: "6px 8px" }}>
-          <Tooltip title={pendidikanFull} overlayStyle={{ whiteSpace: "pre-line", maxWidth: 400 }}>
-            <Text size="xs" c="dimmed" style={{ cursor: pendidikanDetails.length > 0 ? "help" : "default" }}>
+          <Tooltip
+            title={pendidikanFull}
+            overlayStyle={{ whiteSpace: "pre-line", maxWidth: 400 }}
+          >
+            <Text
+              size="xs"
+              c="dimmed"
+              style={{
+                cursor: pendidikanDetails.length > 0 ? "help" : "default",
+              }}
+            >
               {pendidikanShort}
             </Text>
           </Tooltip>
@@ -635,7 +707,8 @@ const ComparisonModal = ({ open, onClose, snapshotData, currentData, comparisonS
     backgroundColor: "#f8f9fa",
   };
 
-  const hasChanges = added.length > 0 || removed.length > 0 || modified.length > 0;
+  const hasChanges =
+    added.length > 0 || removed.length > 0 || modified.length > 0;
 
   return (
     <Modal
@@ -655,31 +728,57 @@ const ComparisonModal = ({ open, onClose, snapshotData, currentData, comparisonS
         <Paper p="xs" radius="sm" withBorder bg="blue.0">
           <Group gap="lg" wrap="wrap">
             <Group gap="xs">
-              <Text size="xs" c="dimmed">Data Asli:</Text>
-              <Text size="xs" fw={600}>{snapshotData.length} usulan</Text>
-              <Text size="xs" c="dimmed">|</Text>
+              <Text size="xs" c="dimmed">
+                Data Asli:
+              </Text>
               <Text size="xs" fw={600}>
-                {snapshotData.reduce((acc, item) => acc + (item.alokasi || 0), 0)} alokasi
+                {snapshotData.length} usulan
+              </Text>
+              <Text size="xs" c="dimmed">
+                |
+              </Text>
+              <Text size="xs" fw={600}>
+                {snapshotData.reduce(
+                  (acc, item) => acc + (item.alokasi || 0),
+                  0
+                )}{" "}
+                alokasi
               </Text>
             </Group>
             <Group gap="xs">
-              <Text size="xs" c="dimmed">Saat Ini:</Text>
-              <Text size="xs" fw={600}>{currentData?.length || 0} usulan</Text>
-              <Text size="xs" c="dimmed">|</Text>
+              <Text size="xs" c="dimmed">
+                Saat Ini:
+              </Text>
               <Text size="xs" fw={600}>
-                {(currentData || []).reduce((acc, item) => acc + (item.alokasi || 0), 0)} alokasi
+                {currentData?.length || 0} usulan
+              </Text>
+              <Text size="xs" c="dimmed">
+                |
+              </Text>
+              <Text size="xs" fw={600}>
+                {(currentData || []).reduce(
+                  (acc, item) => acc + (item.alokasi || 0),
+                  0
+                )}{" "}
+                alokasi
               </Text>
             </Group>
             {hasChanges && (
               <Group gap="xs">
                 {added.length > 0 && (
-                  <Badge size="xs" color="green" variant="light">+{added.length} baru</Badge>
+                  <Badge size="xs" color="green" variant="light">
+                    +{added.length} baru
+                  </Badge>
                 )}
                 {modified.length > 0 && (
-                  <Badge size="xs" color="orange" variant="light">{modified.length} diubah</Badge>
+                  <Badge size="xs" color="orange" variant="light">
+                    {modified.length} diubah
+                  </Badge>
                 )}
                 {removed.length > 0 && (
-                  <Badge size="xs" color="red" variant="light">-{removed.length} dihapus</Badge>
+                  <Badge size="xs" color="red" variant="light">
+                    -{removed.length} dihapus
+                  </Badge>
                 )}
               </Group>
             )}
@@ -693,20 +792,30 @@ const ComparisonModal = ({ open, onClose, snapshotData, currentData, comparisonS
                 <th style={{ ...thStyle, width: 60 }}>Jenis</th>
                 <th style={{ ...thStyle, width: 200 }}>Nama Jabatan</th>
                 <th style={{ ...thStyle, width: 250 }}>Unit Kerja</th>
-                <th style={{ ...thStyle, width: 60, textAlign: "center" }}>Alokasi</th>
+                <th style={{ ...thStyle, width: 60, textAlign: "center" }}>
+                  Alokasi
+                </th>
                 <th style={{ ...thStyle, width: 120 }}>Pendidikan</th>
-                <th style={{ ...thStyle, width: 80, textAlign: "center" }}>Status</th>
+                <th style={{ ...thStyle, width: 80, textAlign: "center" }}>
+                  Status
+                </th>
               </tr>
             </thead>
             <tbody>
               {/* Removed Items */}
-              {removed.length > 0 && removed.map((item) => renderItem(item, "removed"))}
+              {removed.length > 0 &&
+                removed.map((item) => renderItem(item, "removed"))}
               {/* Modified Items */}
-              {modified.length > 0 && modified.map(({ current, snapshot, differences }) => renderItem(current, "modified", snapshot, differences))}
+              {modified.length > 0 &&
+                modified.map(({ current, snapshot, differences }) =>
+                  renderItem(current, "modified", snapshot, differences)
+                )}
               {/* Added Items */}
-              {added.length > 0 && added.map((item) => renderItem(item, "added"))}
+              {added.length > 0 &&
+                added.map((item) => renderItem(item, "added"))}
               {/* Unchanged Items */}
-              {unchanged.length > 0 && unchanged.map((item) => renderItem(item, "unchanged"))}
+              {unchanged.length > 0 &&
+                unchanged.map((item) => renderItem(item, "unchanged"))}
             </tbody>
           </table>
 
@@ -714,7 +823,8 @@ const ComparisonModal = ({ open, onClose, snapshotData, currentData, comparisonS
           {!hasChanges && unchanged.length > 0 && (
             <Paper p="xs" radius="sm" withBorder bg="gray.0" mt="sm">
               <Text size="xs" c="dimmed" ta="center">
-                Tidak ada perubahan. Data saat ini sama dengan data saat pengajuan dikirim.
+                Tidak ada perubahan. Data saat ini sama dengan data saat
+                pengajuan dikirim.
               </Text>
             </Paper>
           )}
@@ -724,7 +834,12 @@ const ComparisonModal = ({ open, onClose, snapshotData, currentData, comparisonS
   );
 };
 
-function UsulanList({ formasiId, formasiUsulanId, submissionStatus, submissionData }) {
+function UsulanList({
+  formasiId,
+  formasiUsulanId,
+  submissionStatus,
+  submissionData,
+}) {
   const router = useRouter();
   const { data: session } = useSession();
   const isAdmin = session?.user?.current_role === "admin";
@@ -828,28 +943,23 @@ function UsulanList({ formasiId, formasiUsulanId, submissionStatus, submissionDa
   );
 
   // Delete mutation
-  const { mutate: hapusUsulan } = useMutation(
-    (id) => deleteUsulan(id),
-    {
-      onMutate: (id) => {
-        setDeletingId(id);
-      },
-      onSuccess: () => {
-        message.success("Usulan berhasil dihapus");
-        queryClient.invalidateQueries(["perencanaan-usulan"]);
-        queryClient.invalidateQueries(["perencanaan-formasi-usulan-detail"]);
-        queryClient.invalidateQueries(["perencanaan-formasi-usulan"]);
-      },
-      onError: (error) => {
-        message.error(
-          error?.response?.data?.message || "Gagal menghapus usulan"
-        );
-      },
-      onSettled: () => {
-        setDeletingId(null);
-      },
-    }
-  );
+  const { mutate: hapusUsulan } = useMutation((id) => deleteUsulan(id), {
+    onMutate: (id) => {
+      setDeletingId(id);
+    },
+    onSuccess: () => {
+      message.success("Usulan berhasil dihapus");
+      queryClient.invalidateQueries(["perencanaan-usulan"]);
+      queryClient.invalidateQueries(["perencanaan-formasi-usulan-detail"]);
+      queryClient.invalidateQueries(["perencanaan-formasi-usulan"]);
+    },
+    onError: (error) => {
+      message.error(error?.response?.data?.message || "Gagal menghapus usulan");
+    },
+    onSettled: () => {
+      setDeletingId(null);
+    },
+  });
 
   // Determine if editable based on submission status and is_confirmed
   // Rules:
@@ -875,9 +985,14 @@ function UsulanList({ formasiId, formasiUsulanId, submissionStatus, submissionDa
 
   // Comparison logic - compare data_usulan (snapshot) with current data
   const dataUsulanSnapshot = submissionData?.data_usulan || [];
-  const hasSnapshot = submissionData?.is_confirmed && dataUsulanSnapshot.length > 0;
-  const currentUsulanIds = new Set((data?.data || []).map((item) => item.usulan_id));
-  const snapshotUsulanIds = new Set(dataUsulanSnapshot.map((item) => item.usulan_id));
+  const hasSnapshot =
+    submissionData?.is_confirmed && dataUsulanSnapshot.length > 0;
+  const currentUsulanIds = new Set(
+    (data?.data || []).map((item) => item.usulan_id)
+  );
+  const snapshotUsulanIds = new Set(
+    dataUsulanSnapshot.map((item) => item.usulan_id)
+  );
 
   // Helper function to get differences between two usulan items
   const getUsulanDifferences = (currentItem, snapshotItem) => {
@@ -887,16 +1002,39 @@ function UsulanList({ formasiId, formasiUsulanId, submissionStatus, submissionDa
     const differences = [];
 
     if (Number(currentItem.alokasi) !== Number(snapshotItem.alokasi)) {
-      differences.push({ field: "alokasi", current: currentItem.alokasi, snapshot: snapshotItem.alokasi });
+      differences.push({
+        field: "alokasi",
+        current: currentItem.alokasi,
+        snapshot: snapshotItem.alokasi,
+      });
     }
-    if (normalize(currentItem.jenis_jabatan) !== normalize(snapshotItem.jenis_jabatan)) {
-      differences.push({ field: "jenis", current: currentItem.jenis_jabatan, snapshot: snapshotItem.jenis_jabatan });
+    if (
+      normalize(currentItem.jenis_jabatan) !==
+      normalize(snapshotItem.jenis_jabatan)
+    ) {
+      differences.push({
+        field: "jenis",
+        current: currentItem.jenis_jabatan,
+        snapshot: snapshotItem.jenis_jabatan,
+      });
     }
-    if (normalize(currentItem.jabatan_id) !== normalize(snapshotItem.jabatan_id)) {
-      differences.push({ field: "jabatan", current: currentItem.nama_jabatan || currentItem.jabatan_id, snapshot: snapshotItem.nama_jabatan || snapshotItem.jabatan_id });
+    if (
+      normalize(currentItem.jabatan_id) !== normalize(snapshotItem.jabatan_id)
+    ) {
+      differences.push({
+        field: "jabatan",
+        current: currentItem.nama_jabatan || currentItem.jabatan_id,
+        snapshot: snapshotItem.nama_jabatan || snapshotItem.jabatan_id,
+      });
     }
-    if (normalize(currentItem.unit_kerja) !== normalize(snapshotItem.unit_kerja)) {
-      differences.push({ field: "unit", current: currentItem.unit_kerja_text || currentItem.unit_kerja, snapshot: snapshotItem.unit_kerja_text || snapshotItem.unit_kerja });
+    if (
+      normalize(currentItem.unit_kerja) !== normalize(snapshotItem.unit_kerja)
+    ) {
+      differences.push({
+        field: "unit",
+        current: currentItem.unit_kerja_text || currentItem.unit_kerja,
+        snapshot: snapshotItem.unit_kerja_text || snapshotItem.unit_kerja,
+      });
     }
 
     // Compare kualifikasi_pendidikan (array)
@@ -905,14 +1043,20 @@ function UsulanList({ formasiId, formasiUsulanId, submissionStatus, submissionDa
     const sortedCurrent = [...currentPendidikan].map(String).sort();
     const sortedSnapshot = [...snapshotPendidikan].map(String).sort();
     if (JSON.stringify(sortedCurrent) !== JSON.stringify(sortedSnapshot)) {
-      differences.push({ field: "pendidikan", current: currentPendidikan.length, snapshot: snapshotPendidikan.length });
+      differences.push({
+        field: "pendidikan",
+        current: currentPendidikan.length,
+        snapshot: snapshotPendidikan.length,
+      });
     }
 
     return differences;
   };
 
   // Create snapshot lookup map
-  const snapshotMap = new Map(dataUsulanSnapshot.map((item) => [item.usulan_id, item]));
+  const snapshotMap = new Map(
+    dataUsulanSnapshot.map((item) => [item.usulan_id, item])
+  );
 
   // Calculate comparison stats
   const comparisonStats = hasSnapshot
@@ -928,14 +1072,20 @@ function UsulanList({ formasiId, formasiUsulanId, submissionStatus, submissionDa
             const snapshotItem = snapshotMap.get(currentItem.usulan_id);
             const differences = getUsulanDifferences(currentItem, snapshotItem);
             if (differences.length > 0) {
-              modified.push({ current: currentItem, snapshot: snapshotItem, differences });
+              modified.push({
+                current: currentItem,
+                snapshot: snapshotItem,
+                differences,
+              });
             } else {
               unchanged.push(currentItem);
             }
           }
         });
 
-        const removed = dataUsulanSnapshot.filter((item) => !currentUsulanIds.has(item.usulan_id));
+        const removed = dataUsulanSnapshot.filter(
+          (item) => !currentUsulanIds.has(item.usulan_id)
+        );
 
         return { added, removed, modified, unchanged };
       })()
@@ -954,7 +1104,9 @@ function UsulanList({ formasiId, formasiUsulanId, submissionStatus, submissionDa
       key: "jenis_jabatan",
       width: 100,
       render: (val) => (
-        <Tag color={val === "fungsional" ? "blue" : "green"}>{val}</Tag>
+        <Tag color={val === "fungsional" ? "blue" : "green"}>
+          {val?.toUpperCase()}
+        </Tag>
       ),
     },
     {
@@ -963,8 +1115,13 @@ function UsulanList({ formasiId, formasiUsulanId, submissionStatus, submissionDa
       key: "nama_jabatan",
       ellipsis: true,
       render: (val, record) => {
-        const isNewItem = hasSnapshot && !snapshotUsulanIds.has(record.usulan_id);
-        const isModifiedItem = hasSnapshot && comparisonStats?.modified?.some(m => m.current.usulan_id === record.usulan_id);
+        const isNewItem =
+          hasSnapshot && !snapshotUsulanIds.has(record.usulan_id);
+        const isModifiedItem =
+          hasSnapshot &&
+          comparisonStats?.modified?.some(
+            (m) => m.current.usulan_id === record.usulan_id
+          );
         return (
           <Group gap="xs" wrap="nowrap">
             <Text size="sm" fw={500} style={{ flex: 1 }}>
@@ -988,33 +1145,35 @@ function UsulanList({ formasiId, formasiUsulanId, submissionStatus, submissionDa
       title: "Kualifikasi Pendidikan",
       dataIndex: "kualifikasi_pendidikan_detail",
       key: "kualifikasi_pendidikan_detail",
-      width: 250,
-      render: (val) =>
-        val?.length > 0 ? (
-          <Stack gap={2}>
-            {val.slice(0, 2).map((item, i) => (
-              <Tooltip key={i} title={item.label}>
-                <Group gap={4} wrap="nowrap">
-                  <Tag color="blue" style={{ flexShrink: 0 }}>
-                    {item.tk_pend}
-                  </Tag>
-                  <Text size="xs" c="dimmed" lineClamp={1}>
-                    {item.label}
-                  </Text>
-                </Group>
-              </Tooltip>
+      width: 200,
+      render: (val) => {
+        if (!val?.length)
+          return (
+            <Text size="xs" c="dimmed">
+              -
+            </Text>
+          );
+        return (
+          <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
+            {val.map((item, i) => (
+              <Tag
+                key={i}
+                color="green"
+                style={{
+                  margin: 0,
+                  fontSize: 10,
+                  padding: "0 4px",
+                  lineHeight: "16px",
+                  whiteSpace: "normal",
+                  height: "auto",
+                }}
+              >
+                {item.tk_pend} - {item.label}
+              </Tag>
             ))}
-            {val.length > 2 && (
-              <Text size="xs" c="dimmed">
-                +{val.length - 2} lainnya
-              </Text>
-            )}
-          </Stack>
-        ) : (
-          <Text size="xs" c="dimmed">
-            -
-          </Text>
-        ),
+          </div>
+        );
+      },
     },
     {
       title: "Unit Kerja",
@@ -1110,54 +1269,223 @@ function UsulanList({ formasiId, formasiUsulanId, submissionStatus, submissionDa
         return;
       }
 
-      // Helper function to transform usulan data
-      const transformUsulan = (items, isSnapshot = false) => {
-        return items.map((item, index) => ({
-          No: index + 1,
-          "Jenis Jabatan": item.jenis_jabatan || "-",
-          "Nama Jabatan": item.nama_jabatan || item.jabatan_id || "-",
-          "Kualifikasi Pendidikan":
-            item.kualifikasi_pendidikan_detail
-              ?.map((p) => `${p.tk_pend} - ${p.label}`)
-              .join("; ") || "-",
-          "Unit Kerja": item.unit_kerja_text || item.unit_kerja || "-",
-          Alokasi: item.alokasi || 0,
-        }));
+      // Create workbook
+      const wb = new ExcelJS.Workbook();
+      wb.creator = "Rumah ASN";
+      wb.created = new Date();
+
+      // Helper function to sort pendidikan by level
+      const sortPendidikan = (pendidikanList) => {
+        if (!pendidikanList || !Array.isArray(pendidikanList)) return [];
+        const levelOrder = [
+          "S3",
+          "S2",
+          "S1",
+          "D-IV",
+          "DIV",
+          "D-III",
+          "DIII",
+          "D-II",
+          "DII",
+          "D-I",
+          "DI",
+          "SMA",
+          "SMK",
+          "SLTA",
+          "SMP",
+          "SLTP",
+          "SD",
+        ];
+        return [...pendidikanList].sort((a, b) => {
+          const levelA =
+            levelOrder.findIndex((l) =>
+              a.tk_pend?.toUpperCase()?.includes(l)
+            ) ?? 999;
+          const levelB =
+            levelOrder.findIndex((l) =>
+              b.tk_pend?.toUpperCase()?.includes(l)
+            ) ?? 999;
+          return levelA - levelB;
+        });
       };
 
-      // Create workbook
-      const wb = XLSX.utils.book_new();
+      // Get formasi and perangkat daerah info from submissionData
+      const formasiTitle = submissionData?.formasi?.deskripsi || "Formasi";
+      const perangkatDaerah =
+        submissionData?.pembuat?.unor?.name ||
+        submissionData?.pembuat?.perangkat_daerah_detail ||
+        "-";
+      const pengusul = submissionData?.pembuat?.username || "-";
 
-      // Transform current data
-      const currentData = transformUsulan(allData.data);
-      const wsCurrent = XLSX.utils.json_to_sheet(currentData);
+      // Helper function to create styled worksheet
+      const createStyledSheet = (sheetName, items, isSnapshot = false) => {
+        const ws = wb.addWorksheet(sheetName);
 
-      // Auto-width columns
-      const colWidths = Object.keys(currentData[0] || {}).map((key) => ({
-        wch: Math.max(key.length + 5, 15),
-      }));
-      wsCurrent["!cols"] = colWidths;
+        // Define columns
+        ws.columns = [
+          { key: "no", width: 5 },
+          { key: "jenis_jabatan", width: 12 },
+          { key: "nama_jabatan", width: 35 },
+          { key: "kualifikasi", width: 30 },
+          { key: "unit_kerja", width: 40 },
+          { key: "alokasi", width: 8 },
+        ];
 
-      // Check if we need to add snapshot sheet (when status is not draft/menunggu and has snapshot)
-      const shouldAddSnapshot = submissionStatus !== "draft" && submissionStatus !== "menunggu" && hasSnapshot;
+        // Add title rows
+        ws.mergeCells("A1:F1");
+        const titleCell = ws.getCell("A1");
+        titleCell.value = `DAFTAR USULAN KEBUTUHAN ${formasiTitle.toUpperCase()}${
+          isSnapshot ? " (SAAT DIKIRIM)" : ""
+        }`;
+        titleCell.font = { bold: true, size: 14 };
+        titleCell.alignment = { horizontal: "center", vertical: "middle" };
+        ws.getRow(1).height = 25;
+
+        ws.mergeCells("A2:F2");
+        const subtitleCell = ws.getCell("A2");
+        subtitleCell.value = perangkatDaerah;
+        subtitleCell.font = { bold: true, size: 11 };
+        subtitleCell.alignment = { horizontal: "center", vertical: "middle" };
+
+        ws.mergeCells("A3:F3");
+        const pengusulCell = ws.getCell("A3");
+        pengusulCell.value = `Pengusul: ${pengusul} | Dicetak: ${dayjs().format(
+          "DD/MM/YYYY HH:mm"
+        )}`;
+        pengusulCell.font = { size: 10, italic: true };
+        pengusulCell.alignment = { horizontal: "center", vertical: "middle" };
+
+        // Add empty row
+        ws.addRow([]);
+
+        // Add header row (row 4)
+        const headerRow = ws.addRow([
+          "NO",
+          "JENIS",
+          "NAMA JABATAN",
+          "KUALIFIKASI PENDIDIKAN",
+          "UNIT KERJA",
+          "ALOKASI",
+        ]);
+        headerRow.height = 22;
+        headerRow.eachCell((cell) => {
+          cell.fill = {
+            type: "pattern",
+            pattern: "solid",
+            fgColor: { argb: "FF1E88E5" },
+          };
+          cell.font = {
+            bold: true,
+            color: { argb: "FFFFFFFF" },
+            size: 10,
+          };
+          cell.alignment = {
+            horizontal: "center",
+            vertical: "middle",
+            wrapText: true,
+          };
+          cell.border = {
+            top: { style: "thin" },
+            left: { style: "thin" },
+            bottom: { style: "thin" },
+            right: { style: "thin" },
+          };
+        });
+
+        // Add data rows
+        items.forEach((item, index) => {
+          // Sort and format kualifikasi pendidikan (vertical with newlines)
+          const sortedPendidikan = sortPendidikan(
+            item.kualifikasi_pendidikan_detail
+          );
+          const kualifikasiText =
+            sortedPendidikan.length > 0
+              ? sortedPendidikan
+                  .map((p) => `${p.tk_pend} - ${p.label}`)
+                  .join("\n")
+              : "-";
+
+          const row = ws.addRow({
+            no: index + 1,
+            jenis_jabatan: item.jenis_jabatan
+              ? item.jenis_jabatan.toUpperCase()
+              : "-",
+            nama_jabatan: item.nama_jabatan || item.jabatan_id || "-",
+            kualifikasi: kualifikasiText,
+            unit_kerja: item.unit_kerja_text || item.unit_kerja || "-",
+            alokasi: item.alokasi || 0,
+          });
+
+          // Style data rows
+          row.eachCell((cell, colNumber) => {
+            cell.border = {
+              top: { style: "thin" },
+              left: { style: "thin" },
+              bottom: { style: "thin" },
+              right: { style: "thin" },
+            };
+            cell.alignment = {
+              vertical: "middle",
+              wrapText: colNumber >= 3 && colNumber <= 5, // Wrap for Nama Jabatan, Kualifikasi, Unit Kerja
+            };
+            cell.font = { size: 10 };
+            // Alternate row colors
+            if (index % 2 === 1) {
+              cell.fill = {
+                type: "pattern",
+                pattern: "solid",
+                fgColor: { argb: "FFF5F5F5" },
+              };
+            }
+          });
+        });
+
+        // Add total row
+        const totalAlokasi = items.reduce(
+          (sum, item) => sum + (item.alokasi || 0),
+          0
+        );
+        const totalRow = ws.addRow(["", "", "", "", "TOTAL", totalAlokasi]);
+        totalRow.eachCell((cell, colNumber) => {
+          cell.border = {
+            top: { style: "thin" },
+            left: { style: "thin" },
+            bottom: { style: "thin" },
+            right: { style: "thin" },
+          };
+          cell.font = { bold: true, size: 10 };
+          if (colNumber === 5) {
+            cell.alignment = { horizontal: "right", vertical: "middle" };
+          }
+          if (colNumber === 6) {
+            cell.alignment = { horizontal: "center", vertical: "middle" };
+            cell.fill = {
+              type: "pattern",
+              pattern: "solid",
+              fgColor: { argb: "FFFFF9C4" }, // Yellow
+            };
+          }
+        });
+
+        return ws;
+      };
+
+      // Check if we need to add snapshot sheet
+      const shouldAddSnapshot =
+        submissionStatus !== "draft" &&
+        submissionStatus !== "menunggu" &&
+        hasSnapshot;
 
       if (shouldAddSnapshot) {
-        // Add current data as "Usulan Sekarang"
-        XLSX.utils.book_append_sheet(wb, wsCurrent, "Usulan Sekarang");
-
-        // Add snapshot data as "Usulan Saat Dikirim"
-        const snapshotData = transformUsulan(dataUsulanSnapshot, true);
-        const wsSnapshot = XLSX.utils.json_to_sheet(snapshotData);
-        wsSnapshot["!cols"] = colWidths;
-        XLSX.utils.book_append_sheet(wb, wsSnapshot, "Usulan Saat Dikirim");
+        createStyledSheet("Usulan Sekarang", allData.data, false);
+        createStyledSheet("Usulan Saat Dikirim", dataUsulanSnapshot, true);
       } else {
-        // Single sheet
-        XLSX.utils.book_append_sheet(wb, wsCurrent, "Usulan Formasi");
+        createStyledSheet("Usulan Formasi", allData.data, false);
       }
 
-      // Generate buffer
-      const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-      const blob = new Blob([excelBuffer], {
+      // Generate buffer and save
+      const buffer = await wb.xlsx.writeBuffer();
+      const blob = new Blob([buffer], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       });
 
@@ -1180,34 +1508,65 @@ function UsulanList({ formasiId, formasiUsulanId, submissionStatus, submissionDa
             <Group gap="md" wrap="wrap">
               <Group gap="xs">
                 <IconGitCompare size={14} color="#868e96" />
-                <Text size="xs" c="dimmed">Data saat dikirim:</Text>
-                <Text size="xs" fw={600}>{dataUsulanSnapshot.length} usulan</Text>
-                <Text size="xs" c="dimmed">|</Text>
+                <Text size="xs" c="dimmed">
+                  Data saat dikirim:
+                </Text>
                 <Text size="xs" fw={600}>
-                  {dataUsulanSnapshot.reduce((acc, item) => acc + (item.alokasi || 0), 0)} alokasi
+                  {dataUsulanSnapshot.length} usulan
+                </Text>
+                <Text size="xs" c="dimmed">
+                  |
+                </Text>
+                <Text size="xs" fw={600}>
+                  {dataUsulanSnapshot.reduce(
+                    (acc, item) => acc + (item.alokasi || 0),
+                    0
+                  )}{" "}
+                  alokasi
                 </Text>
               </Group>
-              {(comparisonStats.added.length > 0 || comparisonStats.removed.length > 0 || comparisonStats.modified.length > 0) ? (
+              {comparisonStats.added.length > 0 ||
+              comparisonStats.removed.length > 0 ||
+              comparisonStats.modified.length > 0 ? (
                 <Group gap="xs">
-                  <Text size="xs" c="dimmed">Perubahan:</Text>
+                  <Text size="xs" c="dimmed">
+                    Perubahan:
+                  </Text>
                   {comparisonStats.added.length > 0 && (
-                    <Badge size="xs" color="green" variant="light" leftSection={<IconCirclePlus size={10} />}>
+                    <Badge
+                      size="xs"
+                      color="green"
+                      variant="light"
+                      leftSection={<IconCirclePlus size={10} />}
+                    >
                       +{comparisonStats.added.length} baru
                     </Badge>
                   )}
                   {comparisonStats.modified.length > 0 && (
-                    <Badge size="xs" color="orange" variant="light" leftSection={<IconEdit size={10} />}>
+                    <Badge
+                      size="xs"
+                      color="orange"
+                      variant="light"
+                      leftSection={<IconEdit size={10} />}
+                    >
                       {comparisonStats.modified.length} diubah
                     </Badge>
                   )}
                   {comparisonStats.removed.length > 0 && (
-                    <Badge size="xs" color="red" variant="light" leftSection={<IconCircleMinus size={10} />}>
+                    <Badge
+                      size="xs"
+                      color="red"
+                      variant="light"
+                      leftSection={<IconCircleMinus size={10} />}
+                    >
                       -{comparisonStats.removed.length} dihapus
                     </Badge>
                   )}
                 </Group>
               ) : (
-                <Badge size="xs" color="gray" variant="light">Tidak ada perubahan</Badge>
+                <Badge size="xs" color="gray" variant="light">
+                  Tidak ada perubahan
+                </Badge>
               )}
             </Group>
             <Tooltip title="Lihat detail perbandingan">
