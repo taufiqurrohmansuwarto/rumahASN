@@ -32,7 +32,8 @@ import {
   Space,
   Alert,
   Divider,
-  Grid
+  Grid,
+  Collapse
 } from "antd";
 import dayjs from "dayjs";
 import { saveAs } from "file-saver";
@@ -70,7 +71,7 @@ const StatusBadge = ({ status }) => {
   return (
     <Tag
       color={color}
-      style={{ display: "flex", alignItems: "center", gap: 4 }}
+      style={{ display: "flex", alignItems: "center", gap: 4, margin: 0 }}
     >
       <Icon size={14} />
       {label}
@@ -700,162 +701,166 @@ function FormasiUsulanDetail({ data, activeTab = "usulan", children }) {
   const isEditable =
     isAdmin || data.status === "draft" || data.status === "perbaikan";
 
+  // Header Actions
+  const renderActions = () => (
+    <div
+      onClick={(e) => e.stopPropagation()}
+      style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", justifyContent: "flex-end" }}
+    >
+      <StatusBadge status={data.status} />
+      {canDownloadPdf && (
+        <Tooltip title="Unduh daftar usulan dalam format PDF">
+          <Button
+            icon={<IconDownload size={16} />}
+            size="small"
+            onClick={handleDownloadPdf}
+            loading={downloadingPdf}
+          >
+            {isMobile ? null : "PDF"}
+          </Button>
+        </Tooltip>
+      )}
+      {isAdmin && !isDraft && (
+        <Button
+          type="primary"
+          size="small"
+          icon={<IconCheck size={16} />}
+          onClick={() => setVerifyModal(true)}
+        >
+          {isMobile ? "Verif" : "Verifikasi"}
+        </Button>
+      )}
+      {isOwner && isDraft && !isConfirmed && (
+        <Tooltip
+          title={
+            (data.jumlah_usulan || 0) === 0
+              ? "Tambahkan usulan jabatan terlebih dahulu"
+              : "Kirim pengajuan untuk diverifikasi"
+          }
+        >
+          <Button
+            type="primary"
+            size="small"
+            icon={<IconSend size={16} />}
+            disabled={(data.jumlah_usulan || 0) === 0}
+            onClick={() => setKirimModal(true)}
+          >
+            {isMobile ? "Kirim" : "Kirim Pengajuan"}
+          </Button>
+        </Tooltip>
+      )}
+    </div>
+  );
+
   return (
     <Space direction="vertical" size="small" style={{ width: "100%" }}>
-      {/* Header Info Card - Structured Layout */}
-      <Card
-        bordered={false}
-        style={{
-          borderRadius: 8,
-          boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.03)",
-          border: "1px solid #f0f0f0"
-        }}
-        bodyStyle={{ padding: "16px 24px" }}
-      >
-        <Space direction="vertical" size="small" style={{ width: "100%" }}>
-          {/* Title Row with Status and Action Buttons */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 8 }}>
-            <Title level={4} style={{ margin: 0 }}>
-              {data.formasi?.deskripsi || "Pengajuan Usulan Formasi"}
-            </Title>
-            {/* Status Badge + Action Buttons - Top Right */}
-            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-              <StatusBadge status={data.status} />
-              {canDownloadPdf && (
-                <Tooltip title="Unduh daftar usulan dalam format PDF">
-                  <Button
-                    icon={<IconDownload size={14} />}
-                    size="small"
-                    onClick={handleDownloadPdf}
-                    loading={downloadingPdf}
-                  >
-                    {isMobile ? null : "Unduh PDF"}
-                  </Button>
-                </Tooltip>
-              )}
-              {isAdmin && !isDraft && (
-                <Button
-                  type="primary"
-                  size="small"
-                  icon={<IconCheck size={14} />}
-                  onClick={() => setVerifyModal(true)}
-                >
-                  {isMobile ? "Verif" : "Verifikasi"}
-                </Button>
-              )}
-              {isOwner && isDraft && !isConfirmed && (
-                <Tooltip
-                  title={
-                    (data.jumlah_usulan || 0) === 0
-                      ? "Tambahkan usulan jabatan terlebih dahulu"
-                      : "Kirim pengajuan untuk diverifikasi"
-                  }
-                >
-                  <Button
-                    type="primary"
-                    size="small"
-                    icon={<IconSend size={14} />}
-                    disabled={(data.jumlah_usulan || 0) === 0}
-                    onClick={() => setKirimModal(true)}
-                  >
-                    {isMobile ? "Kirim" : "Kirim Pengajuan"}
-                  </Button>
-                </Tooltip>
-              )}
-            </div>
-          </div>
+      {/* Header Info - Collapsible */}
+      <Collapse
+        defaultActiveKey={['1']}
+        style={{ background: 'white', borderRadius: 8, border: '1px solid #f0f0f0', boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.03)" }}
+        expandIconPosition="start"
+        items={[
+          {
+            key: '1',
+            label: (
+              <Title level={5} style={{ margin: 0, fontSize: 16 }}>
+                {data.formasi?.deskripsi || "Pengajuan Usulan Formasi"}
+              </Title>
+            ),
+            extra: renderActions(),
+            children: (
+              <Space direction="vertical" size={2} style={{ width: "100%" }}>
+                {/* Row 1: Operator & Tanggal */}
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, width: 100, flexShrink: 0 }}>
+                    <IconUser size={14} color="#1677ff" />
+                    <Text type="secondary" style={{ fontSize: 13 }}>Operator</Text>
+                  </div>
+                  <Text type="secondary" style={{ fontSize: 13 }}>:</Text>
+                  <Text strong style={{ fontSize: 13 }}>{namaOperator}</Text>
+                  <Text type="secondary" style={{ fontSize: 13, marginLeft: 8 }}>({dayjs(data.dibuat_pada).format("DD MMM YYYY HH:mm")})</Text>
+                </div>
 
-          {/* Structured Info Rows */}
-          <Space direction="vertical" size={2}>
-            {/* Row 1: Operator & Tanggal */}
-            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 4, width: 100, flexShrink: 0 }}>
-                <IconUser size={12} color="#1677ff" />
-                <Text type="secondary" style={{ fontSize: 12 }}>Operator</Text>
-              </div>
-              <Text type="secondary" style={{ fontSize: 12 }}>:</Text>
-              <Text strong style={{ fontSize: 12 }}>{namaOperator}</Text>
-              <Text type="secondary" style={{ fontSize: 12, marginLeft: 8 }}>({dayjs(data.dibuat_pada).format("DD MMM YYYY HH:mm")})</Text>
-            </div>
+                {/* Row 2: Jumlah Usulan */}
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, width: 100, flexShrink: 0 }}>
+                    <IconFileText size={14} color="#1677ff" />
+                    <Text type="secondary" style={{ fontSize: 13 }}>Usulan</Text>
+                  </div>
+                  <Text type="secondary" style={{ fontSize: 13 }}>:</Text>
+                  <Tag color="blue" style={{ margin: 0 }}>{data.jumlah_usulan || 0} jabatan</Tag>
+                  <Tag color="cyan" style={{ margin: 0 }}>{data.total_alokasi_semua || 0} alokasi</Tag>
+                </div>
 
-            {/* Row 2: Jumlah Usulan */}
-            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 4, width: 100, flexShrink: 0 }}>
-                <IconFileText size={12} color="#1677ff" />
-                <Text type="secondary" style={{ fontSize: 12 }}>Usulan</Text>
-              </div>
-              <Text type="secondary" style={{ fontSize: 12 }}>:</Text>
-              <Tag color="blue" style={{ margin: 0 }}>{data.jumlah_usulan || 0} Jabatan</Tag>
-              <Tag color="cyan" style={{ margin: 0 }}>{data.total_alokasi_semua || 0} Alokasi</Tag>
-            </div>
-
-            {/* Row 3: Dokumen */}
-            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 4, width: 100, flexShrink: 0 }}>
-                <IconUpload size={12} color="#1677ff" />
-                <Text type="secondary" style={{ fontSize: 12 }}>Dokumen</Text>
-              </div>
-              <Text type="secondary" style={{ fontSize: 12 }}>:</Text>
-              {data.dokumen_url ? (
-                <Button
-                  icon={<IconFileText size={12} />}
-                  size="small"
-                  type="link"
-                  href={data.dokumen_url}
-                  target="_blank"
-                  style={{ padding: 0, height: "auto" }}
-                >
-                  {data.dokumen_name || "Lihat Dokumen"}
-                </Button>
-              ) : (
-                <Text type="warning" style={{ fontSize: 12, fontStyle: 'italic' }}>Belum ada dokumen</Text>
-              )}
-              {isOwner && isEditable && (
-                <Button
-                  size="small"
-                  type="link"
-                  icon={<IconUpload size={12} />}
-                  onClick={() => setUploadModal(true)}
-                  style={{ padding: 0, height: "auto", marginLeft: 8 }}
-                >
-                  {data.dokumen_url ? "Ganti" : "Upload"}
-                </Button>
-              )}
-            </div>
-          </Space>
-
-          {/* Catatan Verifikator - Inline Compact */}
-          {data.catatan && (
-            <Alert
-              message={
-                <Space>
-                  <Text strong>Catatan:</Text>
-                  <Text>{data.catatan}</Text>
-                  {data.korektor && (
-                    <Text type="secondary">
-                      ({data.korektor.username}, {dayjs(data.corrected_at).format("DD/MM/YYYY HH:mm")})
-                    </Text>
+                {/* Row 3: Dokumen */}
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, width: 100, flexShrink: 0 }}>
+                    <IconUpload size={14} color="#1677ff" />
+                    <Text type="secondary" style={{ fontSize: 13 }}>Dokumen</Text>
+                  </div>
+                  <Text type="secondary" style={{ fontSize: 13 }}>:</Text>
+                  {data.dokumen_url ? (
+                    <Button
+                      icon={<IconFileText size={14} />}
+                      size="small"
+                      type="link"
+                      href={data.dokumen_url}
+                      target="_blank"
+                      style={{ padding: 0, height: "auto" }}
+                    >
+                      {data.dokumen_name || "Lihat Dokumen"}
+                    </Button>
+                  ) : (
+                    <Text type="warning" style={{ fontSize: 13, fontStyle: 'italic' }}>Belum ada dokumen</Text>
                   )}
-                </Space>
-              }
-              type={data.status === "ditolak" || data.status === "perbaikan" ? "error" : "info"}
-              showIcon
-              icon={<IconInfoCircle size={14} />}
-              style={{ padding: "6px 12px" }}
-            />
-          )}
+                  {isOwner && isEditable && (
+                    <Button
+                      size="small"
+                      type="link"
+                      icon={<IconUpload size={14} />}
+                      onClick={() => setUploadModal(true)}
+                      style={{ padding: 0, height: "auto", marginLeft: 8 }}
+                    >
+                      {data.dokumen_url ? "Ganti" : "Upload"}
+                    </Button>
+                  )}
+                </div>
 
-          {/* Warning if not editable - Inline Compact */}
-          {!isEditable && isOwner && !data.catatan && (
-            <Alert
-              message="Pengajuan sedang dalam proses verifikasi"
-              type="warning"
-              showIcon
-              style={{ padding: "6px 12px" }}
-            />
-          )}
-        </Space>
-      </Card>
+                {/* Catatan Verifikator */}
+                {data.catatan && (
+                  <Alert
+                    message={
+                      <Space>
+                        <Text strong>Catatan:</Text>
+                        <Text>{data.catatan}</Text>
+                        {data.korektor && (
+                          <Text type="secondary">
+                            ({data.korektor.username}, {dayjs(data.corrected_at).format("DD/MM/YYYY HH:mm")})
+                          </Text>
+                        )}
+                      </Space>
+                    }
+                    type={data.status === "ditolak" || data.status === "perbaikan" ? "error" : "info"}
+                    showIcon
+                    icon={<IconInfoCircle size={14} />}
+                    style={{ marginTop: 8 }}
+                  />
+                )}
+
+                {/* Warning if not editable */}
+                {!isEditable && isOwner && !data.catatan && (
+                  <Alert
+                    message="Pengajuan sedang dalam proses verifikasi"
+                    type="warning"
+                    showIcon
+                    style={{ marginTop: 8 }}
+                  />
+                )}
+              </Space>
+            )
+          }
+        ]}
+      />
 
       {/* Tabs Navigation - Minimal gap */}
       <Card
