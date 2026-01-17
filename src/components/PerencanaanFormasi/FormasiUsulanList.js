@@ -590,7 +590,50 @@ function FormasiUsulanList({ formasiId, formasi }) {
   ];
 
   return (
-    <div>
+    <div style={{ width: "100%" }}>
+      {/* Stats Section */}
+      <Card size="small" style={{ marginBottom: 16, background: "#fafafa" }} bordered>
+        <Row gutter={[16, 16]}>
+          <Col xs={12} sm={8} md={4}>
+            <div style={{ textAlign: isXs ? 'left' : 'center' }}>
+              <Text type="secondary" style={{ fontSize: 12 }}>Total Pengajuan</Text>
+              <Title level={5} style={{ margin: 0 }}>{stats.total}</Title>
+            </div>
+          </Col>
+          <Col xs={12} sm={8} md={4}>
+            <div style={{ textAlign: isXs ? 'left' : 'center' }}>
+              <Text type="secondary" style={{ fontSize: 12 }}>Draft</Text>
+              <Title level={5} style={{ margin: 0 }}>{stats.draft}</Title>
+            </div>
+          </Col>
+          <Col xs={12} sm={8} md={4}>
+            <div style={{ textAlign: isXs ? 'left' : 'center' }}>
+              <Text type="secondary" style={{ fontSize: 12 }}>Menunggu</Text>
+              <Title level={5} style={{ margin: 0, color: "#fa8c16" }}>{stats.menunggu}</Title>
+            </div>
+          </Col>
+          <Col xs={12} sm={8} md={4}>
+            <div style={{ textAlign: isXs ? 'left' : 'center' }}>
+              <Text type="secondary" style={{ fontSize: 12 }}>Disetujui</Text>
+              <Title level={5} style={{ margin: 0, color: "#52c41a" }}>{stats.disetujui}</Title>
+            </div>
+          </Col>
+          <Col xs={12} sm={8} md={4}>
+            <div style={{ textAlign: isXs ? 'left' : 'center' }}>
+              <Text type="secondary" style={{ fontSize: 12 }}>Perbaikan</Text>
+              <Title level={5} style={{ margin: 0, color: "#1890ff" }}>{stats.perbaikan}</Title>
+            </div>
+          </Col>
+          <Col xs={12} sm={8} md={4}>
+            <div style={{ textAlign: isXs ? 'left' : 'center' }}>
+              <Text type="secondary" style={{ fontSize: 12 }}>Ditolak</Text>
+              <Title level={5} style={{ margin: 0, color: "#ff4d4f" }}>{stats.ditolak}</Title>
+            </div>
+          </Col>
+        </Row>
+      </Card>
+
+      {/* Main Content Card */}
       <div style={{ maxWidth: "100%" }}>
         <Card
           style={{
@@ -622,26 +665,26 @@ function FormasiUsulanList({ formasiId, formasi }) {
           {/* Filter and Actions Section */}
           <div style={{ padding: "20px 0 16px 0", borderBottom: "1px solid #f0f0f0" }}>
             <Row gutter={[12, 12]} align="middle" justify="space-between">
-              <Col xs={24} md={18}>
+              <Col xs={24} lg={18}>
                 <Row gutter={[8, 8]} align="middle">
-                  <Col xs={24} sm={8} md={6}>
+                  <Col xs={24} sm={8} md={8}>
                     <Input.Search
-                      size="small"
                       placeholder="Cari operator..."
                       value={searchInput}
                       onChange={(e) => setSearchInput(e.target.value)}
                       allowClear
                       style={{ width: "100%" }}
+                      size="small"
                     />
                   </Col>
                   <Col xs={24} sm={8} md={6}>
                     <Select
-                      size="small"
                       placeholder="Status"
                       value={status || undefined}
                       onChange={(val) => updateFilters({ status: val || "", page: 1 })}
                       style={{ width: "100%" }}
                       allowClear
+                      size="small"
                     >
                       <Select.Option value="draft">Draft</Select.Option>
                       <Select.Option value="menunggu">Menunggu</Select.Option>
@@ -651,9 +694,8 @@ function FormasiUsulanList({ formasiId, formasi }) {
                     </Select>
                   </Col>
                   {isAdmin && (
-                    <Col xs={24} sm={8} md={8}>
+                    <Col xs={24} sm={8} md={10}>
                         <TreeSelect
-                            size="small"
                             placeholder="Perangkat Daerah"
                             value={organizationId || undefined}
                             onChange={(val) => updateFilters({ "organization-id": val || "", page: 1 })}
@@ -664,16 +706,17 @@ function FormasiUsulanList({ formasiId, formasi }) {
                             loading={loadingOpd}
                             style={{ width: "100%" }}
                             dropdownStyle={{ maxHeight: 400, overflow: "auto" }}
+                            size="small"
                         />
                     </Col>
                   )}
                 </Row>
               </Col>
-              <Col xs={24} md={6} style={{ display: "flex", justifyContent: isXs ? "flex-start" : "flex-end" }}>
+              <Col xs={24} lg={6} style={{ display: "flex", justifyContent: isXs ? "flex-start" : "flex-end" }}>
                 <Space wrap>
                   <Tooltip title="Refresh">
                     <Button
-                        icon={<IconRefresh size={16} />}
+                        icon={<IconRefresh size={14} />}
                         onClick={() => refetch()}
                         loading={isLoading || isFetching}
                     />
@@ -681,7 +724,7 @@ function FormasiUsulanList({ formasiId, formasi }) {
                   {isAdmin && (
                     <Tooltip title="Unduh semua data usulan beserta jabatan">
                         <Button
-                        icon={<IconDownload size={16} />}
+                        icon={<IconDownload size={14} />}
                         onClick={handleDownloadAll}
                         loading={downloading}
                         type="primary"
@@ -694,7 +737,7 @@ function FormasiUsulanList({ formasiId, formasi }) {
                   {!isAdmin && formasi?.status === "aktif" && (
                     <Button
                         type="primary"
-                        icon={<IconPlus size={16} />}
+                        icon={<IconPlus size={14} />}
                         onClick={handleCreateNew}
                         loading={isCreating}
                         style={{ background: "#FF4500", borderColor: "#FF4500" }}

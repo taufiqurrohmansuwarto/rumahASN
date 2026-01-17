@@ -660,7 +660,15 @@ function LampiranList({ formasiId, formasiUsulanId, formasi, submissionStatus })
   };
 
   return (
-    <div>
+    <div style={{ width: "100%" }}>
+      {/* Stats Section */}
+      <Card size="small" style={{ marginBottom: 16, background: "#fafafa" }} bordered>
+        <Space>
+          <Text type="secondary" style={{ fontSize: 12 }}>Total Lampiran:</Text>
+          <Text strong>{total}</Text>
+        </Space>
+      </Card>
+
       <div style={{ maxWidth: "100%" }}>
         <Card
           style={{
@@ -694,25 +702,25 @@ function LampiranList({ formasiId, formasiUsulanId, formasi, submissionStatus })
             <Row gutter={[12, 12]} align="middle" justify="space-between">
               <Col xs={24} md={12}>
                 <Input.Search
-                size="small"
                   placeholder="Cari file..."
                   value={searchInput}
                   onChange={(e) => setSearchInput(e.target.value)}
                   allowClear
                   style={{ width: "100%" }}
+                  size="small"
                 />
               </Col>
               <Col xs={24} md={12} style={{ display: "flex", justifyContent: isXs ? "flex-start" : "flex-end" }}>
                 <Space wrap>
                   <Tooltip title="Refresh">
                     <Button
-                        icon={<IconRefresh size={16} />}
+                        icon={<IconRefresh size={14} />}
                         onClick={() => refetch()}
                         loading={isLoading || isFetching}
                     />
                   </Tooltip>
                   <Button
-                    icon={<IconDownload size={16} />}
+                    icon={<IconDownload size={14} />}
                     loading={downloadingExcel}
                     onClick={handleDownloadExcel}
                     type="primary"
@@ -730,7 +738,7 @@ function LampiranList({ formasiId, formasiUsulanId, formasi, submissionStatus })
                     >
                       <Button
                         type="primary"
-                        icon={<IconPlus size={16} />}
+                        icon={<IconPlus size={14} />}
                         onClick={() => setUploadModal(true)}
                         disabled={formasi?.status !== "aktif"}
                         style={{ background: "#FF4500", borderColor: "#FF4500" }}

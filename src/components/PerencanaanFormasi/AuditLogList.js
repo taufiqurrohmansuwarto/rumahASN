@@ -21,8 +21,7 @@ import {
   Col,
   Typography,
   Space,
-  Grid,
-  Tooltip
+  Grid
 } from "antd";
 import dayjs from "dayjs";
 import { saveAs } from "file-saver";
@@ -470,7 +469,15 @@ function AuditLogList() {
   };
 
   return (
-    <div>
+    <div style={{ width: "100%" }}>
+      {/* Stats Section */}
+      <Card size="small" style={{ marginBottom: 16, background: "#fafafa" }} bordered>
+        <Space>
+          <Text type="secondary" style={{ fontSize: 12 }}>Total Log Activity:</Text>
+          <Text strong>{total}</Text>
+        </Space>
+      </Card>
+
       <div style={{ maxWidth: "100%" }}>
         <Card
           style={{
@@ -502,21 +509,20 @@ function AuditLogList() {
           {/* Filter and Actions Section */}
           <div style={{ padding: "20px 0 16px 0", borderBottom: "1px solid #f0f0f0" }}>
             <Row gutter={[12, 12]} align="middle" justify="space-between">
-              <Col xs={24} md={18}>
+              <Col xs={24} lg={18}>
                 <Row gutter={[8, 8]} align="middle">
                   <Col xs={24} sm={8} md={6}>
                     <Input.Search
-                      size="small"
                       placeholder="Cari operator..."
                       value={searchInput}
                       onChange={(e) => setSearchInput(e.target.value)}
                       allowClear
                       style={{ width: "100%" }}
+                      size="small"
                     />
                   </Col>
                   <Col xs={24} sm={8} md={6}>
                     <Select
-                      size="small"
                       placeholder="Filter Aksi"
                       value={aksi || undefined}
                       onChange={(val) => updateFilters({ aksi: val || "", page: 1 })}
@@ -525,31 +531,32 @@ function AuditLogList() {
                       options={AKSI_OPTIONS}
                       showSearch
                       optionFilterProp="label"
+                      size="small"
                     />
                   </Col>
                   <Col xs={24} sm={8} md={8}>
                     <RangePicker
-                      size="small"
                       onChange={handleDateChange}
                       format="DD/MM/YYYY"
                       placeholder={["Dari", "Sampai"]}
                       style={{ width: "100%" }}
                       value={startDate && endDate ? [dayjs(startDate), dayjs(endDate)] : null}
+                      size="small"
                     />
                   </Col>
                 </Row>
               </Col>
-              <Col xs={24} md={6} style={{ display: "flex", justifyContent: isXs ? "flex-start" : "flex-end" }}>
+              <Col xs={24} lg={6} style={{ display: "flex", justifyContent: isXs ? "flex-start" : "flex-end" }}>
                 <Space wrap>
                   <Tooltip title="Refresh">
                     <Button
-                        icon={<IconRefresh size={16} />}
+                        icon={<IconRefresh size={14} />}
                         onClick={() => refetch()}
                         loading={isLoading || isFetching}
                     />
                   </Tooltip>
                   <Button
-                    icon={<IconDownload size={16} />}
+                    icon={<IconDownload size={14} />}
                     loading={downloading}
                     onClick={handleDownloadExcel}
                     type="primary"

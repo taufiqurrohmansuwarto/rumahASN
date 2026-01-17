@@ -375,7 +375,25 @@ function FormasiList() {
   const tableData = data?.data || [];
 
   return (
-    <div>
+    <div style={{ width: "100%" }}>
+      {/* Stats Section */}
+      <Card size="small" style={{ marginBottom: 16, background: "#fafafa" }} bordered>
+        <Row gutter={[16, 16]}>
+          <Col xs={12} sm={6}>
+            <Space>
+              <Text type="secondary" style={{ fontSize: 12 }}>Total Formasi:</Text>
+              <Text strong>{total}</Text>
+            </Space>
+          </Col>
+          <Col xs={12} sm={6}>
+            <Space>
+              <Text type="secondary" style={{ fontSize: 12 }}>Formasi Aktif:</Text>
+              <Text strong style={{ color: '#52c41a' }}>{aktif}</Text>
+            </Space>
+          </Col>
+        </Row>
+      </Card>
+
       <div style={{ maxWidth: "100%" }}>
         <Card
           style={{
@@ -407,37 +425,37 @@ function FormasiList() {
           {/* Filter and Actions Section */}
           <div style={{ padding: "20px 0 16px 0", borderBottom: "1px solid #f0f0f0" }}>
             <Row gutter={[12, 12]} align="middle" justify="space-between">
-              <Col xs={24} md={16}>
+              <Col xs={24} lg={16}>
                 <Row gutter={[8, 8]} align="middle">
-                  <Col xs={24} sm={12} md={8}>
+                  <Col xs={24} sm={12} md={10}>
                     <Input.Search
-                        size="small"
                         placeholder="Cari judul..."
                         value={searchInput}
                         onChange={(e) => setSearchInput(e.target.value)}
                         allowClear
                         style={{ width: "100%" }}
+                        size="small"
                     />
                   </Col>
-                  <Col xs={12} sm={6} md={4}>
+                  <Col xs={12} sm={6} md={6}>
                     <InputNumber
-                        size="small"
                         placeholder="Tahun"
                         value={tahun || undefined}
                         onChange={(val) => updateFilters({ tahun: val || "", page: 1 })}
                         style={{ width: "100%" }}
                         min={2020}
                         max={2100}
+                        size="small"
                     />
                   </Col>
-                  <Col xs={12} sm={6} md={6}>
+                  <Col xs={12} sm={6} md={8}>
                     <Select
                         placeholder="Status"
-                        size="small"
                         value={status || undefined}
                         onChange={(val) => updateFilters({ status: val || "", page: 1 })}
                         style={{ width: "100%" }}
                         allowClear
+                        size="small"
                     >
                         <Select.Option value="aktif">Aktif</Select.Option>
                         <Select.Option value="nonaktif">Nonaktif</Select.Option>
@@ -445,20 +463,21 @@ function FormasiList() {
                   </Col>
                 </Row>
               </Col>
-              <Col xs={24} md={8} style={{ display: "flex", justifyContent: isXs ? "flex-start" : "flex-end" }}>
+              <Col xs={24} lg={8} style={{ display: "flex", justifyContent: isXs ? "flex-start" : "flex-end" }}>
                 <Space wrap>
                   <Button
                     loading={isLoading || isFetching}
                     onClick={() => refetch()}
-                    icon={<IconRefresh size={16} />}
+                    icon={<IconRefresh size={14} />}
                   >
                     Refresh
                   </Button>
                   {isAdmin && (
                     <Button
                         type="primary"
-                        icon={<IconPlus size={16} />}
+                        icon={<IconPlus size={14} />}
                         onClick={() => setModal({ open: true, data: null })}
+                        style={{ background: "#FF4500", borderColor: "#FF4500" }}
                     >
                         Buat Formasi
                     </Button>

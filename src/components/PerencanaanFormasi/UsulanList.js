@@ -1464,37 +1464,45 @@ function UsulanList({
   };
 
   return (
-    <div>
+    <div style={{ width: "100%" }}>
       {/* Comparison Summary - Show when is_confirmed and has snapshot */}
       {hasSnapshot && (
         <Card size="small" style={{ marginBottom: 16, background: "#fafafa" }} bordered>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
-            <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
-              <Space>
-                <IconGitCompare size={16} color="#868e96" />
-                <Text type="secondary">Data saat dikirim:</Text>
-                <Text strong>{dataUsulanSnapshot.length} usulan</Text>
-                <Text type="secondary">|</Text>
-                <Text strong>{dataUsulanSnapshot.reduce((acc, item) => acc + (item.alokasi || 0), 0)} alokasi</Text>
-              </Space>
-              
-              {(comparisonStats.added.length > 0 || comparisonStats.removed.length > 0 || comparisonStats.modified.length > 0) ? (
-                <Space>
-                  <Text type="secondary">Perubahan:</Text>
-                  {comparisonStats.added.length > 0 && <Tag color="green">+{comparisonStats.added.length} baru</Tag>}
-                  {comparisonStats.modified.length > 0 && <Tag color="orange">{comparisonStats.modified.length} diubah</Tag>}
-                  {comparisonStats.removed.length > 0 && <Tag color="red">-{comparisonStats.removed.length} dihapus</Tag>}
-                </Space>
-              ) : (
-                <Tag>Tidak ada perubahan</Tag>
-              )}
-            </div>
-            <Tooltip title="Lihat detail perbandingan">
-              <Button type="text" icon={<IconEye size={16} />} onClick={() => setComparisonModal(true)}>
-                Detail
-              </Button>
-            </Tooltip>
-          </div>
+          <Row gutter={[16, 12]} align="middle" justify="space-between">
+            <Col xs={24} lg={20}>
+              <Row gutter={[24, 8]} align="middle">
+                <Col>
+                  <Space>
+                    <IconGitCompare size={16} color="#868e96" />
+                    <Text type="secondary" style={{ fontSize: 12 }}>Data saat dikirim:</Text>
+                    <Text strong>{dataUsulanSnapshot.length} usulan</Text>
+                    <Text type="secondary">|</Text>
+                    <Text strong>{dataUsulanSnapshot.reduce((acc, item) => acc + (item.alokasi || 0), 0)} alokasi</Text>
+                  </Space>
+                </Col>
+                
+                <Col>
+                  {(comparisonStats.added.length > 0 || comparisonStats.removed.length > 0 || comparisonStats.modified.length > 0) ? (
+                    <Space wrap>
+                      <Text type="secondary" style={{ fontSize: 12 }}>Perubahan:</Text>
+                      {comparisonStats.added.length > 0 && <Tag color="green">+{comparisonStats.added.length} baru</Tag>}
+                      {comparisonStats.modified.length > 0 && <Tag color="orange">{comparisonStats.modified.length} diubah</Tag>}
+                      {comparisonStats.removed.length > 0 && <Tag color="red">-{comparisonStats.removed.length} dihapus</Tag>}
+                    </Space>
+                  ) : (
+                    <Tag>Tidak ada perubahan</Tag>
+                  )}
+                </Col>
+              </Row>
+            </Col>
+            <Col xs={24} lg={4} style={{ textAlign: isXs ? 'left' : 'right' }}>
+              <Tooltip title="Lihat detail perbandingan">
+                <Button type="text" icon={<IconEye size={16} />} onClick={() => setComparisonModal(true)}>
+                  Lihat Detail
+                </Button>
+              </Tooltip>
+            </Col>
+          </Row>
         </Card>
       )}
 
@@ -1534,7 +1542,6 @@ function UsulanList({
                 <Row gutter={[8, 8]} align="middle">
                   <Col xs={24} sm={8} md={4}>
                     <Select
-                      size="small"
                       placeholder="Jenis Jabatan"
                       value={urlJenis || undefined}
                       onChange={(val) => {
@@ -1542,6 +1549,7 @@ function UsulanList({
                       }}
                       style={{ width: "100%" }}
                       allowClear
+                      size="small"
                     >
                       <Select.Option value="pelaksana">Pelaksana</Select.Option>
                       <Select.Option value="fungsional">Fungsional</Select.Option>
@@ -1549,7 +1557,6 @@ function UsulanList({
                   </Col>
                   <Col xs={24} sm={8} md={6}>
                     <TreeSelect
-                      size="small"
                       placeholder={isLoadingJabatan ? "Memuat..." : "Filter Jabatan"}
                       value={urlJabatan || undefined}
                       onChange={(val) => updateFilters({ jabatan: val || "", page: 1 })}
@@ -1561,11 +1568,11 @@ function UsulanList({
                       style={{ width: "100%" }}
                       dropdownStyle={{ maxHeight: 400, overflow: "auto" }}
                       notFoundContent={isLoadingJabatan ? "Memuat..." : "Tidak ditemukan"}
+                      size="small"
                     />
                   </Col>
-                  <Col xs={24} sm={8} md={10}>
+                  <Col xs={24} sm={8} md={6}>
                     <TreeSelect
-                      size="small"
                       placeholder="Unit Kerja"
                       value={urlUnitKerja || undefined}
                       onChange={(val) => updateFilters({ "unit-kerja": val || "", page: 1 })}
@@ -1576,6 +1583,7 @@ function UsulanList({
                       loading={loadingOpd}
                       style={{ width: "100%" }}
                       dropdownStyle={{ maxHeight: 400, overflow: "auto" }}
+                      size="small"
                     />
                   </Col>
                 </Row>
@@ -1583,10 +1591,10 @@ function UsulanList({
               <Col xs={24} md={6} style={{ display: "flex", justifyContent: isXs ? "flex-start" : "flex-end" }}>
                 <Space wrap>
                   <Tooltip title="Refresh">
-                    <Button icon={<IconRefresh size={16} />} onClick={() => refetch()} />
+                    <Button icon={<IconRefresh size={14} />} onClick={() => refetch()} />
                   </Tooltip>
                   <Button
-                    icon={<IconDownload size={16} />}
+                    icon={<IconDownload size={14} />}
                     loading={downloading}
                     onClick={handleDownloadExcel}
                     type="primary"
@@ -1597,7 +1605,7 @@ function UsulanList({
                   <Tooltip title={!isEditable ? "Tidak dapat menambah data" : "Tambah Jabatan"}>
                     <Button
                         type="primary"
-                        icon={<IconPlus size={16} />}
+                        icon={<IconPlus size={14} />}
                         onClick={() => setModal({ open: true, data: null })}
                         disabled={!isEditable}
                     >

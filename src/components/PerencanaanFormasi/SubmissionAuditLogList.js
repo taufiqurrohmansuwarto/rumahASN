@@ -612,7 +612,19 @@ function SubmissionAuditLogList({ formasiId, formasiUsulanId, submissionData }) 
   };
 
   return (
-    <div>
+    <div style={{ width: "100%" }}>
+      {/* Stats Section */}
+      <Card size="small" style={{ marginBottom: 16, background: "#fafafa" }} bordered>
+        <Row gutter={[16, 16]}>
+          <Col xs={24}>
+            <Space>
+              <Text type="secondary" style={{ fontSize: 12 }}>Total Activity Log:</Text>
+              <Text strong>{total}</Text>
+            </Space>
+          </Col>
+        </Row>
+      </Card>
+
       <div style={{ maxWidth: "100%" }}>
         <Card
           style={{
@@ -644,21 +656,20 @@ function SubmissionAuditLogList({ formasiId, formasiUsulanId, submissionData }) 
           {/* Filter and Actions Section */}
           <div style={{ padding: "20px 0 16px 0", borderBottom: "1px solid #f0f0f0" }}>
             <Row gutter={[12, 12]} align="middle" justify="space-between">
-              <Col xs={24} md={18}>
+              <Col xs={24} lg={18}>
                 <Row gutter={[8, 8]} align="middle">
                   <Col xs={24} sm={8} md={6}>
                     <Input.Search
-                      size="small"
                       placeholder="Cari operator..."
                       value={searchInput}
                       onChange={(e) => setSearchInput(e.target.value)}
                       allowClear
                       style={{ width: "100%" }}
+                      size="small"
                     />
                   </Col>
                   <Col xs={24} sm={8} md={6}>
                     <Select
-                      size="small"
                       placeholder="Filter Aksi"
                       value={alAksi || undefined}
                       onChange={(val) => updateFilters({ alAksi: val || "", alPage: 1 })}
@@ -671,11 +682,11 @@ function SubmissionAuditLogList({ formasiId, formasiUsulanId, submissionData }) 
                           .toLowerCase()
                           .includes(input.toLowerCase())
                       }
+                      size="small"
                     />
                   </Col>
                   <Col xs={24} sm={8} md={8}>
                     <RangePicker
-                      size="small"
                       onChange={handleDateChange}
                       format="DD/MM/YYYY"
                       placeholder={["Dari", "Sampai"]}
@@ -685,21 +696,22 @@ function SubmissionAuditLogList({ formasiId, formasiUsulanId, submissionData }) 
                           ? [dayjs(alStartDate), dayjs(alEndDate)]
                           : null
                       }
+                      size="small"
                     />
                   </Col>
                 </Row>
               </Col>
-              <Col xs={24} md={6} style={{ display: "flex", justifyContent: isXs ? "flex-start" : "flex-end" }}>
+              <Col xs={24} lg={6} style={{ display: "flex", justifyContent: isXs ? "flex-start" : "flex-end" }}>
                 <Space wrap>
                   <Tooltip title="Refresh">
                     <Button
-                      icon={<IconRefresh size={16} />}
+                      icon={<IconRefresh size={14} />}
                       onClick={() => refetch()}
                       loading={isLoading || isFetching}
                     />
                   </Tooltip>
                   <Button
-                    icon={<IconDownload size={16} />}
+                    icon={<IconDownload size={14} />}
                     loading={downloading}
                     onClick={handleDownloadExcel}
                     type="primary"

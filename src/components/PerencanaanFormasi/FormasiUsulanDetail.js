@@ -17,6 +17,13 @@ import {
 } from "@tabler/icons-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
+  Row,
+  Col,
+  Space,
+  Alert,
+  Divider,
+  Grid,
+  Collapse,
   Button,
   Form,
   Input,
@@ -25,22 +32,17 @@ import {
   Select,
   Tabs,
   Tag,
+  Typography,
   Tooltip,
   Upload,
   Card,
-  Typography,
-  Space,
-  Alert,
-  Divider,
-  Grid,
-  Collapse
 } from "antd";
 import dayjs from "dayjs";
 import { saveAs } from "file-saver";
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const { TextArea } = Input;
 const { Text, Title } = Typography;
@@ -344,6 +346,22 @@ function FormasiUsulanDetail({ data, activeTab = "usulan", children }) {
   const [uploadModal, setUploadModal] = useState(false);
   const [kirimModal, setKirimModal] = useState(false);
   const [downloadingPdf, setDownloadingPdf] = useState(false);
+
+  // Persist collapse state in localStorage
+  const collapseStorageKey = `formasi-usulan-collapse-${fuId}`;
+  const [collapseActiveKey, setCollapseActiveKey] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem(collapseStorageKey);
+      return saved ? JSON.parse(saved) : ['1'];
+    }
+    return ['1'];
+  });
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(collapseStorageKey, JSON.stringify(collapseActiveKey));
+    }
+  }, [collapseActiveKey, collapseStorageKey]);
 
   // Status check
   const isDraft = data.status === "draft";
@@ -756,9 +774,9 @@ function FormasiUsulanDetail({ data, activeTab = "usulan", children }) {
     <Space direction="vertical" size="small" style={{ width: "100%" }}>
       {/* Header Info - Collapsible */}
       <Collapse
-        defaultActiveKey={['1']}
+        activeKey={collapseActiveKey}
+        onChange={(keys) => setCollapseActiveKey(keys)}
         style={{ background: 'white', borderRadius: 8, border: '1px solid #f0f0f0', boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.03)" }}
-        expandIconPosition="start"
         items={[
           {
             key: '1',
@@ -769,81 +787,94 @@ function FormasiUsulanDetail({ data, activeTab = "usulan", children }) {
             ),
             extra: renderActions(),
             children: (
-              <Space direction="vertical" size={2} style={{ width: "100%" }}>
-                {/* Row 1: Operator & Tanggal */}
-                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, width: 100, flexShrink: 0 }}>
-                    <IconUser size={14} color="#1677ff" />
-                    <Text type="secondary" style={{ fontSize: 13 }}>Operator</Text>
-                  </div>
-                  <Text type="secondary" style={{ fontSize: 13 }}>:</Text>
-                  <Text strong style={{ fontSize: 13 }}>{namaOperator}</Text>
-                  <Text type="secondary" style={{ fontSize: 13, marginLeft: 8 }}>({dayjs(data.dibuat_pada).format("DD MMM YYYY HH:mm")})</Text>
-                </div>
+              <div style={{ width: "100%" }}>
+                <Row gutter={[16, 12]}>
+                  {/* Row 1: Operator & Tanggal */}
+                  <Col xs={24} md={12}>
+                    <Space align="start">
+                      <IconUser size={16} color="#1677ff" style={{ marginTop: 2 }} />
+                      <div>
+                        <Text type="secondary" style={{ fontSize: 12, display: 'block' }}>Operator</Text>
+                        <Space wrap>
+                          <Text strong style={{ fontSize: 13 }}>{namaOperator}</Text>
+                          <Text type="secondary" style={{ fontSize: 12 }}>({dayjs(data.dibuat_pada).format("DD MMM YYYY HH:mm")})</Text>
+                        </Space>
+                      </div>
+                    </Space>
+                  </Col>
 
-                {/* Row 2: Jumlah Usulan */}
-                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, width: 100, flexShrink: 0 }}>
-                    <IconFileText size={14} color="#1677ff" />
-                    <Text type="secondary" style={{ fontSize: 13 }}>Usulan</Text>
-                  </div>
-                  <Text type="secondary" style={{ fontSize: 13 }}>:</Text>
-                  <Tag color="blue" style={{ margin: 0 }}>{data.jumlah_usulan || 0} jabatan</Tag>
-                  <Tag color="cyan" style={{ margin: 0 }}>{data.total_alokasi_semua || 0} alokasi</Tag>
-                </div>
+                  {/* Row 2: Jumlah Usulan & Alokasi */}
+                  <Col xs={24} md={12}>
+                    <Space align="start">
+                      <IconFileText size={16} color="#1677ff" style={{ marginTop: 2 }} />
+                      <div>
+                        <Text type="secondary" style={{ fontSize: 12, display: 'block' }}>Ringkasan Usulan</Text>
+                        <Space wrap>
+                          <Tag color="blue" style={{ margin: 0 }}>{data.jumlah_usulan || 0} Jabatan</Tag>
+                          <Tag color="cyan" style={{ margin: 0 }}>{data.total_alokasi_semua || 0} Alokasi</Tag>
+                        </Space>
+                      </div>
+                    </Space>
+                  </Col>
 
-                {/* Row 3: Dokumen */}
-                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, width: 100, flexShrink: 0 }}>
-                    <IconUpload size={14} color="#1677ff" />
-                    <Text type="secondary" style={{ fontSize: 13 }}>Dokumen</Text>
-                  </div>
-                  <Text type="secondary" style={{ fontSize: 13 }}>:</Text>
-                  {data.dokumen_url ? (
-                    <Button
-                      icon={<IconFileText size={14} />}
-                      size="small"
-                      type="link"
-                      href={data.dokumen_url}
-                      target="_blank"
-                      style={{ padding: 0, height: "auto" }}
-                    >
-                      {data.dokumen_name || "Lihat Dokumen"}
-                    </Button>
-                  ) : (
-                    <Text type="warning" style={{ fontSize: 13, fontStyle: 'italic' }}>Belum ada dokumen</Text>
-                  )}
-                  {isOwner && isEditable && (
-                    <Button
-                      size="small"
-                      type="link"
-                      icon={<IconUpload size={14} />}
-                      onClick={() => setUploadModal(true)}
-                      style={{ padding: 0, height: "auto", marginLeft: 8 }}
-                    >
-                      {data.dokumen_url ? "Ganti" : "Upload"}
-                    </Button>
-                  )}
-                </div>
+                  {/* Row 3: Dokumen */}
+                  <Col xs={24}>
+                    <Divider style={{ margin: "8px 0" }} />
+                    <Space align="start">
+                      <IconUpload size={16} color="#1677ff" style={{ marginTop: 2 }} />
+                      <div>
+                        <Text type="secondary" style={{ fontSize: 12, display: 'block' }}>Dokumen Pendukung</Text>
+                        <Space wrap align="center">
+                          {data.dokumen_url ? (
+                            <Button
+                              icon={<IconFileText size={14} />}
+                              size="small"
+                              type="link"
+                              href={data.dokumen_url}
+                              target="_blank"
+                              style={{ padding: 0, height: "auto" }}
+                            >
+                              {data.dokumen_name || "Lihat Dokumen"}
+                            </Button>
+                          ) : (
+                            <Text type="warning" style={{ fontSize: 13, fontStyle: 'italic' }}>Belum ada dokumen</Text>
+                          )}
+                          {isOwner && isEditable && (
+                            <Button
+                              size="small"
+                              type="primary"
+                              ghost
+                              icon={<IconUpload size={14} />}
+                              onClick={() => setUploadModal(true)}
+                              style={{ height: "24px", fontSize: 11, borderRadius: 4 }}
+                            >
+                              {data.dokumen_url ? "Ganti Dokumen" : "Upload Dokumen"}
+                            </Button>
+                          )}
+                        </Space>
+                      </div>
+                    </Space>
+                  </Col>
+                </Row>
 
                 {/* Catatan Verifikator */}
                 {data.catatan && (
                   <Alert
                     message={
-                      <Space>
-                        <Text strong>Catatan:</Text>
-                        <Text>{data.catatan}</Text>
+                      <Space direction="vertical" size={0}>
+                        <Text strong style={{ fontSize: 13 }}>Catatan Verifikator:</Text>
+                        <Text style={{ fontSize: 13 }}>{data.catatan}</Text>
                         {data.korektor && (
-                          <Text type="secondary">
-                            ({data.korektor.username}, {dayjs(data.corrected_at).format("DD/MM/YYYY HH:mm")})
+                          <Text type="secondary" style={{ fontSize: 11, marginTop: 4, display: 'block' }}>
+                            Oleh: {data.korektor.username} • {dayjs(data.corrected_at).format("DD/MM/YYYY HH:mm")}
                           </Text>
                         )}
                       </Space>
                     }
                     type={data.status === "ditolak" || data.status === "perbaikan" ? "error" : "info"}
                     showIcon
-                    icon={<IconInfoCircle size={14} />}
-                    style={{ marginTop: 8 }}
+                    icon={<IconInfoCircle size={18} />}
+                    style={{ marginTop: 16, borderRadius: 6 }}
                   />
                 )}
 
@@ -853,10 +884,10 @@ function FormasiUsulanDetail({ data, activeTab = "usulan", children }) {
                     message="Pengajuan sedang dalam proses verifikasi"
                     type="warning"
                     showIcon
-                    style={{ marginTop: 8 }}
+                    style={{ marginTop: 16, borderRadius: 6 }}
                   />
                 )}
-              </Space>
+              </div>
             )
           }
         ]}
