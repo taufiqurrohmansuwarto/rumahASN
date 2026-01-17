@@ -1,4 +1,5 @@
 const RiwayatAudit = require("@/models/perencanaan/perencanaan.riwayat_audit.model");
+const Usulan = require("@/models/perencanaan/perencanaan.usulan.model");
 const { handleError } = require("@/utils/helper/controller-helper");
 
 // Helper function to get jabatan name by id and jenis
@@ -46,6 +47,7 @@ const getAll = async (req, res) => {
       limit = 20,
       search,
       formasi_id,
+      formasi_usulan_id,
       usulan_id,
       aksi,
       sortField = "dibuat_pada",
@@ -68,6 +70,63 @@ const getAll = async (req, res) => {
     // Filter by formasi_id
     if (formasi_id) {
       query = query.where("formasi_id", formasi_id);
+    }
+
+    // Filter by formasi_usulan_id (submission) - get usulan-level and submission-level audit logs
+    // This shows ALL audit logs related to this submission (from both admin and non-admin)
+    if (formasi_usulan_id) {
+      const FormasiUsulan = require("@/models/perencanaan/perencanaan.formasi_usulan.model");
+
+      // Get the submission to find its formasi_id
+      const submission = await FormasiUsulan.query()
+        .findById(formasi_usulan_id)
+        .select("formasi_id", "user_id");
+
+      if (!submission) {
+        return res.status(404).json({ message: "Pengajuan tidak ditemukan" });
+      }
+
+      // Get all usulan_ids for this submission
+      const usulanIds = await Usulan.query()
+        .select("usulan_id")
+        .where("formasi_usulan_id", formasi_usulan_id);
+
+      const ids = usulanIds.map((u) => u.usulan_id);
+
+      // Filter by:
+      // 1. usulan_id IN (submission's usulans) - for usulan-level actions (CREATE, UPDATE jabatan)
+      // 2. OR submission-level actions where data_lama or data_baru contains this formasi_usulan_id
+      // 3. OR DELETE actions where data_lama contains this formasi_usulan_id (since deleted usulan_id won't be in ids)
+      query = query.where(function () {
+        // Usulan-level audit logs for existing usulans
+        if (ids.length > 0) {
+          this.whereIn("usulan_id", ids);
+        }
+        // Submission-level audit logs (usulan_id is null)
+        // Check if data_lama or data_baru contains formasi_usulan_id matching this submission
+        // PostgreSQL JSONB syntax: ->> extracts as text
+        this.orWhere(function () {
+          this.whereNull("usulan_id")
+            .where(function () {
+              // JSONB contains formasi_usulan_id in data_lama
+              this.whereRaw("data_lama->>'formasi_usulan_id' = ?", [
+                formasi_usulan_id,
+              ])
+                // OR JSONB contains formasi_usulan_id in data_baru
+                .orWhereRaw("data_baru->>'formasi_usulan_id' = ?", [
+                  formasi_usulan_id,
+                ]);
+            });
+        });
+        // DELETE actions - usulan_id is set but the record no longer exists
+        // So we check data_lama for formasi_usulan_id
+        this.orWhere(function () {
+          this.where("aksi", "DELETE")
+            .whereRaw("data_lama->>'formasi_usulan_id' = ?", [
+              formasi_usulan_id,
+            ]);
+        });
+      });
     }
 
     // Filter by usulan_id

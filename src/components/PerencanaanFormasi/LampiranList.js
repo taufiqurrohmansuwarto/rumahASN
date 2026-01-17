@@ -671,8 +671,8 @@ function LampiranList({ formasiId, formasiUsulanId, formasi, submissionStatus })
 
       {/* Filter Row */}
       <Paper p="xs" radius="sm" withBorder>
-        <Stack gap="xs">
-          <Group gap="xs" wrap="wrap">
+        <Group gap="xs" wrap="wrap" justify="space-between">
+          <Group gap="xs" wrap="wrap" style={{ flex: 1 }}>
             <Input
               placeholder="Cari file..."
               value={searchInput}
@@ -682,7 +682,7 @@ function LampiranList({ formasiId, formasiUsulanId, formasi, submissionStatus })
               allowClear
             />
           </Group>
-          <Group gap="xs" justify={isMobile ? "space-between" : "flex-end"}>
+          <Group gap="xs" wrap="nowrap">
             <Tooltip title="Refresh">
               <Button icon={<IconRefresh size={14} />} onClick={() => refetch()} size="small" />
             </Tooltip>
@@ -714,7 +714,7 @@ function LampiranList({ formasiId, formasiUsulanId, formasi, submissionStatus })
               </Tooltip>
             )}
           </Group>
-        </Stack>
+        </Group>
       </Paper>
 
       {/* Table */}

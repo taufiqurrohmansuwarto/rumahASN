@@ -39,11 +39,20 @@ const AksiBadge = ({ aksi }) => {
     // Usulan actions
     CREATE: { color: "green", label: "Create Usulan" },
     UPDATE: { color: "blue", label: "Edit Usulan" },
-    DELETE: { color: "red", label: "Delete Usulan" },
+    DELETE: { color: "red", label: "Hapus Usulan" },
     VERIFY_DISETUJUI: { color: "green", label: "Disetujui" },
     VERIFY_DITOLAK: { color: "red", label: "Ditolak" },
     VERIFY_PERBAIKAN: { color: "orange", label: "Perbaikan" },
     VERIFY_MENUNGGU: { color: "default", label: "Menunggu" },
+    // Submission actions (Formasi Usulan)
+    CREATE_SUBMISSION: { color: "green", label: "Buat Pengajuan" },
+    UPDATE_SUBMISSION: { color: "blue", label: "Edit Pengajuan" },
+    DELETE_SUBMISSION: { color: "red", label: "Hapus Pengajuan" },
+    VERIFY_SUBMISSION_DISETUJUI: { color: "green", label: "Disetujui" },
+    VERIFY_SUBMISSION_DITOLAK: { color: "red", label: "Ditolak" },
+    VERIFY_SUBMISSION_PERBAIKAN: { color: "orange", label: "Perbaikan" },
+    VERIFY_SUBMISSION_MENUNGGU: { color: "default", label: "Menunggu" },
+    SUBMIT_SUBMISSION: { color: "processing", label: "Kirim Pengajuan" },
     // Lampiran actions
     UPLOAD_LAMPIRAN: { color: "cyan", label: "Upload Lampiran" },
     UPDATE_LAMPIRAN: { color: "geekblue", label: "Edit Lampiran" },
@@ -53,19 +62,53 @@ const AksiBadge = ({ aksi }) => {
     UPDATE_FORMASI: { color: "purple", label: "Edit Formasi" },
     DELETE_FORMASI: { color: "volcano", label: "Hapus Formasi" },
   };
-  const { color, label } = config[aksi] || { color: "default", label: aksi };
+
+  // Handle dynamic aksi values (e.g., VERIFY_SUBMISSION_CPNS2026 -> check prefix)
+  let matchedConfig = config[aksi];
+
+  if (!matchedConfig && aksi) {
+    // Check for prefix patterns
+    if (aksi.startsWith("VERIFY_SUBMISSION_")) {
+      const suffix = aksi.replace("VERIFY_SUBMISSION_", "");
+      if (suffix === "DISETUJUI" || suffix.includes("DISETUJUI")) {
+        matchedConfig = { color: "green", label: "Disetujui" };
+      } else if (suffix === "DITOLAK" || suffix.includes("DITOLAK")) {
+        matchedConfig = { color: "red", label: "Ditolak" };
+      } else if (suffix === "PERBAIKAN" || suffix.includes("PERBAIKAN")) {
+        matchedConfig = { color: "orange", label: "Perbaikan" };
+      } else if (suffix === "MENUNGGU" || suffix.includes("MENUNGGU")) {
+        matchedConfig = { color: "default", label: "Menunggu" };
+      } else {
+        matchedConfig = { color: "processing", label: "Verifikasi" };
+      }
+    } else if (aksi.startsWith("UPDATE_SUBMISSION")) {
+      matchedConfig = { color: "blue", label: "Edit Pengajuan" };
+    } else if (aksi.startsWith("CREATE_SUBMISSION")) {
+      matchedConfig = { color: "green", label: "Buat Pengajuan" };
+    } else if (aksi.startsWith("DELETE_SUBMISSION")) {
+      matchedConfig = { color: "red", label: "Hapus Pengajuan" };
+    }
+  }
+
+  const { color, label } = matchedConfig || { color: "default", label: aksi?.replace(/_/g, " ") || "-" };
   return <Tag color={color}>{label}</Tag>;
 };
 
 // Filter options for aksi with grouping
 const AKSI_OPTIONS = [
-  { label: "--- Usulan ---", value: "group-usulan", disabled: true },
+  { label: "--- Usulan Jabatan ---", value: "group-usulan", disabled: true },
   { label: "Create Usulan", value: "CREATE" },
   { label: "Edit Usulan", value: "UPDATE" },
   { label: "Hapus Usulan", value: "DELETE" },
-  { label: "Verifikasi Disetujui", value: "VERIFY_DISETUJUI" },
-  { label: "Verifikasi Ditolak", value: "VERIFY_DITOLAK" },
-  { label: "Verifikasi Perbaikan", value: "VERIFY_PERBAIKAN" },
+  { label: "--- Pengajuan ---", value: "group-submission", disabled: true },
+  { label: "Buat Pengajuan", value: "CREATE_SUBMISSION" },
+  { label: "Edit Pengajuan", value: "UPDATE_SUBMISSION" },
+  { label: "Hapus Pengajuan", value: "DELETE_SUBMISSION" },
+  { label: "Kirim Pengajuan", value: "SUBMIT_SUBMISSION" },
+  { label: "--- Verifikasi ---", value: "group-verify", disabled: true },
+  { label: "Disetujui", value: "VERIFY_DISETUJUI" },
+  { label: "Ditolak", value: "VERIFY_DITOLAK" },
+  { label: "Perbaikan", value: "VERIFY_PERBAIKAN" },
   { label: "--- Lampiran ---", value: "group-lampiran", disabled: true },
   { label: "Upload Lampiran", value: "UPLOAD_LAMPIRAN" },
   { label: "Edit Lampiran", value: "UPDATE_LAMPIRAN" },
@@ -102,7 +145,7 @@ const parsePerubahan = (dataLama, dataBaru) => {
 };
 
 // Detail Modal
-const DetailModal = ({ open, onClose, data }) => {
+const DetailModal = ({ open, onClose, data, isMobile }) => {
   if (!data) return null;
 
   const perubahan = parsePerubahan(data.data_lama, data.data_baru);
@@ -113,26 +156,27 @@ const DetailModal = ({ open, onClose, data }) => {
       open={open}
       onCancel={onClose}
       footer={<Button onClick={onClose}>Tutup</Button>}
-      width={600}
+      width={isMobile ? "95%" : 600}
+      centered={isMobile}
     >
-      <Descriptions bordered column={2} size="small">
+      <Descriptions bordered column={isMobile ? 1 : 2} size="small">
         <Descriptions.Item label="ID">{data.riwayat_audit_id}</Descriptions.Item>
         <Descriptions.Item label="Aksi">
           <AksiBadge aksi={data.aksi} />
         </Descriptions.Item>
-        <Descriptions.Item label="Formasi" span={2}>
+        <Descriptions.Item label="Formasi" span={isMobile ? 1 : 2}>
           {data.formasi?.deskripsi || data.formasi_id || "-"}
         </Descriptions.Item>
-        <Descriptions.Item label="Usulan" span={2}>
-          {data.usulan?.jabatan_id || data.usulan_id || "-"}
+        <Descriptions.Item label="Jabatan" span={isMobile ? 1 : 2}>
+          {data.nama_jabatan || data.data_baru?.jabatan_id || data.data_lama?.jabatan_id || "-"}
         </Descriptions.Item>
-        <Descriptions.Item label="Operator" span={2}>
+        <Descriptions.Item label="Operator" span={isMobile ? 1 : 2}>
           {data.dibuatOleh?.username || "-"}
         </Descriptions.Item>
-        <Descriptions.Item label="Waktu" span={2}>
+        <Descriptions.Item label="Waktu" span={isMobile ? 1 : 2}>
           {dayjs(data.dibuat_pada).format("DD/MM/YYYY HH:mm:ss")}
         </Descriptions.Item>
-        <Descriptions.Item label="IP Address" span={2}>
+        <Descriptions.Item label="IP Address" span={isMobile ? 1 : 2}>
           {data.ip_address || "-"}
         </Descriptions.Item>
       </Descriptions>
@@ -159,9 +203,8 @@ function AuditLogList() {
   const router = useRouter();
   const [detailModal, setDetailModal] = useState({ open: false, data: null });
 
-  // Responsive breakpoints
+  // Responsive breakpoint
   const isMobile = useMediaQuery("(max-width: 768px)");
-  const isTablet = useMediaQuery("(max-width: 992px)");
 
   // Get filters from URL
   const {
@@ -236,79 +279,104 @@ function AuditLogList() {
       title: "Operator",
       dataIndex: "dibuatOleh",
       key: "dibuatOleh",
-      width: 150,
-      render: (val) => <Text size="sm">{val?.username || "-"}</Text>,
+      width: 140,
+      fixed: "left",
+      render: (val) => (
+        <Text size="xs" fw={500} lineClamp={2}>
+          {val?.username || "-"}
+        </Text>
+      ),
     },
     {
       title: "Aksi",
       dataIndex: "aksi",
       key: "aksi",
-      width: 100,
+      width: 120,
       render: (val) => <AksiBadge aksi={val} />,
     },
     {
       title: "Formasi",
       dataIndex: "formasi",
       key: "formasi",
-      width: 130,
-      render: (val) => <Text size="xs">{val?.deskripsi || "-"}</Text>,
+      width: 100,
+      render: (val) => (
+        <Text size="xs" c="blue" fw={500}>
+          {val?.deskripsi || "-"}
+        </Text>
+      ),
     },
     {
       title: "Jabatan",
       key: "jabatan",
-      width: 180,
+      width: 200,
       ellipsis: true,
-      render: (_, record) => (
-        <Tooltip label={record.nama_jabatan || "-"}>
-          <Text size="xs" lineClamp={2}>
-            {record.nama_jabatan || record.data_baru?.jabatan_id || record.data_lama?.jabatan_id || "-"}
-          </Text>
-        </Tooltip>
-      ),
+      render: (_, record) => {
+        const jabatan = record.nama_jabatan || record.data_baru?.jabatan_id || record.data_lama?.jabatan_id;
+        if (!jabatan) return <Text size="xs" c="dimmed">-</Text>;
+        return (
+          <Tooltip label={jabatan}>
+            <Text size="xs" lineClamp={2}>
+              {jabatan}
+            </Text>
+          </Tooltip>
+        );
+      },
     },
     {
       title: "Unit Kerja",
       key: "unit_kerja",
-      width: 150,
+      width: 180,
       ellipsis: true,
-      render: (_, record) => (
-        <Tooltip label={record.unit_kerja_text || "-"}>
-          <Text size="xs" lineClamp={2}>
-            {record.unit_kerja_text || record.data_baru?.unit_kerja || record.data_lama?.unit_kerja || "-"}
-          </Text>
-        </Tooltip>
-      ),
+      render: (_, record) => {
+        const unitKerja = record.unit_kerja_text || record.data_baru?.unit_kerja || record.data_lama?.unit_kerja;
+        if (!unitKerja) return <Text size="xs" c="dimmed">-</Text>;
+        return (
+          <Tooltip label={unitKerja}>
+            <Text size="xs" lineClamp={2}>
+              {unitKerja}
+            </Text>
+          </Tooltip>
+        );
+      },
     },
     {
-      title: "Perubahan Alokasi",
+      title: "Alokasi",
       key: "perubahan_alokasi",
-      width: 130,
+      width: 100,
+      align: "center",
       render: (_, record) => {
         const lama = record.data_lama?.alokasi;
         const baru = record.data_baru?.alokasi;
         if (lama === baru || (!lama && !baru)) return <Text size="xs" c="dimmed">-</Text>;
         return (
-          <Stack gap={0}>
-            <Text size="xs" c="dimmed">Dari: {lama || "-"}</Text>
-            <Text size="xs" c="blue">Menjadi: {baru || "-"}</Text>
-          </Stack>
+          <Group gap={4} justify="center" wrap="nowrap">
+            <Text size="xs" c="dimmed">{lama ?? "-"}</Text>
+            <Text size="xs" c="dimmed">→</Text>
+            <Text size="xs" fw={600} c="blue">{baru ?? "-"}</Text>
+          </Group>
         );
       },
     },
     {
-      title: "Perubahan Status",
+      title: "Status",
       key: "perubahan_status",
-      width: 140,
+      width: 120,
+      align: "center",
       render: (_, record) => {
         const lama = record.data_lama?.status;
         const baru = record.data_baru?.status;
         if (lama === baru || (!lama && !baru)) return <Text size="xs" c="dimmed">-</Text>;
         return (
-          <Stack gap={0}>
-            <Text size="xs" c="dimmed">Dari: {lama || "-"}</Text>
-            <Tag color={baru === "disetujui" ? "green" : baru === "ditolak" ? "red" : "orange"}>
-              {baru || "-"}
-            </Tag>
+          <Stack gap={2} align="center">
+            {lama && <Text size="xs" c="dimmed">{lama}</Text>}
+            {baru && (
+              <Tag
+                color={baru === "disetujui" ? "green" : baru === "ditolak" ? "red" : baru === "perbaikan" ? "orange" : "blue"}
+                style={{ margin: 0 }}
+              >
+                {baru}
+              </Tag>
+            )}
           </Stack>
         );
       },
@@ -317,7 +385,7 @@ function AuditLogList() {
       title: "Waktu",
       dataIndex: "dibuat_pada",
       key: "dibuat_pada",
-      width: 140,
+      width: 130,
       render: (val) => (
         <Text size="xs" c="dimmed">
           {dayjs(val).format("DD-MM-YYYY HH:mm")}
@@ -325,9 +393,10 @@ function AuditLogList() {
       ),
     },
     {
-      title: "Aksi",
+      title: "",
       key: "action",
-      width: 60,
+      width: 50,
+      fixed: "right",
       align: "center",
       render: (_, record) => (
         <Tooltip label="Detail">
@@ -479,7 +548,7 @@ function AuditLogList() {
             showTotal: (total, range) => `${range[0]}-${range[1]} dari ${total}`,
             onChange: (p, l) => updateFilters({ page: p, limit: l }),
           }}
-          scroll={{ x: isMobile ? 900 : 1200 }}
+          scroll={{ x: isMobile ? 800 : 1140 }}
         />
       </Paper>
 
@@ -488,6 +557,7 @@ function AuditLogList() {
         open={detailModal.open}
         onClose={() => setDetailModal({ open: false, data: null })}
         data={detailModal.data}
+        isMobile={isMobile}
       />
     </Stack>
   );

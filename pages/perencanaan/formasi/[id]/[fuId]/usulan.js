@@ -2,6 +2,7 @@ import PageContainer from "@/components/PageContainer";
 import FormasiUsulanDetail from "@/components/PerencanaanFormasi/FormasiUsulanDetail";
 import UsulanList from "@/components/PerencanaanFormasi/UsulanList";
 import PerencanaanFormasiLayout from "@/components/PerencanaanFormasi/PerencanaanFormasiLayout";
+import useScrollRestoration from "@/hooks/useScrollRestoration";
 import { getFormasiUsulanById } from "@/services/perencanaan-formasi.services";
 import { Breadcrumb, FloatButton, Skeleton } from "antd";
 import Head from "next/head";
@@ -10,6 +11,7 @@ import { useRouter } from "next/router";
 import { useQuery } from "@tanstack/react-query";
 
 const SubmissionUsulanPage = () => {
+  useScrollRestoration();
   const router = useRouter();
   const { id, fuId } = router.query;
 

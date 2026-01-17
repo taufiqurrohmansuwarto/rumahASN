@@ -1592,17 +1592,16 @@ function UsulanList({
 
       {/* Filter Row (Full Width) */}
       <Paper p="xs" radius="sm" withBorder>
-        <Stack gap="xs">
+        <Group gap="xs" wrap="wrap" justify="space-between">
           {/* Filters */}
-          <Group gap="xs" wrap="wrap">
+          <Group gap="xs" wrap="wrap" style={{ flex: 1 }}>
             <Select
               placeholder="Jenis Jabatan"
               value={urlJenis || undefined}
               onChange={(val) => {
-                // Reset jabatan filter when jenis changes
                 updateFilters({ jenis: val || "", jabatan: "", page: 1 });
               }}
-              style={{ width: isMobile ? "calc(50% - 4px)" : 130 }}
+              style={{ width: 120 }}
               size="small"
               allowClear
             >
@@ -1610,9 +1609,7 @@ function UsulanList({
               <Select.Option value="fungsional">Fungsional</Select.Option>
             </Select>
             <TreeSelect
-              placeholder={
-                isLoadingJabatan ? "Memuat jabatan..." : "Filter Jabatan"
-              }
+              placeholder={isLoadingJabatan ? "Memuat..." : "Filter Jabatan"}
               value={urlJabatan || undefined}
               onChange={(val) => updateFilters({ jabatan: val || "", page: 1 })}
               treeData={jabatanTreeData}
@@ -1620,7 +1617,7 @@ function UsulanList({
               treeNodeFilterProp="label"
               allowClear
               disabled={isLoadingJabatan}
-              style={{ width: isMobile ? "calc(50% - 4px)" : 250 }}
+              style={{ width: 200 }}
               size="small"
               dropdownStyle={{ maxHeight: 400, overflow: "auto" }}
               notFoundContent={isLoadingJabatan ? "Memuat..." : "Tidak ditemukan"}
@@ -1628,52 +1625,32 @@ function UsulanList({
             <TreeSelect
               placeholder="Unit Kerja"
               value={urlUnitKerja || undefined}
-              onChange={(val) =>
-                updateFilters({ "unit-kerja": val || "", page: 1 })
-              }
+              onChange={(val) => updateFilters({ "unit-kerja": val || "", page: 1 })}
               treeData={opdTree}
               showSearch
               treeNodeFilterProp="label"
               allowClear
               loading={loadingOpd}
-              style={{ width: isMobile ? "100%" : 220 }}
+              style={{ width: 180 }}
               size="small"
               dropdownStyle={{ maxHeight: 400, overflow: "auto" }}
             />
           </Group>
-
           {/* Action Buttons */}
-          <Group gap="xs" justify={isMobile ? "space-between" : "flex-end"}>
+          <Group gap="xs" wrap="nowrap">
             <Tooltip title="Refresh">
-              <Button
-                icon={<IconRefresh size={14} />}
-                onClick={() => refetch()}
-                size="small"
-              />
+              <Button icon={<IconRefresh size={14} />} onClick={() => refetch()} size="small" />
             </Tooltip>
-            <Button
-              icon={<IconDownload size={14} />}
-              size="small"
-              loading={downloading}
-              onClick={handleDownloadExcel}
-            >
+            <Button icon={<IconDownload size={14} />} size="small" loading={downloading} onClick={handleDownloadExcel}>
               {isMobile ? null : "Unduh"}
             </Button>
-            <Tooltip
-              title={!isEditable ? "Tidak dapat menambah data" : "Tambah Jabatan"}
-            >
-              <Button
-                type="primary"
-                icon={<IconPlus size={14} />}
-                onClick={() => setModal({ open: true, data: null })}
-                size="small"
-                disabled={!isEditable}
-              >
+            <Tooltip title={!isEditable ? "Tidak dapat menambah data" : "Tambah Jabatan"}>
+              <Button type="primary" icon={<IconPlus size={14} />} onClick={() => setModal({ open: true, data: null })} size="small" disabled={!isEditable}>
                 {isMobile ? null : "Tambah"}
               </Button>
             </Tooltip>
           </Group>
-        </Stack>
+        </Group>
       </Paper>
 
       {/* Table */}

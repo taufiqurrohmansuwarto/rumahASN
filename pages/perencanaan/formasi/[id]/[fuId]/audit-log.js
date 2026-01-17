@@ -1,6 +1,6 @@
 import PageContainer from "@/components/PageContainer";
 import FormasiUsulanDetail from "@/components/PerencanaanFormasi/FormasiUsulanDetail";
-import LampiranList from "@/components/PerencanaanFormasi/LampiranList";
+import SubmissionAuditLogList from "@/components/PerencanaanFormasi/SubmissionAuditLogList";
 import PerencanaanFormasiLayout from "@/components/PerencanaanFormasi/PerencanaanFormasiLayout";
 import useScrollRestoration from "@/hooks/useScrollRestoration";
 import { getFormasiUsulanById } from "@/services/perencanaan-formasi.services";
@@ -10,7 +10,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { useQuery } from "@tanstack/react-query";
 
-const SubmissionLampiranPage = () => {
+const SubmissionAuditLogPage = () => {
   useScrollRestoration();
   const router = useRouter();
   const { id, fuId } = router.query;
@@ -36,7 +36,7 @@ const SubmissionLampiranPage = () => {
   return (
     <>
       <Head>
-        <title>Rumah ASN - Detail Pengajuan (Lampiran)</title>
+        <title>Rumah ASN - Detail Pengajuan (Audit Log)</title>
       </Head>
       <PageContainer
         title="Detail Pengajuan"
@@ -49,17 +49,16 @@ const SubmissionLampiranPage = () => {
             <Breadcrumb.Item>
               <Link href={`/perencanaan/formasi/${id}`}>Daftar Pengajuan</Link>
             </Breadcrumb.Item>
-            <Breadcrumb.Item>Detail</Breadcrumb.Item>
+            <Breadcrumb.Item>Audit Log</Breadcrumb.Item>
           </Breadcrumb>
         )}
       >
-        <FormasiUsulanDetail data={submission} activeTab="lampiran">
+        <FormasiUsulanDetail data={submission} activeTab="audit-log">
           <div style={{ marginTop: 16 }}>
-            <LampiranList
+            <SubmissionAuditLogList
               formasiId={id}
               formasiUsulanId={fuId}
-              formasi={submission.formasi}
-              submissionStatus={submission.status}
+              submissionData={submission}
             />
           </div>
         </FormasiUsulanDetail>
@@ -70,15 +69,15 @@ const SubmissionLampiranPage = () => {
   );
 };
 
-SubmissionLampiranPage.getLayout = (page) => (
+SubmissionAuditLogPage.getLayout = (page) => (
   <PerencanaanFormasiLayout active="/perencanaan/formasi">
     {page}
   </PerencanaanFormasiLayout>
 );
 
-SubmissionLampiranPage.Auth = {
+SubmissionAuditLogPage.Auth = {
   action: "manage",
   subject: "Tickets",
 };
 
-export default SubmissionLampiranPage;
+export default SubmissionAuditLogPage;

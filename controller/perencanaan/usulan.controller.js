@@ -323,6 +323,24 @@ const create = async (req, res) => {
       diperbarui_oleh: userId,
     });
 
+    // Create audit log
+    await RiwayatAudit.query().insert({
+      usulan_id: result.usulan_id,
+      formasi_id: formasiUsulan.formasi_id,
+      aksi: "CREATE",
+      data_baru: {
+        jenis_jabatan,
+        jabatan_id,
+        kualifikasi_pendidikan,
+        alokasi,
+        unit_kerja,
+        status: "menunggu",
+      },
+      data_lama: null,
+      dibuat_oleh: userId,
+      ip_address: req?.ip || req?.connection?.remoteAddress,
+    });
+
     res.json({ code: 200, message: "Usulan berhasil ditambahkan", data: result });
   } catch (error) {
     handleError(res, error);
@@ -404,6 +422,23 @@ const update = async (req, res) => {
 
     await Usulan.query().findById(id).patch(updateData);
 
+    // Create audit log
+    await RiwayatAudit.query().insert({
+      usulan_id: id,
+      formasi_id: formasiUsulan.formasi_id,
+      aksi: "UPDATE",
+      data_baru: updateData,
+      data_lama: {
+        jenis_jabatan: usulan.jenis_jabatan,
+        jabatan_id: usulan.jabatan_id,
+        kualifikasi_pendidikan: usulan.kualifikasi_pendidikan,
+        alokasi: usulan.alokasi,
+        unit_kerja: usulan.unit_kerja,
+      },
+      dibuat_oleh: userId,
+      ip_address: req?.ip || req?.connection?.remoteAddress,
+    });
+
     res.json({ code: 200, message: "Usulan berhasil diperbarui" });
   } catch (error) {
     handleError(res, error);
@@ -460,6 +495,26 @@ const remove = async (req, res) => {
     if (!canDelete) {
       return res.status(403).json({ message: errorMessage });
     }
+
+    // Create audit log before deleting
+    // Include formasi_usulan_id in data_lama so we can find this log even after usulan is deleted
+    await RiwayatAudit.query().insert({
+      usulan_id: id,
+      formasi_id: formasiUsulan.formasi_id,
+      aksi: "DELETE",
+      data_baru: null,
+      data_lama: {
+        formasi_usulan_id: usulan.formasi_usulan_id,
+        jenis_jabatan: usulan.jenis_jabatan,
+        jabatan_id: usulan.jabatan_id,
+        kualifikasi_pendidikan: usulan.kualifikasi_pendidikan,
+        alokasi: usulan.alokasi,
+        unit_kerja: usulan.unit_kerja,
+        status: usulan.status,
+      },
+      dibuat_oleh: userId,
+      ip_address: req?.ip || req?.connection?.remoteAddress,
+    });
 
     await Usulan.query().deleteById(id);
 

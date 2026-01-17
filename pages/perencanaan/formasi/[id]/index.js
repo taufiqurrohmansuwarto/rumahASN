@@ -1,6 +1,7 @@
 import PageContainer from "@/components/PageContainer";
 import FormasiList from "@/components/PerencanaanFormasi/FormasiUsulanList";
 import PerencanaanFormasiLayout from "@/components/PerencanaanFormasi/PerencanaanFormasiLayout";
+import useScrollRestoration from "@/hooks/useScrollRestoration";
 import { getFormasiById } from "@/services/perencanaan-formasi.services";
 import { Breadcrumb, FloatButton } from "antd";
 import Head from "next/head";
@@ -9,6 +10,7 @@ import { useRouter } from "next/router";
 import { useQuery } from "@tanstack/react-query";
 
 const DetailFormasiPage = () => {
+  useScrollRestoration();
   const router = useRouter();
   const { id } = router.query;
 

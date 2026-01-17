@@ -3,10 +3,12 @@ import {
   updateFormasiUsulan,
   uploadDokumenFormasiUsulan,
 } from "@/services/perencanaan-formasi.services";
-import { Alert, Group, Paper, Stack, Text, Divider } from "@mantine/core";
-import { useMediaQuery } from "@mantine/hooks";
+import { ActionIcon, Alert, Collapse, Group, Paper, Stack, Text, Divider } from "@mantine/core";
+import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import {
   IconCheck,
+  IconChevronDown,
+  IconChevronUp,
   IconClock,
   IconDownload,
   IconEdit,
@@ -359,9 +361,12 @@ function FormasiUsulanDetail({ data, activeTab = "usulan", children }) {
 
   // Status check
   const isDraft = data.status === "draft";
+  const isConfirmed = data.is_confirmed;
+  const canDownloadPdf = isDraft && !isConfirmed;
 
   // Perangkat daerah info - prioritize unor.name
-  const perangkatDaerah = data.pembuat?.unor?.name || data.pembuat?.perangkat_daerah_detail || "-";
+  const perangkatDaerah =
+    data.pembuat?.unor?.name || data.pembuat?.perangkat_daerah_detail || "-";
   const namaOperator = data.pembuat?.username || "-";
 
   // Download PDF daftar usulan menggunakan pdf-lib
@@ -712,67 +717,18 @@ function FormasiUsulanDetail({ data, activeTab = "usulan", children }) {
 
   return (
     <Stack gap={4}>
-      {/* Header Info Card - Responsive Layout */}
-      <Paper p="xs" radius="sm" withBorder>
+      {/* Header Info Card - Structured Layout */}
+      <Paper p="sm" radius="sm" withBorder>
         <Stack gap="xs">
-          {/* Title Row */}
-          <Group justify="space-between" align="center" wrap="wrap" gap="xs">
-            <Text size="sm" fw={600}>
+          {/* Title Row with Status and Action Buttons */}
+          <Group justify="space-between" align="flex-start" wrap="wrap" gap="xs">
+            <Text size="md" fw={600}>
               {data.formasi?.deskripsi || "Pengajuan Usulan Formasi"}
             </Text>
-            <StatusBadge status={data.status} />
-          </Group>
-
-          {/* Info Row */}
-          <Group gap="xs" wrap="wrap">
-            <Group gap={4}>
-              <IconUser size={12} color="#868e96" />
-              <Text size="xs" c="dimmed">{namaOperator}</Text>
-            </Group>
-            {!isMobile && <Text size="xs" c="dimmed">|</Text>}
-            <Text size="xs" c="dimmed">
-              {dayjs(data.dibuat_pada).format("DD MMM YYYY")}
-            </Text>
-            {!isMobile && <Text size="xs" c="dimmed">|</Text>}
-            <Tag color="blue" style={{ margin: 0 }}>{data.jumlah_usulan || 0} jabatan</Tag>
-            <Tag color="cyan" style={{ margin: 0 }}>{data.total_alokasi_semua || 0} alokasi</Tag>
-          </Group>
-
-          {/* Document & Actions Row */}
-          <Group justify="space-between" align="center" wrap="wrap" gap="xs">
-            {/* Document Info */}
-            <Group gap="xs" wrap="wrap">
-              {data.dokumen_url ? (
-                <Button
-                  icon={<IconFileText size={12} />}
-                  size="small"
-                  type="link"
-                  href={data.dokumen_url}
-                  target="_blank"
-                  style={{ padding: 0, height: 'auto' }}
-                >
-                  {isMobile ? "Dokumen" : (data.dokumen_name || "Dokumen")}
-                </Button>
-              ) : (
-                <Text size="xs" c="orange" fs="italic">Belum ada dokumen</Text>
-              )}
-              {isOwner && isEditable && (
-                <Button
-                  size="small"
-                  type="link"
-                  icon={<IconUpload size={12} />}
-                  onClick={() => setUploadModal(true)}
-                  style={{ padding: 0, height: 'auto' }}
-                >
-                  {data.dokumen_url ? "Ganti" : "Upload"}
-                </Button>
-              )}
-            </Group>
-
-            {/* Action Buttons */}
+            {/* Status Badge + Action Buttons - Top Right */}
             <Group gap="xs" wrap="nowrap">
-              {/* Download PDF Button - Only when status is draft */}
-              {isDraft && (
+              <StatusBadge status={data.status} />
+              {canDownloadPdf && (
                 <Tooltip title="Unduh daftar usulan dalam format PDF">
                   <Button
                     icon={<IconDownload size={14} />}
@@ -784,20 +740,17 @@ function FormasiUsulanDetail({ data, activeTab = "usulan", children }) {
                   </Button>
                 </Tooltip>
               )}
-
-              {/* Admin: Verify */}
               {isAdmin && !isDraft && (
                 <Button
                   type="primary"
                   size="small"
+                  icon={<IconCheck size={14} />}
                   onClick={() => setVerifyModal(true)}
                 >
                   {isMobile ? "Verif" : "Verifikasi"}
                 </Button>
               )}
-
-              {/* Owner: Submit with Modal */}
-              {isOwner && isDraft && (
+              {isOwner && isDraft && !isConfirmed && (
                 <Tooltip
                   title={
                     (data.jumlah_usulan || 0) === 0
@@ -818,51 +771,103 @@ function FormasiUsulanDetail({ data, activeTab = "usulan", children }) {
               )}
             </Group>
           </Group>
-        </Stack>
-      </Paper>
 
-      {/* Catatan & Warning Section - Only show if has content */}
-      {(data.catatan || (!isEditable && isOwner)) && (
-        <Paper p="xs" radius="sm" withBorder>
+          {/* Structured Info Rows */}
+          <Stack gap={2}>
+            {/* Row 1: Operator & Tanggal */}
+            <Group gap={4} wrap="nowrap">
+              <Group gap={4} w={100} style={{ flexShrink: 0 }}>
+                <IconUser size={12} color="#1677ff" />
+                <Text size="xs" c="dimmed">Operator</Text>
+              </Group>
+              <Text size="xs" c="dimmed">:</Text>
+              <Text size="xs" fw={500}>{namaOperator}</Text>
+              <Text size="xs" c="dimmed" ml="md">({dayjs(data.dibuat_pada).format("DD MMM YYYY HH:mm")})</Text>
+            </Group>
 
-          {/* Catatan Area */}
+            {/* Row 2: Jumlah Usulan */}
+            <Group gap={4} wrap="nowrap">
+              <Group gap={4} w={100} style={{ flexShrink: 0 }}>
+                <IconFileText size={12} color="#1677ff" />
+                <Text size="xs" c="dimmed">Usulan</Text>
+              </Group>
+              <Text size="xs" c="dimmed">:</Text>
+              <Tag color="blue" style={{ margin: 0 }}>{data.jumlah_usulan || 0} jabatan</Tag>
+              <Tag color="cyan" style={{ margin: 0 }}>{data.total_alokasi_semua || 0} alokasi</Tag>
+            </Group>
+
+            {/* Row 3: Dokumen */}
+            <Group gap={4} wrap="nowrap" align="center">
+              <Group gap={4} w={100} style={{ flexShrink: 0 }}>
+                <IconUpload size={12} color="#1677ff" />
+                <Text size="xs" c="dimmed">Dokumen</Text>
+              </Group>
+              <Text size="xs" c="dimmed">:</Text>
+              {data.dokumen_url ? (
+                <Button
+                  icon={<IconFileText size={12} />}
+                  size="small"
+                  type="link"
+                  href={data.dokumen_url}
+                  target="_blank"
+                  style={{ padding: 0, height: "auto" }}
+                >
+                  {data.dokumen_name || "Lihat Dokumen"}
+                </Button>
+              ) : (
+                <Text size="xs" c="orange" fs="italic">Belum ada dokumen</Text>
+              )}
+              {isOwner && isEditable && (
+                <Button
+                  size="small"
+                  type="link"
+                  icon={<IconUpload size={12} />}
+                  onClick={() => setUploadModal(true)}
+                  style={{ padding: 0, height: "auto", marginLeft: 8 }}
+                >
+                  {data.dokumen_url ? "Ganti" : "Upload"}
+                </Button>
+              )}
+            </Group>
+          </Stack>
+
+          {/* Catatan Verifikator - Inline Compact */}
           {data.catatan && (
-            <Alert
-              variant="light"
-              color={
-                data.status === "ditolak" || data.status === "perbaikan"
-                  ? "red"
-                  : "blue"
-              }
-              title="Catatan Verifikator"
-              icon={<IconInfoCircle size={16} />}
-              mt="sm"
-            >
-              {data.catatan}
+            <Group gap={4} wrap="wrap" style={{
+              backgroundColor: data.status === "ditolak" || data.status === "perbaikan" ? "#fff2f0" : "#e6f4ff",
+              padding: "6px 10px",
+              borderRadius: 4,
+              borderLeft: `3px solid ${data.status === "ditolak" || data.status === "perbaikan" ? "#ff4d4f" : "#1677ff"}`,
+              marginTop: 4
+            }}>
+              <IconInfoCircle size={14} color={data.status === "ditolak" || data.status === "perbaikan" ? "#ff4d4f" : "#1677ff"} />
+              <Text size="xs" fw={500} c={data.status === "ditolak" || data.status === "perbaikan" ? "red" : "blue"}>
+                Catatan:
+              </Text>
+              <Text size="xs">{data.catatan}</Text>
               {data.korektor && (
-                <Text size="xs" mt={4} c="dimmed">
-                  - {data.korektor.username} (
-                  {dayjs(data.corrected_at).format("DD/MM/YYYY HH:mm")})
+                <Text size="xs" c="dimmed">
+                  ({data.korektor.username}, {dayjs(data.corrected_at).format("DD/MM/YYYY HH:mm")})
                 </Text>
               )}
-            </Alert>
+            </Group>
           )}
 
-          {/* Warning if not editable */}
-          {!isEditable && isOwner && (
-            <Alert
-              variant="light"
-              color="orange"
-              title="Pengajuan Terkunci"
-              icon={<IconInfoCircle size={16} />}
-              mt="sm"
-            >
-              Pengajuan sedang dalam proses verifikasi. Anda tidak dapat mengubah
-              data sampai admin memberikan keputusan.
-            </Alert>
+          {/* Warning if not editable - Inline Compact */}
+          {!isEditable && isOwner && !data.catatan && (
+            <Group gap={4} wrap="wrap" style={{
+              backgroundColor: "#fffbe6",
+              padding: "6px 10px",
+              borderRadius: 4,
+              borderLeft: "3px solid #faad14",
+              marginTop: 4
+            }}>
+              <IconInfoCircle size={14} color="#faad14" />
+              <Text size="xs">Pengajuan sedang dalam proses verifikasi</Text>
+            </Group>
           )}
-        </Paper>
-      )}
+        </Stack>
+      </Paper>
 
       {/* Tabs Navigation - Minimal gap */}
       <Tabs
@@ -872,7 +877,8 @@ function FormasiUsulanDetail({ data, activeTab = "usulan", children }) {
         size="small"
         items={[
           { key: "usulan", label: "Daftar Usulan Jabatan" },
-          { key: "lampiran", label: "Lampiran Usulan" },
+          { key: "lampiran", label: "Daftar Penyimpanan" },
+          { key: "audit-log", label: "Audit Log" },
         ]}
         tabBarStyle={{ marginBottom: 0 }}
       />

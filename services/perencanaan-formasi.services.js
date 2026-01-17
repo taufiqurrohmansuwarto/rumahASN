@@ -354,6 +354,25 @@ export const getRiwayatAuditByFormasiId = async (formasi_id, params = {}) => {
 };
 
 /**
+ * Get riwayat audit by formasi_usulan_id (submission)
+ * @param {String} formasi_usulan_id - Formasi Usulan (Submission) ID
+ * @param {Object} params - { page, limit, aksi, sortField, sortOrder, search, startDate, endDate }
+ */
+export const getRiwayatAuditBySubmissionId = async (
+  formasi_usulan_id,
+  params = {}
+) => {
+  const query = queryString.stringify(
+    { formasi_usulan_id, ...params },
+    {
+      skipEmptyString: true,
+      skipNull: true,
+    }
+  );
+  return api.get(`/riwayat-audit?${query}`).then((res) => res?.data);
+};
+
+/**
  * Export riwayat audit to Excel
  * @param {Object} params - { formasi_id, usulan_id, aksi, startDate, endDate }
  */
