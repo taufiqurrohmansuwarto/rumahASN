@@ -10,17 +10,6 @@ import {
   updateUsulan,
 } from "@/services/perencanaan-formasi.services";
 import {
-  ActionIcon,
-  Badge,
-  Box,
-  Group,
-  Paper,
-  ScrollArea,
-  Stack,
-  Text,
-} from "@mantine/core";
-import { useMediaQuery } from "@mantine/hooks";
-import {
   IconAlertCircle,
   IconBriefcase,
   IconBuilding,
@@ -39,6 +28,7 @@ import {
   IconSchool,
   IconTrash,
   IconUser,
+  IconClipboardList
 } from "@tabler/icons-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -56,6 +46,13 @@ import {
   Tag,
   Tooltip,
   TreeSelect,
+  Card,
+  Row,
+  Col,
+  Typography,
+  Space,
+  Grid,
+  Badge
 } from "antd";
 import dayjs from "dayjs";
 import { saveAs } from "file-saver";
@@ -64,12 +61,16 @@ import { useRouter } from "next/router";
 import { useCallback, useEffect, useState } from "react";
 import ExcelJS from "exceljs";
 
+const { Title, Text } = Typography;
+const { useBreakpoint } = Grid;
+
 // Modal Create/Edit Usulan
 const UsulanModal = ({ open, onClose, data, formasiId, formasiUsulanId }) => {
   const [form] = Form.useForm();
   const queryClient = useQueryClient();
   const isEdit = !!data;
-  const isMobile = useMediaQuery("(max-width: 768px)");
+  const screens = useBreakpoint();
+  const isXs = !screens?.sm;
 
   // State untuk filter tingkat pendidikan (cascading dropdown)
   const [selectedTingkat, setSelectedTingkat] = useState(null);
@@ -239,16 +240,16 @@ const UsulanModal = ({ open, onClose, data, formasiId, formasiUsulanId }) => {
   return (
     <Modal
       title={
-        <Group gap="xs">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           {isEdit ? <IconEdit size={18} /> : <IconPlus size={18} />}
           <span>{isEdit ? "Edit Usulan" : "Usulan Baru"}</span>
-        </Group>
+        </div>
       }
       open={open}
       onCancel={onClose}
-      width={isMobile ? "95%" : 700}
+      width={isXs ? "95%" : 700}
       destroyOnClose
-      centered={isMobile}
+      centered={isXs}
       footer={
         <div style={{ textAlign: "right" }}>
           <Button onClick={onClose} style={{ marginRight: 8 }}>
@@ -284,10 +285,10 @@ const UsulanModal = ({ open, onClose, data, formasiId, formasiUsulanId }) => {
         <Form.Item
           name="jenis_jabatan"
           label={
-            <Group gap={4}>
+            <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
               <IconBriefcase size={14} />
               <span>Jenis Jabatan</span>
-            </Group>
+            </div>
           }
           rules={[{ required: true, message: "Pilih jenis jabatan" }]}
         >
@@ -303,10 +304,10 @@ const UsulanModal = ({ open, onClose, data, formasiId, formasiUsulanId }) => {
         <Form.Item
           name="jabatan_id"
           label={
-            <Group gap={4}>
+            <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
               <IconFileText size={14} />
               <span>Nama Jabatan</span>
-            </Group>
+            </div>
           }
           rules={[{ required: true, message: "Pilih nama jabatan" }]}
         >
@@ -330,13 +331,13 @@ const UsulanModal = ({ open, onClose, data, formasiId, formasiUsulanId }) => {
         {/* Kualifikasi Pendidikan dengan Filter Tingkat (Compact) */}
         <Form.Item
           label={
-            <Group gap={4}>
+            <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
               <IconSchool size={14} />
               <span>Kualifikasi Pendidikan</span>
-            </Group>
+            </div>
           }
         >
-          <Group gap="xs" align="flex-start" wrap="nowrap">
+          <Space.Compact style={{ width: '100%' }}>
             <Select
               placeholder="Tingkat"
               allowClear
@@ -345,7 +346,7 @@ const UsulanModal = ({ open, onClose, data, formasiId, formasiUsulanId }) => {
               options={getTingkatPendidikanOptions()}
               showSearch
               optionFilterProp="label"
-              style={{ width: 160, flexShrink: 0 }}
+              style={{ width: 120 }}
             />
             <Form.Item name="kualifikasi_pendidikan" noStyle>
               <Select
@@ -369,19 +370,19 @@ const UsulanModal = ({ open, onClose, data, formasiId, formasiUsulanId }) => {
                   value: item.value,
                   label: item.label,
                 }))}
-                style={{ flex: 1, minWidth: 0 }}
+                style={{ width: '100%' }}
               />
             </Form.Item>
-          </Group>
+          </Space.Compact>
         </Form.Item>
 
         <Form.Item
           name="alokasi"
           label={
-            <Group gap={4}>
+            <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
               <IconHash size={14} />
               <span>Alokasi</span>
-            </Group>
+            </div>
           }
           rules={[{ required: true, message: "Alokasi wajib diisi" }]}
         >
@@ -396,10 +397,10 @@ const UsulanModal = ({ open, onClose, data, formasiId, formasiUsulanId }) => {
         <Form.Item
           name="unit_kerja"
           label={
-            <Group gap={4}>
+            <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
               <IconBuilding size={14} />
               <span>Unit Kerja</span>
-            </Group>
+            </div>
           }
           rules={[{ required: true, message: "Pilih unit kerja" }]}
         >
@@ -418,10 +419,10 @@ const UsulanModal = ({ open, onClose, data, formasiId, formasiUsulanId }) => {
         <Form.Item
           name="lampiran_id"
           label={
-            <Group gap={4}>
+            <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
               <IconPaperclip size={14} />
               <span>Lampiran</span>
-            </Group>
+            </div>
           }
         >
           <Select
@@ -458,41 +459,41 @@ const ComparisonModal = ({
     const statusConfig = {
       added: {
         color: "green",
-        bg: "#e6ffed",
+        bg: "#f6ffed",
         label: "Baru",
         icon: IconCirclePlus,
       },
       removed: {
         color: "red",
-        bg: "#ffebe9",
+        bg: "#fff1f0",
         label: "Dihapus",
         icon: IconCircleMinus,
       },
       modified: {
         color: "orange",
-        bg: "#fff3e0",
+        bg: "#fff7e6",
         label: "Diubah",
         icon: IconEdit,
       },
-      unchanged: { color: "gray", bg: "#f8f9fa", label: "Tetap", icon: null },
+      unchanged: { color: "default", bg: "#f5f5f5", label: "Tetap", icon: null },
     };
     const config = statusConfig[status];
     const Icon = config.icon;
 
     // Get pendidikan details - show tk_pend short, full label in tooltip
     const pendidikanDetails = item.kualifikasi_pendidikan_detail || [];
-    const pendidikanShort =
+    const pendidikanShort = 
       pendidikanDetails.length > 0
         ? pendidikanDetails.map((p) => p.tk_pend).join(", ")
         : "-";
-    const pendidikanFull =
+    const pendidikanFull = 
       pendidikanDetails.length > 0
         ? pendidikanDetails.map((p) => p.label).join("\n")
         : "-";
 
     const unitKerja = item.unit_kerja_text || item.unit_kerja || "-";
     // Truncate unit kerja if too long
-    const unitKerjaShort =
+    const unitKerjaShort = 
       unitKerja.length > 40 ? unitKerja.substring(0, 40) + "..." : unitKerja;
 
     // For modified items, show what changed
@@ -500,20 +501,20 @@ const ComparisonModal = ({
       const alokasidiff = differences.find((d) => d.field === "alokasi");
       if (status === "modified" && alokasidiff) {
         return (
-          <Tooltip title={`Sebelumnya: ${alokasidiff.snapshot}`}>
-            <Group gap={2} justify="center">
-              <Text size="xs" c="dimmed" td="line-through">
+          <Tooltip title={`Sebelumnya: ${alokasidiff.snapshot}`}> 
+            <Space size={4}> 
+              <Text type="secondary" delete>
                 {alokasidiff.snapshot}
               </Text>
-              <Text size="xs" fw={600} c="orange">
+              <Text strong style={{ color: "#fa8c16" }}>
                 {alokasidiff.current}
               </Text>
-            </Group>
+            </Space>
           </Tooltip>
         );
       }
       return (
-        <Text size="xs" fw={600}>
+        <Text strong>
           {item.alokasi}
         </Text>
       );
@@ -523,18 +524,18 @@ const ComparisonModal = ({
     const renderComparisonPopover = () => {
       if (status !== "modified" || !snapshotItem) return null;
 
-      const snapshotPendidikan =
+      const snapshotPendidikan = 
         snapshotItem.kualifikasi_pendidikan_detail || [];
-      const snapshotPendidikanText =
+      const snapshotPendidikanText = 
         snapshotPendidikan.length > 0
           ? snapshotPendidikan.map((p) => p.label || p.tk_pend).join(", ")
           : "-";
-      const currentPendidikanText =
+      const currentPendidikanText = 
         pendidikanDetails.length > 0
           ? pendidikanDetails.map((p) => p.label || p.tk_pend).join(", ")
           : "-";
 
-      const snapshotUnitKerja =
+      const snapshotUnitKerja = 
         snapshotItem.unit_kerja_text || snapshotItem.unit_kerja || "-";
 
       const isChanged = (field) => differences.some((d) => d.field === field);
@@ -543,47 +544,45 @@ const ComparisonModal = ({
         const changed = isChanged(field);
         const currentStr = String(current || "-");
         const snapshotStr = String(snapshot || "-");
-        const currentTrunc =
+        const currentTrunc = 
           currentStr.length > truncate
             ? currentStr.substring(0, truncate) + "..."
             : currentStr;
-        const snapshotTrunc =
+        const snapshotTrunc = 
           snapshotStr.length > truncate
             ? snapshotStr.substring(0, truncate) + "..."
             : snapshotStr;
 
         if (changed) {
           return (
-            <Stack gap={2}>
-              <Text size="xs" c="dimmed" td="line-through">
+            <Space direction="vertical" size={0}> 
+              <Text type="secondary" delete style={{ fontSize: 12 }}>
                 {snapshotTrunc}
               </Text>
-              <Text size="xs" fw={500} c="orange">
+              <Text strong style={{ color: "#fa8c16", fontSize: 12 }}>
                 {currentTrunc}
               </Text>
-            </Stack>
+            </Space>
           );
         }
-        return <Text size="xs">{currentTrunc}</Text>;
+        return <Text style={{ fontSize: 12 }}>{currentTrunc}</Text>;
       };
 
       return (
-        <Box style={{ width: 350 }}>
-          <Group gap="xs" mb="xs">
+        <div style={{ width: 350 }}>
+          <div style={{ display: 'flex', gap: 8, marginBottom: 8, alignItems: 'center' }}>
             <IconGitCompare size={14} />
-            <Text size="xs" fw={600}>
-              Perbandingan Data
-            </Text>
-          </Group>
+            <Text strong>Perbandingan Data</Text>
+          </div>
           <Descriptions size="small" column={1} bordered>
-            <Descriptions.Item label={<Text size="xs">Jenis</Text>}>
+            <Descriptions.Item label="Jenis">
               {renderValue(
                 item.jenis_jabatan,
                 snapshotItem.jenis_jabatan,
                 "jenis"
               )}
             </Descriptions.Item>
-            <Descriptions.Item label={<Text size="xs">Jabatan</Text>}>
+            <Descriptions.Item label="Jabatan">
               {renderValue(
                 item.nama_jabatan || item.jabatan_id,
                 snapshotItem.nama_jabatan || snapshotItem.jabatan_id,
@@ -591,13 +590,13 @@ const ComparisonModal = ({
                 40
               )}
             </Descriptions.Item>
-            <Descriptions.Item label={<Text size="xs">Unit Kerja</Text>}>
+            <Descriptions.Item label="Unit Kerja">
               {renderValue(unitKerja, snapshotUnitKerja, "unit", 40)}
             </Descriptions.Item>
-            <Descriptions.Item label={<Text size="xs">Alokasi</Text>}>
+            <Descriptions.Item label="Alokasi">
               {renderValue(item.alokasi, snapshotItem.alokasi, "alokasi")}
             </Descriptions.Item>
-            <Descriptions.Item label={<Text size="xs">Pendidikan</Text>}>
+            <Descriptions.Item label="Pendidikan">
               {renderValue(
                 currentPendidikanText,
                 snapshotPendidikanText,
@@ -606,28 +605,28 @@ const ComparisonModal = ({
               )}
             </Descriptions.Item>
           </Descriptions>
-          <Text size="xs" c="dimmed" mt="xs" ta="center">
-            {differences.length} field berubah
-          </Text>
-        </Box>
+          <div style={{ marginTop: 8, textAlign: 'center' }}>
+            <Text type="secondary" style={{ fontSize: 12 }}>
+                {differences.length} field berubah
+            </Text>
+          </div>
+        </div>
       );
     };
 
     // Render status badge with popover for modified items
     const renderStatusBadge = () => {
       const badge = (
-        <Badge
-          size="xs"
+        <Tag
           color={config.color}
-          variant="light"
-          leftSection={Icon && <Icon size={10} />}
-          style={{ cursor: status === "modified" ? "pointer" : "default" }}
+          icon={Icon && <Icon size={12} style={{ marginRight: 4 }} />}
+          style={{ cursor: status === "modified" ? "pointer" : "default", margin: 0 }}
         >
           {config.label}
           {status === "modified" && differences.length > 0
             ? ` (${differences.length})`
             : ""}
-        </Badge>
+        </Tag>
       );
 
       if (status === "modified" && snapshotItem) {
@@ -648,38 +647,35 @@ const ComparisonModal = ({
 
     return (
       <tr key={item.usulan_id} style={{ backgroundColor: config.bg }}>
-        <td style={{ padding: "6px 8px", whiteSpace: "nowrap" }}>
-          <Badge
-            size="xs"
-            color={item.jenis_jabatan === "fungsional" ? "blue" : "green"}
-          >
+        <td style={{ padding: "8px", whiteSpace: "nowrap", borderBottom: "1px solid #f0f0f0" }}>
+          <Tag color={item.jenis_jabatan === "fungsional" ? "blue" : "green"}>
             {item.jenis_jabatan === "fungsional" ? "JFT" : "JFU"}
-          </Badge>
+          </Tag>
         </td>
-        <td style={{ padding: "6px 8px" }}>
-          <Text size="xs" fw={500} lineClamp={1}>
+        <td style={{ padding: "8px", borderBottom: "1px solid #f0f0f0" }}>
+          <Text strong style={{ fontSize: 13 }} ellipsis>
             {item.nama_jabatan || item.jabatan_id}
           </Text>
         </td>
-        <td style={{ padding: "6px 8px" }}>
+        <td style={{ padding: "8px", borderBottom: "1px solid #f0f0f0" }}>
           <Tooltip title={unitKerja}>
-            <Text size="xs" c="dimmed" lineClamp={1}>
+            <Text type="secondary" style={{ fontSize: 13 }} ellipsis>
               {unitKerjaShort}
             </Text>
           </Tooltip>
         </td>
-        <td style={{ padding: "6px 8px", textAlign: "center" }}>
+        <td style={{ padding: "8px", textAlign: "center", borderBottom: "1px solid #f0f0f0" }}>
           {renderAlokasiWithDiff()}
         </td>
-        <td style={{ padding: "6px 8px" }}>
+        <td style={{ padding: "8px", borderBottom: "1px solid #f0f0f0" }}>
           <Tooltip
             title={pendidikanFull}
             overlayStyle={{ whiteSpace: "pre-line", maxWidth: 400 }}
           >
             <Text
-              size="xs"
-              c="dimmed"
+              type="secondary"
               style={{
+                fontSize: 13,
                 cursor: pendidikanDetails.length > 0 ? "help" : "default",
               }}
             >
@@ -687,7 +683,7 @@ const ComparisonModal = ({
             </Text>
           </Tooltip>
         </td>
-        <td style={{ padding: "6px 8px", textAlign: "center" }}>
+        <td style={{ padding: "8px", textAlign: "center", borderBottom: "1px solid #f0f0f0" }}>
           {renderStatusBadge()}
         </td>
       </tr>
@@ -697,109 +693,80 @@ const ComparisonModal = ({
   const tableStyle = {
     width: "100%",
     borderCollapse: "collapse",
-    fontSize: "12px",
+    fontSize: "13px",
   };
 
   const thStyle = {
-    padding: "8px",
+    padding: "12px 8px",
     textAlign: "left",
-    borderBottom: "1px solid #dee2e6",
+    borderBottom: "1px solid #f0f0f0",
     fontWeight: 600,
-    fontSize: "11px",
-    color: "#868e96",
-    backgroundColor: "#f8f9fa",
+    fontSize: "12px",
+    color: "rgba(0, 0, 0, 0.45)",
+    backgroundColor: "#fafafa",
   };
 
-  const hasChanges =
+  const hasChanges = 
     added.length > 0 || removed.length > 0 || modified.length > 0;
 
   return (
     <Modal
       title={
-        <Group gap="xs">
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
           <IconGitCompare size={18} />
           <span>Detail Perbandingan Data Usulan</span>
-        </Group>
+        </div>
       }
       open={open}
       onCancel={onClose}
       footer={null}
       width={950}
     >
-      <Stack gap="sm">
+      <Space direction="vertical" size="middle" style={{ width: '100%' }}>
         {/* Summary */}
-        <Paper p="xs" radius="sm" withBorder bg="blue.0">
-          <Group gap="lg" wrap="wrap">
-            <Group gap="xs">
-              <Text size="xs" c="dimmed">
-                Data Asli:
-              </Text>
-              <Text size="xs" fw={600}>
-                {snapshotData.length} usulan
-              </Text>
-              <Text size="xs" c="dimmed">
-                |
-              </Text>
-              <Text size="xs" fw={600}>
-                {snapshotData.reduce(
-                  (acc, item) => acc + (item.alokasi || 0),
-                  0
-                )}{" "}
-                alokasi
-              </Text>
-            </Group>
-            <Group gap="xs">
-              <Text size="xs" c="dimmed">
-                Saat Ini:
-              </Text>
-              <Text size="xs" fw={600}>
-                {currentData?.length || 0} usulan
-              </Text>
-              <Text size="xs" c="dimmed">
-                |
-              </Text>
-              <Text size="xs" fw={600}>
-                {(currentData || []).reduce(
-                  (acc, item) => acc + (item.alokasi || 0),
-                  0
-                )}{" "}
-                alokasi
-              </Text>
-            </Group>
+        <Card size="small" style={{ background: "#e6f7ff", borderColor: "#91d5ff" }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 24, justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', gap: 16 }}>
+                <div>
+                    <Text type="secondary" style={{ fontSize: 12 }}>Data Asli</Text>
+                    <div>
+                        <Text strong>{snapshotData.length} usulan</Text>
+                        <Text type="secondary"> | </Text>
+                        <Text strong>{snapshotData.reduce((acc, item) => acc + (item.alokasi || 0), 0)} alokasi</Text>
+                    </div>
+                </div>
+                <div>
+                    <Text type="secondary" style={{ fontSize: 12 }}>Saat Ini</Text>
+                    <div>
+                        <Text strong>{currentData?.length || 0} usulan</Text>
+                        <Text type="secondary"> | </Text>
+                        <Text strong>{(currentData || []).reduce((acc, item) => acc + (item.alokasi || 0), 0)} alokasi</Text>
+                    </div>
+                </div>
+            </div>
+            
             {hasChanges && (
-              <Group gap="xs">
-                {added.length > 0 && (
-                  <Badge size="xs" color="green" variant="light">
-                    +{added.length} baru
-                  </Badge>
-                )}
-                {modified.length > 0 && (
-                  <Badge size="xs" color="orange" variant="light">
-                    {modified.length} diubah
-                  </Badge>
-                )}
-                {removed.length > 0 && (
-                  <Badge size="xs" color="red" variant="light">
-                    -{removed.length} dihapus
-                  </Badge>
-                )}
-              </Group>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                {added.length > 0 && <Tag color="green">+{added.length} baru</Tag>}
+                {modified.length > 0 && <Tag color="orange">{modified.length} diubah</Tag>}
+                {removed.length > 0 && <Tag color="red">-{removed.length} dihapus</Tag>}
+              </div>
             )}
-          </Group>
-        </Paper>
+          </div>
+        </Card>
 
-        <ScrollArea h={400} offsetScrollbars>
+        <div style={{ maxHeight: 400, overflowY: 'auto' }}>
           <table style={tableStyle}>
             <thead>
               <tr>
-                <th style={{ ...thStyle, width: 60 }}>Jenis</th>
+                <th style={{ ...thStyle, width: 80 }}>Jenis</th>
                 <th style={{ ...thStyle, width: 200 }}>Nama Jabatan</th>
                 <th style={{ ...thStyle, width: 250 }}>Unit Kerja</th>
-                <th style={{ ...thStyle, width: 60, textAlign: "center" }}>
+                <th style={{ ...thStyle, width: 70, textAlign: "center" }}>
                   Alokasi
                 </th>
-                <th style={{ ...thStyle, width: 120 }}>Pendidikan</th>
-                <th style={{ ...thStyle, width: 80, textAlign: "center" }}>
+                <th style={{ ...thStyle, width: 150 }}>Pendidikan</th>
+                <th style={{ ...thStyle, width: 100, textAlign: "center" }}>
                   Status
                 </th>
               </tr>
@@ -824,15 +791,14 @@ const ComparisonModal = ({
 
           {/* No changes message */}
           {!hasChanges && unchanged.length > 0 && (
-            <Paper p="xs" radius="sm" withBorder bg="gray.0" mt="sm">
-              <Text size="xs" c="dimmed" ta="center">
-                Tidak ada perubahan. Data saat ini sama dengan data saat
-                pengajuan dikirim.
+            <div style={{ textAlign: 'center', padding: 24, background: '#fafafa', marginTop: 16, borderRadius: 4 }}>
+              <Text type="secondary">
+                Tidak ada perubahan. Data saat ini sama dengan data saat pengajuan dikirim.
               </Text>
-            </Paper>
+            </div>
           )}
-        </ScrollArea>
-      </Stack>
+        </div>
+      </Space>
     </Modal>
   );
 };
@@ -848,10 +814,8 @@ function UsulanList({
   const isAdmin = session?.user?.current_role === "admin";
   const queryClient = useQueryClient();
   const [deletingId, setDeletingId] = useState(null);
-
-  // Responsive breakpoints
-  const isMobile = useMediaQuery("(max-width: 768px)");
-  const isTablet = useMediaQuery("(max-width: 992px)");
+  const screens = useBreakpoint();
+  const isXs = !screens?.sm;
 
   // Get filters from URL (using kebab-case for cleaner URLs)
   const {
@@ -992,7 +956,7 @@ function UsulanList({
 
   // Comparison logic - compare data_usulan (snapshot) with current data
   const dataUsulanSnapshot = submissionData?.data_usulan || [];
-  const hasSnapshot =
+  const hasSnapshot = 
     submissionData?.is_confirmed && dataUsulanSnapshot.length > 0;
   const currentUsulanIds = new Set(
     (data?.data || []).map((item) => item.usulan_id)
@@ -1122,29 +1086,29 @@ function UsulanList({
       key: "nama_jabatan",
       ellipsis: true,
       render: (val, record) => {
-        const isNewItem =
+        const isNewItem = 
           hasSnapshot && !snapshotUsulanIds.has(record.usulan_id);
-        const isModifiedItem =
+        const isModifiedItem = 
           hasSnapshot &&
           comparisonStats?.modified?.some(
             (m) => m.current.usulan_id === record.usulan_id
           );
         return (
-          <Group gap="xs" wrap="nowrap">
-            <Text size="sm" fw={500} style={{ flex: 1 }}>
+          <Space>
+            <Text strong style={{ flex: 1 }}>
               {val || record.jabatan_id}
             </Text>
             {isNewItem && (
-              <Badge size="xs" color="green" variant="light">
+              <Tag color="green">
                 Baru
-              </Badge>
+              </Tag>
             )}
             {isModifiedItem && (
-              <Badge size="xs" color="orange" variant="light">
+              <Tag color="orange">
                 Diubah
-              </Badge>
+              </Tag>
             )}
-          </Group>
+          </Space>
         );
       },
     },
@@ -1156,26 +1120,23 @@ function UsulanList({
       render: (val) => {
         if (!val?.length)
           return (
-            <Text size="xs" c="dimmed">
+            <Text type="secondary">
               -
             </Text>
           );
         return (
-          <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
             {val.map((item, i) => (
               <Tag
                 key={i}
-                color="green"
                 style={{
                   margin: 0,
-                  fontSize: 10,
-                  padding: "0 4px",
-                  lineHeight: "16px",
+                  fontSize: 11,
                   whiteSpace: "normal",
                   height: "auto",
                 }}
               >
-                {item.tk_pend} - {item.label}
+                <b>{item.tk_pend}</b> - {item.label}
               </Tag>
             ))}
           </div>
@@ -1189,7 +1150,7 @@ function UsulanList({
       width: 250,
       render: (val, record) => (
         <Tooltip title={val || record.unit_kerja}>
-          <Text size="xs" lineClamp={2} style={{ whiteSpace: "normal" }}>
+          <Text style={{ whiteSpace: "normal" }} ellipsis={{ rows: 2 }}>
             {val || record.unit_kerja}
           </Text>
         </Tooltip>
@@ -1202,7 +1163,7 @@ function UsulanList({
       width: 80,
       align: "center",
       render: (val) => (
-        <Text size="sm" fw={600} c="blue">
+        <Text strong style={{ color: "#1890ff" }}>
           {val}
         </Text>
       ),
@@ -1210,24 +1171,22 @@ function UsulanList({
     {
       title: "Aksi",
       key: "action",
-      width: 80,
+      width: 100,
       align: "center",
       render: (_, record) => {
         const canEdit = isEditable;
         const canDelete = isEditable;
 
         return (
-          <Group gap={4} justify="center">
+          <Space size="small">
             <Tooltip title={canEdit ? "Edit" : "Tidak dapat diedit"}>
-              <ActionIcon
-                variant="subtle"
-                color="green"
-                size="sm"
+              <Button
+                type="text"
+                icon={<IconEdit size={16} />}
+                style={{ color: canEdit ? "#52c41a" : undefined }}
                 onClick={() => setModal({ open: true, data: record })}
                 disabled={!canEdit}
-              >
-                <IconEdit size={14} />
-              </ActionIcon>
+              />
             </Tooltip>
             <Popconfirm
               title="Hapus usulan?"
@@ -1237,18 +1196,16 @@ function UsulanList({
               disabled={!canDelete}
             >
               <Tooltip title="Hapus">
-                <ActionIcon
-                  variant="subtle"
-                  color="red"
-                  size="sm"
+                <Button
+                  type="text"
+                  icon={<IconTrash size={16} />}
+                  danger
                   disabled={!canDelete}
                   loading={deletingId === record.usulan_id}
-                >
-                  <IconTrash size={14} />
-                </ActionIcon>
+                />
               </Tooltip>
             </Popconfirm>
-          </Group>
+          </Space>
         );
       },
     },
@@ -1269,9 +1226,9 @@ function UsulanList({
       });
 
       if (!allData?.data?.length) {
-        message.warning({
-          content: "Tidak ada data untuk diunduh",
-          key: "download",
+        message.warning({ 
+          content: "Tidak ada data untuk diunduh", 
+          key: "download"
         });
         return;
       }
@@ -1304,12 +1261,12 @@ function UsulanList({
           "SD",
         ];
         return [...pendidikanList].sort((a, b) => {
-          const levelA =
-            levelOrder.findIndex((l) =>
+          const levelA = 
+            levelOrder.findIndex((l) => 
               a.tk_pend?.toUpperCase()?.includes(l)
             ) ?? 999;
-          const levelB =
-            levelOrder.findIndex((l) =>
+          const levelB = 
+            levelOrder.findIndex((l) => 
               b.tk_pend?.toUpperCase()?.includes(l)
             ) ?? 999;
           return levelA - levelB;
@@ -1318,7 +1275,7 @@ function UsulanList({
 
       // Get formasi and perangkat daerah info from submissionData
       const formasiTitle = submissionData?.formasi?.deskripsi || "Formasi";
-      const perangkatDaerah =
+      const perangkatDaerah = 
         submissionData?.pembuat?.unor?.name ||
         submissionData?.pembuat?.perangkat_daerah_detail ||
         "-";
@@ -1341,7 +1298,7 @@ function UsulanList({
         // Add title rows
         ws.mergeCells("A1:F1");
         const titleCell = ws.getCell("A1");
-        titleCell.value = `DAFTAR USULAN KEBUTUHAN ${formasiTitle.toUpperCase()}${
+        titleCell.value = `DAFTAR USULAN KEBUTUHAN ${formasiTitle.toUpperCase()}${ 
           isSnapshot ? " (SAAT DIKIRIM)" : ""
         }`;
         titleCell.font = { bold: true, size: 14 };
@@ -1405,7 +1362,7 @@ function UsulanList({
           const sortedPendidikan = sortPendidikan(
             item.kualifikasi_pendidikan_detail
           );
-          const kualifikasiText =
+          const kualifikasiText = 
             sortedPendidikan.length > 0
               ? sortedPendidikan
                   .map((p) => `${p.tk_pend} - ${p.label}`)
@@ -1478,7 +1435,7 @@ function UsulanList({
       };
 
       // Check if we need to add snapshot sheet
-      const shouldAddSnapshot =
+      const shouldAddSnapshot = 
         submissionStatus !== "draft" &&
         submissionStatus !== "menunggu" &&
         hasSnapshot;
@@ -1507,289 +1464,252 @@ function UsulanList({
   };
 
   return (
-    <Stack gap="xs">
+    <div>
       {/* Comparison Summary - Show when is_confirmed and has snapshot */}
       {hasSnapshot && (
-        <Paper p="xs" radius="sm" withBorder bg="gray.0">
-          <Group gap="md" wrap="wrap" justify="space-between">
-            <Group gap="md" wrap="wrap">
-              <Group gap="xs">
-                <IconGitCompare size={14} color="#868e96" />
-                <Text size="xs" c="dimmed">
-                  Data saat dikirim:
-                </Text>
-                <Text size="xs" fw={600}>
-                  {dataUsulanSnapshot.length} usulan
-                </Text>
-                <Text size="xs" c="dimmed">
-                  |
-                </Text>
-                <Text size="xs" fw={600}>
-                  {dataUsulanSnapshot.reduce(
-                    (acc, item) => acc + (item.alokasi || 0),
-                    0
-                  )}{" "}
-                  alokasi
-                </Text>
-              </Group>
-              {comparisonStats.added.length > 0 ||
-              comparisonStats.removed.length > 0 ||
-              comparisonStats.modified.length > 0 ? (
-                <Group gap="xs">
-                  <Text size="xs" c="dimmed">
-                    Perubahan:
-                  </Text>
-                  {comparisonStats.added.length > 0 && (
-                    <Badge
-                      size="xs"
-                      color="green"
-                      variant="light"
-                      leftSection={<IconCirclePlus size={10} />}
-                    >
-                      +{comparisonStats.added.length} baru
-                    </Badge>
-                  )}
-                  {comparisonStats.modified.length > 0 && (
-                    <Badge
-                      size="xs"
-                      color="orange"
-                      variant="light"
-                      leftSection={<IconEdit size={10} />}
-                    >
-                      {comparisonStats.modified.length} diubah
-                    </Badge>
-                  )}
-                  {comparisonStats.removed.length > 0 && (
-                    <Badge
-                      size="xs"
-                      color="red"
-                      variant="light"
-                      leftSection={<IconCircleMinus size={10} />}
-                    >
-                      -{comparisonStats.removed.length} dihapus
-                    </Badge>
-                  )}
-                </Group>
+        <Card size="small" style={{ marginBottom: 16, background: "#fafafa" }} bordered>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
+            <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
+              <Space>
+                <IconGitCompare size={16} color="#868e96" />
+                <Text type="secondary">Data saat dikirim:</Text>
+                <Text strong>{dataUsulanSnapshot.length} usulan</Text>
+                <Text type="secondary">|</Text>
+                <Text strong>{dataUsulanSnapshot.reduce((acc, item) => acc + (item.alokasi || 0), 0)} alokasi</Text>
+              </Space>
+              
+              {(comparisonStats.added.length > 0 || comparisonStats.removed.length > 0 || comparisonStats.modified.length > 0) ? (
+                <Space>
+                  <Text type="secondary">Perubahan:</Text>
+                  {comparisonStats.added.length > 0 && <Tag color="green">+{comparisonStats.added.length} baru</Tag>}
+                  {comparisonStats.modified.length > 0 && <Tag color="orange">{comparisonStats.modified.length} diubah</Tag>}
+                  {comparisonStats.removed.length > 0 && <Tag color="red">-{comparisonStats.removed.length} dihapus</Tag>}
+                </Space>
               ) : (
-                <Badge size="xs" color="gray" variant="light">
-                  Tidak ada perubahan
-                </Badge>
+                <Tag>Tidak ada perubahan</Tag>
               )}
-            </Group>
+            </div>
             <Tooltip title="Lihat detail perbandingan">
-              <Button
-                size="small"
-                type="text"
-                icon={<IconEye size={14} />}
-                onClick={() => setComparisonModal(true)}
-              >
+              <Button type="text" icon={<IconEye size={16} />} onClick={() => setComparisonModal(true)}>
                 Detail
               </Button>
             </Tooltip>
-          </Group>
-        </Paper>
+          </div>
+        </Card>
       )}
 
-      {/* Filter Row (Full Width) */}
-      <Paper p="xs" radius="sm" withBorder>
-        <Group gap="xs" wrap="wrap" justify="space-between">
-          {/* Filters */}
-          <Group gap="xs" wrap="wrap" style={{ flex: 1 }}>
-            <Select
-              placeholder="Jenis Jabatan"
-              value={urlJenis || undefined}
-              onChange={(val) => {
-                updateFilters({ jenis: val || "", jabatan: "", page: 1 });
+      {/* Main Content Card */}
+      <div style={{ maxWidth: "100%" }}>
+        <Card
+          style={{
+            borderRadius: "12px",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+            border: "none",
+          }}
+        >
+          {/* Header Section */}
+          <div
+            style={{
+              background: "#FF4500",
+              color: "white",
+              padding: "24px",
+              textAlign: "center",
+              borderRadius: "12px 12px 0 0",
+              margin: "-24px -24px 0 -24px",
+            }}
+          >
+            <IconClipboardList size={32} style={{ marginBottom: 8 }} />
+            <Title level={3} style={{ color: "white", margin: 0 }}>
+              Daftar Usulan Jabatan
+            </Title>
+            <Text style={{ color: "rgba(255,255,255,0.9)", fontSize: "14px" }}>
+              Kelola rincian usulan jabatan formasi
+            </Text>
+          </div>
+
+          {/* Filter and Actions Section */}
+          <div style={{ padding: "20px 0 16px 0", borderBottom: "1px solid #f0f0f0" }}>
+            <Row gutter={[12, 12]} align="middle" justify="space-between">
+              <Col xs={24} md={18}>
+                <Row gutter={[8, 8]} align="middle">
+                  <Col xs={24} sm={8} md={4}>
+                    <Select
+                      size="small"
+                      placeholder="Jenis Jabatan"
+                      value={urlJenis || undefined}
+                      onChange={(val) => {
+                        updateFilters({ jenis: val || "", jabatan: "", page: 1 });
+                      }}
+                      style={{ width: "100%" }}
+                      allowClear
+                    >
+                      <Select.Option value="pelaksana">Pelaksana</Select.Option>
+                      <Select.Option value="fungsional">Fungsional</Select.Option>
+                    </Select>
+                  </Col>
+                  <Col xs={24} sm={8} md={6}>
+                    <TreeSelect
+                      size="small"
+                      placeholder={isLoadingJabatan ? "Memuat..." : "Filter Jabatan"}
+                      value={urlJabatan || undefined}
+                      onChange={(val) => updateFilters({ jabatan: val || "", page: 1 })}
+                      treeData={jabatanTreeData}
+                      showSearch
+                      treeNodeFilterProp="label"
+                      allowClear
+                      disabled={isLoadingJabatan}
+                      style={{ width: "100%" }}
+                      dropdownStyle={{ maxHeight: 400, overflow: "auto" }}
+                      notFoundContent={isLoadingJabatan ? "Memuat..." : "Tidak ditemukan"}
+                    />
+                  </Col>
+                  <Col xs={24} sm={8} md={10}>
+                    <TreeSelect
+                      size="small"
+                      placeholder="Unit Kerja"
+                      value={urlUnitKerja || undefined}
+                      onChange={(val) => updateFilters({ "unit-kerja": val || "", page: 1 })}
+                      treeData={opdTree}
+                      showSearch
+                      treeNodeFilterProp="label"
+                      allowClear
+                      loading={loadingOpd}
+                      style={{ width: "100%" }}
+                      dropdownStyle={{ maxHeight: 400, overflow: "auto" }}
+                    />
+                  </Col>
+                </Row>
+              </Col>
+              <Col xs={24} md={6} style={{ display: "flex", justifyContent: isXs ? "flex-start" : "flex-end" }}>
+                <Space wrap>
+                  <Tooltip title="Refresh">
+                    <Button icon={<IconRefresh size={16} />} onClick={() => refetch()} />
+                  </Tooltip>
+                  <Button
+                    icon={<IconDownload size={16} />}
+                    loading={downloading}
+                    onClick={handleDownloadExcel}
+                    type="primary"
+                    ghost
+                  >
+                    Unduh
+                  </Button>
+                  <Tooltip title={!isEditable ? "Tidak dapat menambah data" : "Tambah Jabatan"}>
+                    <Button
+                        type="primary"
+                        icon={<IconPlus size={16} />}
+                        onClick={() => setModal({ open: true, data: null })}
+                        disabled={!isEditable}
+                    >
+                        Tambah
+                    </Button>
+                  </Tooltip>
+                </Space>
+              </Col>
+            </Row>
+          </div>
+
+          {/* Table Section */}
+          <div style={{ marginTop: "16px" }}>
+            <Table
+              dataSource={data?.data || []}
+              columns={columns}
+              rowKey="usulan_id"
+              size="middle"
+              loading={isLoading}
+              pagination={{
+                position: ["bottomRight"],
+                current: Number(urlPage),
+                pageSize: Number(urlLimit),
+                total: data?.meta?.total || 0,
+                showSizeChanger: true,
+                showTotal: (total, range) => `${range[0]}-${range[1]} dari ${total}`,
+                onChange: (p, l) => updateFilters({ page: p, limit: l }),
               }}
-              style={{ width: 120 }}
-              size="small"
-              allowClear
-            >
-              <Select.Option value="pelaksana">Pelaksana</Select.Option>
-              <Select.Option value="fungsional">Fungsional</Select.Option>
-            </Select>
-            <TreeSelect
-              placeholder={isLoadingJabatan ? "Memuat..." : "Filter Jabatan"}
-              value={urlJabatan || undefined}
-              onChange={(val) => updateFilters({ jabatan: val || "", page: 1 })}
-              treeData={jabatanTreeData}
-              showSearch
-              treeNodeFilterProp="label"
-              allowClear
-              disabled={isLoadingJabatan}
-              style={{ width: 200 }}
-              size="small"
-              dropdownStyle={{ maxHeight: 400, overflow: "auto" }}
-              notFoundContent={isLoadingJabatan ? "Memuat..." : "Tidak ditemukan"}
+              scroll={{ x: 1200 }}
+              expandable={{
+                expandedRowRender: (record) => {
+                  const hasCatatan = record.catatan;
+                  const hasAlasanPerbaikan = record.alasan_perbaikan;
+                  const hasVerifier = record.diverifikasiOleh || record.diverifikasi_pada;
+
+                  if (!hasCatatan && !hasAlasanPerbaikan && !hasVerifier) return null;
+
+                  const items = [];
+
+                  if (hasVerifier) {
+                    items.push({
+                      key: "verifikasi",
+                      label: (
+                        <Space>
+                          <IconUser size={14} color="#52c41a" />
+                          <Text type="success" strong>Informasi Verifikasi</Text>
+                        </Space>
+                      ),
+                      children: (
+                        <Space direction="vertical" size={0}> 
+                          {record.diverifikasiOleh && (
+                            <Space>
+                              <Text type="secondary">Diverifikasi oleh:</Text>
+                              <Text strong>{record.diverifikasiOleh.username || record.diverifikasiOleh.custom_id || "-"}</Text>
+                            </Space>
+                          )}
+                          {record.diverifikasi_pada && (
+                            <Space>
+                              <Text type="secondary">Tanggal verifikasi:</Text>
+                              <Text strong>{dayjs(record.diverifikasi_pada).format("DD/MM/YYYY HH:mm")}</Text>
+                            </Space>
+                          )}
+                        </Space>
+                      ),
+                    });
+                  }
+
+                  if (hasAlasanPerbaikan) {
+                    items.push({
+                      key: "alasan_perbaikan",
+                      label: (
+                        <Space>
+                          <IconAlertCircle size={14} color="#ff4d4f" />
+                          <Text type="danger" strong>Alasan Perbaikan</Text>
+                        </Space>
+                      ),
+                      children: <Text style={{ whiteSpace: "pre-wrap" }}>{record.alasan_perbaikan}</Text>,
+                    });
+                  }
+
+                  if (hasCatatan) {
+                    items.push({
+                      key: "catatan",
+                      label: (
+                        <Space>
+                          <IconMessage size={14} color="#1890ff" />
+                          <Text style={{ color: "#1890ff" }} strong>Catatan Verifikasi</Text>
+                        </Space>
+                      ),
+                      children: <Text style={{ whiteSpace: "pre-wrap" }}>{record.catatan}</Text>,
+                    });
+                  }
+
+                  return (
+                    <div style={{ paddingLeft: 24 }}>
+                      <Collapse
+                        items={items}
+                        defaultActiveKey={["verifikasi", "alasan_perbaikan", "catatan"]}
+                        size="small"
+                        ghost
+                      />
+                    </div>
+                  );
+                },
+                rowExpandable: (record) =>
+                  record.status !== "menunggu" &&
+                  (record.catatan || record.alasan_perbaikan || record.diverifikasiOleh || record.diverifikasi_pada),
+              }}
             />
-            <TreeSelect
-              placeholder="Unit Kerja"
-              value={urlUnitKerja || undefined}
-              onChange={(val) => updateFilters({ "unit-kerja": val || "", page: 1 })}
-              treeData={opdTree}
-              showSearch
-              treeNodeFilterProp="label"
-              allowClear
-              loading={loadingOpd}
-              style={{ width: 180 }}
-              size="small"
-              dropdownStyle={{ maxHeight: 400, overflow: "auto" }}
-            />
-          </Group>
-          {/* Action Buttons */}
-          <Group gap="xs" wrap="nowrap">
-            <Tooltip title="Refresh">
-              <Button icon={<IconRefresh size={14} />} onClick={() => refetch()} size="small" />
-            </Tooltip>
-            <Button icon={<IconDownload size={14} />} size="small" loading={downloading} onClick={handleDownloadExcel}>
-              {isMobile ? null : "Unduh"}
-            </Button>
-            <Tooltip title={!isEditable ? "Tidak dapat menambah data" : "Tambah Jabatan"}>
-              <Button type="primary" icon={<IconPlus size={14} />} onClick={() => setModal({ open: true, data: null })} size="small" disabled={!isEditable}>
-                {isMobile ? null : "Tambah"}
-              </Button>
-            </Tooltip>
-          </Group>
-        </Group>
-      </Paper>
-
-      {/* Table */}
-      <Paper p="xs" radius="sm" withBorder>
-        <Table
-          dataSource={data?.data || []}
-          columns={columns}
-          rowKey="usulan_id"
-          size="small"
-          loading={isLoading}
-          pagination={{
-            current: Number(urlPage),
-            pageSize: Number(urlLimit),
-            total: data?.meta?.total || 0,
-            showSizeChanger: true,
-            showTotal: (total, range) =>
-              `${range[0]}-${range[1]} dari ${total}`,
-            onChange: (p, l) => updateFilters({ page: p, limit: l }),
-          }}
-          scroll={{ x: isMobile ? 900 : 1200 }}
-          expandable={{
-            expandedRowRender: (record) => {
-              // Only show expanded content if status is not "menunggu" and has content to show
-              const hasCatatan = record.catatan;
-              const hasAlasanPerbaikan = record.alasan_perbaikan;
-              const hasVerifier =
-                record.diverifikasiOleh || record.diverifikasi_pada;
-
-              if (!hasCatatan && !hasAlasanPerbaikan && !hasVerifier)
-                return null;
-
-              const items = [];
-
-              // Add verifier info first
-              if (hasVerifier) {
-                items.push({
-                  key: "verifikasi",
-                  label: (
-                    <Group gap={6}>
-                      <IconUser size={14} color="#40c057" />
-                      <Text size="xs" fw={500} c="green">
-                        Informasi Verifikasi
-                      </Text>
-                    </Group>
-                  ),
-                  children: (
-                    <Stack gap={4}>
-                      {record.diverifikasiOleh && (
-                        <Group gap={4}>
-                          <Text size="xs" c="dimmed">
-                            Diverifikasi oleh:
-                          </Text>
-                          <Text size="xs" fw={500}>
-                            {record.diverifikasiOleh.username ||
-                              record.diverifikasiOleh.custom_id ||
-                              "-"}
-                          </Text>
-                        </Group>
-                      )}
-                      {record.diverifikasi_pada && (
-                        <Group gap={4}>
-                          <Text size="xs" c="dimmed">
-                            Tanggal verifikasi:
-                          </Text>
-                          <Text size="xs" fw={500}>
-                            {dayjs(record.diverifikasi_pada).format(
-                              "DD/MM/YYYY HH:mm"
-                            )}
-                          </Text>
-                        </Group>
-                      )}
-                    </Stack>
-                  ),
-                });
-              }
-
-              if (hasAlasanPerbaikan) {
-                items.push({
-                  key: "alasan_perbaikan",
-                  label: (
-                    <Group gap={6}>
-                      <IconAlertCircle size={14} color="#fa5252" />
-                      <Text size="xs" fw={500} c="red">
-                        Alasan Perbaikan
-                      </Text>
-                    </Group>
-                  ),
-                  children: (
-                    <Text size="xs" style={{ whiteSpace: "pre-wrap" }}>
-                      {record.alasan_perbaikan}
-                    </Text>
-                  ),
-                });
-              }
-
-              if (hasCatatan) {
-                items.push({
-                  key: "catatan",
-                  label: (
-                    <Group gap={6}>
-                      <IconMessage size={14} color="#228be6" />
-                      <Text size="xs" fw={500} c="blue">
-                        Catatan Verifikasi
-                      </Text>
-                    </Group>
-                  ),
-                  children: (
-                    <Text size="xs" style={{ whiteSpace: "pre-wrap" }}>
-                      {record.catatan}
-                    </Text>
-                  ),
-                });
-              }
-
-              return (
-                <Box pl="md">
-                  <Collapse
-                    items={items}
-                    defaultActiveKey={[
-                      "verifikasi",
-                      "alasan_perbaikan",
-                      "catatan",
-                    ]}
-                    size="small"
-                    bordered={false}
-                    style={{ background: "transparent" }}
-                  />
-                </Box>
-              );
-            },
-            rowExpandable: (record) =>
-              record.status !== "menunggu" &&
-              (record.catatan ||
-                record.alasan_perbaikan ||
-                record.diverifikasiOleh ||
-                record.diverifikasi_pada),
-          }}
-        />
-      </Paper>
+          </div>
+        </Card>
+      </div>
 
       {/* Modals */}
       <UsulanModal
@@ -1806,7 +1726,7 @@ function UsulanList({
         currentData={data?.data || []}
         comparisonStats={comparisonStats}
       />
-    </Stack>
+    </div>
   );
 }
 

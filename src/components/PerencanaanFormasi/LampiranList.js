@@ -8,14 +8,6 @@ import {
 import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
 import {
-  ActionIcon,
-  Group,
-  Paper,
-  Stack,
-  Text,
-} from "@mantine/core";
-import { useDebouncedValue, useMediaQuery } from "@mantine/hooks";
-import {
   IconDownload,
   IconEdit,
   IconEye,
@@ -25,6 +17,7 @@ import {
   IconRefresh,
   IconTrash,
   IconUpload,
+  IconPaperclip
 } from "@tabler/icons-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -38,10 +31,20 @@ import {
   Tag,
   Tooltip,
   Upload,
+  Card,
+  Row,
+  Col,
+  Typography,
+  Space,
+  Grid
 } from "antd";
 import dayjs from "dayjs";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useState } from "react";
+import { useDebouncedValue } from "@mantine/hooks";
+
+const { Title, Text } = Typography;
+const { useBreakpoint } = Grid;
 
 // Format file size
 const formatFileSize = (bytes) => {
@@ -79,7 +82,8 @@ const UploadModal = ({ open, onClose, formasiId }) => {
   const [form] = Form.useForm();
   const [file, setFile] = useState(null);
   const queryClient = useQueryClient();
-  const isMobile = useMediaQuery("(max-width: 768px)");
+  const screens = useBreakpoint();
+  const isXs = !screens?.sm;
 
   const { mutate: upload, isLoading } = useMutation(
     (formData) => uploadLampiran(formData),
@@ -124,16 +128,16 @@ const UploadModal = ({ open, onClose, formasiId }) => {
   return (
     <Modal
       title={
-        <Group gap="xs">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <IconUpload size={18} />
           <span>Lampiran Baru</span>
-        </Group>
+        </div>
       }
       open={open}
       onCancel={handleClose}
-      width={isMobile ? "95%" : 500}
+      width={isXs ? "95%" : 500}
       destroyOnClose
-      centered={isMobile}
+      centered={isXs}
       footer={
         <div style={{ textAlign: "right" }}>
           <Button onClick={handleClose} style={{ marginRight: 8 }}>
@@ -149,10 +153,10 @@ const UploadModal = ({ open, onClose, formasiId }) => {
         <Form.Item
           name="nama_dokumen"
           label={
-            <Group gap={4}>
+            <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
               <IconFileText size={14} />
               <span>Nama Dokumen</span>
-            </Group>
+            </div>
           }
         >
           <Input placeholder="Contoh: kppi_2026" prefix={<IconFile size={14} color="#868e96" />} />
@@ -160,10 +164,10 @@ const UploadModal = ({ open, onClose, formasiId }) => {
 
         <Form.Item
           label={
-            <Group gap={4}>
+            <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
               <IconUpload size={14} />
               <span>Upload Dokumen Lampiran</span>
-            </Group>
+            </div>
           }
           required
         >
@@ -215,7 +219,8 @@ const EditModal = ({ open, onClose, data }) => {
   const [file, setFile] = useState(null);
   const [currentExt, setCurrentExt] = useState("");
   const queryClient = useQueryClient();
-  const isMobile = useMediaQuery("(max-width: 768px)");
+  const screens = useBreakpoint();
+  const isXs = !screens?.sm;
 
   // Set current extension when data changes
   useEffect(() => {
@@ -268,16 +273,16 @@ const EditModal = ({ open, onClose, data }) => {
   return (
     <Modal
       title={
-        <Group gap="xs">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <IconEdit size={18} />
           <span>Edit Lampiran</span>
-        </Group>
+        </div>
       }
       open={open}
       onCancel={handleClose}
-      width={isMobile ? "95%" : 550}
+      width={isXs ? "95%" : 550}
       destroyOnClose
-      centered={isMobile}
+      centered={isXs}
       footer={
         <div style={{ textAlign: "right" }}>
           <Button onClick={handleClose} style={{ marginRight: 8 }}>
@@ -290,33 +295,33 @@ const EditModal = ({ open, onClose, data }) => {
       }
     >
       {/* Current File Info */}
-      <Paper p="xs" radius="sm" withBorder mb="md" bg="gray.0">
-        <Stack gap={4}>
-          <Group gap="xs">
-            <Text size="xs" c="dimmed" w={100}>File Saat Ini:</Text>
-            <Group gap={4}>
+      <Card size="small" style={{ marginBottom: 16, background: "#fafafa" }} bordered>
+        <Space direction="vertical" size={4} style={{ width: "100%" }}>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <Text type="secondary" style={{ width: 100 }}>File Saat Ini:</Text>
+            <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
               <IconFile size={14} color="#868e96" />
-              <Text size="sm" fw={500}>{data.file_name}</Text>
-            </Group>
-          </Group>
-          <Group gap="xs">
-            <Text size="xs" c="dimmed" w={100}>Ukuran:</Text>
-            <Text size="sm">{formatFileSize(data.file_size)}</Text>
-          </Group>
-          <Group gap="xs">
-            <Text size="xs" c="dimmed" w={100}>Tipe:</Text>
+              <Text strong>{data.file_name}</Text>
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <Text type="secondary" style={{ width: 100 }}>Ukuran:</Text>
+            <Text>{formatFileSize(data.file_size)}</Text>
+          </div>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <Text type="secondary" style={{ width: 100 }}>Tipe:</Text>
             <FileTypeTag type={data.file_type} />
-          </Group>
+          </div>
           {data.file_url && (
-            <Group gap="xs">
-              <Text size="xs" c="dimmed" w={100}>URL:</Text>
-              <a href={data.file_url} target="_blank" rel="noopener noreferrer">
-                <Text size="xs" c="blue">Buka file</Text>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <Text type="secondary" style={{ width: 100 }}>URL:</Text>
+              <a href={data.file_url} target="_blank" rel="noopener noreferrer" style={{ color: '#1890ff' }}>
+                Buka file
               </a>
-            </Group>
+            </div>
           )}
-        </Stack>
-      </Paper>
+        </Space>
+      </Card>
 
       <Form
         form={form}
@@ -327,25 +332,25 @@ const EditModal = ({ open, onClose, data }) => {
         <Form.Item
           name="file_name"
           label={
-            <Group gap={4}>
+            <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
               <IconFile size={14} />
               <span>Nama File (tanpa extension)</span>
-            </Group>
+            </div>
           }
         >
           <Input
             placeholder="Nama file"
             prefix={<IconFile size={14} color="#868e96" />}
-            suffix={<Text size="xs" c="dimmed">.{currentExt || file?.name?.split(".").pop()}</Text>}
+            suffix={<Text type="secondary" style={{ fontSize: 12 }}>.{currentExt || file?.name?.split(".").pop()}</Text>}
           />
         </Form.Item>
 
         <Form.Item
           label={
-            <Group gap={4}>
+            <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
               <IconUpload size={14} />
               <span>Upload File Baru (Opsional)</span>
-            </Group>
+            </div>
           }
           extra="Biarkan kosong jika tidak ingin mengganti file"
         >
@@ -403,9 +408,8 @@ function LampiranList({ formasiId, formasiUsulanId, formasi, submissionStatus })
   const [uploadModal, setUploadModal] = useState(false);
   const [editModal, setEditModal] = useState({ open: false, data: null });
   const [downloading, setDownloading] = useState(null);
-
-  // Responsive breakpoints
-  const isMobile = useMediaQuery("(max-width: 768px)");
+  const screens = useBreakpoint();
+  const isXs = !screens?.sm;
 
   // Determine if editable based on submission status
   const isEditable = !submissionStatus || submissionStatus === "draft" || submissionStatus === "perbaikan";
@@ -445,7 +449,7 @@ function LampiranList({ formasiId, formasiUsulanId, formasi, submissionStatus })
   const filters = { page: Number(lPage), limit: Number(lLimit), search: lSearch };
 
   // Fetch lampiran
-  const { data, isLoading, refetch } = useQuery(
+  const { data, isLoading, refetch, isFetching } = useQuery(
     ["perencanaan-lampiran", filters],
     () => getLampiran(filters),
     { keepPreviousData: true }
@@ -491,6 +495,7 @@ function LampiranList({ formasiId, formasiUsulanId, formasi, submissionStatus })
       title: "No",
       key: "no",
       width: 50,
+      align: 'center',
       render: (_, __, index) => (filters.page - 1) * filters.limit + index + 1,
     },
     {
@@ -500,10 +505,10 @@ function LampiranList({ formasiId, formasiUsulanId, formasi, submissionStatus })
       ellipsis: true,
       render: (val) => (
         <Tooltip title={val}>
-          <Group gap={6}>
-            <IconFile size={14} color="#868e96" />
-            <Text size="sm">{stripExtension(val)}</Text>
-          </Group>
+          <Space>
+            <IconFile size={16} color="#868e96" />
+            <Text>{stripExtension(val)}</Text>
+          </Space>
         </Tooltip>
       ),
     },
@@ -511,8 +516,8 @@ function LampiranList({ formasiId, formasiUsulanId, formasi, submissionStatus })
       title: "Ukuran",
       dataIndex: "file_size",
       key: "file_size",
-      width: 90,
-      render: (val) => <Text size="xs" c="dimmed">{formatFileSize(val)}</Text>,
+      width: 100,
+      render: (val) => <Text type="secondary" style={{ fontSize: 12 }}>{formatFileSize(val)}</Text>,
     },
     {
       title: "URL",
@@ -523,17 +528,15 @@ function LampiranList({ formasiId, formasiUsulanId, formasi, submissionStatus })
       render: (val) =>
         val ? (
           <Tooltip title="Buka URL">
-            <ActionIcon
-              variant="subtle"
-              color="blue"
-              size="sm"
+            <Button
+              type="text"
+              icon={<IconEye size={16} />}
+              style={{ color: "#1890ff" }}
               onClick={() => window.open(val, "_blank")}
-            >
-              <IconEye size={14} />
-            </ActionIcon>
+            />
           </Tooltip>
         ) : (
-          <Text size="xs" c="dimmed">-</Text>
+          <Text type="secondary">-</Text>
         ),
     },
     {
@@ -548,44 +551,40 @@ function LampiranList({ formasiId, formasiUsulanId, formasi, submissionStatus })
       dataIndex: "dibuatOleh",
       key: "dibuatOleh",
       width: 130,
-      render: (val) => <Text size="xs" c="dimmed">{val?.username || "-"}</Text>,
+      render: (val) => <Text type="secondary" style={{ fontSize: 12 }}>{val?.username || "-"}</Text>,
     },
     {
       title: "Upload at",
       dataIndex: "dibuat_pada",
       key: "dibuat_pada",
       width: 130,
-      render: (val) => <Text size="xs" c="dimmed">{dayjs(val).format("DD-MM-YYYY HH:mm")}</Text>,
+      render: (val) => <Text type="secondary" style={{ fontSize: 12 }}>{dayjs(val).format("DD-MM-YYYY HH:mm")}</Text>,
     },
     {
       title: "Aksi",
       key: "action",
-      width: 110,
+      width: 120,
       align: "center",
       render: (_, record) => (
-        <Group gap={4} justify="center">
+        <Space size="small">
           {isEditable && (
             <Tooltip title="Edit">
-              <ActionIcon
-                variant="subtle"
-                color="blue"
-                size="sm"
+              <Button
+                type="text"
+                icon={<IconEdit size={16} />}
+                style={{ color: "#1890ff" }}
                 onClick={() => setEditModal({ open: true, data: record })}
-              >
-                <IconEdit size={14} />
-              </ActionIcon>
+              />
             </Tooltip>
           )}
           <Tooltip title="Download">
-            <ActionIcon
-              variant="subtle"
-              color="green"
-              size="sm"
+            <Button
+              type="text"
+              icon={<IconDownload size={16} />}
+              style={{ color: "#52c41a" }}
               onClick={() => handleDownload(record)}
               loading={downloading === record.lampiran_id}
-            >
-              <IconDownload size={14} />
-            </ActionIcon>
+            />
           </Tooltip>
           {isEditable && (
             <Popconfirm
@@ -595,13 +594,16 @@ function LampiranList({ formasiId, formasiUsulanId, formasi, submissionStatus })
               cancelText="Tidak"
             >
               <Tooltip title="Hapus">
-                <ActionIcon variant="subtle" color="red" size="sm" loading={isDeleting}>
-                  <IconTrash size={14} />
-                </ActionIcon>
+                <Button
+                  type="text"
+                  icon={<IconTrash size={16} />}
+                  danger
+                  loading={isDeleting}
+                />
               </Tooltip>
             </Popconfirm>
           )}
-        </Group>
+        </Space>
       ),
     },
   ];
@@ -658,84 +660,112 @@ function LampiranList({ formasiId, formasiUsulanId, formasi, submissionStatus })
   };
 
   return (
-    <Stack gap="xs">
-      {/* Header: Stats */}
-      <Paper p="xs" radius="sm" withBorder>
-        <Group gap="lg">
-          <Group gap={4}>
-            <Text size="xs" c="dimmed">Total File:</Text>
-            <Text size="sm" fw={600}>{total}</Text>
-          </Group>
-        </Group>
-      </Paper>
-
-      {/* Filter Row */}
-      <Paper p="xs" radius="sm" withBorder>
-        <Group gap="xs" wrap="wrap" justify="space-between">
-          <Group gap="xs" wrap="wrap" style={{ flex: 1 }}>
-            <Input
-              placeholder="Cari file..."
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              style={{ width: isMobile ? "100%" : 200, flex: isMobile ? 1 : undefined }}
-              size="small"
-              allowClear
-            />
-          </Group>
-          <Group gap="xs" wrap="nowrap">
-            <Tooltip title="Refresh">
-              <Button icon={<IconRefresh size={14} />} onClick={() => refetch()} size="small" />
-            </Tooltip>
-            <Button
-              icon={<IconDownload size={14} />}
-              size="small"
-              loading={downloadingExcel}
-              onClick={handleDownloadExcel}
-            >
-              {isMobile ? null : "Unduh"}
-            </Button>
-            {isEditable && (
-              <Tooltip
-                title={
-                  formasi?.status !== "aktif"
-                    ? "Formasi tidak aktif"
-                    : "Tambah lampiran baru"
-                }
-              >
-                <Button
-                  type="primary"
-                  icon={<IconPlus size={14} />}
-                  onClick={() => setUploadModal(true)}
-                  size="small"
-                  disabled={formasi?.status !== "aktif"}
-                >
-                  {isMobile ? "Tambah" : "Tambah Lampiran"}
-                </Button>
-              </Tooltip>
-            )}
-          </Group>
-        </Group>
-      </Paper>
-
-      {/* Table */}
-      <Paper p="xs" radius="sm" withBorder>
-        <Table
-          dataSource={data?.data || []}
-          columns={columns}
-          rowKey="lampiran_id"
-          size="small"
-          loading={isLoading}
-          pagination={{
-            current: Number(lPage),
-            pageSize: Number(lLimit),
-            total: data?.meta?.total || 0,
-            showSizeChanger: true,
-            showTotal: (total, range) => `${range[0]}-${range[1]} dari ${total}`,
-            onChange: (p, l) => updateFilters({ lPage: p, lLimit: l }),
+    <div>
+      <div style={{ maxWidth: "100%" }}>
+        <Card
+          style={{
+            borderRadius: "12px",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+            border: "none",
           }}
-          scroll={{ x: isMobile ? 700 : 900 }}
-        />
-      </Paper>
+        >
+          {/* Header Section */}
+          <div
+            style={{
+              background: "#FF4500",
+              color: "white",
+              padding: "24px",
+              textAlign: "center",
+              borderRadius: "12px 12px 0 0",
+              margin: "-24px -24px 0 -24px",
+            }}
+          >
+            <IconPaperclip size={32} style={{ marginBottom: 8 }} />
+            <Title level={3} style={{ color: "white", margin: 0 }}>
+              Daftar Lampiran
+            </Title>
+            <Text style={{ color: "rgba(255,255,255,0.9)", fontSize: "14px" }}>
+              Dokumen pendukung usulan formasi
+            </Text>
+          </div>
+
+          {/* Filter and Actions Section */}
+          <div style={{ padding: "20px 0 16px 0", borderBottom: "1px solid #f0f0f0" }}>
+            <Row gutter={[12, 12]} align="middle" justify="space-between">
+              <Col xs={24} md={12}>
+                <Input.Search
+                size="small"
+                  placeholder="Cari file..."
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                  allowClear
+                  style={{ width: "100%" }}
+                />
+              </Col>
+              <Col xs={24} md={12} style={{ display: "flex", justifyContent: isXs ? "flex-start" : "flex-end" }}>
+                <Space wrap>
+                  <Tooltip title="Refresh">
+                    <Button
+                        icon={<IconRefresh size={16} />}
+                        onClick={() => refetch()}
+                        loading={isLoading || isFetching}
+                    />
+                  </Tooltip>
+                  <Button
+                    icon={<IconDownload size={16} />}
+                    loading={downloadingExcel}
+                    onClick={handleDownloadExcel}
+                    type="primary"
+                    ghost
+                  >
+                    Unduh
+                  </Button>
+                  {isEditable && (
+                    <Tooltip
+                      title={
+                        formasi?.status !== "aktif"
+                          ? "Formasi tidak aktif"
+                          : "Tambah lampiran baru"
+                      }
+                    >
+                      <Button
+                        type="primary"
+                        icon={<IconPlus size={16} />}
+                        onClick={() => setUploadModal(true)}
+                        disabled={formasi?.status !== "aktif"}
+                        style={{ background: "#FF4500", borderColor: "#FF4500" }}
+                      >
+                        Tambah Lampiran
+                      </Button>
+                    </Tooltip>
+                  )}
+                </Space>
+              </Col>
+            </Row>
+          </div>
+
+          {/* Table Section */}
+          <div style={{ marginTop: "16px" }}>
+            <Table
+              dataSource={data?.data || []}
+              columns={columns}
+              rowKey="lampiran_id"
+              size="middle"
+              loading={isLoading || isFetching}
+              pagination={{
+                position: ["bottomRight"],
+                current: Number(lPage),
+                pageSize: Number(lLimit),
+                total: data?.meta?.total || 0,
+                showSizeChanger: true,
+                showTotal: (total, range) => `${range[0]}-${range[1]} dari ${total} file`,
+                onChange: (p, l) => updateFilters({ lPage: p, lLimit: l }),
+              }}
+              scroll={{ x: 800 }}
+            />
+          </div>
+        </Card>
+      </div>
 
       {/* Modals */}
       <UploadModal open={uploadModal} onClose={() => setUploadModal(false)} formasiId={formasiId} />
@@ -744,7 +774,7 @@ function LampiranList({ formasiId, formasiUsulanId, formasi, submissionStatus })
         onClose={() => setEditModal({ open: false, data: null })}
         data={editModal.data}
       />
-    </Stack>
+    </div>
   );
 }
 

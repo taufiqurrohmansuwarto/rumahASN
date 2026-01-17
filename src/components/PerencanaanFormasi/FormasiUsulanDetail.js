@@ -3,12 +3,8 @@ import {
   updateFormasiUsulan,
   uploadDokumenFormasiUsulan,
 } from "@/services/perencanaan-formasi.services";
-import { ActionIcon, Alert, Collapse, Group, Paper, Stack, Text, Divider } from "@mantine/core";
-import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import {
   IconCheck,
-  IconChevronDown,
-  IconChevronUp,
   IconClock,
   IconDownload,
   IconEdit,
@@ -31,6 +27,12 @@ import {
   Tag,
   Tooltip,
   Upload,
+  Card,
+  Typography,
+  Space,
+  Alert,
+  Divider,
+  Grid
 } from "antd";
 import dayjs from "dayjs";
 import { saveAs } from "file-saver";
@@ -39,9 +41,9 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useState } from "react";
 
-// Remove unused XLSX import since we're using pdf-lib now
-
 const { TextArea } = Input;
+const { Text, Title } = Typography;
+const { useBreakpoint } = Grid;
 
 // Status Badge Helper
 const StatusBadge = ({ status }) => {
@@ -124,12 +126,12 @@ const VerifikasiModal = ({ open, onClose, data }) => {
         <Form.Item name="catatan" label="Catatan Verifikator">
           <TextArea rows={4} placeholder="Tulis catatan untuk user..." />
         </Form.Item>
-        <Group justify="flex-end">
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
           <Button onClick={onClose}>Batal</Button>
           <Button type="primary" htmlType="submit" loading={isLoading}>
             Simpan
           </Button>
-        </Group>
+        </div>
       </Form>
     </Modal>
   );
@@ -172,14 +174,12 @@ const UploadModal = ({ open, onClose, data }) => {
       }}
     >
       <Alert
-        variant="light"
-        color="blue"
-        title="Informasi"
-        icon={<IconInfoCircle size={16} />}
-        mb="md"
-      >
-        Unggah Surat Pengantar / SPTJM sebagai bukti pengajuan resmi.
-      </Alert>
+        message="Informasi"
+        description="Unggah Surat Pengantar / SPTJM sebagai bukti pengajuan resmi."
+        type="info"
+        showIcon
+        style={{ marginBottom: 16 }}
+      />
       <Upload.Dragger
         maxCount={1}
         beforeUpload={(f) => {
@@ -245,82 +245,69 @@ const KirimUsulanModal = ({ open, onClose, data, onSuccess }) => {
   return (
     <Modal
       title={
-        <Group gap="xs">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <IconSend size={18} />
           <span>Kirim Pengajuan Usulan</span>
-        </Group>
+        </div>
       }
       open={open}
       onCancel={onClose}
       width={500}
       footer={
-        <Group justify="flex-end">
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
           <Button onClick={onClose}>Batal</Button>
           <Button type="primary" loading={isLoading} onClick={handleSubmit}>
             Kirim Pengajuan
           </Button>
-        </Group>
+        </div>
       }
     >
-      <Stack gap="md">
+      <Space direction="vertical" size="middle" style={{ width: "100%" }}>
         <Alert
-          variant="light"
-          color="blue"
-          title="Konfirmasi Pengiriman"
-          icon={<IconInfoCircle size={16} />}
-        >
-          Pastikan semua data usulan jabatan sudah benar. Setelah dikirim, data
-          tidak dapat diubah sampai admin memberikan keputusan.
-        </Alert>
+          message="Konfirmasi Pengiriman"
+          description="Pastikan semua data usulan jabatan sudah benar. Setelah dikirim, data tidak dapat diubah sampai admin memberikan keputusan."
+          type="info"
+          showIcon
+        />
 
-        <Paper p="sm" radius="sm" withBorder bg="gray.0">
-          <Stack gap={4}>
-            <Group gap="xs">
-              <Text size="xs" c="dimmed" w={120}>
-                Nama Formasi:
-              </Text>
-              <Text size="sm" fw={500}>
-                {data.formasi?.deskripsi || "-"}
-              </Text>
-            </Group>
-            <Group gap="xs">
-              <Text size="xs" c="dimmed" w={120}>
-                Jumlah Usulan:
-              </Text>
-              <Text size="sm" fw={500}>
-                {data.jumlah_usulan || 0} jabatan
-              </Text>
-            </Group>
-            <Group gap="xs">
-              <Text size="xs" c="dimmed" w={120}>
-                Total Alokasi:
-              </Text>
-              <Text size="sm" fw={500}>
-                {data.total_alokasi_semua || 0} formasi
-              </Text>
-            </Group>
-          </Stack>
-        </Paper>
+        <Card size="small" style={{ background: "#f5f5f5" }} bordered={true}>
+          <Space direction="vertical" size={4} style={{ width: "100%" }}>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <Text type="secondary" style={{ width: 120 }}>Nama Formasi:</Text>
+              <Text strong>{data.formasi?.deskripsi || "-"}</Text>
+            </div>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <Text type="secondary" style={{ width: 120 }}>Jumlah Usulan:</Text>
+              <Text strong>{data.jumlah_usulan || 0} jabatan</Text>
+            </div>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <Text type="secondary" style={{ width: 120 }}>Total Alokasi:</Text>
+              <Text strong>{data.total_alokasi_semua || 0} formasi</Text>
+            </div>
+          </Space>
+        </Card>
 
         <Divider />
 
-        <Text size="sm" fw={500}>
-          Unggah Dokumen Pendukung{" "}
-          {data.dokumen_url ? "(Opsional - Ganti)" : "(Wajib)"}
-        </Text>
-        <Text size="xs" c="dimmed">
-          Unggah Surat Pengantar / SPTJM sebagai bukti pengajuan resmi.
-        </Text>
+        <div>
+            <Text strong>
+            Unggah Dokumen Pendukung{" "}
+            {data.dokumen_url ? "(Opsional - Ganti)" : "(Wajib)"}
+            </Text>
+            <br/>
+            <Text type="secondary" style={{ fontSize: 12 }}>
+            Unggah Surat Pengantar / SPTJM sebagai bukti pengajuan resmi.
+            </Text>
+        </div>
 
         {data.dokumen_url && (
           <Alert
-            variant="light"
-            color="green"
-            title="Dokumen sudah ada"
+            message="Dokumen sudah ada"
+            description={data.dokumen_name || "dokumen.pdf"}
+            type="success"
+            showIcon
             icon={<IconFileText size={16} />}
-          >
-            {data.dokumen_name || "dokumen.pdf"}
-          </Alert>
+          />
         )}
 
         <Upload.Dragger
@@ -338,7 +325,7 @@ const KirimUsulanModal = ({ open, onClose, data, onSuccess }) => {
           <p className="ant-upload-text">Klik atau drag file PDF ke sini</p>
           <p className="ant-upload-hint">Format: PDF, Max 5MB</p>
         </Upload.Dragger>
-      </Stack>
+      </Space>
     </Modal>
   );
 };
@@ -349,10 +336,8 @@ function FormasiUsulanDetail({ data, activeTab = "usulan", children }) {
   const { data: session } = useSession();
   const isAdmin = session?.user?.current_role === "admin";
   const isOwner = session?.user?.id === data.user_id; // Fixed: use id instead of customId
-
-  // Responsive breakpoints
-  const isMobile = useMediaQuery("(max-width: 768px)");
-  const isTablet = useMediaQuery("(max-width: 992px)");
+  const screens = useBreakpoint();
+  const isMobile = !screens.md;
 
   const [verifyModal, setVerifyModal] = useState(false);
   const [uploadModal, setUploadModal] = useState(false);
@@ -716,17 +701,25 @@ function FormasiUsulanDetail({ data, activeTab = "usulan", children }) {
     isAdmin || data.status === "draft" || data.status === "perbaikan";
 
   return (
-    <Stack gap={4}>
+    <Space direction="vertical" size="small" style={{ width: "100%" }}>
       {/* Header Info Card - Structured Layout */}
-      <Paper p="sm" radius="sm" withBorder>
-        <Stack gap="xs">
+      <Card
+        bordered={false}
+        style={{
+          borderRadius: 8,
+          boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.03)",
+          border: "1px solid #f0f0f0"
+        }}
+        bodyStyle={{ padding: "16px 24px" }}
+      >
+        <Space direction="vertical" size="small" style={{ width: "100%" }}>
           {/* Title Row with Status and Action Buttons */}
-          <Group justify="space-between" align="flex-start" wrap="wrap" gap="xs">
-            <Text size="md" fw={600}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 8 }}>
+            <Title level={4} style={{ margin: 0 }}>
               {data.formasi?.deskripsi || "Pengajuan Usulan Formasi"}
-            </Text>
+            </Title>
             {/* Status Badge + Action Buttons - Top Right */}
-            <Group gap="xs" wrap="nowrap">
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
               <StatusBadge status={data.status} />
               {canDownloadPdf && (
                 <Tooltip title="Unduh daftar usulan dalam format PDF">
@@ -769,40 +762,40 @@ function FormasiUsulanDetail({ data, activeTab = "usulan", children }) {
                   </Button>
                 </Tooltip>
               )}
-            </Group>
-          </Group>
+            </div>
+          </div>
 
           {/* Structured Info Rows */}
-          <Stack gap={2}>
+          <Space direction="vertical" size={2}>
             {/* Row 1: Operator & Tanggal */}
-            <Group gap={4} wrap="nowrap">
-              <Group gap={4} w={100} style={{ flexShrink: 0 }}>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 4, width: 100, flexShrink: 0 }}>
                 <IconUser size={12} color="#1677ff" />
-                <Text size="xs" c="dimmed">Operator</Text>
-              </Group>
-              <Text size="xs" c="dimmed">:</Text>
-              <Text size="xs" fw={500}>{namaOperator}</Text>
-              <Text size="xs" c="dimmed" ml="md">({dayjs(data.dibuat_pada).format("DD MMM YYYY HH:mm")})</Text>
-            </Group>
+                <Text type="secondary" style={{ fontSize: 12 }}>Operator</Text>
+              </div>
+              <Text type="secondary" style={{ fontSize: 12 }}>:</Text>
+              <Text strong style={{ fontSize: 12 }}>{namaOperator}</Text>
+              <Text type="secondary" style={{ fontSize: 12, marginLeft: 8 }}>({dayjs(data.dibuat_pada).format("DD MMM YYYY HH:mm")})</Text>
+            </div>
 
             {/* Row 2: Jumlah Usulan */}
-            <Group gap={4} wrap="nowrap">
-              <Group gap={4} w={100} style={{ flexShrink: 0 }}>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 4, width: 100, flexShrink: 0 }}>
                 <IconFileText size={12} color="#1677ff" />
-                <Text size="xs" c="dimmed">Usulan</Text>
-              </Group>
-              <Text size="xs" c="dimmed">:</Text>
-              <Tag color="blue" style={{ margin: 0 }}>{data.jumlah_usulan || 0} jabatan</Tag>
-              <Tag color="cyan" style={{ margin: 0 }}>{data.total_alokasi_semua || 0} alokasi</Tag>
-            </Group>
+                <Text type="secondary" style={{ fontSize: 12 }}>Usulan</Text>
+              </div>
+              <Text type="secondary" style={{ fontSize: 12 }}>:</Text>
+              <Tag color="blue" style={{ margin: 0 }}>{data.jumlah_usulan || 0} Jabatan</Tag>
+              <Tag color="cyan" style={{ margin: 0 }}>{data.total_alokasi_semua || 0} Alokasi</Tag>
+            </div>
 
             {/* Row 3: Dokumen */}
-            <Group gap={4} wrap="nowrap" align="center">
-              <Group gap={4} w={100} style={{ flexShrink: 0 }}>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 4, width: 100, flexShrink: 0 }}>
                 <IconUpload size={12} color="#1677ff" />
-                <Text size="xs" c="dimmed">Dokumen</Text>
-              </Group>
-              <Text size="xs" c="dimmed">:</Text>
+                <Text type="secondary" style={{ fontSize: 12 }}>Dokumen</Text>
+              </div>
+              <Text type="secondary" style={{ fontSize: 12 }}>:</Text>
               {data.dokumen_url ? (
                 <Button
                   icon={<IconFileText size={12} />}
@@ -815,7 +808,7 @@ function FormasiUsulanDetail({ data, activeTab = "usulan", children }) {
                   {data.dokumen_name || "Lihat Dokumen"}
                 </Button>
               ) : (
-                <Text size="xs" c="orange" fs="italic">Belum ada dokumen</Text>
+                <Text type="warning" style={{ fontSize: 12, fontStyle: 'italic' }}>Belum ada dokumen</Text>
               )}
               {isOwner && isEditable && (
                 <Button
@@ -828,60 +821,65 @@ function FormasiUsulanDetail({ data, activeTab = "usulan", children }) {
                   {data.dokumen_url ? "Ganti" : "Upload"}
                 </Button>
               )}
-            </Group>
-          </Stack>
+            </div>
+          </Space>
 
           {/* Catatan Verifikator - Inline Compact */}
           {data.catatan && (
-            <Group gap={4} wrap="wrap" style={{
-              backgroundColor: data.status === "ditolak" || data.status === "perbaikan" ? "#fff2f0" : "#e6f4ff",
-              padding: "6px 10px",
-              borderRadius: 4,
-              borderLeft: `3px solid ${data.status === "ditolak" || data.status === "perbaikan" ? "#ff4d4f" : "#1677ff"}`,
-              marginTop: 4
-            }}>
-              <IconInfoCircle size={14} color={data.status === "ditolak" || data.status === "perbaikan" ? "#ff4d4f" : "#1677ff"} />
-              <Text size="xs" fw={500} c={data.status === "ditolak" || data.status === "perbaikan" ? "red" : "blue"}>
-                Catatan:
-              </Text>
-              <Text size="xs">{data.catatan}</Text>
-              {data.korektor && (
-                <Text size="xs" c="dimmed">
-                  ({data.korektor.username}, {dayjs(data.corrected_at).format("DD/MM/YYYY HH:mm")})
-                </Text>
-              )}
-            </Group>
+            <Alert
+              message={
+                <Space>
+                  <Text strong>Catatan:</Text>
+                  <Text>{data.catatan}</Text>
+                  {data.korektor && (
+                    <Text type="secondary">
+                      ({data.korektor.username}, {dayjs(data.corrected_at).format("DD/MM/YYYY HH:mm")})
+                    </Text>
+                  )}
+                </Space>
+              }
+              type={data.status === "ditolak" || data.status === "perbaikan" ? "error" : "info"}
+              showIcon
+              icon={<IconInfoCircle size={14} />}
+              style={{ padding: "6px 12px" }}
+            />
           )}
 
           {/* Warning if not editable - Inline Compact */}
           {!isEditable && isOwner && !data.catatan && (
-            <Group gap={4} wrap="wrap" style={{
-              backgroundColor: "#fffbe6",
-              padding: "6px 10px",
-              borderRadius: 4,
-              borderLeft: "3px solid #faad14",
-              marginTop: 4
-            }}>
-              <IconInfoCircle size={14} color="#faad14" />
-              <Text size="xs">Pengajuan sedang dalam proses verifikasi</Text>
-            </Group>
+            <Alert
+              message="Pengajuan sedang dalam proses verifikasi"
+              type="warning"
+              showIcon
+              style={{ padding: "6px 12px" }}
+            />
           )}
-        </Stack>
-      </Paper>
+        </Space>
+      </Card>
 
       {/* Tabs Navigation - Minimal gap */}
-      <Tabs
-        activeKey={activeTab}
-        onChange={handleTabChange}
-        type="card"
-        size="small"
-        items={[
-          { key: "usulan", label: "Daftar Usulan Jabatan" },
-          { key: "lampiran", label: "Daftar Penyimpanan" },
-          { key: "audit-log", label: "Audit Log" },
-        ]}
-        tabBarStyle={{ marginBottom: 0 }}
-      />
+      <Card
+        bordered={false}
+        style={{
+            borderRadius: 8,
+            boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.03)",
+            border: "1px solid #f0f0f0"
+        }}
+        bodyStyle={{ padding: 0 }}
+      >
+        <Tabs
+            activeKey={activeTab}
+            onChange={handleTabChange}
+            type="line"
+            size="middle"
+            items={[
+            { key: "usulan", label: "Daftar Usulan Jabatan" },
+            { key: "lampiran", label: "Daftar Penyimpanan" },
+            { key: "audit-log", label: "Audit Log" },
+            ]}
+            tabBarStyle={{ padding: "0 24px", margin: 0 }}
+        />
+      </Card>
 
       {/* Page Content - Direct below tabs */}
       {children}
@@ -902,7 +900,7 @@ function FormasiUsulanDetail({ data, activeTab = "usulan", children }) {
         onClose={() => setKirimModal(false)}
         data={data}
       />
-    </Stack>
+    </Space>
   );
 }
 

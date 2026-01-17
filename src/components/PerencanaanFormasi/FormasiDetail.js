@@ -1,6 +1,4 @@
 import { getFormasiById } from "@/services/perencanaan-formasi.services";
-import { Group, Paper, Stack, Text } from "@mantine/core";
-import { useMediaQuery } from "@mantine/hooks";
 import {
   IconCalendarEvent,
   IconClipboardList,
@@ -8,10 +6,13 @@ import {
   IconUser,
 } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
-import { Skeleton, Tabs, Tag } from "antd";
+import { Card, Skeleton, Space, Tabs, Tag, Typography, Grid } from "antd";
 import { useRouter } from "next/router";
 import LampiranList from "./LampiranList";
 import UsulanList from "./UsulanList";
+
+const { Text, Title } = Typography;
+const { useBreakpoint } = Grid;
 
 // Status Badge
 const StatusBadge = ({ status }) => {
@@ -25,20 +26,21 @@ const StatusBadge = ({ status }) => {
 
 // Info Badge Component - compact inline
 const InfoBadge = ({ icon: Icon, label, value }) => (
-  <Group gap={4} wrap="nowrap">
+  <Space size={4} style={{ display: 'inline-flex', alignItems: 'center' }}>
     <Icon size={14} color="#868e96" />
-    <Text size="xs" c="dimmed">
+    <Text type="secondary" style={{ fontSize: 12 }}>
       {label}:
     </Text>
-    <Text size="xs" fw={600}>
+    <Text strong style={{ fontSize: 12 }}>
       {value || "-"}
     </Text>
-  </Group>
+  </Space>
 );
 
 function FormasiDetail({ formasiId, activeTab = "usulan" }) {
   const router = useRouter();
-  const isMobile = useMediaQuery("(max-width: 768px)");
+  const screens = useBreakpoint();
+  const isMobile = !screens.md;
 
   // Fetch formasi detail
   const { data: formasi, isLoading } = useQuery({
@@ -56,7 +58,7 @@ function FormasiDetail({ formasiId, activeTab = "usulan" }) {
       key: "usulan",
       label: (
         <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          <IconClipboardList size={14} />
+          <IconClipboardList size={16} />
           Formasi
         </span>
       ),
@@ -66,7 +68,7 @@ function FormasiDetail({ formasiId, activeTab = "usulan" }) {
       key: "lampiran",
       label: (
         <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          <IconPaperclip size={14} />
+          <IconPaperclip size={16} />
           Lampiran
         </span>
       ),
@@ -76,30 +78,43 @@ function FormasiDetail({ formasiId, activeTab = "usulan" }) {
 
   if (isLoading) {
     return (
-      <Stack gap="xs">
-        <Paper p="xs" radius="sm" withBorder>
-          <Skeleton active paragraph={{ rows: 2 }} />
-        </Paper>
-        <Skeleton active paragraph={{ rows: 6 }} />
-      </Stack>
+      <Space direction="vertical" size="middle" style={{ width: "100%" }}>
+        <Card>
+          <Skeleton active paragraph={{ rows: 1 }} />
+        </Card>
+        <Card>
+          <Skeleton active />
+        </Card>
+      </Space>
     );
   }
 
   return (
-    <Stack gap="xs">
+    <Space direction="vertical" size="middle" style={{ width: "100%" }}>
       {/* Header - responsive layout */}
-      <Paper p="xs" radius="sm" withBorder>
-        <Stack gap="xs">
+      <Card
+        bordered={false}
+        style={{
+          borderRadius: 8,
+          boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.03)",
+          border: "1px solid #f0f0f0"
+        }}
+        bodyStyle={{ padding: "16px 24px" }}
+      >
+        <Space direction="vertical" size={8} style={{ width: "100%" }}>
           {/* Title + Badge */}
-          <Group gap="xs" wrap="wrap">
-            <Text fw={600} size="sm">
-              {formasi?.deskripsi || "Detail Formasi"}
-            </Text>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <IconClipboardList size={20} color="#1890ff" />
+                <Text strong style={{ fontSize: 16 }}>
+                {formasi?.deskripsi || "Detail Formasi"}
+                </Text>
+            </div>
             <StatusBadge status={formasi?.status} />
-          </Group>
+          </div>
 
           {/* Info badges */}
-          <Group gap={isMobile ? "xs" : "sm"} wrap="wrap">
+          <Space size={isMobile ? "small" : "large"} wrap style={{ marginTop: 4 }}>
             <InfoBadge
               icon={IconCalendarEvent}
               label="Tahun"
@@ -115,19 +130,29 @@ function FormasiDetail({ formasiId, activeTab = "usulan" }) {
               label="Dibuat"
               value={formasi?.dibuatOleh?.username}
             />
-          </Group>
-        </Stack>
-      </Paper>
+          </Space>
+        </Space>
+      </Card>
 
       {/* Tabs - Outside Card */}
-      <Tabs
-        activeKey={activeTab}
-        onChange={handleTabChange}
-        items={tabItems}
-        size="small"
-        type="card"
-      />
-    </Stack>
+      <Card
+        bordered={false}
+        style={{
+            borderRadius: 8,
+            boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.03)",
+            border: "1px solid #f0f0f0"
+        }}
+        bodyStyle={{ padding: 0 }}
+      >
+        <Tabs
+            activeKey={activeTab}
+            onChange={handleTabChange}
+            items={tabItems}
+            size="middle"
+            tabBarStyle={{ padding: "0 24px", margin: 0 }}
+        />
+      </Card>
+    </Space>
   );
 }
 

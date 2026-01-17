@@ -7,14 +7,13 @@ import {
 import { getOpdFasilitator } from "@/services/master.services";
 import { saveAs } from "file-saver";
 import ExcelJS from "exceljs";
-import { ActionIcon, Group, Paper, Stack, Text } from "@mantine/core";
-import { useDebouncedValue, useMediaQuery } from "@mantine/hooks";
 import {
   IconDownload,
   IconEye,
   IconPlus,
   IconRefresh,
   IconTrash,
+  IconFileText
 } from "@tabler/icons-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -29,13 +28,22 @@ import {
   Tag,
   Tooltip,
   TreeSelect,
+  Card,
+  Row,
+  Col,
+  Typography,
+  Space,
+  Grid
 } from "antd";
 import dayjs from "dayjs";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useState } from "react";
+import { useDebouncedValue } from "@mantine/hooks";
 
 const { confirm } = Modal;
+const { Title, Text } = Typography;
+const { useBreakpoint } = Grid;
 
 // Status Badge - Compact version
 const StatusBadge = ({ status, isConfirmed }) => {
@@ -62,10 +70,8 @@ function FormasiUsulanList({ formasiId, formasi }) {
   const userId = session?.user?.id; // custom_id from session
   const queryClient = useQueryClient();
   const [deletingId, setDeletingId] = useState(null);
-
-  // Responsive breakpoints
-  const isMobile = useMediaQuery("(max-width: 768px)");
-  const isTablet = useMediaQuery("(max-width: 992px)");
+  const screens = useBreakpoint();
+  const isXs = !screens?.sm;
 
   // Filters
   const {
@@ -120,7 +126,7 @@ function FormasiUsulanList({ formasiId, formasi }) {
   };
 
   // Fetch data
-  const { data, isLoading, refetch } = useQuery(
+  const { data, isLoading, refetch, isFetching } = useQuery(
     ["perencanaan-formasi-usulan", filters],
     () => getFormasiUsulan(filters),
     { enabled: !!formasiId, keepPreviousData: true }
@@ -170,20 +176,20 @@ function FormasiUsulanList({ formasiId, formasi }) {
     confirm({
       title: "Buat Pengajuan Baru?",
       content: (
-        <Stack gap="xs">
-          <Text size="sm">
+        <Space direction="vertical" size="small">
+          <Text>
             Anda akan membuat pengajuan usulan formasi baru untuk periode:
           </Text>
-          <Paper p="xs" radius="sm" bg="blue.0" withBorder>
-            <Text size="sm" fw={600} c="blue.7">
+          <Card size="small" style={{ background: "#e6f7ff", borderColor: "#91d5ff" }}>
+            <Text strong style={{ color: "#1890ff" }}>
               {formasi?.deskripsi || "Formasi"} - Tahun {formasi?.tahun || "-"}
             </Text>
-          </Paper>
-          <Text size="xs" c="dimmed">
+          </Card>
+          <Text type="secondary" style={{ fontSize: 12 }}>
             Setelah dibuat, Anda dapat menambahkan daftar jabatan yang diusulkan
             dan mengunggah dokumen pendukung.
           </Text>
-        </Stack>
+        </Space>
       ),
       okText: "Ya, Buat Pengajuan",
       cancelText: "Batal",
@@ -438,22 +444,22 @@ function FormasiUsulanList({ formasiId, formasi }) {
       render: (val) => {
         const perangkatDaerah = val?.unor?.name || val?.perangkat_daerah_detail || "-";
         return (
-          <Group gap={8} wrap="nowrap" align="flex-start">
-            <Avatar src={val?.image} size={28}>
+          <Space>
+            <Avatar src={val?.image} size="small">
               {val?.username?.[0]?.toUpperCase() || "?"}
             </Avatar>
-            <div>
-              <Text size="xs" fw={500} lh={1.2}>{val?.username || "-"}</Text>
-              <Text size="xs" c="dimmed" lh={1.2}>{perangkatDaerah}</Text>
-            </div>
-          </Group>
+            <Space direction="vertical" size={0}>
+              <Text strong style={{ fontSize: 12, lineHeight: 1.2 }}>{val?.username || "-"}</Text>
+              <Text type="secondary" style={{ fontSize: 11, lineHeight: 1.2 }}>{perangkatDaerah}</Text>
+            </Space>
+          </Space>
         );
       },
     },
     {
       title: "Usulan",
       key: "jumlah_usulan",
-      width: 80,
+      width: 100,
       align: "center",
       render: (_, record) => {
         const current = record.jumlah_usulan || 0;
@@ -463,7 +469,7 @@ function FormasiUsulanList({ formasiId, formasi }) {
 
         return (
           <Tooltip title={hasSnapshot ? `Dikirim: ${snapshot} → Sekarang: ${current}` : `${current} jabatan`}>
-            <Text size="xs" fw={500} c={changed ? "orange" : undefined}>
+            <Text strong style={{ color: changed ? "#fa8c16" : undefined }}>
               {current}{hasSnapshot && changed && ` (${snapshot})`}
             </Text>
           </Tooltip>
@@ -473,7 +479,7 @@ function FormasiUsulanList({ formasiId, formasi }) {
     {
       title: "Alokasi",
       key: "total_alokasi",
-      width: 80,
+      width: 100,
       align: "center",
       render: (_, record) => {
         const current = record.total_alokasi || 0;
@@ -483,7 +489,7 @@ function FormasiUsulanList({ formasiId, formasi }) {
 
         return (
           <Tooltip title={hasSnapshot ? `Dikirim: ${snapshot} → Sekarang: ${current}` : `Total: ${current}`}>
-            <Text size="xs" fw={600} c={changed ? "orange" : "blue"}>
+            <Text strong style={{ color: changed ? "#fa8c16" : "#1890ff" }}>
               {current}{hasSnapshot && changed && ` (${snapshot})`}
             </Text>
           </Tooltip>
@@ -494,18 +500,18 @@ function FormasiUsulanList({ formasiId, formasi }) {
       title: "Status",
       dataIndex: "status",
       key: "status",
-      width: 90,
+      width: 120,
       align: "center",
       render: (val, record) => <StatusBadge status={val} isConfirmed={record.is_confirmed} />,
     },
     {
       title: "Dok",
       key: "dokumen",
-      width: 50,
+      width: 60,
       align: "center",
       render: (_, record) => (
         <Tooltip title={record.dokumen_url ? record.dokumen_name || "Ada dokumen" : "Belum ada dokumen"}>
-          <Text size="xs" c={record.dokumen_url ? "green" : "dimmed"}>
+          <Text style={{ color: record.dokumen_url ? "#52c41a" : "#d9d9d9" }}>
             {record.dokumen_url ? "✓" : "-"}
           </Text>
         </Tooltip>
@@ -514,24 +520,24 @@ function FormasiUsulanList({ formasiId, formasi }) {
     {
       title: "Verifikasi",
       key: "verifikasi",
-      width: 180,
+      width: 200,
       render: (_, record) => {
         if (!record.corrected_at && !record.korektor) {
-          return <Text size="xs" c="dimmed">-</Text>;
+          return <Text type="secondary">-</Text>;
         }
         return (
           <Tooltip title={`${record.korektor?.username || "-"}\n${record.corrected_at ? dayjs(record.corrected_at).format("DD/MM/YYYY HH:mm") : "-"}`}>
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <Avatar src={record.korektor?.image} size={28} style={{ flexShrink: 0 }}>
+            <Space>
+              <Avatar src={record.korektor?.image} size="small">
                 {record.korektor?.username?.[0]?.toUpperCase() || "?"}
               </Avatar>
-              <div style={{ minWidth: 0, flex: 1 }}>
-                <Text size="xs" fw={500} lh={1.2} lineClamp={1}>{record.korektor?.username || "-"}</Text>
-                <Text size="xs" c="dimmed" lh={1.2}>
+              <Space direction="vertical" size={0} style={{ minWidth: 0, flex: 1 }}>
+                <Text strong style={{ fontSize: 12, lineHeight: 1.2 }} ellipsis>{record.korektor?.username || "-"}</Text>
+                <Text type="secondary" style={{ fontSize: 11, lineHeight: 1.2 }}>
                   {record.corrected_at ? dayjs(record.corrected_at).format("DD/MM/YY HH:mm") : "-"}
                 </Text>
-              </div>
-            </div>
+              </Space>
+            </Space>
           </Tooltip>
         );
       },
@@ -539,27 +545,25 @@ function FormasiUsulanList({ formasiId, formasi }) {
     {
       title: "Aksi",
       key: "aksi",
-      width: 70,
+      width: 100,
       align: "center",
       render: (_, record) => {
         const isOwner = record.user_id === userId;
         const canDelete = isAdmin || (isOwner && record.status === "draft");
 
         return (
-          <Group gap={4} justify="center">
+          <Space size="small">
             <Tooltip title="Detail">
-              <ActionIcon
-                variant="subtle"
-                color="blue"
-                size="sm"
+              <Button
+                type="text"
+                icon={<IconEye size={16} />}
+                style={{ color: "#1890ff" }}
                 onClick={() =>
                   router.push(
                     `/perencanaan/formasi/${formasiId}/${record.formasi_usulan_id}/usulan`
                   )
                 }
-              >
-                <IconEye size={14} />
-              </ActionIcon>
+              />
             </Tooltip>
             {canDelete && (
               <Popconfirm
@@ -570,153 +574,162 @@ function FormasiUsulanList({ formasiId, formasi }) {
                 cancelText="Batal"
               >
                 <Tooltip title="Hapus">
-                  <ActionIcon variant="subtle" color="red" size="sm" loading={deletingId === record.formasi_usulan_id}>
-                    <IconTrash size={14} />
-                  </ActionIcon>
+                  <Button
+                    type="text"
+                    icon={<IconTrash size={16} />}
+                    danger
+                    loading={deletingId === record.formasi_usulan_id}
+                  />
                 </Tooltip>
               </Popconfirm>
             )}
-          </Group>
+          </Space>
         );
       },
     },
   ];
 
   return (
-    <Stack gap="xs">
-      {/* Stats Row */}
-      <Paper p="xs" radius="sm" withBorder>
-        <Group gap={isMobile ? "xs" : "lg"} wrap="wrap">
-          <Group gap={4}>
-            <Text size="xs" c="dimmed">Total:</Text>
-            <Text size="sm" fw={600}>{stats.total}</Text>
-          </Group>
-          {!isMobile && <Text size="xs" c="dimmed">|</Text>}
-          <Group gap={4}>
-            <Text size="xs" c="dimmed">Draft:</Text>
-            <Text size="sm" fw={600}>{stats.draft}</Text>
-          </Group>
-          <Group gap={4}>
-            <Text size="xs" c="dimmed">Menunggu:</Text>
-            <Text size="sm" fw={600} c="orange">{stats.menunggu}</Text>
-          </Group>
-          <Group gap={4}>
-            <Text size="xs" c="dimmed">Disetujui:</Text>
-            <Text size="sm" fw={600} c="green">{stats.disetujui}</Text>
-          </Group>
-          <Group gap={4}>
-            <Text size="xs" c="dimmed">Perbaikan:</Text>
-            <Text size="sm" fw={600} c="blue">{stats.perbaikan}</Text>
-          </Group>
-          <Group gap={4}>
-            <Text size="xs" c="dimmed">Ditolak:</Text>
-            <Text size="sm" fw={600} c="red">{stats.ditolak}</Text>
-          </Group>
-        </Group>
-      </Paper>
-
-      {/* Filter & Action Bar */}
-      <Paper p="xs" radius="sm" withBorder>
-        <Stack gap="xs">
-          {/* Filter Row */}
-          <Group gap="xs" wrap="wrap">
-            <Input
-              placeholder="Cari operator..."
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              style={{ width: isMobile ? "100%" : 180, flex: isMobile ? 1 : undefined }}
-              size="small"
-              allowClear
-            />
-            <Select
-              placeholder="Status"
-              value={status || undefined}
-              onChange={(val) => updateFilters({ status: val || "", page: 1 })}
-              style={{ width: isMobile ? "calc(50% - 4px)" : 140 }}
-              size="small"
-              allowClear
-            >
-              <Select.Option value="draft">Draft</Select.Option>
-              <Select.Option value="menunggu">Menunggu</Select.Option>
-              <Select.Option value="disetujui">Disetujui</Select.Option>
-              <Select.Option value="perbaikan">Perbaikan</Select.Option>
-              <Select.Option value="ditolak">Ditolak</Select.Option>
-            </Select>
-            {isAdmin && (
-              <TreeSelect
-                placeholder="Perangkat Daerah"
-                value={organizationId || undefined}
-                onChange={(val) => updateFilters({ "organization-id": val || "", page: 1 })}
-                treeData={opdTree}
-                showSearch
-                treeNodeFilterProp="label"
-                allowClear
-                loading={loadingOpd}
-                style={{ width: isMobile ? "calc(50% - 4px)" : 220 }}
-                size="small"
-                dropdownStyle={{ maxHeight: 400, overflow: "auto" }}
-              />
-            )}
-          </Group>
-
-          {/* Action Buttons Row */}
-          <Group gap="xs" justify={isMobile ? "space-between" : "flex-end"}>
-            <Tooltip title="Refresh">
-              <Button
-                icon={<IconRefresh size={14} />}
-                onClick={() => refetch()}
-                size="small"
-              />
-            </Tooltip>
-            {/* Admin: Download all usulan */}
-            {isAdmin && (
-              <Tooltip title="Unduh semua data usulan beserta jabatan">
-                <Button
-                  icon={<IconDownload size={14} />}
-                  onClick={handleDownloadAll}
-                  loading={downloading}
-                  size="small"
-                >
-                  {isMobile ? null : "Unduh Semua"}
-                </Button>
-              </Tooltip>
-            )}
-            {/* Non-admin can create if formasi is active */}
-            {!isAdmin && formasi?.status === "aktif" && (
-              <Button
-                type="primary"
-                icon={<IconPlus size={14} />}
-                onClick={handleCreateNew}
-                loading={isCreating}
-                size="small"
-              >
-                {isMobile ? "Buat" : "Buat Pengajuan Baru"}
-              </Button>
-            )}
-          </Group>
-        </Stack>
-      </Paper>
-
-      {/* Table */}
-      <Paper p="xs" radius="sm" withBorder>
-        <Table
-          dataSource={data?.data || []}
-          columns={columns}
-          rowKey="formasi_usulan_id"
-          loading={isLoading}
-          size="small"
-          pagination={{
-            current: Number(page),
-            pageSize: Number(limit),
-            total: data?.meta?.total || 0,
-            onChange: (p, l) => updateFilters({ page: p, limit: l }),
-            showTotal: (total, range) => `${range[0]}-${range[1]} dari ${total}`,
-            showSizeChanger: true,
+    <div>
+      <div style={{ maxWidth: "100%" }}>
+        <Card
+          style={{
+            borderRadius: "12px",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+            border: "none",
           }}
-          scroll={{ x: isMobile ? 700 : 900 }}
-        />
-      </Paper>
-    </Stack>
+        >
+          {/* Header Section */}
+          <div
+            style={{
+              background: "#FF4500",
+              color: "white",
+              padding: "24px",
+              textAlign: "center",
+              borderRadius: "12px 12px 0 0",
+              margin: "-24px -24px 0 -24px",
+            }}
+          >
+            <IconFileText size={32} style={{ marginBottom: 8 }} />
+            <Title level={3} style={{ color: "white", margin: 0 }}>
+              Daftar Pengajuan Usulan
+            </Title>
+            <Text style={{ color: "rgba(255,255,255,0.9)", fontSize: "14px" }}>
+              Manajemen pengajuan usulan formasi dari OPD
+            </Text>
+          </div>
+
+          {/* Filter and Actions Section */}
+          <div style={{ padding: "20px 0 16px 0", borderBottom: "1px solid #f0f0f0" }}>
+            <Row gutter={[12, 12]} align="middle" justify="space-between">
+              <Col xs={24} md={18}>
+                <Row gutter={[8, 8]} align="middle">
+                  <Col xs={24} sm={8} md={6}>
+                    <Input.Search
+                      size="small"
+                      placeholder="Cari operator..."
+                      value={searchInput}
+                      onChange={(e) => setSearchInput(e.target.value)}
+                      allowClear
+                      style={{ width: "100%" }}
+                    />
+                  </Col>
+                  <Col xs={24} sm={8} md={6}>
+                    <Select
+                      size="small"
+                      placeholder="Status"
+                      value={status || undefined}
+                      onChange={(val) => updateFilters({ status: val || "", page: 1 })}
+                      style={{ width: "100%" }}
+                      allowClear
+                    >
+                      <Select.Option value="draft">Draft</Select.Option>
+                      <Select.Option value="menunggu">Menunggu</Select.Option>
+                      <Select.Option value="disetujui">Disetujui</Select.Option>
+                      <Select.Option value="perbaikan">Perbaikan</Select.Option>
+                      <Select.Option value="ditolak">Ditolak</Select.Option>
+                    </Select>
+                  </Col>
+                  {isAdmin && (
+                    <Col xs={24} sm={8} md={8}>
+                        <TreeSelect
+                            size="small"
+                            placeholder="Perangkat Daerah"
+                            value={organizationId || undefined}
+                            onChange={(val) => updateFilters({ "organization-id": val || "", page: 1 })}
+                            treeData={opdTree}
+                            showSearch
+                            treeNodeFilterProp="label"
+                            allowClear
+                            loading={loadingOpd}
+                            style={{ width: "100%" }}
+                            dropdownStyle={{ maxHeight: 400, overflow: "auto" }}
+                        />
+                    </Col>
+                  )}
+                </Row>
+              </Col>
+              <Col xs={24} md={6} style={{ display: "flex", justifyContent: isXs ? "flex-start" : "flex-end" }}>
+                <Space wrap>
+                  <Tooltip title="Refresh">
+                    <Button
+                        icon={<IconRefresh size={16} />}
+                        onClick={() => refetch()}
+                        loading={isLoading || isFetching}
+                    />
+                  </Tooltip>
+                  {isAdmin && (
+                    <Tooltip title="Unduh semua data usulan beserta jabatan">
+                        <Button
+                        icon={<IconDownload size={16} />}
+                        onClick={handleDownloadAll}
+                        loading={downloading}
+                        type="primary"
+                        ghost
+                        >
+                        Unduh
+                        </Button>
+                    </Tooltip>
+                  )}
+                  {!isAdmin && formasi?.status === "aktif" && (
+                    <Button
+                        type="primary"
+                        icon={<IconPlus size={16} />}
+                        onClick={handleCreateNew}
+                        loading={isCreating}
+                        style={{ background: "#FF4500", borderColor: "#FF4500" }}
+                    >
+                        Buat Pengajuan
+                    </Button>
+                  )}
+                </Space>
+              </Col>
+            </Row>
+          </div>
+
+          {/* Table Section */}
+          <div style={{ marginTop: "16px" }}>
+            <Table
+              dataSource={data?.data || []}
+              columns={columns}
+              rowKey="formasi_usulan_id"
+              size="middle"
+              loading={isLoading}
+              pagination={{
+                position: ["bottomRight"],
+                current: Number(page),
+                pageSize: Number(limit),
+                total: data?.meta?.total || 0,
+                onChange: (p, l) => updateFilters({ page: p, limit: l }),
+                showTotal: (total, range) => `${range[0]}-${range[1]} dari ${total}`,
+                showSizeChanger: true,
+              }}
+              scroll={{ x: 1000 }}
+            />
+          </div>
+        </Card>
+      </div>
+    </div>
   );
 }
 

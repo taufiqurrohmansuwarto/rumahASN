@@ -1,17 +1,9 @@
 import { getRiwayatAuditBySubmissionId } from "@/services/perencanaan-formasi.services";
 import {
-  ActionIcon,
-  Group,
-  Paper,
-  Stack,
-  Text,
-  Tooltip,
-} from "@mantine/core";
-import { useDebouncedValue, useMediaQuery } from "@mantine/hooks";
-import {
   IconDownload,
   IconEye,
   IconRefresh,
+  IconHistory
 } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -24,14 +16,24 @@ import {
   Select,
   Table,
   Tag,
+  Card,
+  Row,
+  Col,
+  Typography,
+  Space,
+  Grid,
+  Tooltip
 } from "antd";
 import dayjs from "dayjs";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useState } from "react";
+import { useDebouncedValue } from "@mantine/hooks";
 
 const { RangePicker } = DatePicker;
+const { Title, Text } = Typography;
+const { useBreakpoint } = Grid;
 
 // Aksi Badge
 const AksiBadge = ({ aksi }) => {
@@ -153,7 +155,7 @@ const parsePerubahan = (dataLama, dataBaru) => {
 };
 
 // Detail Modal
-const DetailModal = ({ open, onClose, data, isMobile }) => {
+const DetailModal = ({ open, onClose, data, isXs }) => {
   if (!data) return null;
 
   const perubahan = parsePerubahan(data.data_lama, data.data_baru);
@@ -164,34 +166,34 @@ const DetailModal = ({ open, onClose, data, isMobile }) => {
       open={open}
       onCancel={onClose}
       footer={<Button onClick={onClose}>Tutup</Button>}
-      width={isMobile ? "95%" : 600}
-      centered={isMobile}
+      width={isXs ? "95%" : 600}
+      centered={isXs}
     >
-      <Descriptions bordered column={isMobile ? 1 : 2} size="small">
+      <Descriptions bordered column={isXs ? 1 : 2} size="small">
         <Descriptions.Item label="ID">
           {data.riwayat_audit_id}
         </Descriptions.Item>
         <Descriptions.Item label="Aksi">
           <AksiBadge aksi={data.aksi} />
         </Descriptions.Item>
-        <Descriptions.Item label="Jabatan" span={isMobile ? 1 : 2}>
+        <Descriptions.Item label="Jabatan" span={isXs ? 1 : 2}>
           {data.nama_jabatan ||
             data.data_baru?.jabatan_id ||
             data.data_lama?.jabatan_id ||
             "-"}
         </Descriptions.Item>
-        <Descriptions.Item label="Operator" span={isMobile ? 1 : 2}>
+        <Descriptions.Item label="Operator" span={isXs ? 1 : 2}>
           {data.dibuatOleh?.username || "-"}
         </Descriptions.Item>
-        <Descriptions.Item label="Waktu" span={isMobile ? 1 : 2}>
+        <Descriptions.Item label="Waktu" span={isXs ? 1 : 2}>
           {dayjs(data.dibuat_pada).format("DD/MM/YYYY HH:mm:ss")}
         </Descriptions.Item>
-        <Descriptions.Item label="IP Address" span={isMobile ? 1 : 2}>
+        <Descriptions.Item label="IP Address" span={isXs ? 1 : 2}>
           {data.ip_address || "-"}
         </Descriptions.Item>
       </Descriptions>
 
-      <Text fw={600} size="sm" mt="md" mb="xs">
+      <Text strong style={{ marginTop: 16, display: 'block', marginBottom: 8 }}>
         Perubahan Data
       </Text>
       <Table
@@ -213,8 +215,8 @@ function SubmissionAuditLogList({ formasiId, formasiUsulanId, submissionData }) 
   const router = useRouter();
   const [detailModal, setDetailModal] = useState({ open: false, data: null });
 
-  // Responsive breakpoint
-  const isMobile = useMediaQuery("(max-width: 768px)");
+  const screens = useBreakpoint();
+  const isXs = !screens?.sm;
 
   // Get filters from URL
   const {
@@ -268,7 +270,7 @@ function SubmissionAuditLogList({ formasiId, formasiUsulanId, submissionData }) 
   };
 
   // Fetch audit log
-  const { data, isLoading, refetch } = useQuery(
+  const { data, isLoading, refetch, isFetching } = useQuery(
     ["perencanaan-submission-audit-log", formasiUsulanId, filters],
     () => getRiwayatAuditBySubmissionId(formasiUsulanId, filters),
     { enabled: !!formasiUsulanId, keepPreviousData: true }
@@ -295,7 +297,7 @@ function SubmissionAuditLogList({ formasiId, formasiUsulanId, submissionData }) 
       width: 140,
       fixed: "left",
       render: (val) => (
-        <Text size="xs" fw={500} lineClamp={2}>
+        <Text strong style={{ fontSize: 12 }}>
           {val?.username || "-"}
         </Text>
       ),
@@ -319,13 +321,13 @@ function SubmissionAuditLogList({ formasiId, formasiUsulanId, submissionData }) 
           record.data_lama?.jabatan_id;
         if (!jabatan)
           return (
-            <Text size="xs" c="dimmed">
+            <Text type="secondary" style={{ fontSize: 12 }}>
               -
             </Text>
           );
         return (
-          <Tooltip label={jabatan}>
-            <Text size="xs" lineClamp={2}>
+          <Tooltip title={jabatan}>
+            <Text style={{ fontSize: 12 }} ellipsis>
               {jabatan}
             </Text>
           </Tooltip>
@@ -344,13 +346,13 @@ function SubmissionAuditLogList({ formasiId, formasiUsulanId, submissionData }) 
           record.data_lama?.unit_kerja;
         if (!unitKerja)
           return (
-            <Text size="xs" c="dimmed">
+            <Text type="secondary" style={{ fontSize: 12 }}>
               -
             </Text>
           );
         return (
-          <Tooltip label={unitKerja}>
-            <Text size="xs" lineClamp={2}>
+          <Tooltip title={unitKerja}>
+            <Text style={{ fontSize: 12 }} ellipsis>
               {unitKerja}
             </Text>
           </Tooltip>
@@ -367,22 +369,22 @@ function SubmissionAuditLogList({ formasiId, formasiUsulanId, submissionData }) 
         const baru = record.data_baru?.alokasi;
         if (lama === baru || (!lama && !baru))
           return (
-            <Text size="xs" c="dimmed">
+            <Text type="secondary" style={{ fontSize: 12 }}>
               -
             </Text>
           );
         return (
-          <Group gap={4} justify="center" wrap="nowrap">
-            <Text size="xs" c="dimmed">
+          <Space size={4}>
+            <Text type="secondary" style={{ fontSize: 12 }}>
               {lama ?? "-"}
             </Text>
-            <Text size="xs" c="dimmed">
+            <Text type="secondary" style={{ fontSize: 12 }}>
               →
             </Text>
-            <Text size="xs" fw={600} c="blue">
+            <Text strong style={{ color: "#1890ff", fontSize: 12 }}>
               {baru ?? "-"}
             </Text>
-          </Group>
+          </Space>
         );
       },
     },
@@ -392,7 +394,7 @@ function SubmissionAuditLogList({ formasiId, formasiUsulanId, submissionData }) 
       key: "dibuat_pada",
       width: 130,
       render: (val) => (
-        <Text size="xs" c="dimmed">
+        <Text type="secondary" style={{ fontSize: 12 }}>
           {dayjs(val).format("DD-MM-YYYY HH:mm")}
         </Text>
       ),
@@ -400,19 +402,17 @@ function SubmissionAuditLogList({ formasiId, formasiUsulanId, submissionData }) 
     {
       title: "",
       key: "action",
-      width: 50,
+      width: 60,
       fixed: "right",
       align: "center",
       render: (_, record) => (
-        <Tooltip label="Detail">
-          <ActionIcon
-            variant="subtle"
-            color="blue"
-            size="sm"
+        <Tooltip title="Detail">
+          <Button
+            type="text"
+            icon={<IconEye size={16} />}
+            style={{ color: "#1890ff" }}
             onClick={() => setDetailModal({ open: true, data: record })}
-          >
-            <IconEye size={14} />
-          </ActionIcon>
+          />
         </Tooltip>
       ),
     },
@@ -612,114 +612,137 @@ function SubmissionAuditLogList({ formasiId, formasiUsulanId, submissionData }) 
   };
 
   return (
-    <Stack gap="xs">
-      {/* Header: Stats */}
-      <Paper p="xs" radius="sm" withBorder>
-        <Group gap="lg">
-          <Group gap={4}>
-            <Text size="xs" c="dimmed">
-              Total Log:
-            </Text>
-            <Text size="sm" fw={600}>
-              {total}
-            </Text>
-          </Group>
-        </Group>
-      </Paper>
-
-      {/* Filter Row */}
-      <Paper p="xs" radius="sm" withBorder>
-        <Group gap="xs" wrap="wrap" justify="space-between">
-          <Group gap="xs" wrap="wrap" style={{ flex: 1 }}>
-            <Input
-              placeholder="Cari operator..."
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              style={{
-                width: isMobile ? "100%" : 160,
-                flex: isMobile ? 1 : undefined,
-              }}
-              size="small"
-              allowClear
-            />
-            <Select
-              placeholder="Filter Aksi"
-              value={alAksi || undefined}
-              onChange={(val) =>
-                updateFilters({ alAksi: val || "", alPage: 1 })
-              }
-              style={{ width: isMobile ? "calc(50% - 4px)" : 180 }}
-              size="small"
-              allowClear
-              options={AKSI_OPTIONS}
-              showSearch
-              filterOption={(input, option) =>
-                (option?.label ?? "")
-                  .toLowerCase()
-                  .includes(input.toLowerCase())
-              }
-            />
-            <RangePicker
-              size="small"
-              onChange={handleDateChange}
-              format="DD/MM/YYYY"
-              placeholder={["Dari", "Sampai"]}
-              style={{ width: isMobile ? "calc(50% - 4px)" : 220 }}
-              value={
-                alStartDate && alEndDate
-                  ? [dayjs(alStartDate), dayjs(alEndDate)]
-                  : null
-              }
-            />
-          </Group>
-          <Group gap="xs" wrap="nowrap">
-            <Tooltip label="Refresh">
-              <Button
-                icon={<IconRefresh size={14} />}
-                onClick={() => refetch()}
-                size="small"
-              />
-            </Tooltip>
-            <Button
-              icon={<IconDownload size={14} />}
-              size="small"
-              loading={downloading}
-              onClick={handleDownloadExcel}
-            >
-              {isMobile ? null : "Unduh"}
-            </Button>
-          </Group>
-        </Group>
-      </Paper>
-
-      {/* Table */}
-      <Paper p="xs" radius="sm" withBorder>
-        <Table
-          dataSource={data?.data || []}
-          columns={columns}
-          rowKey="riwayat_audit_id"
-          size="small"
-          loading={isLoading}
-          pagination={{
-            current: Number(alPage),
-            pageSize: Number(alLimit),
-            total: data?.meta?.total || 0,
-            showSizeChanger: true,
-            showTotal: (total, range) => `${range[0]}-${range[1]} dari ${total}`,
-            onChange: (p, l) => updateFilters({ alPage: p, alLimit: l }),
+    <div>
+      <div style={{ maxWidth: "100%" }}>
+        <Card
+          style={{
+            borderRadius: "12px",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+            border: "none",
           }}
-          scroll={{ x: isMobile ? 700 : 920 }}
-        />
-      </Paper>
+        >
+          {/* Header Section */}
+          <div
+            style={{
+              background: "#FF4500",
+              color: "white",
+              padding: "24px",
+              textAlign: "center",
+              borderRadius: "12px 12px 0 0",
+              margin: "-24px -24px 0 -24px",
+            }}
+          >
+            <IconHistory size={32} style={{ marginBottom: 8 }} />
+            <Title level={3} style={{ color: "white", margin: 0 }}>
+              Audit Log Submission
+            </Title>
+            <Text style={{ color: "rgba(255,255,255,0.9)", fontSize: "14px" }}>
+              Riwayat aktivitas pada pengajuan ini
+            </Text>
+          </div>
+
+          {/* Filter and Actions Section */}
+          <div style={{ padding: "20px 0 16px 0", borderBottom: "1px solid #f0f0f0" }}>
+            <Row gutter={[12, 12]} align="middle" justify="space-between">
+              <Col xs={24} md={18}>
+                <Row gutter={[8, 8]} align="middle">
+                  <Col xs={24} sm={8} md={6}>
+                    <Input.Search
+                      size="small"
+                      placeholder="Cari operator..."
+                      value={searchInput}
+                      onChange={(e) => setSearchInput(e.target.value)}
+                      allowClear
+                      style={{ width: "100%" }}
+                    />
+                  </Col>
+                  <Col xs={24} sm={8} md={6}>
+                    <Select
+                      size="small"
+                      placeholder="Filter Aksi"
+                      value={alAksi || undefined}
+                      onChange={(val) => updateFilters({ alAksi: val || "", alPage: 1 })}
+                      style={{ width: "100%" }}
+                      allowClear
+                      options={AKSI_OPTIONS}
+                      showSearch
+                      filterOption={(input, option) =>
+                        (option?.label ?? "")
+                          .toLowerCase()
+                          .includes(input.toLowerCase())
+                      }
+                    />
+                  </Col>
+                  <Col xs={24} sm={8} md={8}>
+                    <RangePicker
+                      size="small"
+                      onChange={handleDateChange}
+                      format="DD/MM/YYYY"
+                      placeholder={["Dari", "Sampai"]}
+                      style={{ width: "100%" }}
+                      value={
+                        alStartDate && alEndDate
+                          ? [dayjs(alStartDate), dayjs(alEndDate)]
+                          : null
+                      }
+                    />
+                  </Col>
+                </Row>
+              </Col>
+              <Col xs={24} md={6} style={{ display: "flex", justifyContent: isXs ? "flex-start" : "flex-end" }}>
+                <Space wrap>
+                  <Tooltip title="Refresh">
+                    <Button
+                      icon={<IconRefresh size={16} />}
+                      onClick={() => refetch()}
+                      loading={isLoading || isFetching}
+                    />
+                  </Tooltip>
+                  <Button
+                    icon={<IconDownload size={16} />}
+                    loading={downloading}
+                    onClick={handleDownloadExcel}
+                    type="primary"
+                    ghost
+                  >
+                    Unduh
+                  </Button>
+                </Space>
+              </Col>
+            </Row>
+          </div>
+
+          {/* Table Section */}
+          <div style={{ marginTop: "16px" }}>
+            <Table
+              dataSource={data?.data || []}
+              columns={columns}
+              rowKey="riwayat_audit_id"
+              size="middle"
+              loading={isLoading || isFetching}
+              pagination={{
+                position: ["bottomRight"],
+                current: Number(alPage),
+                pageSize: Number(alLimit),
+                total: data?.meta?.total || 0,
+                showSizeChanger: true,
+                showTotal: (total, range) => `${range[0]}-${range[1]} dari ${total} log`,
+                onChange: (p, l) => updateFilters({ alPage: p, alLimit: l }),
+              }}
+              scroll={{ x: 1100 }}
+            />
+          </div>
+        </Card>
+      </div>
 
       {/* Detail Modal */}
       <DetailModal
         open={detailModal.open}
         onClose={() => setDetailModal({ open: false, data: null })}
         data={detailModal.data}
-        isMobile={isMobile}
+        isXs={isXs}
       />
-    </Stack>
+    </div>
   );
 }
 
